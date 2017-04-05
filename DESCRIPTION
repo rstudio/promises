@@ -1,0 +1,17 @@
+Package: promise
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Authors@R: c(
+      person("Joe", "Cheng", email = "joe@rstudio.com", role = c("aut", "cre")),
+      person("RStudio", role = c("cph"))
+    )
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: MIT + file LICENSE
+Imports: R6, later
+Suggests: testthat
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.0.1
+Encoding: UTF-8
+LazyData: true
