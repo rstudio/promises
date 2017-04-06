@@ -14,7 +14,7 @@ Promise <- R6::R6Class("Promise",
     # more than once, whereas public ones no-op after the first
     # time they are invoked.
     doResolve = function(value) {
-      if (inherits(value, "Promise")) {
+      if (is.promise(value)) {
         value$then(
           private$doResolve,
           private$doReject
@@ -24,7 +24,7 @@ Promise <- R6::R6Class("Promise",
       }
     },
     doReject = function(reason) {
-      if (inherits(reason, "Promise")) {
+      if (is.promise(reason)) {
         reason$then(
           private$doResolve,
           private$doReject
@@ -272,6 +272,11 @@ new_promise <- function(action) {
     class = "promise",
     promise_impl = p
   )
+}
+
+#' @export
+is.promise <- function(x) {
+  inherits(x, "promise")
 }
 
 #' Fulfill a promise
