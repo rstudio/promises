@@ -16,3 +16,4 @@ Use these functions to satisfy a promise with either success (\code{resolve})
 or failure (\code{reject}).
 }
 \keyword{internal}
+

@@ -9,9 +9,11 @@ Authors@R: c(
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: MIT + file LICENSE
-Imports: R6, later
-Suggests: testthat
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.0.1
+Imports:
+    R6,
+    later
+Suggests:
+    testthat
+RoxygenNote: 5.0.1
 Encoding: UTF-8
 LazyData: true
