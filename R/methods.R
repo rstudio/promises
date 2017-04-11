@@ -1,7 +1,7 @@
 #' @export
 fmap.promise <- function(.m, .f, ...) {
-  .m$then(function(val) {
-    .f(val, ...)
+  .m$then(function(...) {
+    .f(...)
   })
 }
 

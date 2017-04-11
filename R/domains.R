@@ -10,14 +10,14 @@ promiseDomain <- list(
     results <- list()
     if (!is.null(onFulfilled)) {
       newOnFulfilled <- domain$wrapOnFulfilled(onFulfilled)
-      results$onFulfilled <- function(value) {
-        with_promise_domain(domain, newOnFulfilled(value))
+      results$onFulfilled <- function(...) {
+        with_promise_domain(domain, newOnFulfilled(...))
       }
     }
     if (!is.null(onRejected)) {
       newOnRejected <- domain$wrapOnRejected(onRejected)
-      results$onRejected <- function(reason) {
-        with_promise_domain(domain, newOnRejected(reason))
+      results$onRejected <- function(...) {
+        with_promise_domain(domain, newOnRejected(...))
       }
     }
     results
