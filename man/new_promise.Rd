@@ -2,8 +2,8 @@
 % Please edit documentation in R/promise.R
 \name{new_promise}
 \alias{new_promise}
-\alias{rejected}
 \alias{resolved}
+\alias{rejected}
 \title{Create a new promise object}
 \usage{
 new_promise(action)
@@ -47,4 +47,3 @@ The return value of \code{action} will be ignored.
 # TODO
 
 }
-

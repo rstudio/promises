@@ -1,6 +1,6 @@
 #' Access the results of a promise
 #'
-#' Use the `then` function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to `then` is non-blocking, that is, it returns immediately; so what it does *not* do is immediately return the result value of the promise. Instead, you pass logic you want to execute to `then`, in the form of function callbacks (or formulas, see Details). If you provide an `onFulfilled` callback, it will be called upon the promise's successful resolution, with a single argument `value`: the result value If you provide an `onRejected` callback, it will be called if the operation fails, with a single argument `reason`: the error that caused the failure.
+#' Use the `then` function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to `then` is non-blocking, that is, it returns immediately; so what it does *not* do is immediately return the result value of the promise. Instead, you pass logic you want to execute to `then`, in the form of function callbacks (or formulas, see Details). If you provide an `onFulfilled` callback, it will be called upon the promise's successful resolution, with a single argument `value`: the result value. If you provide an `onRejected` callback, it will be called if the operation fails, with a single argument `reason`: the error that caused the failure.
 #'
 #' @section Formulas:
 #'
@@ -53,6 +53,10 @@
 #' The `catch` function is equivalent to `then`, but without the `onFulfilled` argument. It is typically used at the end of a promise chain to perform error handling/logging.
 #'
 #' The `finally` function is similar to `then`, but takes a single no-argument function (or formula) that will be executed upon completion of the promise, regardless of whether the result is success or failure. It is typically used at the end of a promise chain to perform cleanup tasks, like closing file handles or database connections. Unlike `then` and `catch`, the return value of `finally` is ignored; however, if an error is thrown in `finally`, that error will be propagated forward into the returned promise.
+#'
+#' @section Visibility:
+#'
+#' `onFulfilled` functions can optionally have a second parameter `visible`, which will be `FALSE` if the result value is [invisible][base::invisible()].
 #'
 #' @param onFulfilled A function taking the argument `value` (or a formula--see
 #'   Details). The function can return a value

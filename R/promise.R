@@ -3,6 +3,7 @@ Promise <- R6::R6Class("Promise",
   private = list(
     state = "pending",
     value = NULL,
+    visible = TRUE,
     publicResolveRejectCalled = FALSE,
     onFulfilled = list(),
     onRejected = list(),
@@ -14,13 +15,17 @@ Promise <- R6::R6Class("Promise",
     # more than once, whereas public ones no-op after the first
     # time they are invoked.
     doResolve = function(value) {
+      val <- withVisible(value)
+      value <- val$value
+      visible <- val$visible
+
       if (is.promise(value)) {
         value$then(
           private$doResolve,
           private$doReject
         )
       } else {
-        private$doResolveFinalValue(value)
+        private$doResolveFinalValue(value, visible)
       }
     },
     doReject = function(reason) {
@@ -35,13 +40,14 @@ Promise <- R6::R6Class("Promise",
     },
     # These "final" versions of resolve/reject are for when we've
     # established that the value/reason is not itself a promise.
-    doResolveFinalValue = function(value) {
+    doResolveFinalValue = function(value, visible) {
       private$value <- value
+      private$visible <- visible
       private$state <- "fulfilled"
 
       later::later(function() {
         lapply(private$onFulfilled, function(f) {
-          f(private$value)
+          f(private$value, private$visible)
         })
         private$onFulfilled <- list()
       })
@@ -82,7 +88,10 @@ Promise <- R6::R6Class("Promise",
 
       tryCatch(
         {
-          force(value)
+          # Important: Do not trigger evaluation of value before
+          # passing to doResolve. doResolve calls withVisible() on
+          # value, so evaluating it before that point will cause
+          # the visibility to be lost.
           private$doResolve(value)
         },
         error = function(err) {
@@ -114,6 +123,9 @@ Promise <- R6::R6Class("Promise",
       invisible()
     },
     then = function(onFulfilled = NULL, onRejected = NULL) {
+      onFulfilled <- normalizeOnFulfilled(onFulfilled)
+      onRejected <- normalizeOnRejected(onRejected)
+
       promise2 <- new_promise(function(resolve, reject) {
 
         res <- promiseDomain$onThen(onFulfilled, onRejected)
@@ -122,11 +134,11 @@ Promise <- R6::R6Class("Promise",
           onRejected <- res$onRejected
         }
 
-        handleFulfill <- function(value) {
+        handleFulfill <- function(value, visible) {
           if (is.function(onFulfilled)) {
-            resolve(onFulfilled(value))
+            resolve(onFulfilled(value, visible))
           } else {
-            resolve(value)
+            resolve(if (visible) value else invisible(value))
           }
         }
 
@@ -148,7 +160,9 @@ Promise <- R6::R6Class("Promise",
             handleReject
           ))
         } else if (private$state == "fulfilled") {
-          later::later(~handleFulfill(private$value))
+          later::later(function() {
+            handleFulfill(private$value, private$visible)
+          })
         } else if (private$state == "rejected") {
           later::later(function() {
             private$rejectionHandled <- TRUE
@@ -189,6 +203,42 @@ Promise <- R6::R6Class("Promise",
     }
   )
 )
+
+normalizeOnFulfilled <- function(onFulfilled) {
+  if (!is.function(onFulfilled))
+    return(onFulfilled)
+
+  args <- formals(onFulfilled)
+  arg_count <- length(args)
+
+  if (arg_count >= 2 || "..." %in% names(args)) {
+    onFulfilled
+  } else if (arg_count == 1) {
+    function(value, visible) {
+      onFulfilled(value)
+    }
+  } else {
+    function(value, visible) {
+      onFulfilled()
+    }
+  }
+}
+
+normalizeOnRejected <- function(onRejected) {
+  if (!is.function(onRejected))
+    return(onRejected)
+
+  args <- formals(onRejected)
+  arg_count <- length(args)
+
+  if (arg_count >= 1) {
+    onRejected
+  } else if (arg_count == 0) {
+    function(reason) {
+      onRejected()
+    }
+  }
+}
 
 #' Create a new promise object
 #'
