@@ -122,11 +122,14 @@ Promise <- R6::R6Class("Promise",
           onRejected <- res$onRejected
         }
 
-        handleIt <- function(func, value) {
+        handleIt <- function(func, value, rejection = FALSE) {
           tryCatch(
             {
-              val <- func(value)
-              resolve(val)
+              if (is.function(func))
+                value <- func(value)
+              else if (rejection)
+                stop(value)
+              resolve(value)
             },
             error = function(e) {
               reject(e)
@@ -135,26 +138,22 @@ Promise <- R6::R6Class("Promise",
         }
 
         if (private$state == "pending") {
-          if (is.function(onFulfilled)) {
-            private$onFulfilled <- c(private$onFulfilled, list(
-              function(value) {
-                handleIt(onFulfilled, value)
-              }
-            ))
-          }
-          if (is.function(onRejected)) {
-            private$onRejected <- c(private$onRejected, list(
-              function(reason) {
-                handleIt(onRejected, reason)
-              }
-            ))
-          }
+          private$onFulfilled <- c(private$onFulfilled, list(
+            function(value) {
+              handleIt(onFulfilled, value)
+            }
+          ))
+          private$onRejected <- c(private$onRejected, list(
+            function(reason) {
+              handleIt(onRejected, reason, rejection = TRUE)
+            }
+          ))
         } else if (private$state == "fulfilled") {
           later::later(~handleIt(onFulfilled, private$value))
         } else if (private$state == "rejected") {
           later::later(function() {
             private$rejectionHandled <- TRUE
-            handleIt(onRejected, private$value)
+            handleIt(onRejected, private$value, rejection = TRUE)
           })
         } else {
           stop("Unexpected state ", private$state)
