@@ -59,17 +59,25 @@
 #'
 #' @export
 then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
+  if (!is.null(onFulfilled))
+    onFulfilled <- rlang::as_function(onFulfilled)
+  if (!is.null(onRejected))
+    onRejected <- rlang::as_function(onRejected)
   promise$then(onFulfilled = onFulfilled, onRejected = onRejected)
 }
 
 #' @rdname then
 #' @export
 catch <- function(promise, onRejected) {
+  if (!is.null(onRejected))
+    onRejected <- rlang::as_function(onRejected)
   promise$catch(onRejected)
 }
 
 #' @rdname then
 #' @export
 finally <- function(promise, onFinally) {
+  if (!is.null(onFinally))
+    onFinally <- rlang::as_function(onFinally)
   promise$finally(onFinally)
 }
