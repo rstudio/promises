@@ -11,7 +11,8 @@ Description: More about what it does (maybe more than one line)
 License: MIT + file LICENSE
 Imports:
     R6,
-    later
+    later,
+    rlang
 Suggests:
     testthat
 Roxygen: list(markdown = TRUE)
