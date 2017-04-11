@@ -61,7 +61,7 @@ Promise <- R6::R6Class("Promise",
           reg.finalizer(self, function(obj) {
             if (!private$rejectionHandled) {
               # warning() was unreliable here, not sure why
-              cat(file=stderr(), "Unhandled promise error: ", reason$message)
+              cat(file=stderr(), "Unhandled promise error: ", reason$message, "\n", sep = "")
               shiny::printError(reason)
             }
           }, onexit = TRUE)
