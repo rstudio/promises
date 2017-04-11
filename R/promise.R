@@ -113,7 +113,7 @@ Promise <- R6::R6Class("Promise",
 
       invisible()
     },
-    then = function(onFulfilled = identity, onRejected = stop) {
+    then = function(onFulfilled = NULL, onRejected = NULL) {
       promise2 <- new_promise(function(resolve, reject) {
 
         res <- promiseDomain$onThen(onFulfilled, onRejected)
@@ -122,38 +122,37 @@ Promise <- R6::R6Class("Promise",
           onRejected <- res$onRejected
         }
 
-        handleIt <- function(func, value, rejection = FALSE) {
-          tryCatch(
-            {
-              if (is.function(func))
-                value <- func(value)
-              else if (rejection)
-                stop(value)
-              resolve(value)
-            },
-            error = function(e) {
-              reject(e)
-            }
-          )
+        handleFulfill <- function(value) {
+          if (is.function(onFulfilled)) {
+            resolve(onFulfilled(value))
+          } else {
+            resolve(value)
+          }
+        }
+
+        handleReject <- function(reason) {
+          if (is.function(onRejected)) {
+            # Yes, resolve, not reject.
+            resolve(onRejected(reason))
+          } else {
+            # Yes, reject, not resolve.
+            reject(reason)
+          }
         }
 
         if (private$state == "pending") {
           private$onFulfilled <- c(private$onFulfilled, list(
-            function(value) {
-              handleIt(onFulfilled, value)
-            }
+            handleFulfill
           ))
           private$onRejected <- c(private$onRejected, list(
-            function(reason) {
-              handleIt(onRejected, reason, rejection = TRUE)
-            }
+            handleReject
           ))
         } else if (private$state == "fulfilled") {
-          later::later(~handleIt(onFulfilled, private$value))
+          later::later(~handleFulfill(private$value))
         } else if (private$state == "rejected") {
           later::later(function() {
             private$rejectionHandled <- TRUE
-            handleIt(onRejected, private$value, rejection = TRUE)
+            handleReject(private$value)
           })
         } else {
           stop("Unexpected state ", private$state)
