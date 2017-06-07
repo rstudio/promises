@@ -1,3 +1,11 @@
+#' @importFrom magrittr %>%
+#' @export
+magrittr::`%>%`
+
+#' @importFrom monads %>>%
+#' @export
+monads::`%>>%`
+
 #' @export
 fmap.promise <- function(.m, .f, ...) {
   .m$then(.f)

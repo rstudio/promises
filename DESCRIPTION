@@ -12,7 +12,9 @@ License: MIT + file LICENSE
 Imports:
     R6,
     later,
-    rlang
+    rlang,
+    magrittr,
+    monads
 Suggests:
     testthat
 Roxygen: list(markdown = TRUE)
