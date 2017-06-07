@@ -209,14 +209,14 @@ normalizeOnFulfilled <- function(onFulfilled) {
   args <- formals(onFulfilled)
   arg_count <- length(args)
 
-  if (arg_count >= 2 || "..." %in% names(args)) {
+  if (arg_count >= 2 && names(args)[[2]] == ".visible") {
     onFulfilled
-  } else if (arg_count == 1) {
-    function(value, visible) {
+  } else if (arg_count > 0) {
+    function(value, .visible) {
       onFulfilled(value)
     }
   } else {
-    function(value, visible) {
+    function(value, .visible) {
       onFulfilled()
     }
   }
