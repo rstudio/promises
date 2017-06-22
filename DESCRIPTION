@@ -11,6 +11,7 @@ Description: More about what it does (maybe more than one line)
 License: MIT + file LICENSE
 Imports:
     R6,
+    Rcpp,
     later,
     rlang
 Suggests:
@@ -19,6 +20,6 @@ LinkingTo:
     later,
     Rcpp
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Encoding: UTF-8
 LazyData: true

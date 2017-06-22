@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include <task.h>
+#include <later_api.h>
 
 class PromiseTask : public later::BackgroundTask {
 public:
@@ -21,7 +21,7 @@ private:
 };
 
 long fib(long x) {
-  if (x <= 1) {
+  if (x <= 2) {
     return 1;
   }
   return fib(x-1) + fib(x-2);
@@ -39,7 +39,7 @@ public:
 
   Rcpp::RObject get_result() {
     Rcpp::NumericVector res(1);
-    res.push_back((double)result);
+    res[0] = (double)result;
     return res;
   }
 
@@ -56,10 +56,12 @@ void asyncFib(Rcpp::Function resolve, Rcpp::Function reject, double x) {
 
 /*** R
 library(promise)
+library(later)
+library(Rcpp)
 library(monads)
 
 new_promise(function(resolve, reject) {
-  asyncFib(resolve, reject, 10)
+  promise:::asyncFib(resolve, reject, 45)
 }) %>>% print()
 
  */

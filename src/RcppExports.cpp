@@ -17,3 +17,13 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"promise_asyncFib", (DL_FUNC) &promise_asyncFib, 3},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_promise(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

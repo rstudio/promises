@@ -1,4 +1,6 @@
 #' @useDynLib promise
+#' @importFrom Rcpp evalCpp
+#' @import later
 NULL
 
 #' @import R6
