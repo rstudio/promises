@@ -1,3 +1,11 @@
+#' @importFrom magrittr %>%
+#' @export
+magrittr::"%>%"
+
+#' @importFrom magrittr %T>%
+#' @export
+magrittr::"%T>%"
+
 #' @export
 `%...>%` <- function(lhs, rhs) {
   # the parent environment

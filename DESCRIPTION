@@ -16,8 +16,7 @@ Imports:
     rlang
 Suggests:
     testthat
-LinkingTo:
-    later,
+LinkingTo: later,
     Rcpp
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.1
