@@ -2,9 +2,11 @@
 
 S3method(format,promise)
 S3method(print,promise)
+export("%...!%")
+export("%...>%")
+export("%T...!%")
 export(catch)
 export(finally)
-export(fmap.promise)
 export(is.promise)
 export(new_promise)
 export(new_promise_domain)
