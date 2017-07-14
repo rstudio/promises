@@ -13,8 +13,20 @@ catch(promise, onRejected)
 finally(promise, onFinally)
 }
 \arguments{
-\item{onFulfilled}{A function taking the argument \code{value} (or a formula--see
-Details). The function can return a value}
+\item{onFulfilled}{A function (or a formula--see Details) that will be
+invoked if the promise value successfully resolves. When invoked, the
+function will be called with a single argument: the resolved value.
+Optionally, the function can take a second parameter \code{.visible} if you care
+whether the promise was resolved with a visible or invisible value. The
+function can return a value or a promise object, or can throw an error;
+these will affect the resolution of the promise object that is returned
+by \code{then()}.}
+
+\item{onRejected}{A function taking the argument \code{error} (or a formula--see
+Details). The function can return a value or a promise object, or can throw
+an error. If \code{onRejected} is provided and doesn't throw an error (or return
+a promise that fails) then this is the async equivalent of catching an
+error.}
 }
 \description{
 Use the \code{then} function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to \code{then} is non-blocking, that is, it returns immediately; so what it does \emph{not} do is immediately return the result value of the promise. Instead, you pass logic you want to execute to \code{then}, in the form of function callbacks (or formulas, see Details). If you provide an \code{onFulfilled} callback, it will be called upon the promise's successful resolution, with a single argument \code{value}: the result value. If you provide an \code{onRejected} callback, it will be called if the operation fails, with a single argument \code{reason}: the error that caused the failure.
@@ -26,13 +38,26 @@ Use the \code{then} function to access the eventual result of a promise (or, if 
 \section{Chaining promises}{
 
 
-The first parameter of \code{then} is a promise; given the stated purpose of the function, this should be no surprise. However, what may be surprising is that the return value of \code{then} is also a (newly created) promise. This new promise waits for the original promise to be fulfilled or rejected, and for \code{onFulfilled} or \code{onRejected} to be called. The result of (or error raised by) calling \code{onFulfilled}/\code{onRejected} will be used to fulfill (reject) the new promise.\preformatted{promise_a <- get_data_frame_async()
+The first parameter of \code{then} is a promise; given the stated purpose of the
+function, this should be no surprise. However, what may be surprising is that
+the return value of \code{then} is also a (newly created) promise. This new
+promise waits for the original promise to be fulfilled or rejected, and for
+\code{onFulfilled} or \code{onRejected} to be called. The result of (or error raised
+by) calling \code{onFulfilled}/\code{onRejected} will be used to fulfill (reject) the
+new promise.\preformatted{promise_a <- get_data_frame_async()
 promise_b <- then(promise_a, onFulfilled = head)
 }
 
-In this example, assuming \code{get_data_frame_async} returns a promise that eventually resolves to a data frame, \code{promise_b} will eventually resolve to the first 10 or fewer rows of that data frame.
+In this example, assuming \code{get_data_frame_async} returns a promise that
+eventually resolves to a data frame, \code{promise_b} will eventually resolve to
+the first 10 or fewer rows of that data frame.
 
-Note that the new promise is considered fulfilled or rejected based on whether \code{onFulfilled}/\code{onRejected} returns a value or throws an error, not on whether the original promise was fulfilled or rejected. In other words, it's possible to turn failure to success and success to failure. Consider this example, where we expect \code{some_async_operation} to fail, and want to consider it an error if it doesn't:\preformatted{promise_c <- some_async_operation()
+Note that the new promise is considered fulfilled or rejected based on
+whether \code{onFulfilled}/\code{onRejected} returns a value or throws an error, not on
+whether the original promise was fulfilled or rejected. In other words, it's
+possible to turn failure to success and success to failure. Consider this
+example, where we expect \code{some_async_operation} to fail, and want to consider
+it an error if it doesn't:\preformatted{promise_c <- some_async_operation()
 promise_d <- then(promise_c,
   onFulfilled = function(value) {
     stop("That's strange, the operation didn't fail!")
@@ -44,9 +69,11 @@ promise_d <- then(promise_c,
 )
 }
 
-Now, \code{promise_d} will be rejected if \code{promise_c} is fulfilled, and vice versa.
+Now, \code{promise_d} will be rejected if \code{promise_c} is fulfilled, and vice
+versa.
 
-\strong{Warning:} Be very careful not to accidentally turn failure into success, if your error handling code is not the last item in a chain!\preformatted{some_async_operation() %>%
+\strong{Warning:} Be very careful not to accidentally turn failure into success,
+if your error handling code is not the last item in a chain!\preformatted{some_async_operation() %>%
   catch(function(reason) {
     warning("An error occurred: ", reason)
   }) %>%
@@ -55,7 +82,8 @@ Now, \code{promise_d} will be rejected if \code{promise_c} is fulfilled, and vic
   })
 }
 
-In this example, the \code{catch} callback does not itself throw an error, so the subsequent \code{then} call will consider its promise fulfilled!
+In this example, the \code{catch} callback does not itself throw an error, so the
+subsequent \code{then} call will consider its promise fulfilled!
 }
 
 \section{Convenience functions}{
@@ -63,14 +91,23 @@ In this example, the \code{catch} callback does not itself throw an error, so th
 
 For readability and convenience, we provide \code{catch} and \code{finally} functions.
 
-The \code{catch} function is equivalent to \code{then}, but without the \code{onFulfilled} argument. It is typically used at the end of a promise chain to perform error handling/logging.
+The \code{catch} function is equivalent to \code{then}, but without the \code{onFulfilled}
+argument. It is typically used at the end of a promise chain to perform error
+handling/logging.
 
-The \code{finally} function is similar to \code{then}, but takes a single no-argument function (or formula) that will be executed upon completion of the promise, regardless of whether the result is success or failure. It is typically used at the end of a promise chain to perform cleanup tasks, like closing file handles or database connections. Unlike \code{then} and \code{catch}, the return value of \code{finally} is ignored; however, if an error is thrown in \code{finally}, that error will be propagated forward into the returned promise.
+The \code{finally} function is similar to \code{then}, but takes a single no-argument
+function (or formula) that will be executed upon completion of the promise,
+regardless of whether the result is success or failure. It is typically used
+at the end of a promise chain to perform cleanup tasks, like closing file
+handles or database connections. Unlike \code{then} and \code{catch}, the return value
+of \code{finally} is ignored; however, if an error is thrown in \code{finally}, that
+error will be propagated forward into the returned promise.
 }
 
 \section{Visibility}{
 
 
-\code{onFulfilled} functions can optionally have a second parameter \code{visible}, which will be \code{FALSE} if the result value is \link[base:invisible]{invisible}.
+\code{onFulfilled} functions can optionally have a second parameter \code{visible},
+which will be \code{FALSE} if the result value is \link[base:invisible]{invisible}.
 }
 

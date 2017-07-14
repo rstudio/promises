@@ -6,16 +6,29 @@
 #'
 #' @section Chaining promises:
 #'
-#' The first parameter of `then` is a promise; given the stated purpose of the function, this should be no surprise. However, what may be surprising is that the return value of `then` is also a (newly created) promise. This new promise waits for the original promise to be fulfilled or rejected, and for `onFulfilled` or `onRejected` to be called. The result of (or error raised by) calling `onFulfilled`/`onRejected` will be used to fulfill (reject) the new promise.
+#' The first parameter of `then` is a promise; given the stated purpose of the
+#' function, this should be no surprise. However, what may be surprising is that
+#' the return value of `then` is also a (newly created) promise. This new
+#' promise waits for the original promise to be fulfilled or rejected, and for
+#' `onFulfilled` or `onRejected` to be called. The result of (or error raised
+#' by) calling `onFulfilled`/`onRejected` will be used to fulfill (reject) the
+#' new promise.
 #'
 #' ```
 #' promise_a <- get_data_frame_async()
 #' promise_b <- then(promise_a, onFulfilled = head)
 #' ```
 #'
-#' In this example, assuming `get_data_frame_async` returns a promise that eventually resolves to a data frame, `promise_b` will eventually resolve to the first 10 or fewer rows of that data frame.
+#' In this example, assuming `get_data_frame_async` returns a promise that
+#' eventually resolves to a data frame, `promise_b` will eventually resolve to
+#' the first 10 or fewer rows of that data frame.
 #'
-#' Note that the new promise is considered fulfilled or rejected based on whether `onFulfilled`/`onRejected` returns a value or throws an error, not on whether the original promise was fulfilled or rejected. In other words, it's possible to turn failure to success and success to failure. Consider this example, where we expect `some_async_operation` to fail, and want to consider it an error if it doesn't:
+#' Note that the new promise is considered fulfilled or rejected based on
+#' whether `onFulfilled`/`onRejected` returns a value or throws an error, not on
+#' whether the original promise was fulfilled or rejected. In other words, it's
+#' possible to turn failure to success and success to failure. Consider this
+#' example, where we expect `some_async_operation` to fail, and want to consider
+#' it an error if it doesn't:
 #'
 #' ```
 #' promise_c <- some_async_operation()
@@ -30,9 +43,11 @@
 #' )
 #' ```
 #'
-#' Now, `promise_d` will be rejected if `promise_c` is fulfilled, and vice versa.
+#' Now, `promise_d` will be rejected if `promise_c` is fulfilled, and vice
+#' versa.
 #'
-#' **Warning:** Be very careful not to accidentally turn failure into success, if your error handling code is not the last item in a chain!
+#' **Warning:** Be very careful not to accidentally turn failure into success,
+#' if your error handling code is not the last item in a chain!
 #'
 #' ```
 #' some_async_operation() %>%
@@ -44,22 +59,44 @@
 #'   })
 #' ```
 #'
-#' In this example, the `catch` callback does not itself throw an error, so the subsequent `then` call will consider its promise fulfilled!
+#' In this example, the `catch` callback does not itself throw an error, so the
+#' subsequent `then` call will consider its promise fulfilled!
 #'
 #' @section Convenience functions:
 #'
 #' For readability and convenience, we provide `catch` and `finally` functions.
 #'
-#' The `catch` function is equivalent to `then`, but without the `onFulfilled` argument. It is typically used at the end of a promise chain to perform error handling/logging.
+#' The `catch` function is equivalent to `then`, but without the `onFulfilled`
+#' argument. It is typically used at the end of a promise chain to perform error
+#' handling/logging.
 #'
-#' The `finally` function is similar to `then`, but takes a single no-argument function (or formula) that will be executed upon completion of the promise, regardless of whether the result is success or failure. It is typically used at the end of a promise chain to perform cleanup tasks, like closing file handles or database connections. Unlike `then` and `catch`, the return value of `finally` is ignored; however, if an error is thrown in `finally`, that error will be propagated forward into the returned promise.
+#' The `finally` function is similar to `then`, but takes a single no-argument
+#' function (or formula) that will be executed upon completion of the promise,
+#' regardless of whether the result is success or failure. It is typically used
+#' at the end of a promise chain to perform cleanup tasks, like closing file
+#' handles or database connections. Unlike `then` and `catch`, the return value
+#' of `finally` is ignored; however, if an error is thrown in `finally`, that
+#' error will be propagated forward into the returned promise.
 #'
 #' @section Visibility:
 #'
-#' `onFulfilled` functions can optionally have a second parameter `visible`, which will be `FALSE` if the result value is [invisible][base::invisible()].
+#' `onFulfilled` functions can optionally have a second parameter `visible`,
+#' which will be `FALSE` if the result value is [invisible][base::invisible()].
 #'
-#' @param onFulfilled A function taking the argument `value` (or a formula--see
-#'   Details). The function can return a value
+#' @param onFulfilled A function (or a formula--see Details) that will be
+#'   invoked if the promise value successfully resolves. When invoked, the
+#'   function will be called with a single argument: the resolved value.
+#'   Optionally, the function can take a second parameter `.visible` if you care
+#'   whether the promise was resolved with a visible or invisible value. The
+#'   function can return a value or a promise object, or can throw an error;
+#'   these will affect the resolution of the promise object that is returned
+#'   by `then()`.
+#'
+#' @param onRejected A function taking the argument `error` (or a formula--see
+#'   Details). The function can return a value or a promise object, or can throw
+#'   an error. If `onRejected` is provided and doesn't throw an error (or return
+#'   a promise that fails) then this is the async equivalent of catching an
+#'   error.
 #'
 #' @export
 then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
@@ -67,7 +104,7 @@ then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
     onFulfilled <- rlang::as_function(onFulfilled)
   if (!is.null(onRejected))
     onRejected <- rlang::as_function(onRejected)
-  promise$then(onFulfilled = onFulfilled, onRejected = onRejected)
+  invisible(promise$then(onFulfilled = onFulfilled, onRejected = onRejected))
 }
 
 #' @rdname then

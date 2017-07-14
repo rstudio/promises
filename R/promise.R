@@ -1,3 +1,8 @@
+#' @useDynLib promise
+#' @importFrom Rcpp evalCpp
+#' @import later
+NULL
+
 #' @import R6
 Promise <- R6::R6Class("Promise",
   private = list(
