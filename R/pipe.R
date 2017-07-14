@@ -43,7 +43,7 @@ magrittr::"%T>%"
   parts <- match.call()
   func <- pipeify_rhs(parts[[3L]], env)
   catch(lhs, func)
-  lhs
+  invisible(lhs)
 }
 
 has.visible <- function(func) {

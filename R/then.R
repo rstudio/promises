@@ -104,7 +104,7 @@ then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
     onFulfilled <- rlang::as_function(onFulfilled)
   if (!is.null(onRejected))
     onRejected <- rlang::as_function(onRejected)
-  promise$then(onFulfilled = onFulfilled, onRejected = onRejected)
+  invisible(promise$then(onFulfilled = onFulfilled, onRejected = onRejected))
 }
 
 #' @rdname then
