@@ -58,10 +58,9 @@ void asyncFib(Rcpp::Function resolve, Rcpp::Function reject, double x) {
 library(promise)
 library(later)
 library(Rcpp)
-library(monads)
 
 new_promise(function(resolve, reject) {
   promise:::asyncFib(resolve, reject, 45)
-}) %>>% print()
+}) %...>% print()
 
  */

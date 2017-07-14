@@ -14,8 +14,7 @@ Imports:
     Rcpp,
     later,
     rlang,
-    magrittr,
-    monads
+    magrittr
 Suggests:
     testthat
 LinkingTo: later,
