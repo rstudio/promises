@@ -20,6 +20,21 @@ magrittr::"%T>%"
 }
 
 #' @export
+`%...T>%` <- function(lhs, rhs) {
+  # the parent environment
+  parent <- parent.frame()
+
+  # the environment in which to evaluate pipeline
+  env <- new.env(parent = parent)
+
+  parts <- match.call()
+  func <- pipeify_rhs(parts[[3L]], env)
+  lhs %>%
+    then(func) %>%
+    then(function(value) lhs)
+}
+
+#' @export
 `%...!%` <- function(lhs, rhs) {
   # the parent environment
   parent <- parent.frame()
@@ -33,7 +48,7 @@ magrittr::"%T>%"
 }
 
 #' @export
-`%T...!%` <- function(lhs, rhs) {
+`%...T!%` <- function(lhs, rhs) {
   # the parent environment
   parent <- parent.frame()
 
