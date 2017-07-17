@@ -8,11 +8,13 @@
 \usage{
 then(promise, onFulfilled = NULL, onRejected = NULL)
 
-catch(promise, onRejected)
+catch(promise, onRejected, tee = FALSE)
 
 finally(promise, onFinally)
 }
 \arguments{
+\item{promise}{A promise object. The object can be in any state.}
+
 \item{onFulfilled}{A function (or a formula--see Details) that will be
 invoked if the promise value successfully resolves. When invoked, the
 function will be called with a single argument: the resolved value.
@@ -27,12 +29,22 @@ Details). The function can return a value or a promise object, or can throw
 an error. If \code{onRejected} is provided and doesn't throw an error (or return
 a promise that fails) then this is the async equivalent of catching an
 error.}
+
+\item{onFinally}{A function with no arguments, to be called when the async
+operation either succeeds or fails. Usually used for freeing resources that
+were used during async operations.}
 }
 \description{
 Use the \code{then} function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to \code{then} is non-blocking, that is, it returns immediately; so what it does \emph{not} do is immediately return the result value of the promise. Instead, you pass logic you want to execute to \code{then}, in the form of function callbacks (or formulas, see Details). If you provide an \code{onFulfilled} callback, it will be called upon the promise's successful resolution, with a single argument \code{value}: the result value. If you provide an \code{onRejected} callback, it will be called if the operation fails, with a single argument \code{reason}: the error that caused the failure.
 }
 \section{Formulas}{
 
+
+For convenience, the \code{then()}, \code{catch()}, and \code{finally()} functions use
+\code{\link[rlang:as_function]{rlang::as_function()}} to convert \code{onFulfilled}, \code{onRejected}, and
+\code{onFinally} arguments to functions. This means that you can use formulas to
+create very compact anonymous functions, using \code{.} to access the value (in
+the case of \code{onFulfilled}) or error (in the case of \code{onRejected}).
 }
 
 \section{Chaining promises}{

@@ -12,7 +12,7 @@ promise_all <- function(..., list = NULL) {
   done <- list()
   results <- list()
 
-  new_promise(function(resolve, reject) {
+  promise(function(resolve, reject) {
     keys <- if (is.null(names(list))) {
       1:length(list)
     } else {
@@ -49,7 +49,7 @@ promise_race <- function(..., list = NULL) {
     list <- list(...)
   }
 
-  new_promise(function(resolve, reject) {
+  promise(function(resolve, reject) {
     lapply(list, function(promise) {
       then(promise, resolve, reject)
     })

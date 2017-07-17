@@ -72,7 +72,6 @@ Promise <- R6::R6Class("Promise",
           if (!private$rejectionHandled) {
             # warning() was unreliable here
             cat(file=stderr(), "Unhandled promise error: ", reason$message, "\n", sep = "")
-            shiny::printError(reason)
           }
         })
       })
@@ -129,7 +128,7 @@ Promise <- R6::R6Class("Promise",
       onFulfilled <- normalizeOnFulfilled(onFulfilled)
       onRejected <- normalizeOnRejected(onRejected)
 
-      promise2 <- new_promise(function(resolve, reject) {
+      promise2 <- promise(function(resolve, reject) {
 
         res <- promiseDomain$onThen(onFulfilled, onRejected)
         if (!is.null(res)) {
@@ -196,12 +195,11 @@ Promise <- R6::R6Class("Promise",
     format = function() {
       if (private$state == "pending") {
         "<Promise [pending]>"
-      } else if (private$state == "fulfilled") {
-        val <- paste(capture.output(print(private$value)), collapse = "\n")
-        strsplit(sprintf("<Promise [fulfilled]>\n%s", val), "\n")[[1]]
-      } else if (private$state == "rejected") {
-        err <- paste(capture.output(print(private$value)), collapse = "\n")
-        strsplit(sprintf("<Promise [rejected]>\n%s", err), "\n")[[1]]
+      } else {
+        classname <- class(private$value)[[1]]
+        if (length(classname) == 0) classname <- ""
+
+        sprintf("<Promise [%s: %s]>", private$state, classname)
       }
     }
   )
@@ -245,30 +243,29 @@ normalizeOnRejected <- function(onRejected) {
 
 #' Create a new promise object
 #'
-#' \code{new_promise} creates a new promise. A promise is a placeholder object
-#' for the eventual result (or error) of an asynchronous operation. This
-#' function is not generally needed to carry out asynchronous programming tasks;
-#' instead, it is intended to be used mostly by package authors who want to
-#' write asynchronous functions that return promises.
+#' `promise()` creates a new promise. A promise is a placeholder object for the
+#' eventual result (or error) of an asynchronous operation. This function is not
+#' generally needed to carry out asynchronous programming tasks; instead, it is
+#' intended to be used mostly by package authors who want to write asynchronous
+#' functions that return promises.
 #'
-#' The \code{action} function/formula should be a piece of code that returns
-#' quickly, but initiates a potentially long-running, asynchronous task. If/when
-#' the task successfully completes, call \code{resolve(value)} where
-#' \code{value} is the result of the computation (like the return value). If the
-#' task fails, call \code{reject(reason)}, where \code{reason} is either an
-#' error object, or a character string.
+#' The `action` function should be a piece of code that returns quickly, but
+#' initiates a potentially long-running, asynchronous task. If/when the task
+#' successfully completes, call `resolve(value)` where `value` is the result of
+#' the computation (like the return value). If the task fails, call
+#' `reject(reason)`, where `reason` is either an error object, or a character
+#' string.
 #'
-#' It's important that asynchronous tasks kicked off from \code{action} be coded
-#' very carefully--in particular, all errors must be caught and passed to
-#' \code{reject()}. Failure to do so will cause those errors to be lost, at
-#' best; and the caller of the asynchronous task will never receive a response
-#' (the asynchronous equivalent of a function call that never returns, i.e.
-#' hangs).
+#' It's important that asynchronous tasks kicked off from `action` be coded very
+#' carefully--in particular, all errors must be caught and passed to `reject()`.
+#' Failure to do so will cause those errors to be lost, at best; and the caller
+#' of the asynchronous task will never receive a response (the asynchronous
+#' equivalent of a function call that never returns, i.e. hangs).
 #'
-#' The return value of \code{action} will be ignored.
+#' The return value of `action` will be ignored.
 #'
-#' @param action Either a function with signature \code{function(resolve,
-#'   reject)}, or a one-sided formula. See Details.
+#' @param action A function with signature `function(resolve, reject)`, or a
+#'   one-sided formula. See Details.
 #'
 #' @return A promise object (see \code{\link{then}}).
 #'
@@ -276,7 +273,7 @@ normalizeOnRejected <- function(onRejected) {
 #' # TODO
 #'
 #' @export
-new_promise <- function(action) {
+promise <- function(action) {
   if (inherits(action, "formula")) {
     if (length(action) != 2) {
       stop("'action' must be a function or one-sided formula")
@@ -339,29 +336,12 @@ is.promise <- function(x) {
 #' @param reason An error or string that explains why the operation failed.
 #'
 #' @keywords internal
-#' @export
 resolve <- function(value = NULL) {
   stop("resolve() must be called from within a promise constructor")
 }
 
+#' @rdname resolve
 #' @keywords internal
-#' @export
 reject <- function(reason) {
   stop("reject() must be called from within a promise constructor")
-}
-
-#' @rdname new_promise
-#' @export
-resolved <- function(value) {
-  new_promise(function(resolve, reject) {
-    resolve(value)
-  })
-}
-
-#' @rdname new_promise
-#' @export
-rejected <- function(reason) {
-  new_promise(function(resolve, reject) {
-    reject(reason)
-  })
 }

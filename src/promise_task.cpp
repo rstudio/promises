@@ -59,7 +59,7 @@ library(promise)
 library(later)
 library(Rcpp)
 
-new_promise(function(resolve, reject) {
+promise(function(resolve, reject) {
   promise:::asyncFib(resolve, reject, 45)
 }) %...>% print()
 

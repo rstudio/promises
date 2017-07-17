@@ -4,6 +4,12 @@
 #'
 #' @section Formulas:
 #'
+#' For convenience, the `then()`, `catch()`, and `finally()` functions use
+#' [rlang::as_function()] to convert `onFulfilled`, `onRejected`, and
+#' `onFinally` arguments to functions. This means that you can use formulas to
+#' create very compact anonymous functions, using `.` to access the value (in
+#' the case of `onFulfilled`) or error (in the case of `onRejected`).
+#'
 #' @section Chaining promises:
 #'
 #' The first parameter of `then` is a promise; given the stated purpose of the
@@ -83,6 +89,8 @@
 #' `onFulfilled` functions can optionally have a second parameter `visible`,
 #' which will be `FALSE` if the result value is [invisible][base::invisible()].
 #'
+#' @param promise A promise object. The object can be in any state.
+#'
 #' @param onFulfilled A function (or a formula--see Details) that will be
 #'   invoked if the promise value successfully resolves. When invoked, the
 #'   function will be called with a single argument: the resolved value.
@@ -109,13 +117,26 @@ then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
 
 #' @rdname then
 #' @export
-catch <- function(promise, onRejected) {
+catch <- function(promise, onRejected, tee = FALSE) {
   if (!is.null(onRejected))
     onRejected <- rlang::as_function(onRejected)
-  promise$catch(onRejected)
+
+  if (!tee) {
+    return(promise$catch(onRejected))
+  } else {
+    promise$catch(function(reason) {
+      onRejected(reason)
+      stop(reason)
+    })
+  }
 }
 
 #' @rdname then
+#'
+#' @param onFinally A function with no arguments, to be called when the async
+#'   operation either succeeds or fails. Usually used for freeing resources that
+#'   were used during async operations.
+#'
 #' @export
 finally <- function(promise, onFinally) {
   if (!is.null(onFinally))

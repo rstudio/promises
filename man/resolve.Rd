@@ -2,9 +2,12 @@
 % Please edit documentation in R/promise.R
 \name{resolve}
 \alias{resolve}
+\alias{reject}
 \title{Fulfill a promise}
 \usage{
 resolve(value = NULL)
+
+reject(reason)
 }
 \arguments{
 \item{value}{The result from a successful calculation.}
