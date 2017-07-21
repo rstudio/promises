@@ -1,5 +1,6 @@
 library(later)
 
+# Create a promise that can be EXTernally resolved/rejected/inspected
 ext_promise <- function() {
   res <- NULL
   p <- promise(function(resolve, reject) {
@@ -14,6 +15,7 @@ ext_promise <- function() {
   )
 }
 
+# Block until all pending later tasks have executed
 wait_for_it <- function() {
   while (!loop_empty()) {
     run_now()
@@ -21,6 +23,8 @@ wait_for_it <- function() {
   }
 }
 
+# Block until the promise is resolved/rejected. If resolved, return the value.
+# If rejected, throw (yes throw, not return) the error.
 extract <- function(promise) {
   promise_value <- NULL
   error <- NULL
@@ -35,6 +39,13 @@ extract <- function(promise) {
     promise_value
 }
 
+# Prevent "Unhandled promise error" warning that happens if you don't handle the
+# rejection of a promise
 squelch_unhandled_promise_error <- function(promise) {
   promise %...!% {}
+}
+
+.GlobalEnv$.Last <- function() {
+  # Detect unexpected "Unhandled promise error" warnings.
+  wait_for_it()
 }
