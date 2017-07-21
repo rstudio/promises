@@ -4,11 +4,16 @@ promise_all <- function(..., list = NULL) {
     list <- list(...)
   }
 
-  # TODO: Verify that list is either all named or all unnamed
-
   if (length(list) == 0) {
-    return(resolved(list()))
+    return(promise(~resolve(list())))
   }
+
+  # Verify that list members are either all named or all unnamed
+  nameCount <- sum(nzchar(names(list)))
+  if (nameCount != 0 && nameCount != length(list)) {
+    stop("promise_all expects promise arguments (or list) to be either all named or all unnamed")
+  }
+
   done <- list()
   results <- list()
 
