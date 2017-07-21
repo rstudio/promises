@@ -25,6 +25,9 @@ Promise <- R6::R6Class("Promise",
       visible <- val$visible
 
       if (is.promise(value)) {
+        if (identical(self, attr(value, "promise_impl", exact = TRUE))) {
+          return(private$doReject(simpleError("Chaining cycle detected for promise")))
+        }
         value$then(
           private$doResolve,
           private$doReject

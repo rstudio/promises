@@ -108,6 +108,10 @@
 #'
 #' @export
 then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
+  if (!is.promise(promise)) {
+    stop("Unable to call 'then()' on a non-promise object")
+  }
+
   if (!is.null(onFulfilled))
     onFulfilled <- rlang::as_function(onFulfilled)
   if (!is.null(onRejected))
