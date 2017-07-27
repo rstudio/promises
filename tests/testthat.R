@@ -1,4 +1,4 @@
 library(testthat)
-library(promise)
+library(promises)
 
-test_check("promise")
+test_check("promises")

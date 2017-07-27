@@ -55,7 +55,7 @@ void asyncFib(Rcpp::Function resolve, Rcpp::Function reject, double x) {
 }
 
 /*** R
-library(promise)
+library(promises)
 library(later)
 library(Rcpp)
 

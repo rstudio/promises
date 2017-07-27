@@ -1,4 +1,4 @@
-#' @useDynLib promise
+#' @useDynLib promises
 #' @importFrom Rcpp evalCpp
 #' @import later
 NULL

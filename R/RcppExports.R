@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 asyncFib <- function(resolve, reject, x) {
-    invisible(.Call('promise_asyncFib', PACKAGE = 'promise', resolve, reject, x))
+    invisible(.Call('promises_asyncFib', PACKAGE = 'promises', resolve, reject, x))
 }
 
