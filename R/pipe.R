@@ -6,6 +6,39 @@ magrittr::"%>%"
 #' @export
 magrittr::"%T>%"
 
+#' Pipe all the things
+#'
+#' Promise-aware pipe operators, in the style of [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html).
+#' Like magrittr pipes, these operators can be used to chain together pipelines
+#' of promise-transforming operations. Unlike magrittr pipes, these pipes wait
+#' for promise resolution and pass the unwrapped value (or error) to the `rhs`
+#' function call.
+#'
+#' 1. \code{promise \%...>\% func()} is equivalent to \code{promise \%>\% then(func)}.
+#' 2. \code{promise \%...!>\% func()} is equivalent to \code{promise \%>\% catch(func)}.
+#' 3. \code{promise \%...T>\% func()} is equivalent to \code{promise \%T>\% then(func)}.
+#' 4. \code{promise \%...T!>\% func()} is equivalent to \code{promise \%T>\%
+#' catch(func)} or \code{promise \%>\% catch(func, tee = TRUE)}.
+#'
+#' One situation where 3. and 4. above break down is when `func()` throws an
+#' error, or returns a promise that ultimately fails. In that case, the failure
+#' will be propagated by our pipe operators but not by the
+#' magrittr-plus-function "equivalents".
+#'
+#' For simplicity of implementation, we do not support the magrittr feature of
+#' using a `.` at the head of a pipeline to turn the entire pipeline into a
+#' function instead of an expression.
+#'
+#' @param lhs A promise object.
+#' @param rhs A function call using the magrittr semantics. It can return either
+#'   a promise or non-promise value, or throw an error.
+#'
+#' @examples
+#' # TODO
+#'
+#' @return A new promise.
+#'
+#' @name pipes
 #' @export
 `%...>%` <- function(lhs, rhs) {
   # the parent environment
@@ -19,6 +52,7 @@ magrittr::"%T>%"
   then(lhs, func)
 }
 
+#' @rdname pipes
 #' @export
 `%...T>%` <- function(lhs, rhs) {
   # the parent environment
@@ -34,6 +68,7 @@ magrittr::"%T>%"
     then(function(value) lhs)
 }
 
+#' @rdname pipes
 #' @export
 `%...!%` <- function(lhs, rhs) {
   # the parent environment
@@ -47,6 +82,7 @@ magrittr::"%T>%"
   catch(lhs, func)
 }
 
+#' @rdname pipes
 #' @export
 `%...T!%` <- function(lhs, rhs) {
   # the parent environment

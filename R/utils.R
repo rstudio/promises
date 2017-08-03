@@ -1,3 +1,27 @@
+#' Combine multiple promise objects
+#'
+#' Use `promise_all` to wait for multiple promise objects to all be successfully
+#' fulfilled. Use `promise_race` to wait for the first of multiple promise
+#' objects to be either fulfilled or rejected.
+#'
+#' @param ... Promise objects. Either all arguments must be named, or all
+#'   arguments must be unnamed. If `list` is provided, then these arguments are
+#'   ignored.
+#' @param list A list of promise objects--an alternative to `...`.
+#'
+#' @return A promise.
+#'
+#'   For `promise_all`, if all of the promises were successful, the returned
+#'   promise will resolve to a list of the promises' values; if any promise
+#'   fails, the first error to be encountered will be used to reject the
+#'   returned promise.
+#'
+#'   For `promise_race`, the first of the promises to either fulfill or reject
+#'   will be passed through to the returned promise.
+#'
+#' @examples
+#' # TODO
+#'
 #' @export
 promise_all <- function(..., list = NULL) {
   if (missing(list)) {
@@ -48,6 +72,7 @@ promise_all <- function(..., list = NULL) {
   })
 }
 
+#' @rdname promise_all
 #' @export
 promise_race <- function(..., list = NULL) {
   if (missing(list)) {

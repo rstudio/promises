@@ -119,6 +119,12 @@ then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
   invisible(promise$then(onFulfilled = onFulfilled, onRejected = onRejected))
 }
 
+#' @param tee If `TRUE`, ignore the return value of the callback, and use the
+#'   original value instead. This is useful for performing operations with
+#'   side-effects, particularly logging to the console or a file. If the
+#'   callback itself throws an error, and `tee` is `TRUE`, that error will still
+#'   be used to fulfill the the returned promise (in other words, `tee` only has
+#'   an effect if the callback does not throw).
 #' @rdname then
 #' @export
 catch <- function(promise, onRejected, tee = FALSE) {

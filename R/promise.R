@@ -325,6 +325,12 @@ promise <- function(action) {
   )
 }
 
+#' Tests whether an object is a promise
+#'
+#' Use `is.promise` to determine whether an R object is a promise.
+#'
+#' @param x An R object to test.
+#'
 #' @export
 is.promise <- function(x) {
   inherits(x, "promise")

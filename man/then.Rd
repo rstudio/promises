@@ -30,6 +30,13 @@ an error. If \code{onRejected} is provided and doesn't throw an error (or return
 a promise that fails) then this is the async equivalent of catching an
 error.}
 
+\item{tee}{If \code{TRUE}, ignore the return value of the callback, and use the
+original value instead. This is useful for performing operations with
+side-effects, particularly logging to the console or a file. If the
+callback itself throws an error, and \code{tee} is \code{TRUE}, that error will still
+be used to fulfill the the returned promise (in other words, \code{tee} only has
+an effect if the callback does not throw).}
+
 \item{onFinally}{A function with no arguments, to be called when the async
 operation either succeeds or fails. Usually used for freeing resources that
 were used during async operations.}

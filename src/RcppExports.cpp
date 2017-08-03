@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // asyncFib
 void asyncFib(Rcpp::Function resolve, Rcpp::Function reject, double x);
-RcppExport SEXP promises_asyncFib(SEXP resolveSEXP, SEXP rejectSEXP, SEXP xSEXP) {
+RcppExport SEXP _promises_asyncFib(SEXP resolveSEXP, SEXP rejectSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::Function >::type resolve(resolveSEXP);
@@ -19,7 +19,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"promises_asyncFib", (DL_FUNC) &promises_asyncFib, 3},
+    {"_promises_asyncFib", (DL_FUNC) &_promises_asyncFib, 3},
     {NULL, NULL, 0}
 };
 
