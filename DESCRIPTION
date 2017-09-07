@@ -14,9 +14,11 @@ Imports:
     Rcpp,
     later,
     rlang,
+    stats,
     magrittr
 Suggests:
-    testthat
+    testthat,
+    future
 LinkingTo: later,
     Rcpp
 Roxygen: list(markdown = TRUE)

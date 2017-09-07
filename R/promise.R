@@ -325,15 +325,64 @@ promise <- function(action) {
   )
 }
 
-#' Tests whether an object is a promise
+#' Coerce to a promise
 #'
-#' Use `is.promise` to determine whether an R object is a promise.
+#' Use `is.promise` to determine whether an R object is a promise. Use
+#' `as.promise` (an S3 generic method) to attempt to coerce an R object to a
+#' promise. This package includes support for converting [future](future:Future)
+#' objects (from the `future` package) into promises.
 #'
-#' @param x An R object to test.
+#' @param x An R object to test or coerce.
+#'
+#' @return `as.promise` returns a promise object, or throws an error if the
+#'   object cannot be converted.
+#'
+#'   `is.promise` returns `TRUE` if the given value is a promise object, and
+#'   `FALSE` otherwise.
 #'
 #' @export
 is.promise <- function(x) {
   inherits(x, "promise")
+}
+
+#' @rdname is.promise
+#' @export
+as.promise <- function(x) {
+  UseMethod("as.promise", x)
+}
+
+#' @export
+as.promise.promise <- function(x) {
+  x
+}
+
+#' @export
+as.promise.Future <- function(x) {
+  promise(function(resolve, reject) {
+    poll_interval <- 0.1
+    check <- function() {
+      if (future::resolved(x)) {
+        tryCatch(
+          {
+            result <- future::value(x, signal = TRUE)
+            resolve(result)
+          },
+          error = function(e) {
+            reject(e)
+          }
+        )
+      } else {
+        later::later(check, poll_interval)
+      }
+    }
+    later::later(check, 0)
+  })
+}
+
+#' @export
+as.promise.default <- function(x) {
+  # TODO: If x is an error or try-error, should this return a rejected promise?
+  promise(~resolve(x))
 }
 
 #' Fulfill a promise
