@@ -358,10 +358,20 @@ as.promise.promise <- function(x) {
 
 #' @export
 as.promise.Future <- function(x) {
-  promise(function(resolve, reject) {
+  # We want to create a promise only once for each Future object, and cache it
+  # as an attribute. This spares us from having multiple polling loops waiting
+  # for the same Future.
+
+  cached <- attr(x, "converted_promise", exact = TRUE)
+  if (!is.null(cached)) {
+    return(cached)
+  }
+
+  p <- promise(function(resolve, reject) {
     poll_interval <- 0.1
     check <- function() {
-      if (future::resolved(x)) {
+      # timeout = 0 is important, the default waits for 200ms
+      if (future::resolved(x, timeout = 0)) {
         tryCatch(
           {
             result <- future::value(x, signal = TRUE)
@@ -375,8 +385,12 @@ as.promise.Future <- function(x) {
         later::later(check, poll_interval)
       }
     }
-    later::later(check, 0)
+    check()
   })
+
+  # Store the new promise for next time
+  attr(x, "converted_promise") <- p
+  p
 }
 
 #' @export
