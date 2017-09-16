@@ -2,13 +2,26 @@
 % Please edit documentation in R/promise.R
 \name{is.promise}
 \alias{is.promise}
-\title{Tests whether an object is a promise}
+\alias{as.promise}
+\title{Coerce to a promise}
 \usage{
 is.promise(x)
+
+as.promise(x)
 }
 \arguments{
-\item{x}{An R object to test.}
+\item{x}{An R object to test or coerce.}
+}
+\value{
+\code{as.promise} returns a promise object, or throws an error if the
+object cannot be converted.
+
+\code{is.promise} returns \code{TRUE} if the given value is a promise object, and
+\code{FALSE} otherwise.
 }
 \description{
-Use \code{is.promise} to determine whether an R object is a promise.
+Use \code{is.promise} to determine whether an R object is a promise. Use
+\code{as.promise} (an S3 generic method) to attempt to coerce an R object to a
+promise. This package includes support for converting \href{future:Future}{future}
+objects (from the \code{future} package) into promises.
 }

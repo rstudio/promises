@@ -85,3 +85,34 @@ promise_race <- function(..., list = NULL) {
     })
   })
 }
+
+#' @param X A vector (atomic or list) or an expression object. Other objects
+#'   (including classed objects) will be coerced by base::as.list.
+#' @param FUN The function to be applied to each element of `X`. The function is
+#'   permitted, but not required, to return a promise.
+#' @rdname promise_all
+#' @export
+promise_lapply <- function(X, FUN, ...) {
+  FUN <- match.fun(FUN)
+  if (!is.vector(X) || is.object(X))
+    X <- as.list(X)
+  X_names <- names(X)
+  results <- vector("list", length(X))
+
+  do_next <- function(pos) {
+    if (pos > length(results)) {
+      return(stats::setNames(results, X_names))
+    } else {
+      this_result <- FUN(X[[pos]], ...)
+      as.promise(this_result) %...>%
+        (function(this_value) {
+          results[[pos]] <<- this_value
+          do_next(pos + 1)
+        })
+    }
+  }
+
+  promise(function(resolve, reject) {
+    resolve(do_next(1))
+  })
+}

@@ -108,9 +108,7 @@
 #'
 #' @export
 then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
-  if (!is.promise(promise)) {
-    stop("Unable to call 'then()' on a non-promise object")
-  }
+  promise <- as.promise(promise)
 
   if (!is.null(onFulfilled))
     onFulfilled <- rlang::as_function(onFulfilled)
@@ -128,9 +126,7 @@ then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
 #' @rdname then
 #' @export
 catch <- function(promise, onRejected, tee = FALSE) {
-  if (!is.promise(promise)) {
-    stop("Unable to call 'catch()' on a non-promise object")
-  }
+  promise <- as.promise(promise)
 
   if (!is.null(onRejected))
     onRejected <- rlang::as_function(onRejected)
@@ -153,9 +149,7 @@ catch <- function(promise, onRejected, tee = FALSE) {
 #'
 #' @export
 finally <- function(promise, onFinally) {
-  if (!is.promise(promise)) {
-    stop("Unable to call 'finally()' on a non-promise object")
-  }
+  promise <- as.promise(promise)
 
   if (!is.null(onFinally))
     onFinally <- rlang::as_function(onFinally)
