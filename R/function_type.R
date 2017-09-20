@@ -15,3 +15,7 @@ prepare_function <- function(f)
 {
   as.call(list(f, quote(.)))
 }
+
+is_lambda <- function(expr) {
+  identical(expr[[1L]], quote(`function`))
+}

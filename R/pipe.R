@@ -107,7 +107,12 @@ pipeify_rhs <- function(rhs, env) {
 
   rhs <- if (is_funexpr(rhs)) {
     rhs
-  } else if (is_function(rhs) || is_colexpr(rhs)) {
+  } else if (is_lambda(rhs)) {
+    # We can remove this conditional if we want this behavior to be supported.
+    # The next conditional checks for is_lambda too, and does the right thing.
+    # Keeping the error for now in deference to magrittr pipe behavior.
+    stop("Anonymous functions must be parenthesized")
+  } else if (is_function(rhs) || is_colexpr(rhs) || is_lambda(rhs)) {
     # This block diverges from magrittr because we have an optional .visible
     # argument that can be passed to the function. If the function takes a
     # parameter called .visible then we will pass it, otherwise no.
