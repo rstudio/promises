@@ -8,7 +8,7 @@
 with_promise_domain(domain, expr, replace = FALSE)
 
 new_promise_domain(wrapOnFulfilled = identity, wrapOnRejected = identity,
-  ...)
+  wrapSync = force, ...)
 }
 \arguments{
 \item{domain}{A promise domain object to install while \code{expr} is evaluated.}
@@ -30,6 +30,11 @@ that was passed as an \code{onFulfilled} argument to \code{\link[=then]{then()}}
 that was passed as an \code{onRejected} argument to \code{\link[=then]{then()}}. The
 \code{wrapOnRejected} function should return a function that is suitable for
 \code{onRejected} duty.}
+
+\item{wrapSync}{A function that takes a single argument: a (lazily evaluated)
+expression that the function should \code{\link[=force]{force()}}. This expression represents
+the \code{expr} argument passed to \code{\link[=with_promise_domain]{with_promise_domain()}}; \code{wrapSync} allows
+the domain to manipulate the environment before/after \code{expr} is evaluated.}
 
 \item{...}{Arbitrary named values that will become elements of the promise
 domain object, and can be accessed as items in an environment (i.e. using

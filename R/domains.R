@@ -11,13 +11,13 @@ promiseDomain <- list(
     if (!is.null(onFulfilled)) {
       newOnFulfilled <- domain$wrapOnFulfilled(onFulfilled)
       results$onFulfilled <- function(...) {
-        with_promise_domain(domain, newOnFulfilled(...))
+        reenter_promise_domain(domain, newOnFulfilled(...))
       }
     }
     if (!is.null(onRejected)) {
       newOnRejected <- domain$wrapOnRejected(onRejected)
       results$onRejected <- function(...) {
-        with_promise_domain(domain, newOnRejected(...))
+        reenter_promise_domain(domain, newOnRejected(...))
       }
     }
     results
@@ -69,6 +69,18 @@ with_promise_domain <- function(domain, expr, replace = FALSE) {
     globals$domain <- compose_domains(oldval, domain)
   on.exit(globals$domain <- oldval)
 
+  globals$domain$wrapSync(expr)
+}
+
+# Like with_promise_domain, but doesn't include the wrapSync call.
+reenter_promise_domain <- function(domain, expr, replace = FALSE) {
+  oldval <- current_promise_domain()
+  if (replace)
+    globals$domain <- domain
+  else
+    globals$domain <- compose_domains(oldval, domain)
+  on.exit(globals$domain <- oldval)
+
   force(expr)
 }
 
@@ -80,6 +92,10 @@ with_promise_domain <- function(domain, expr, replace = FALSE) {
 #'   that was passed as an `onRejected` argument to [then()]. The
 #'   `wrapOnRejected` function should return a function that is suitable for
 #'   `onRejected` duty.
+#' @param wrapSync A function that takes a single argument: a (lazily evaluated)
+#'   expression that the function should [force()]. This expression represents
+#'   the `expr` argument passed to [with_promise_domain()]; `wrapSync` allows
+#'   the domain to manipulate the environment before/after `expr` is evaluated.
 #' @param ... Arbitrary named values that will become elements of the promise
 #'   domain object, and can be accessed as items in an environment (i.e. using
 #'   `[[` or `$`).
@@ -88,11 +104,13 @@ with_promise_domain <- function(domain, expr, replace = FALSE) {
 new_promise_domain <- function(
   wrapOnFulfilled = identity,
   wrapOnRejected = identity,
+  wrapSync = force,
   ...
 ) {
   list2env(list(
     wrapOnFulfilled = wrapOnFulfilled,
     wrapOnRejected = wrapOnRejected,
+    wrapSync = wrapSync,
     ...
   ), parent = emptyenv())
 }
@@ -113,6 +131,11 @@ compose_domains <- function(base, new) {
       new$wrapOnRejected(
         base$wrapOnRejected(onRejected)
       )
-    }
+    },
+    # Only include the new wrapSync, assuming that we've already applied the
+    # base domain's wrapSync. This assumption won't hold if we either export
+    # compose_domains in the future, or if we use it in cases where the base
+    # domain isn't currently active.
+    wrapSync = new$wrapSync
   )
 }
