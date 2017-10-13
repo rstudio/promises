@@ -340,9 +340,19 @@ promise <- function(action) {
 #'   `is.promise` returns `TRUE` if the given value is a promise object, and
 #'   `FALSE` otherwise.
 #'
+#'   `is.promising` returns `TRUE` if the given value is a promise object or
+#'   if it can be converted to a promise object using `as.promise`, and `FALSE`
+#'   otherwise.
+#'
 #' @export
 is.promise <- function(x) {
   inherits(x, "promise")
+}
+
+#' @rdname is.promise
+#' @export
+is.promising <- function(x) {
+  inherits(x, "promise") || inherits(x, "Future")
 }
 
 #' @rdname is.promise

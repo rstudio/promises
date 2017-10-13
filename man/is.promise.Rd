@@ -2,10 +2,13 @@
 % Please edit documentation in R/promise.R
 \name{is.promise}
 \alias{is.promise}
+\alias{is.promising}
 \alias{as.promise}
 \title{Coerce to a promise}
 \usage{
 is.promise(x)
+
+is.promising(x)
 
 as.promise(x)
 }
@@ -18,6 +21,10 @@ object cannot be converted.
 
 \code{is.promise} returns \code{TRUE} if the given value is a promise object, and
 \code{FALSE} otherwise.
+
+\code{is.promising} returns \code{TRUE} if the given value is a promise object or
+if it can be converted to a promise object using \code{as.promise}, and \code{FALSE}
+otherwise.
 }
 \description{
 Use \code{is.promise} to determine whether an R object is a promise. Use
