@@ -54,22 +54,22 @@ Promise <- R6::R6Class("Promise",
       private$state <- "fulfilled"
 
       later::later(function() {
-        lapply(private$onFulfilled, function(f) {
-          f(private$value, private$visible)
+          lapply(private$onFulfilled, function(f) {
+            f(private$value, private$visible)
+          })
+          private$onFulfilled <- list()
         })
-        private$onFulfilled <- list()
-      })
     },
     doRejectFinalReason = function(reason) {
       private$value <- reason
       private$state <- "rejected"
 
       later::later(function() {
-        lapply(private$onRejected, function(f) {
-          private$rejectionHandled <- TRUE
-          f(private$value)
-        })
-        private$onRejected <- list()
+          lapply(private$onRejected, function(f) {
+            private$rejectionHandled <- TRUE
+            f(private$value)
+          })
+          private$onRejected <- list()
 
         later::later(~{
           if (!private$rejectionHandled) {
@@ -133,50 +133,50 @@ Promise <- R6::R6Class("Promise",
 
       promise2 <- promise(function(resolve, reject) {
 
-        res <- promiseDomain$onThen(onFulfilled, onRejected)
-        if (!is.null(res)) {
-          onFulfilled <- res$onFulfilled
-          onRejected <- res$onRejected
-        }
-
-        handleFulfill <- function(value, visible) {
-          if (is.function(onFulfilled)) {
-            resolve(onFulfilled(value, visible))
-          } else {
-            resolve(if (visible) value else invisible(value))
+          res <- promiseDomain$onThen(onFulfilled, onRejected)
+          if (!is.null(res)) {
+            onFulfilled <- res$onFulfilled
+            onRejected <- res$onRejected
           }
-        }
 
-        handleReject <- function(reason) {
-          if (is.function(onRejected)) {
-            # Yes, resolve, not reject.
-            resolve(onRejected(reason))
-          } else {
-            # Yes, reject, not resolve.
-            reject(reason)
+          handleFulfill <- function(value, visible) {
+            if (is.function(onFulfilled)) {
+              resolve(onFulfilled(value, visible))
+            } else {
+              resolve(if (visible) value else invisible(value))
+            }
           }
-        }
 
-        if (private$state == "pending") {
-          private$onFulfilled <- c(private$onFulfilled, list(
-            handleFulfill
-          ))
-          private$onRejected <- c(private$onRejected, list(
-            handleReject
-          ))
-        } else if (private$state == "fulfilled") {
-          later::later(function() {
-            handleFulfill(private$value, private$visible)
-          })
-        } else if (private$state == "rejected") {
-          later::later(function() {
-            private$rejectionHandled <- TRUE
-            handleReject(private$value)
-          })
-        } else {
-          stop("Unexpected state ", private$state)
-        }
-      })
+          handleReject <- function(reason) {
+            if (is.function(onRejected)) {
+              # Yes, resolve, not reject.
+              resolve(onRejected(reason))
+            } else {
+              # Yes, reject, not resolve.
+              reject(reason)
+            }
+          }
+
+          if (private$state == "pending") {
+            private$onFulfilled <- c(private$onFulfilled, list(
+              handleFulfill
+            ))
+            private$onRejected <- c(private$onRejected, list(
+              handleReject
+            ))
+          } else if (private$state == "fulfilled") {
+            later::later(function() {
+              handleFulfill(private$value, private$visible)
+            })
+          } else if (private$state == "rejected") {
+            later::later(function() {
+              private$rejectionHandled <- TRUE
+              handleReject(private$value)
+            })
+          } else {
+            stop("Unexpected state ", private$state)
+          }
+        })
 
       invisible(promise2)
     },
@@ -406,7 +406,7 @@ as.promise.Future <- function(x) {
 #' @export
 as.promise.default <- function(x) {
   # TODO: If x is an error or try-error, should this return a rejected promise?
-  promise(~resolve(x))
+  stop("Don't know how to convert object of class ", class(x)[[1L]], " into a promise")
 }
 
 #' Fulfill a promise

@@ -103,6 +103,8 @@ promise_lapply <- function(X, FUN, ...) {
     if (pos > length(results)) {
       return(stats::setNames(results, X_names))
     } else {
+      # The next line may throw, that's fine, it will be caught by resolve() and
+      # reject the promise
       this_result <- FUN(X[[pos]], ...)
       as.promise(this_result) %...>%
         (function(this_value) {

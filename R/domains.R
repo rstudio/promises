@@ -1,3 +1,16 @@
+tryCatch <- function(expr, ..., finally) {
+  base::tryCatch(
+    withCallingHandlers(
+      expr,
+      error = function(e) {
+        promiseDomain$onError(e)
+      }
+    ),
+    ...,
+    finally = finally
+  )
+}
+
 promiseDomain <- list(
   onThen = function(onFulfilled, onRejected) {
     domain <- current_promise_domain()
@@ -21,6 +34,10 @@ promiseDomain <- list(
       }
     }
     results
+  },
+  onError = function(error) {
+    domain <- current_promise_domain()
+    domain$onError(error)
   }
 )
 
@@ -105,12 +122,14 @@ new_promise_domain <- function(
   wrapOnFulfilled = identity,
   wrapOnRejected = identity,
   wrapSync = force,
+  onError = force,
   ...
 ) {
   list2env(list(
     wrapOnFulfilled = wrapOnFulfilled,
     wrapOnRejected = wrapOnRejected,
     wrapSync = wrapSync,
+    onError = onError,
     ...
   ), parent = emptyenv())
 }
@@ -136,6 +155,10 @@ compose_domains <- function(base, new) {
     # base domain's wrapSync. This assumption won't hold if we either export
     # compose_domains in the future, or if we use it in cases where the base
     # domain isn't currently active.
-    wrapSync = new$wrapSync
+    wrapSync = new$wrapSync,
+    onError = function(e) {
+      base$onError(e)
+      new$onError(e)
+    }
   )
 }
