@@ -113,6 +113,11 @@ reenter_promise_domain <- function(domain, expr, replace = FALSE) {
 #'   expression that the function should [force()]. This expression represents
 #'   the `expr` argument passed to [with_promise_domain()]; `wrapSync` allows
 #'   the domain to manipulate the environment before/after `expr` is evaluated.
+#' @param onError A function that takes a single argument: an error. `onError`
+#'   will be called whenever an exception occurs in a domain (that isn't caught
+#'   by a `tryCatch`). Providing an `onError` callback doesn't cause errors to
+#'   be caught, necessarily; instead, `onError` callbacks behave like calling
+#'   handlers.
 #' @param ... Arbitrary named values that will become elements of the promise
 #'   domain object, and can be accessed as items in an environment (i.e. using
 #'   `[[` or `$`).
@@ -142,14 +147,14 @@ compose_domains <- function(base, new) {
 
   list(
     wrapOnFulfilled = function(onFulfilled) {
-      new$wrapOnFulfilled(
-        base$wrapOnFulfilled(onFulfilled)
-      )
+      # Force eager evaluation of base$wrapOnFulfilled(onFulfilled)
+      base <- base$wrapOnFulfilled(onFulfilled)
+      new$wrapOnFulfilled(base)
     },
     wrapOnRejected = function(onRejected) {
-      new$wrapOnRejected(
-        base$wrapOnRejected(onRejected)
-      )
+      # Force eager evaluation of base$wrapOnRejected(onRejected)
+      base <- base$wrapOnRejected(onRejected)
+      new$wrapOnRejected(base)
     },
     # Only include the new wrapSync, assuming that we've already applied the
     # base domain's wrapSync. This assumption won't hold if we either export

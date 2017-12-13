@@ -8,7 +8,7 @@
 with_promise_domain(domain, expr, replace = FALSE)
 
 new_promise_domain(wrapOnFulfilled = identity, wrapOnRejected = identity,
-  wrapSync = force, ...)
+  wrapSync = force, onError = force, ...)
 }
 \arguments{
 \item{domain}{A promise domain object to install while \code{expr} is evaluated.}
@@ -35,6 +35,12 @@ that was passed as an \code{onRejected} argument to \code{\link[=then]{then()}}.
 expression that the function should \code{\link[=force]{force()}}. This expression represents
 the \code{expr} argument passed to \code{\link[=with_promise_domain]{with_promise_domain()}}; \code{wrapSync} allows
 the domain to manipulate the environment before/after \code{expr} is evaluated.}
+
+\item{onError}{A function that takes a single argument: an error. \code{onError}
+will be called whenever an exception occurs in a domain (that isn't caught
+by a \code{tryCatch}). Providing an \code{onError} callback doesn't cause errors to
+be caught, necessarily; instead, \code{onError} callbacks behave like calling
+handlers.}
 
 \item{...}{Arbitrary named values that will become elements of the promise
 domain object, and can be accessed as items in an environment (i.e. using
