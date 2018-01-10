@@ -4,3 +4,4 @@
 .Ruserdata
 *.so
 *.o
+inst/doc

@@ -1,0 +1,137 @@
+---
+title: "Using promises with Shiny"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Using promises with Shiny}
+  %\VignetteEncoding{UTF-8}
+---
+
+Taking advantage of async programming from Shiny is not as simple as turning on an option or flipping a switch. If you have already written a Shiny application and are looking to improve its scalability, expect the changes required for async operation to ripple through multiple layers of server code.
+
+Async programming with Shiny boils down to following a few steps.
+
+1. Identify slow operations (function calls or blocks of statements) in your app.
+
+2. Convert the slow operation into a future. (See [related vignette](futures.html).)
+
+3. Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the future object.
+
+We'll get into details for all these steps, but first, an example. Consider the following synchronous server code:
+
+```R
+function(input, output, session) {
+  output$plot <- renderPlot({
+    result <- expensive_operation()
+    result <- head(result, input$n)
+    plot(result)
+  })
+}
+```
+
+We'd convert it to async like this:
+
+```R
+library(promises)
+library(future)
+plan(multiprocess)
+
+function(input, output, session) {
+  output$plot <- renderPlot({
+    future({ expensive_operation() }) %...>%
+      head(input$n) %...>%
+      plot()
+  })
+}
+```
+
+## Adding prerequisites
+
+The easiest part is adding `library(promises)`, `library(future)`, and `plan(multiprocess)` to the top of the app.
+
+The `promises` library is necessary for the `%...>%` operator. You may also want to use promise utility functions like `promise_all` and `promise_race`.
+
+The `future` library is needed because the `future()` function is how you will actually launch asynchronous tasks.
+
+`plan(multiprocess)` is a directive to the `future` package, telling it how future tasks should actually be executed. There are other options besides `multiprocess`, but this is a good default to start with; it uses forked R processes on non-Windows platforms, and separate R processes on Windows. For more information about the other options, including distributing work across cluster nodes, see the `future` package's Overview vignette.
+
+## Identifying slow operations
+
+To find areas of your code that are good candidates for the future/promise treatment, let's start with the obvious: identifying what code is making your app slow. You may assume it's your plotting code that's slow, but it's actually your database queries; or vice versa. If there's one thing that veteran programmers can agree on, it's that human intuition is a surprisingly unreliable tool for spotting performance problems.
+
+Our recommendation is that you use the [profvis](https://rstudio.github.io/profvis/) profiler, which we designed to work with Shiny (see Example 3 in the profvis documentation). You can use profvis to help you focus in on where the time is actually being spent in your app.
+
+>  **Note:** As of this writing, profvis doesn't work particularly well for diagnosing performance problems in parts of your code that you've already made asynchronous. In particular, we haven't done any work to help it profile code that executes in a future, and the mechanism we use to hide "irrelevant" parts of the stack trace doesn't work well with promises. These are areas that are ripe for future development.
+
+Async programming works well when you can identify just a few "hotspots" in your app where lots of time is being spent. It works much less well if your app is too slow because of a generalized, diffuse slowness through every aspect of your app, where no one operation takes too much time but it all adds up to a lot. The more futures you need to introduce into your app, the more fixed communication overhead you incur. So for the most bang-for-the-buck, we want to launch a small number of futures per session but move a lot of the waited-on code into each one.
+
+## Converting a slow operation into a future
+
+Now that we've found hotspots that we want to make asynchronous, let's talk about the actual work of converting them to futures.
+
+Conceptually, futures work like this:
+
+```R
+future({
+  # Expensive code goes here
+}) %...>% (function(result) {
+  # Code to handle result of expensive code goes here
+})
+```
+
+which seems incredibly simple. What's actually happening is that the future runs in a totally separate child R process, and then the result is collected up and returned to the main R process:
+
+```R
+# Code here runs in process A
+future({
+  # Code here runs in (child) process B
+}) %...>% (function(result) {
+  # Code here runs in process A
+})
+```
+
+The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues.
+
+### Accessing code and data from inside future()
+
+It's likely that the future code block will want to access functions and data that already exist in the original process. Depending on the plan that is used to actually launch the future, this is either very easy or extremely hard.
+
+* **Forking** – This is what happens if you choose `plan(multiprocess)` on non-Windows platforms (or `plan(multicore)` if you always want to use forking, even though it doesn't work on Windows). Forking is a way of creating a new child process whose memory state is identical to the parent process. It is generally extremely fast and there's mostly no need to worry about the availability of packages, functions, data frames, etc.—they're all already present.
+* **Session** – This is what happens if you choose `plan(multiprocess)` on Windows, or `plan(multisession)` on any platform. It launches a totally separate R process, and runs your code in that process. With this strategy, you'll need to call `library(pkgname)` inside the future code block to load any packages you need, even if they're already loaded in the original process.``
+
+
+
+### Avoid operations that might have side effects on in-memory structures
+
+Most seriously, the child process will be operating in a completely different memory address space than the original process. Therefore, some types of objects that rely on memory pointers or other properties of the original process, are simply not going to work.
+
+* Future code blocks **cannot directly access reactive inputs or reactive expressions** from the original process. If needed, assign the reactive values you need to regular local variables before invoking the future.
+* Future code blocks **cannot use database connections** from the original process. If they need to access a database, they must create, use, and destroy connections entirely within the code block.
+
+Furthermore, in-memory changes that you make in the child process will not affect the original process.
+
+* Future code blocks **cannot modify environments or reference class objects** from the original process—or they can, but should not expect any changes to be reflected in the original process automatically.
+* Be careful with any kind of objects that use **external pointers**, such as handles from the `curl` package or XML nodes from the `xml2` package. If in doubt, restrict your usage of such native-library packages to either entirely be within the future, or entirely in the original process.
+
+
+
+
+
+
+
+
+
+Be sure that the last expression in the `renderPlot` code block is the promise pipeline. This is how Shiny will know to hold off on processing the plot until the promise pipeline runs to completion.
+
+
+
+
+
+
+
+
+
+1. Where a value is expected, return a promise for a value instead.
+2. Do not attempt to access reactive objects (inputs, values, or expressions) from inside a future code block. You must not touch `input`, or `session`, or access any reactive expressions. If you are tempted to do so, store their values in local variables immediately before invoking `future()`, and refer to those local variables from inside the future code block.
+3. Also verboten inside a future: using network sockets or database connections from the main R process, mutating reference class or R6 objects from the main R process.
+4. 
