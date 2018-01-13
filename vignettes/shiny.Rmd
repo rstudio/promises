@@ -13,7 +13,7 @@ Async programming with Shiny boils down to following a few steps.
 
 1. Identify slow operations (function calls or blocks of statements) in your app.
 
-2. Convert the slow operation into a future. (See [related vignette](futures.html).)
+2. Convert the slow operation into a future. (If you haven't read the [article on futures](futures.html), definitely do that before proceeding!)
 
 3. Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the future object.
 
@@ -51,17 +51,17 @@ The easiest part is adding `library(promises)`, `library(future)`, and `plan(mul
 
 The `promises` library is necessary for the `%...>%` operator. You may also want to use promise utility functions like `promise_all` and `promise_race`.
 
-The `future` library is needed because the `future()` function is how you will actually launch asynchronous tasks.
+The `future` library is needed because the `future()` function is how you will launch asynchronous tasks.
 
-`plan(multiprocess)` is a directive to the `future` package, telling it how future tasks should actually be executed. There are other options besides `multiprocess`, but this is a good default to start with; it uses forked R processes on non-Windows platforms, and separate R processes on Windows. For more information about the other options, including distributing work across cluster nodes, see the `future` package's Overview vignette.
+`plan(multiprocess)` is a directive to the `future` package, telling it how future tasks should actually be executed. See the [article on futures](futures.html) for more details.
 
 ## Identifying slow operations
 
-To find areas of your code that are good candidates for the future/promise treatment, let's start with the obvious: identifying what code is making your app slow. You may assume it's your plotting code that's slow, but it's actually your database queries; or vice versa. If there's one thing that veteran programmers can agree on, it's that human intuition is a surprisingly unreliable tool for spotting performance problems.
+To find areas of your code that are good candidates for the future/promise treatment, let's start with the obvious: identifying the code that is making your app slow. You may assume it's your plotting code that's slow, but it's actually your database queries; or vice versa. If there's one thing that veteran programmers can agree on, it's that human intuition is a surprisingly unreliable tool for spotting performance problems.
 
 Our recommendation is that you use the [profvis](https://rstudio.github.io/profvis/) profiler, which we designed to work with Shiny (see Example 3 in the profvis documentation). You can use profvis to help you focus in on where the time is actually being spent in your app.
 
->  **Note:** As of this writing, profvis doesn't work particularly well for diagnosing performance problems in parts of your code that you've already made asynchronous. In particular, we haven't done any work to help it profile code that executes in a future, and the mechanism we use to hide "irrelevant" parts of the stack trace doesn't work well with promises. These are areas that are ripe for future development.
+>  **Note:** As of this writing, profvis doesn't work particularly well for diagnosing performance problems in parts of your code that you've already made asynchronous. In particular, we haven't done any work to help it profile code that executes in a future, and the mechanism we use to hide "irrelevant" parts of the stack trace doesn't work well with promises. These are ripe areas for future development.
 
 Async programming works well when you can identify just a few "hotspots" in your app where lots of time is being spent. It works much less well if your app is too slow because of a generalized, diffuse slowness through every aspect of your app, where no one operation takes too much time but it all adds up to a lot. The more futures you need to introduce into your app, the more fixed communication overhead you incur. So for the most bang-for-the-buck, we want to launch a small number of futures per session but move a lot of the waited-on code into each one.
 
@@ -90,38 +90,138 @@ future({
 })
 ```
 
-The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues.
+The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues. There are extremely important constraints that futures impose on their code blocks; certain objects cannot be safely used across process boundaries, and some of the default behaviors of the future library may severely impact the performance of your app. Again, see the [article on futures](futures.html) for more details.
 
-### Accessing code and data from inside future()
+### Shiny-specific caveats and limitations
 
-It's likely that the future code block will want to access functions and data that already exist in the original process. Depending on the plan that is used to actually launch the future, this is either very easy or extremely hard.
+In addition to the constraints that all futures face, there is an additional one for Shiny: reactive values and reactive expressions cannot be read from within a future. Whenever reactive values/expressions are read, side effects are carried out under the hood so that the currently executing observer or reactive expression can be notified when the reactive value/expression becomes invalidated. If a reactive value/expression is created in one process, but read in another process, there will be no way for readers to be notified about invalidation.
 
-* **Forking** – This is what happens if you choose `plan(multiprocess)` on non-Windows platforms (or `plan(multicore)` if you always want to use forking, even though it doesn't work on Windows). Forking is a way of creating a new child process whose memory state is identical to the parent process. It is generally extremely fast and there's mostly no need to worry about the availability of packages, functions, data frames, etc.—they're all already present.
-* **Session** – This is what happens if you choose `plan(multiprocess)` on Windows, or `plan(multisession)` on any platform. It launches a totally separate R process, and runs your code in that process. With this strategy, you'll need to call `library(pkgname)` inside the future code block to load any packages you need, even if they're already loaded in the original process.``
+This code, for example, will not work:
+
+```R
+function(input, output, session) {
+  r1 <- reactive({ ... })
+  
+  r2 <- reactive({
+    future({
+      r1() # Will error--don't do this!
+    })
+  })
+}
+```
+
+Even though `r1()` is called from inside the `r2` reactive expression, the fact that it's also in a future means the call will fail. Instead, you must read any reactive values/expressions you need in advance of launching the future:
+
+```R
+function(input, output, session) {
+  r1 <- reactive({ ... })
+  
+  r2 <- reactive({
+    val <- r1()
+    future({
+      val # No problem!
+    })
+  })
+}
+```
+
+However, it's perfectly fine to read reactive values/expressions from inside a promise _handler_. Handlers run in the original process, not a child process, so reactive operations are allowed.
+
+```R
+function(input, output, session) {
+  r1 <- reactive({ ... })
+  
+  r2 <- reactive({
+    future({ ... }) %...>%
+      rbind(r1()) # OK!
+  })
+}
+```
+
+## Integrating promises with Shiny
+
+Generally, you'll be using promises with Shiny from within outputs, reactive expressions, and observers. We've tried to integrate promises into these constructs in as natural a way as possible.
+
+### Outputs
+
+Most outputs (`renderXXX({ ... })`) functions expect your code block to return a value; for example, `renderText()` expects a character vector and `renderTable()` expects a data frame. All such render functions that are included within the `shiny` package can now optionally be given a promise for such a value instead.
+
+So this:
+
+```R
+output$table <- renderTable({
+  read.csv(url) %>%
+    filter(date == input$date)
+})
+```
+
+could become:
+
+```R
+output$table <- renderTable({
+  future({ read.csv(url) }) %...>%
+    filter(date == input$date)
+})
+```
+
+or, trading elegance for efficiency:
+
+```R
+output$table <- renderTable({
+  input_date <- input$date
+  future({
+    read.csv(url) %>% filter(date == input_date)
+  })
+})
+```
+
+The important thing to keep in mind is that the promise (or promise pipeline) must be the final expression in the code block. Shiny only knows about promises you actually return to it when you hand control back.
+
+#### Render functions with side effects: `renderPrint` and `renderPlot`
+
+The render functions `renderPrint()` and `renderPlot()` are slightly different than other render functions, in that they can be affected by side effects in the code block you provide. In `renderPrint` you can print to the console, and in `renderPlot` you can plot to the active R graphics device.
+
+With promises, these render functions can work in a similar way, but with a caveat. As you hopefully understand by now, futures execute their code in a separate R process, and printing/plotting in a separate process won't have any effect on the Shiny output in the original process. These examples, then, are incorrect:
+
+```R
+output$summary <- renderPrint({
+  future({
+    read.csv(url) %>%
+      summary() %>%
+      print()
+  })
+})
+
+output$plot <- renderPlot({
+  future({
+    df <- read.csv(url)
+    ggplot(df, aes(length, width)) + geom_point()
+  })
+})
+```
+
+Instead, do printing and plotting after control returns back to the original process, via a promise handler:
+
+```R
+output$summary <- renderPrint({
+  future({ read.csv(url) }) %...>%
+    summary() %...>%
+    print()
+})
+
+output$plot <- renderPlot({
+  future({ read.csv(url) }) %...>%
+  {
+    ggplot(., aes(length, width)) + geom_point()
+  }
+})
+```
+
+Again, you do need to be careful to make sure that the last expression in your code block is the promise (pipeline); this is the only way the rendering logic can know whether/when your logic has completed, and whether any errors occurred.
+
+### Observers
 
 
-
-### Avoid operations that might have side effects on in-memory structures
-
-Most seriously, the child process will be operating in a completely different memory address space than the original process. Therefore, some types of objects that rely on memory pointers or other properties of the original process, are simply not going to work.
-
-* Future code blocks **cannot directly access reactive inputs or reactive expressions** from the original process. If needed, assign the reactive values you need to regular local variables before invoking the future.
-* Future code blocks **cannot use database connections** from the original process. If they need to access a database, they must create, use, and destroy connections entirely within the code block.
-
-Furthermore, in-memory changes that you make in the child process will not affect the original process.
-
-* Future code blocks **cannot modify environments or reference class objects** from the original process—or they can, but should not expect any changes to be reflected in the original process automatically.
-* Be careful with any kind of objects that use **external pointers**, such as handles from the `curl` package or XML nodes from the `xml2` package. If in doubt, restrict your usage of such native-library packages to either entirely be within the future, or entirely in the original process.
-
-
-
-
-
-
-
-
-
-Be sure that the last expression in the `renderPlot` code block is the promise pipeline. This is how Shiny will know to hold off on processing the plot until the promise pipeline runs to completion.
 
 
 
@@ -134,4 +234,4 @@ Be sure that the last expression in the `renderPlot` code block is the promise p
 1. Where a value is expected, return a promise for a value instead.
 2. Do not attempt to access reactive objects (inputs, values, or expressions) from inside a future code block. You must not touch `input`, or `session`, or access any reactive expressions. If you are tempted to do so, store their values in local variables immediately before invoking `future()`, and refer to those local variables from inside the future code block.
 3. Also verboten inside a future: using network sockets or database connections from the main R process, mutating reference class or R6 objects from the main R process.
-4. 
+4. ​
