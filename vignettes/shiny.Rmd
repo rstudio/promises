@@ -217,11 +217,11 @@ output$plot <- renderPlot({
 })
 ```
 
-Again, you do need to be careful to make sure that the last expression in your code block is the promise (pipeline); this is the only way the rendering logic can know whether/when your logic has completed, and whether any errors occurred.
+Again, you do need to be careful to make sure that the last expression in your code block is the promise/pipeline; this is the only way the rendering logic can know whether and when your logic has completed, and if any errors occurred (so they can be displayed to the user).
 
 ### Observers
 
-
+Observers are very similar to outputs: you must make sure that the last expression in your code block is the promise/pipeline. Like outputs, observers need to know whether and when it's done running, and if any errors occured (so they can log them and terminate the user session).
 
 
 
