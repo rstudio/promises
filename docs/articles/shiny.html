@@ -82,7 +82,7 @@
 <p>Async programming with Shiny boils down to following a few steps.</p>
 <ol style="list-style-type: decimal">
 <li><p>Identify slow operations (function calls or blocks of statements) in your app.</p></li>
-<li><p>Convert the slow operation into a future. (See <a href="futures.html">related vignette</a>.)</p></li>
+<li><p>Convert the slow operation into a future. (If you haven’t read the <a href="futures.html">article on futures</a>, definitely do that before proceeding!)</p></li>
 <li><p>Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the future object.</p></li>
 </ol>
 <p>We’ll get into details for all these steps, but first, an example. Consider the following synchronous server code:</p>
@@ -110,16 +110,16 @@
 <a href="#adding-prerequisites" class="anchor"></a>Adding prerequisites</h2>
 <p>The easiest part is adding <code>library(promises)</code>, <code>library(future)</code>, and <code><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan(multiprocess)</a></code> to the top of the app.</p>
 <p>The <code>promises</code> library is necessary for the <code>%...&gt;%</code> operator. You may also want to use promise utility functions like <code>promise_all</code> and <code>promise_race</code>.</p>
-<p>The <code>future</code> library is needed because the <code><a href="http://www.rdocumentation.org/packages/future/topics/future">future()</a></code> function is how you will actually launch asynchronous tasks.</p>
-<p><code><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan(multiprocess)</a></code> is a directive to the <code>future</code> package, telling it how future tasks should actually be executed. There are other options besides <code>multiprocess</code>, but this is a good default to start with; it uses forked R processes on non-Windows platforms, and separate R processes on Windows. For more information about the other options, including distributing work across cluster nodes, see the <code>future</code> package’s Overview vignette.</p>
+<p>The <code>future</code> library is needed because the <code><a href="http://www.rdocumentation.org/packages/future/topics/future">future()</a></code> function is how you will launch asynchronous tasks.</p>
+<p><code><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan(multiprocess)</a></code> is a directive to the <code>future</code> package, telling it how future tasks should actually be executed. See the <a href="futures.html">article on futures</a> for more details.</p>
 </div>
 <div id="identifying-slow-operations" class="section level2">
 <h2 class="hasAnchor">
 <a href="#identifying-slow-operations" class="anchor"></a>Identifying slow operations</h2>
-<p>To find areas of your code that are good candidates for the future/promise treatment, let’s start with the obvious: identifying what code is making your app slow. You may assume it’s your plotting code that’s slow, but it’s actually your database queries; or vice versa. If there’s one thing that veteran programmers can agree on, it’s that human intuition is a surprisingly unreliable tool for spotting performance problems.</p>
+<p>To find areas of your code that are good candidates for the future/promise treatment, let’s start with the obvious: identifying the code that is making your app slow. You may assume it’s your plotting code that’s slow, but it’s actually your database queries; or vice versa. If there’s one thing that veteran programmers can agree on, it’s that human intuition is a surprisingly unreliable tool for spotting performance problems.</p>
 <p>Our recommendation is that you use the <a href="https://rstudio.github.io/profvis/">profvis</a> profiler, which we designed to work with Shiny (see Example 3 in the profvis documentation). You can use profvis to help you focus in on where the time is actually being spent in your app.</p>
 <blockquote>
-<p><strong>Note:</strong> As of this writing, profvis doesn’t work particularly well for diagnosing performance problems in parts of your code that you’ve already made asynchronous. In particular, we haven’t done any work to help it profile code that executes in a future, and the mechanism we use to hide “irrelevant” parts of the stack trace doesn’t work well with promises. These are areas that are ripe for future development.</p>
+<p><strong>Note:</strong> As of this writing, profvis doesn’t work particularly well for diagnosing performance problems in parts of your code that you’ve already made asynchronous. In particular, we haven’t done any work to help it profile code that executes in a future, and the mechanism we use to hide “irrelevant” parts of the stack trace doesn’t work well with promises. These are ripe areas for future development.</p>
 </blockquote>
 <p>Async programming works well when you can identify just a few “hotspots” in your app where lots of time is being spent. It works much less well if your app is too slow because of a generalized, diffuse slowness through every aspect of your app, where no one operation takes too much time but it all adds up to a lot. The more futures you need to introduce into your app, the more fixed communication overhead you incur. So for the most bang-for-the-buck, we want to launch a small number of futures per session but move a lot of the waited-on code into each one.</p>
 </div>
@@ -140,39 +140,214 @@
 }) <span class="op">%...&gt;%</span><span class="st"> </span>(<span class="cf">function</span>(result) {
   <span class="co"># Code here runs in process A</span>
 })</code></pre></div>
-<p>The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues.</p>
-<div id="accessing-code-and-data-from-inside-future" class="section level3">
+<p>The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues. There are extremely important constraints that futures impose on their code blocks; certain objects cannot be safely used across process boundaries, and some of the default behaviors of the future library may severely impact the performance of your app. Again, see the <a href="futures.html">article on futures</a> for more details.</p>
+<div id="shiny-specific-caveats-and-limitations" class="section level3">
 <h3 class="hasAnchor">
-<a href="#accessing-code-and-data-from-inside-future" class="anchor"></a>Accessing code and data from inside future()</h3>
-<p>It’s likely that the future code block will want to access functions and data that already exist in the original process. Depending on the plan that is used to actually launch the future, this is either very easy or extremely hard.</p>
-<ul>
-<li>
-<strong>Forking</strong> – This is what happens if you choose <code><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan(multiprocess)</a></code> on non-Windows platforms (or <code><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan(multicore)</a></code> if you always want to use forking, even though it doesn’t work on Windows). Forking is a way of creating a new child process whose memory state is identical to the parent process. It is generally extremely fast and there’s mostly no need to worry about the availability of packages, functions, data frames, etc.—they’re all already present.</li>
-<li>
-<strong>Session</strong> – This is what happens if you choose <code><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan(multiprocess)</a></code> on Windows, or <code><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan(multisession)</a></code> on any platform. It launches a totally separate R process, and runs your code in that process. With this strategy, you’ll need to call <code>library(pkgname)</code> inside the future code block to load any packages you need, even if they’re already loaded in the original process.``</li>
-</ul>
+<a href="#shiny-specific-caveats-and-limitations" class="anchor"></a>Shiny-specific caveats and limitations</h3>
+<p>In addition to the constraints that all futures face, there is an additional one for Shiny: reactive values and reactive expressions cannot be read from within a future. Whenever reactive values/expressions are read, side effects are carried out under the hood so that the currently executing observer or reactive expression can be notified when the reactive value/expression becomes invalidated. If a reactive value/expression is created in one process, but read in another process, there will be no way for readers to be notified about invalidation.</p>
+<p>This code, for example, will not work:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">function</span>(input, output, session) {
+  r1 &lt;-<span class="st"> </span><span class="kw">reactive</span>({ ... })
+  
+  r2 &lt;-<span class="st"> </span><span class="kw">reactive</span>({
+    <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
+      <span class="kw">r1</span>() <span class="co"># Will error--don't do this!</span>
+    })
+  })
+}</code></pre></div>
+<p>Even though <code>r1()</code> is called from inside the <code>r2</code> reactive expression, the fact that it’s also in a future means the call will fail. Instead, you must read any reactive values/expressions you need in advance of launching the future:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">function</span>(input, output, session) {
+  r1 &lt;-<span class="st"> </span><span class="kw">reactive</span>({ ... })
+  
+  r2 &lt;-<span class="st"> </span><span class="kw">reactive</span>({
+    val &lt;-<span class="st"> </span><span class="kw">r1</span>()
+    <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
+      val <span class="co"># No problem!</span>
+    })
+  })
+}</code></pre></div>
+<p>However, it’s perfectly fine to read reactive values/expressions from inside a promise <em>handler</em>. Handlers run in the original process, not a child process, so reactive operations are allowed.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">function</span>(input, output, session) {
+  r1 &lt;-<span class="st"> </span><span class="kw">reactive</span>({ ... })
+  
+  r2 &lt;-<span class="st"> </span><span class="kw">reactive</span>({
+    <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ ... }) <span class="op">%...&gt;%</span>
+<span class="st">      </span><span class="kw">rbind</span>(<span class="kw">r1</span>()) <span class="co"># OK!</span>
+  })
+}</code></pre></div>
 </div>
-<div id="avoid-operations-that-might-have-side-effects-on-in-memory-structures" class="section level3">
+</div>
+<div id="integrating-promises-with-shiny" class="section level2">
+<h2 class="hasAnchor">
+<a href="#integrating-promises-with-shiny" class="anchor"></a>Integrating promises with Shiny</h2>
+<p>Generally, you’ll be using promises with Shiny from within outputs, reactive expressions, and observers. We’ve tried to integrate promises into these constructs in as natural a way as possible.</p>
+<div id="outputs" class="section level3">
 <h3 class="hasAnchor">
-<a href="#avoid-operations-that-might-have-side-effects-on-in-memory-structures" class="anchor"></a>Avoid operations that might have side effects on in-memory structures</h3>
-<p>Most seriously, the child process will be operating in a completely different memory address space than the original process. Therefore, some types of objects that rely on memory pointers or other properties of the original process, are simply not going to work.</p>
-<ul>
-<li>Future code blocks <strong>cannot directly access reactive inputs or reactive expressions</strong> from the original process. If needed, assign the reactive values you need to regular local variables before invoking the future.</li>
-<li>Future code blocks <strong>cannot use database connections</strong> from the original process. If they need to access a database, they must create, use, and destroy connections entirely within the code block.</li>
-</ul>
-<p>Furthermore, in-memory changes that you make in the child process will not affect the original process.</p>
-<ul>
-<li>Future code blocks <strong>cannot modify environments or reference class objects</strong> from the original process—or they can, but should not expect any changes to be reflected in the original process automatically.</li>
-<li>Be careful with any kind of objects that use <strong>external pointers</strong>, such as handles from the <code>curl</code> package or XML nodes from the <code>xml2</code> package. If in doubt, restrict your usage of such native-library packages to either entirely be within the future, or entirely in the original process.</li>
-</ul>
-<p>Be sure that the last expression in the <code>renderPlot</code> code block is the promise pipeline. This is how Shiny will know to hold off on processing the plot until the promise pipeline runs to completion.</p>
+<a href="#outputs" class="anchor"></a>Outputs</h3>
+<p>Most outputs (<code>renderXXX({ ... })</code>) functions expect your code block to return a value; for example, <code>renderText()</code> expects a character vector and <code>renderTable()</code> expects a data frame. All such render functions that are included within the <code>shiny</code> package can now optionally be given a promise for such a value instead.</p>
+<p>So this:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({
+  <span class="kw">read.csv</span>(url) <span class="op">%&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(date <span class="op">==</span><span class="st"> </span>input<span class="op">$</span>date)
+})</code></pre></div>
+<p>could become:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({
+  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ <span class="kw">read.csv</span>(url) }) <span class="op">%...&gt;%</span>
+<span class="st">    </span><span class="kw">filter</span>(date <span class="op">==</span><span class="st"> </span>input<span class="op">$</span>date)
+})</code></pre></div>
+<p>or, trading elegance for efficiency:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({
+  input_date &lt;-<span class="st"> </span>input<span class="op">$</span>date
+  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
+    <span class="kw">read.csv</span>(url) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(date <span class="op">==</span><span class="st"> </span>input_date)
+  })
+})</code></pre></div>
+<p>The important thing to keep in mind is that the promise (or promise pipeline) must be the final expression in the code block. Shiny only knows about promises you actually return to it when you hand control back.</p>
+<div id="render-functions-with-side-effects-renderprint-and-renderplot" class="section level4">
+<h4 class="hasAnchor">
+<a href="#render-functions-with-side-effects-renderprint-and-renderplot" class="anchor"></a>Render functions with side effects: <code>renderPrint</code> and <code>renderPlot</code>
+</h4>
+<p>The render functions <code>renderPrint()</code> and <code>renderPlot()</code> are slightly different than other render functions, in that they can be affected by side effects in the code block you provide. In <code>renderPrint</code> you can print to the console, and in <code>renderPlot</code> you can plot to the active R graphics device.</p>
+<p>With promises, these render functions can work in a similar way, but with a caveat. As you hopefully understand by now, futures execute their code in a separate R process, and printing/plotting in a separate process won’t have any effect on the Shiny output in the original process. These examples, then, are incorrect:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>summary &lt;-<span class="st"> </span><span class="kw">renderPrint</span>({
+  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
+    <span class="kw">read.csv</span>(url) <span class="op">%&gt;%</span>
+<span class="st">      </span><span class="kw">summary</span>() <span class="op">%&gt;%</span>
+<span class="st">      </span><span class="kw">print</span>()
+  })
+})
+
+output<span class="op">$</span>plot &lt;-<span class="st"> </span><span class="kw">renderPlot</span>({
+  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
+    df &lt;-<span class="st"> </span><span class="kw">read.csv</span>(url)
+    <span class="kw">ggplot</span>(df, <span class="kw">aes</span>(length, width)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>()
+  })
+})</code></pre></div>
+<p>Instead, do printing and plotting after control returns back to the original process, via a promise handler:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>summary &lt;-<span class="st"> </span><span class="kw">renderPrint</span>({
+  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ <span class="kw">read.csv</span>(url) }) <span class="op">%...&gt;%</span>
+<span class="st">    </span><span class="kw">summary</span>() <span class="op">%...&gt;%</span>
+<span class="st">    </span><span class="kw">print</span>()
+})
+
+output<span class="op">$</span>plot &lt;-<span class="st"> </span><span class="kw">renderPlot</span>({
+  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ <span class="kw">read.csv</span>(url) }) <span class="op">%...&gt;%</span>
+<span class="st">  </span>{
+    <span class="kw">ggplot</span>(., <span class="kw">aes</span>(length, width)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>()
+  }
+})</code></pre></div>
+<p>Again, you do need to be careful to make sure that the last expression in your code block is the promise/pipeline; this is the only way the rendering logic can know whether and when your logic has completed, and if any errors occurred (so they can be displayed to the user).</p>
+</div>
+</div>
+<div id="observers" class="section level3">
+<h3 class="hasAnchor">
+<a href="#observers" class="anchor"></a>Observers</h3>
+<p>Observers are very similar to outputs: you must make sure that the last expression in your code block is the promise/pipeline. Like outputs, observers need to know whether and when they’re done running, and if any errors occured (so they can log them and terminate the user session). The way to communicate this from your async user code is by returning the promise.</p>
+<p>Here’s a synchronous example that we’ll convert to async. Clicking the <code>refresh_data</code> action button causes data to be downloaded, which is then saved to disk as <code>cached.rds</code> and also used to update the reactive value <code>data</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data &lt;-<span class="st"> </span><span class="kw">reactiveVal</span>(<span class="kw">readRDS</span>(<span class="st">"cached.rds"</span>))
+
+<span class="cf">function</span>(input, output, session) {  
+  <span class="kw">observeEvent</span>(input<span class="op">$</span>refresh_data, {
+    df &lt;-<span class="st"> </span><span class="kw">read.csv</span>(url)
+    <span class="kw">saveRDS</span>(df, <span class="st">"cached.rds"</span>)
+    <span class="kw">data</span>(df)
+  })
+}</code></pre></div>
+<p>And the async version:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data &lt;-<span class="st"> </span><span class="kw">reactiveVal</span>(<span class="kw">readRDS</span>(<span class="st">"cached.rds"</span>))
+
+<span class="cf">function</span>(input, output, session) {
+  <span class="kw">observeEvent</span>(input<span class="op">$</span>refresh_data, {
+    <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
+      df &lt;-<span class="st"> </span><span class="kw">read.csv</span>(url)
+      <span class="kw">saveRDS</span>(df, <span class="st">"cached.rds"</span>)
+      df
+    }) <span class="op">%...&gt;%</span>
+<span class="st">      </span><span class="kw">data</span>()
+  })
+}</code></pre></div>
+<p>Note that in this version, we cannot call <code>data(df)</code> inside the future, as this would cause the update to happen in the wrong process. Instead, we use the <code>%...&gt;%</code> operator to perform the assignment back in the main process once the future resolves.</p>
+</div>
+<div id="reactive-expressions" class="section level3">
+<h3 class="hasAnchor">
+<a href="#reactive-expressions" class="anchor"></a>Reactive expressions</h3>
+<p>Recall that reactive expressions are used to calculate values, and are cached until they are automatically invalidated by one of their dependencies. Unlike outputs and observers, reactive expressions can be used from other reactive consumers.</p>
+<p>Asynchronous reactive expressions are similar to regular (synchronous) reactive expressions: instead of a “normal” value, they return a promise that will yield the desired value; and a normal reactive will cache a normal value, while an async reactive will cache the promise.</p>
+<p>The upshot is that when defining an async reactive expression, your code block should return a promise or promise pipeline, following the same rules as reactive outputs. And when calling an async reactive expression, call it like a function like you would a regular reactive expression, and treat the value that’s returned like any other promise.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">function</span>(input, output, session) {
+  data &lt;-<span class="st"> </span><span class="kw">eventReactive</span>(input<span class="op">$</span>refresh_data, {
+    <span class="kw">read.csv</span>(url)
+  })
+  
+  filteredData &lt;-<span class="st"> </span><span class="kw">reactive</span>({
+    <span class="kw">data</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(date <span class="op">==</span><span class="st"> </span>input<span class="op">$</span>date)
+  })
+  
+  output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({
+    <span class="kw">filteredData</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>(<span class="dv">5</span>)
+  })
+}</code></pre></div>
+<p>And now in async:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">function</span>(input, output, session) {
+  data &lt;-<span class="st"> </span><span class="kw">eventReactive</span>(input<span class="op">$</span>refresh_data, {
+    <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ <span class="kw">read.csv</span>(url) })
+  })
+  
+  filteredData &lt;-<span class="st"> </span><span class="kw">reactive</span>({
+    <span class="kw">data</span>() <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">filter</span>(date <span class="op">==</span><span class="st"> </span>input<span class="op">$</span>date)
+  })
+  
+  output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({
+    <span class="kw">filteredData</span>() <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">head</span>(<span class="dv">5</span>)
+  })
+}</code></pre></div>
+</div>
+</div>
+<div id="the-flush-cycle" class="section level2">
+<h2 class="hasAnchor">
+<a href="#the-flush-cycle" class="anchor"></a>The flush cycle</h2>
+<p>In the past, Shiny’s reactive programming model has operated using a mostly traditional <a href="https://en.wikipedia.org/wiki/Event_loop">event loop</a> model. Somewhere many levels beneath <code><a href="http://www.rdocumentation.org/packages/shiny/topics/runApp">shiny::runApp()</a></code> was a piece of code that looked a bit like this:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">while</span> (<span class="ot">TRUE</span>) {
+  <span class="co"># Do nothing until a browser sends some data</span>
+  input &lt;-<span class="st"> </span><span class="kw">receiveInputFromBrowser</span>()
+  <span class="co"># Use the received data to update reactive inputs</span>
+  session<span class="op">$</span><span class="kw">updateInput</span>(input)
+  <span class="co"># Execute all invalidated outputs/observers</span>
+  <span class="kw">flushReact</span>()
+  <span class="co"># After ALL outputs execute, send the results back</span>
+  <span class="kw">flushOutputs</span>()
+}</code></pre></div>
+<p>We call this Shiny’s “flush cycle”. There are two important properties to our flush cycle.</p>
 <ol style="list-style-type: decimal">
-<li>Where a value is expected, return a promise for a value instead.</li>
-<li>Do not attempt to access reactive objects (inputs, values, or expressions) from inside a future code block. You must not touch <code>input</code>, or <code>session</code>, or access any reactive expressions. If you are tempted to do so, store their values in local variables immediately before invoking <code><a href="http://www.rdocumentation.org/packages/future/topics/future">future()</a></code>, and refer to those local variables from inside the future code block.</li>
-<li>Also verboten inside a future: using network sockets or database connections from the main R process, mutating reference class or R6 objects from the main R process.</li>
-<li>
+<li>Only one of the four steps—receiving, updating, reacting, and sending—can be executing a time. (Remember, R is single threaded.) In particular, it’s not possible for inputs to be updated while outputs/observers are running. This is important in order to avoid race conditions that would be all but impossible to defend against.</li>
+<li>Many outputs may change as a result of a single input value received from the browser, but none of them are sent back to the client until all of the outputs are ready. The advantage of this is a smoother experience for the end-user in most cases.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>
+</li>
+</ol>
+<p>While adding async support to Shiny, we aimed to keep these two properties intact. Imagine now that <code>flushReact()</code>, the line that executes invalidated outputs/observers, returns a promise that combines all of the async outputs/observers (i.e. a promise that resolves only after all of the async outputs/observers have resolved). The new, async-aware event loop is conceptually more like this:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doEventLoop &lt;-<span class="st"> </span><span class="cf">function</span>() {
+  <span class="co"># Do nothing until a browser sends some data</span>
+  input &lt;-<span class="st"> </span><span class="kw">receiveInputFromBrowser</span>()
+  <span class="co"># Use the received data to update reactive inputs</span>
+  session<span class="op">$</span><span class="kw">updateInput</span>(input)
+  <span class="co"># Execute all invalidated outputs/observers</span>
+  <span class="kw">flushReact</span>() <span class="op">%...&gt;%</span><span class="st"> </span>{
+    <span class="co"># After ALL outputs execute, send the results back</span>
+    <span class="kw">flushOutputs</span>()
+    <span class="co"># Continue the event loop</span>
+    <span class="kw">doEventLoop</span>()
+  }
+}</code></pre></div>
+<p>The resulting behavior matches the synchronous version of the event loop, in that:</p>
+<ol style="list-style-type: decimal">
+<li>No inputs are received from the browser until all pending async outputs/observers have completed. Unlike the synchronous version, this separation is enforced at the session level: if Session A has some async observers that have not finished executing, that only prevents Session A from processing new input values, while new input values from Session B can be handled immediately because they belong to a different session. Again, the goal of keeping input updates separate from output/observer execution is to prevent race conditions, which are even more pernicious to debug and understand when async code is involved.</li>
+<li>For a given session, no outputs are sent back to the client, until all outputs are ready. It doesn’t matter whether the outputs in question are synchronous, asynchronous, or some combination; they all must complete execution before any can be sent.</li>
 </ol>
 </div>
+<div class="footnotes">
+<hr>
+<ol>
+<li id="fn1"><p>Admittedly, there has been some controversy regarding this property of Shiny; some app authors would strongly prefer to show outputs as soon as they are ready, or at least to have manual control over this behavior.<a href="#fnref1">↩</a></p></li>
+</ol>
 </div>
 </div>
   </div>
@@ -185,6 +360,8 @@
 <li><a href="#adding-prerequisites">Adding prerequisites</a></li>
       <li><a href="#identifying-slow-operations">Identifying slow operations</a></li>
       <li><a href="#converting-a-slow-operation-into-a-future">Converting a slow operation into a future</a></li>
+      <li><a href="#integrating-promises-with-shiny">Integrating promises with Shiny</a></li>
+      <li><a href="#the-flush-cycle">The flush cycle</a></li>
       </ul>
 </div>
       </div>

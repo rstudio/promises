@@ -217,21 +217,131 @@ output$plot <- renderPlot({
 })
 ```
 
-Again, you do need to be careful to make sure that the last expression in your code block is the promise (pipeline); this is the only way the rendering logic can know whether/when your logic has completed, and whether any errors occurred.
+Again, you do need to be careful to make sure that the last expression in your code block is the promise/pipeline; this is the only way the rendering logic can know whether and when your logic has completed, and if any errors occurred (so they can be displayed to the user).
 
 ### Observers
 
+Observers are very similar to outputs: you must make sure that the last expression in your code block is the promise/pipeline. Like outputs, observers need to know whether and when they're done running, and if any errors occured (so they can log them and terminate the user session). The way to communicate this from your async user code is by returning the promise.
 
+Here's a synchronous example that we'll convert to async. Clicking the `refresh_data` action button causes data to be downloaded, which is then saved to disk as `cached.rds` and also used to update the reactive value `data`.
 
+```R
+data <- reactiveVal(readRDS("cached.rds"))
 
+function(input, output, session) {  
+  observeEvent(input$refresh_data, {
+    df <- read.csv(url)
+    saveRDS(df, "cached.rds")
+    data(df)
+  })
+}
+```
 
+And the async version:
 
+```R
+data <- reactiveVal(readRDS("cached.rds"))
 
+function(input, output, session) {
+  observeEvent(input$refresh_data, {
+    future({
+      df <- read.csv(url)
+      saveRDS(df, "cached.rds")
+      df
+    }) %...>%
+      data()
+  })
+}
+```
 
+Note that in this version, we cannot call `data(df)` inside the future, as this would cause the update to happen in the wrong process. Instead, we use the `%...>%` operator to perform the assignment back in the main process once the future resolves.
 
+### Reactive expressions
 
+Recall that reactive expressions are used to calculate values, and are cached until they are automatically invalidated by one of their dependencies. Unlike outputs and observers, reactive expressions can be used from other reactive consumers.
 
-1. Where a value is expected, return a promise for a value instead.
-2. Do not attempt to access reactive objects (inputs, values, or expressions) from inside a future code block. You must not touch `input`, or `session`, or access any reactive expressions. If you are tempted to do so, store their values in local variables immediately before invoking `future()`, and refer to those local variables from inside the future code block.
-3. Also verboten inside a future: using network sockets or database connections from the main R process, mutating reference class or R6 objects from the main R process.
-4. ​
+Asynchronous reactive expressions are similar to regular (synchronous) reactive expressions: instead of a "normal" value, they return a promise that will yield the desired value; and a normal reactive will cache a normal value, while an async reactive will cache the promise.
+
+The upshot is that when defining an async reactive expression, your code block should return a promise or promise pipeline, following the same rules as reactive outputs. And when calling an async reactive expression, call it like a function like you would a regular reactive expression, and treat the value that's returned like any other promise.
+
+```R
+function(input, output, session) {
+  data <- eventReactive(input$refresh_data, {
+    read.csv(url)
+  })
+  
+  filteredData <- reactive({
+    data() %>% filter(date == input$date)
+  })
+  
+  output$table <- renderTable({
+    filteredData() %>% head(5)
+  })
+}
+```
+
+And now in async:
+
+```R
+function(input, output, session) {
+  data <- eventReactive(input$refresh_data, {
+    future({ read.csv(url) })
+  })
+  
+  filteredData <- reactive({
+    data() %...>% filter(date == input$date)
+  })
+  
+  output$table <- renderTable({
+    filteredData() %...>% head(5)
+  })
+}
+```
+
+## The flush cycle
+
+In the past, Shiny's reactive programming model has operated using a mostly traditional [event loop](https://en.wikipedia.org/wiki/Event_loop) model. Somewhere many levels beneath `shiny::runApp()` was a piece of code that looked a bit like this:
+
+```R
+while (TRUE) {
+  # Do nothing until a browser sends some data
+  input <- receiveInputFromBrowser()
+  # Use the received data to update reactive inputs
+  session$updateInput(input)
+  # Execute all invalidated outputs/observers
+  flushReact()
+  # After ALL outputs execute, send the results back
+  flushOutputs()
+}
+```
+
+We call this Shiny's "flush cycle". There are two important properties to our flush cycle.
+
+1. Only one of the four steps—receiving, updating, reacting, and sending—can be executing a time. (Remember, R is single threaded.) In particular, it's not possible for inputs to be updated while outputs/observers are running. This is important in order to avoid race conditions that would be all but impossible to defend against.
+2. Many outputs may change as a result of a single input value received from the browser, but none of them are sent back to the client until all of the outputs are ready. The advantage of this is a smoother experience for the end-user in most cases.[^1]
+
+[^1]: Admittedly, there has been some controversy regarding this property of Shiny; some app authors would strongly prefer to show outputs as soon as they are ready, or at least to have manual control over this behavior.
+
+While adding async support to Shiny, we aimed to keep these two properties intact. Imagine now that `flushReact()`, the line that executes invalidated outputs/observers, returns a promise that combines all of the async outputs/observers (i.e. a promise that resolves only after all of the async outputs/observers have resolved). The new, async-aware event loop is conceptually more like this:
+
+```R
+doEventLoop <- function() {
+  # Do nothing until a browser sends some data
+  input <- receiveInputFromBrowser()
+  # Use the received data to update reactive inputs
+  session$updateInput(input)
+  # Execute all invalidated outputs/observers
+  flushReact() %...>% {
+	# After ALL outputs execute, send the results back
+    flushOutputs()
+    # Continue the event loop
+    doEventLoop()
+  }
+}
+```
+
+The resulting behavior matches the synchronous version of the event loop, in that:
+
+1. No inputs are received from the browser until all pending async outputs/observers have completed. Unlike the synchronous version, this separation is enforced at the session level: if Session A has some async observers that have not finished executing, that only prevents Session A from processing new input values, while new input values from Session B can be handled immediately because they belong to a different session. Again, the goal of keeping input updates separate from output/observer execution is to prevent race conditions, which are even more pernicious to debug and understand when async code is involved.
+2. For a given session, no outputs are sent back to the client, until all outputs are ready. It doesn't matter whether the outputs in question are synchronous, asynchronous, or some combination; they all must complete execution before any can be sent.
+
