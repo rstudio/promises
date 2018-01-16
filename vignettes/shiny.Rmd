@@ -221,9 +221,52 @@ Again, you do need to be careful to make sure that the last expression in your c
 
 ### Observers
 
-Observers are very similar to outputs: you must make sure that the last expression in your code block is the promise/pipeline. Like outputs, observers need to know whether and when it's done running, and if any errors occured (so they can log them and terminate the user session).
+Observers are very similar to outputs: you must make sure that the last expression in your code block is the promise/pipeline. Like outputs, observers need to know whether and when they're done running, and if any errors occured (so they can log them and terminate the user session). The way to communicate this from your async user code is by returning the promise.
 
+Here's a synchronous example that we'll convert to async. Clicking the `refresh_data` action button causes data to be downloaded, which is then saved to disk as `cached.rds` and also used to update the reactive value `data`.
 
+```R
+data <- reactiveVal(readRDS("cached.rds"))
+
+function(input, output, session) {  
+  observeEvent(input$refresh_data, {
+    df <- read.csv(url)
+    saveRDS(df, "cached.rds")
+    data(df)
+  })
+}
+```
+
+And the async version:
+
+```R
+data <- reactiveVal(readRDS("cached.rds"))
+
+function(input, output, session) {
+  observeEvent(input$refresh_data, {
+    future({
+      df <- read.csv(url)
+      saveRDS(df, "cached.rds")
+      df
+    }) %...>%
+      data()
+  })
+}
+```
+
+Note that in this version, we cannot call `data(df)` inside the future, as this would cause the update to happen in the wrong process. Instead, we use the `%...>%` operator to perform the assignment back in the main process once the future resolves.
+
+### Reactive expressions
+
+Recall that reactive expressions are used to calculate values, and are cached until they are automatically invalidated by one of their dependencies. Unlike outputs and observers, reactive expressions can be used from other reactive consumers.
+
+Asynchronous reactive expressions are surprisingly similar to regular (synchronous) reactive expressions; instead of a "normal" value, they return a promise that will yield the desired value. A normal reactive will cache a normal value, while an async reactive will cache the promise.
+
+The upshot is that when defining an async reactive expression, your code block should return a promise or promise pipeline, following the same rules as reactive outputs; and when calling an async reactive expression, call it like a function like you would a regular reactive expression, and treat the value that's returned like any other promise.
+
+```R
+function(input, output, session) {
+```
 
 
 
