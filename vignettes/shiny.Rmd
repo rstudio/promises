@@ -262,10 +262,40 @@ Recall that reactive expressions are used to calculate values, and are cached un
 
 Asynchronous reactive expressions are surprisingly similar to regular (synchronous) reactive expressions; instead of a "normal" value, they return a promise that will yield the desired value. A normal reactive will cache a normal value, while an async reactive will cache the promise.
 
-The upshot is that when defining an async reactive expression, your code block should return a promise or promise pipeline, following the same rules as reactive outputs; and when calling an async reactive expression, call it like a function like you would a regular reactive expression, and treat the value that's returned like any other promise.
+The upshot is that when defining an async reactive expression, your code block should return a promise or promise pipeline, following the same rules as reactive outputs. And when calling an async reactive expression, call it like a function like you would a regular reactive expression, and treat the value that's returned like any other promise.
 
 ```R
 function(input, output, session) {
+  data <- eventReactive(input$refresh_data, {
+    read.csv(url)
+  })
+  
+  filteredData <- reactive({
+    data() %>% filter(date == input$date)
+  })
+  
+  output$table <- renderTable({
+    filteredData()
+  })
+}
+```
+
+And now in async:
+
+```R
+function(input, output, session) {
+  data <- eventReactive(input$refresh_data, {
+    future({ read.csv(url) })
+  })
+  
+  filteredData <- reactive({
+    data() %...>% filter(date == input$date)
+  })
+  
+  output$table <- renderTable({
+    filteredData()
+  })
+}
 ```
 
 
