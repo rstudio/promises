@@ -318,9 +318,7 @@ while (TRUE) {
 We call this Shiny's "flush cycle". There are two important properties to our flush cycle.
 
 1. Only one of the four steps—receiving, updating, reacting, and sending—can be executing a time. (Remember, R is single threaded.) In particular, it's not possible for inputs to be updated while outputs/observers are running. This is important in order to avoid race conditions that would be all but impossible to defend against.
-2. Many outputs may change as a result of a single input value received from the browser, but none of them are sent back to the client until all of the outputs are ready. The advantage of this is a smoother experience for the end-user in most cases.[^1]
-
-[^1]: Admittedly, there has been some controversy regarding this property of Shiny; some app authors would strongly prefer to show outputs as soon as they are ready, or at least to have manual control over this behavior.
+2. Many outputs may change as a result of a single input value received from the browser, but none of them are sent back to the client until all of the outputs are ready. The advantage of this is a smoother experience for the end-user in most cases. (Admittedly, there has been some controversy regarding this property of Shiny; some app authors would strongly prefer to show outputs as soon as they are ready, or at least to have manual control over this behavior.)
 
 While adding async support to Shiny, we aimed to keep these two properties intact. Imagine now that `flushReact()`, the line that executes invalidated outputs/observers, returns a promise that combines all of the async outputs/observers (i.e. a promise that resolves only after all of the async outputs/observers have resolved). The new, async-aware event loop is conceptually more like this:
 
