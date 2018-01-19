@@ -3,14 +3,11 @@
 \name{promise_all}
 \alias{promise_all}
 \alias{promise_race}
-\alias{promise_lapply}
 \title{Combine multiple promise objects}
 \usage{
 promise_all(..., list = NULL)
 
 promise_race(..., list = NULL)
-
-promise_lapply(X, FUN, ...)
 }
 \arguments{
 \item{...}{Promise objects. Either all arguments must be named, or all
@@ -18,12 +15,6 @@ arguments must be unnamed. If \code{list} is provided, then these arguments are
 ignored.}
 
 \item{list}{A list of promise objects--an alternative to \code{...}.}
-
-\item{X}{A vector (atomic or list) or an expression object. Other objects
-(including classed objects) will be coerced by base::as.list.}
-
-\item{FUN}{The function to be applied to each element of \code{X}. The function is
-permitted, but not required, to return a promise.}
 }
 \value{
 A promise.
@@ -42,6 +33,19 @@ fulfilled. Use \code{promise_race} to wait for the first of multiple promise
 objects to be either fulfilled or rejected.
 }
 \examples{
-# TODO
+p1 <- promise(~later::later(~resolve(1), delay = 1))
+p2 <- promise(~later::later(~resolve(2), delay = 2))
+
+# Resolves after 1 second, to the value 1
+promise_race(p1, p2) \%...>\% {
+  cat("promise_race:\\n")
+  str(.)
+}
+
+# Resolves after 2 seconds, to the value list(1, 2)
+promise_all(p1, p2) \%...>\% {
+  cat("promise_all:\\n")
+  str(.)
+}
 
 }

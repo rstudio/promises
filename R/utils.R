@@ -20,7 +20,20 @@
 #'   will be passed through to the returned promise.
 #'
 #' @examples
-#' # TODO
+#' p1 <- promise(~later::later(~resolve(1), delay = 1))
+#' p2 <- promise(~later::later(~resolve(2), delay = 2))
+#'
+#' # Resolves after 1 second, to the value 1
+#' promise_race(p1, p2) %...>% {
+#'   cat("promise_race:\n")
+#'   str(.)
+#' }
+#'
+#' # Resolves after 2 seconds, to the value list(1, 2)
+#' promise_all(p1, p2) %...>% {
+#'   cat("promise_all:\n")
+#'   str(.)
+#' }
 #'
 #' @export
 promise_all <- function(..., list = NULL) {
@@ -86,11 +99,38 @@ promise_race <- function(..., list = NULL) {
   })
 }
 
-#' @param X A vector (atomic or list) or an expression object. Other objects
-#'   (including classed objects) will be coerced by base::as.list.
+#' Promise-aware lapply
+#'
+#' Similar to [`base::lapply()`], but promise-aware: the `FUN` function is
+#' permitted to return promises, and while `lapply` returns a list,
+#' `promises_lapply` returns a promise that resolves to a similar list (of
+#' resolved values only, no promises).
+#'
+#' `promise_lapply` processes elements of `X` serially; that is, if
+#' `FUN(X[[1]])` returns a promise, then `FUN(X[[2]])` will not be invoked until
+#' that promise is resolved. If any such promise rejects (errors), then the
+#' promise returned by `promise_lapply` immediately rejects with that err.
+#'
+#' @param X A vector (atomic or list) or an expression object (but not a
+#'   promise). Other objects (including classed objects) will be coerced by
+#'   base::as.list.
 #' @param FUN The function to be applied to each element of `X`. The function is
 #'   permitted, but not required, to return a promise.
-#' @rdname promise_all
+#' @param ... Optional arguments to `FUN`.
+#'
+#' @examples
+#' \dontrun{
+#' # Waits x seconds, then returns x*10
+#' wait_this_long <- function(x) {
+#'   promise(~later::later(~{
+#'     resolve(x*10)
+#'   }, delay = x))
+#' }
+#'
+#' promise_lapply(list(A=1, B=2, C=3), wait_this_long) %...>%
+#'   print()
+#' }
+#'
 #' @export
 promise_lapply <- function(X, FUN, ...) {
   FUN <- match.fun(FUN)
@@ -106,7 +146,7 @@ promise_lapply <- function(X, FUN, ...) {
       # The next line may throw, that's fine, it will be caught by resolve() and
       # reject the promise
       this_result <- FUN(X[[pos]], ...)
-      as.promise(this_result) %...>%
+      promise_resolve(this_result) %...>%
         (function(this_value) {
           results[[pos]] <<- this_value
           do_next(pos + 1)
@@ -117,4 +157,44 @@ promise_lapply <- function(X, FUN, ...) {
   promise(function(resolve, reject) {
     resolve(do_next(1))
   })
+}
+
+#' Promise-aware version of Reduce
+#'
+#' Similar to [`base::Reduce()`] (left fold), but the `func` function is
+#' permitted to return a promise. (Note also that the order of the parameters is
+#' different than `Reduce`, in order to be more tidyverse friendly; and
+#' right-fold and accumulate options are not included.) `promise_reduce` will
+#' wait for any returned promise to resolve before invoking the `func` with the
+#' next element; in other words, `func` can return a promise as output but
+#' should never encounter a promise as input.
+#'
+#' @param x A vector or list to reduce. (Not a promise.)
+#' @param func A function that takes two parameters. The first parameter will be
+#'   the "result" (initially `init`, and then set to the result of the most
+#'   recent call to `func`), and the second parameter will be an element of `x`.
+#'
+#' @return A promise that will resolve to the result of calling `func` on the
+#'   last element (or `init` if `x` had no elements). If any invocation of
+#'   `func` results in an error or a rejected promise, then the overall
+#'   `promise_reduce` promise will immediately reject with that error.
+#'
+#' @examples
+#' \dontrun{
+#' # Returns a promise for the sum of e1 + e2, with a 0.5 sec delay
+#' slowly_add <- function(e1, e2) {
+#'   promise(~later::later(~resolve(e1 + e2), delay = 0.5))
+#' }
+#'
+#' # Prints 55 after a little over 5 seconds
+#' promise_reduce(1:10, slowly_add, 0) %...>% print()
+#' }
+#'
+#' @export
+promise_reduce <- function(x, func, init = NULL) {
+  p <- promise(~resolve(init))
+  lapply(x, function(item) {
+    p <<- p %...>% func(item)
+  })
+  p
 }

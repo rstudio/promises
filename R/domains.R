@@ -37,6 +37,8 @@ promiseDomain <- list(
   },
   onError = function(error) {
     domain <- current_promise_domain()
+    if (is.null(domain))
+      return()
     domain$onError(error)
   }
 )

@@ -273,7 +273,23 @@ normalizeOnRejected <- function(onRejected) {
 #' @return A promise object (see \code{\link{then}}).
 #'
 #' @examples
-#' # TODO
+#' \dontrun{
+#' # Create a promise that resolves to a random value after 2 secs
+#' p1 <- promise(function(resolve, reject) {
+#'   later::later(~resolve(runif(1)), delay = 2)
+#' })
+#'
+#' p1 %...>% print()
+#'
+#' # Create a promise that errors immediately
+#' p2 <- promise(~{
+#'   reject("An error has occurred")
+#' })
+#' then(p2,
+#'   onFulfilled = ~message("Success"),
+#'   onRejected = ~message("Failure")
+#' )
+#' }
 #'
 #' @export
 promise <- function(action) {
@@ -323,6 +339,38 @@ promise <- function(action) {
     class = "promise",
     promise_impl = p
   )
+}
+
+#' Create a resolved or rejected promise
+#'
+#' Helper functions to conveniently create a promise that is resolved to the
+#' given value (or rejected with the given reason).
+#'
+#' @param value A value, or promise, that the new promise should be resolved to.
+#'   This expression will be lazily evaluated, and if evaluating the expression
+#'   raises an error, then the new promise will be rejected with that error as
+#'   the reason.
+#' @param reason An error message string, or error object.
+#'
+#' @examples
+#' \dontrun{
+#' promise_resolve(mtcars) %...>%
+#'   head() %...>%
+#'   print()
+#'
+#' promise_reject("Something went wrong") %...T!%
+#'   { message(conditionMessage(.)) }
+#' }
+#'
+#' @export
+promise_resolve <- function(value) {
+  promise(~resolve(value))
+}
+
+#' @rdname promise_resolve
+#' @export
+promise_reject <- function(reason) {
+  promise(~reject(reason))
 }
 
 #' Coerce to a promise
