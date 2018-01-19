@@ -145,20 +145,23 @@ will be passed through to the returned promise.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='promise.html'>promise</a></span>(~<span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/later/topics/later'>later</a></span>(~<span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='fl'>1</span>), <span class='kw'>delay</span> <span class='kw'>=</span> <span class='fl'>1</span>))
+    <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='promise.html'>promise</a></span>(~<span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/later/topics/later'>later</a></span>(~<span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='fl'>1</span>), <span class='kw'>delay</span> <span class='kw'>=</span> <span class='fl'>1</span>))
 <span class='no'>p2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='promise.html'>promise</a></span>(~<span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/later/topics/later'>later</a></span>(~<span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='fl'>2</span>), <span class='kw'>delay</span> <span class='kw'>=</span> <span class='fl'>2</span>))
 
-<span class='co'># Resolves after 1 second, to the value 1</span>
+<span class='co'># Resolves after 1 second, to the value: 1</span>
 <span class='fu'>promise_race</span>(<span class='no'>p1</span>, <span class='no'>p2</span>) <span class='kw'>%...&gt;%</span> {
   <span class='fu'>cat</span>(<span class='st'>"promise_race:\n"</span>)
   <span class='fu'>str</span>(<span class='no'>.</span>)
 }
 
-<span class='co'># Resolves after 2 seconds, to the value list(1, 2)</span>
+<span class='co'># Resolves after 2 seconds, to the value: list(1, 2)</span>
 <span class='fu'>promise_all</span>(<span class='no'>p1</span>, <span class='no'>p2</span>) <span class='kw'>%...&gt;%</span> {
   <span class='fu'>cat</span>(<span class='st'>"promise_all:\n"</span>)
   <span class='fu'>str</span>(<span class='no'>.</span>)
-}</div></pre>
+}
+<span class='co'># }</span><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

@@ -1,17 +1,26 @@
 template:
   params:
     bootswatch: cosmo
-articles:
-  - title: "Learning about promises"
-    desc: >
-      These articles are essential reading if you intend to use async programming
-      techniques to speed up your Shiny apps.
+reference:
+  - title: Handling promises
     contents:
-      - motivation
-      - intro
-      - overview
-      - futures
-      - shiny
+      - then
+      - pipes
+  - title: Combining promises
+    contents:
+      - promise_all
+  - title: Functional promises
+    contents:
+      - promise_reduce
+      - promise_lapply
+  - title: Creating promises
+    contents:
+      - promise
+      - promise_resolve
+      - is.promise
+  - title: Domains
+    contents:
+      - with_promise_domain
 navbar:
   left:
     - text: Home
