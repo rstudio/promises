@@ -45,9 +45,22 @@ blueberries.
 It all starts with *async functions*. An async function is one that performs an
 operation that takes a long time, yet returns control to you immediately.
 Whereas a normal function like `read.csv` will not return until its work is done
-and it has the value you requested, a (hypothetical) `read.csv.async` function
+and it has the value you requested, an asynchronous `read.csv.async` function
 would kick off the CSV reading operation, but then return immediately, long
 before the real work has actually completed.
+
+```r
+library(future)
+plan(multiprocess)
+
+read.csv.async <- function(file, header = TRUE, stringsAsFactors = FALSE) {
+  future({
+    read.csv(file, header = header, stringsAsFactors = stringsAsFactors)
+  })
+}
+```
+
+(Don't worry about what this definition means for now. You'll learn more about defining async functions in [Launching tasks](futures.html).)
 
 **So instead of “read this CSV file” it’s more like “begin reading this CSV
 file”?**
@@ -56,28 +69,28 @@ Yes! That’s what async functions do: they start things, and give you back a
 special object called a *promise*. If it doesn’t return a promise, it’s not an
 async function.
 
-**Oh, I’ve heard of promises in R! From **[the NSE
-chapter](http://adv-r.had.co.nz/Computing-on-the-language.html)** in Hadley’s
+**Oh, I’ve heard of promises in R! From [the NSE
+chapter](http://adv-r.had.co.nz/Computing-on-the-language.html) in Hadley’s
 Advanced R book!**
 
-Ah… this is awkward, but no. I’m using the word “promise”, but I’m not referring
+Ah... this is awkward, but no. I’m using the word “promise”, but I’m not referring
 to *that* kind of promise. For the purposes of async programming, try to forget
 that you’ve ever heard of that kind of promise, OK?
 
 I know it seems needlessly confusing, but the promises we’re talking about here
-are shamelessly copied from directly inspired by a central abstraction in modern
+are ~~shamelessly copied from~~ directly inspired by a central abstraction in modern
 JavaScript, and the JS folks named them “promises”.
 
 **Fine, whatever. So what are these promises?**
 
 Conceptually, they’re a stand-in for the *eventual result* of the operation. For
-example, in the case of our (again, hypothetical) `read.csv.async` function, the
+example, in the case of our `read.csv.async` function, the
 promise is a stand-in for a data frame. At some point, the operation is going to
 finish, and a data frame is going to become available. The promise gives us a
 way to get at that value.
 
-**Let me guess: it’s an object that has **`has_completed()`** and
-**`get_value()`** methods?**
+**Let me guess: it’s an object that has `has_completed()` and
+`get_value()` methods?**
 
 Good guess, but no. Promises are *not* a way to directly inquire about the
 status of an operation, nor to directly retrieve the result value. That is
@@ -96,19 +109,21 @@ A lot like that! You can’t use the `%>%` operator itself, but we provide a
 promise-compatible version of it: `%...>%`. So whereas you might do this to a
 regular data frame:
 
-    read.csv("data.csv") %>%
-      filter(state == "NY") %>%
-      arrange(median_income) %>%
-      head(10) %>%
-      View()
+```r
+library(dplyr)
+read.csv("https://rstudio.github.io/promises/data.csv") %>%
+  filter(state == "NY") %>%
+  View()
+```
 
 The async version would look like:
 
-    read.csv.async("data.csv") %...>%
-      filter(state == "NY") %...>%
-      arrange(median_income) %...>%
-      head(10) %...>%
-      View()
+```r
+library(dplyr)
+read.csv.async("https://rstudio.github.io/promises/data.csv") %...>%
+  filter(state == "NY") %...>%
+  View()
+```
 
 The `%...>%` operator here is the secret sauce. It’s called the *promise pipe*;
 the `...` stands for promise, and `>` mimics the standard pipe operator.
@@ -148,7 +163,9 @@ sometime in the future.
 OK, let’s slow down and take this step by step. We’ll generate a promise by
 calling an async function:
 
-    df_promise <- read.csv.async("data.csv")
+```r
+df_promise <- read.csv.async("https://rstudio.github.io/promises/data.csv")
+```
 
 Even if `data.csv` is many gigabytes, `read.csv.async` returns immediately with
 a new promise. We store it as `df_promise`. Eventually, when the CSV reading
@@ -158,19 +175,23 @@ now it’s just an empty placeholder.
 One thing we definitely *can’t* do is treat `df_promise` as if it’s simply a
 data frame:
 
-    # Doesn't work!
-    dplyr::filter(df_promise, state == "NY")
+```r
+# Doesn't work!
+dplyr::filter(df_promise, state == "NY")
+```
 
 Try this and you’ll get an error like `no applicable method for 'filter_'
 applied to an object of class "promise"`. And the pipe won’t help you either;
 `df_promise %>% filter(state == "NY")` will give you the same error.
 
-**Right, that makes sense. **`filter`** is designed to work on data frames, and
-**`df_promise`** isn’t a data frame.**
+**Right, that makes sense. `filter` is designed to work on data frames, and
+`df_promise` isn’t a data frame.**
 
 Exactly. Now let’s try something that actually works:
 
-    df_promise %...>% filter(state == "NY")
+```r
+df_promise %...>% filter(state == "NY")
+```
 
 At the moment it’s called, this code won’t appear to do much of anything,
 really. But whenever the `df_promise` operation actually completes successfully,
@@ -179,7 +200,7 @@ then the result of that operation—the plain old data frame—will be passed to
 
 **OK, so that’s good. I see what you mean about `%...>%` letting you use
 non-promise functions with promises. But the whole point of using the
-**`filter`** function is to get a data frame back. If **`filter`** isn’t even
+`filter` function is to get a data frame back. If `filter` isn’t even
 going to be called until some random time in the future, how do we get its value
 back?**
 
@@ -188,12 +209,16 @@ I’ll tell you the answer, but it’s not going to be satisfying at first.
 When you use a regular `%>%`, the result you get back is the return value from
 the right-hand side:
 
-    df_filtered <- df %>% filter(state == "NY")
+```r
+df_filtered <- df %>% filter(state == "NY")
+```
 
 When you use `%...>%`, the result you get back is a promise, whose *eventual*
 result will be the return value from the right-hand side:
 
-    df_filtered_promise <- df_promise %...>% filter(state == "NY")
+```r
+df_filtered_promise <- df_promise %...>% filter(state == "NY")
+```
 
 **Wait, what? If I have a promise, I can do stuff to it using `%...>%`, but
 then I just end up with another promise? Why not just have `%...>%` return a
@@ -219,10 +244,12 @@ async-compatible version of Shiny (version >=1.1), all of the
 built-in `renderXXX` functions can deal with either regular values or promises.
 An example of the latter:
 
-    output$table <- renderTable({
-      read.csv.async("data.csv") %...>%
-        filter(state == "NY")
-    })
+```r
+output$table <- renderTable({
+  read.csv.async("https://rstudio.github.io/promises/data.csv") %...>%
+    filter(state == "NY")
+})
+```
 
 When `output$table` executes the `renderTable` code block, it will notice that
 the result is a promise, and wait for it to complete before continuing with the
@@ -233,32 +260,36 @@ Second, you can use promises with reactive expressions. Reactive expressions
 treat promises about the same as they treat other values, actually. But this
 works perfectly fine:
 
-    # A reactive expression that returns a 
-    filtered_df <- reactive({
-      read.csv.async("data.csv") %...>%
-        filter(state == "NY") %...>%
-        arrange(median_income)
-    })
-    
-    # A reactive expression that reads the previous
-    # (promise-returning) reactive, and returns a
-    # new promise
-    top_n_by_income <- reactive({
-      filtered_df() %...>%
-        head(input$n)
-    })
-    
-    output$table <- renderTable({
-      top_n_by_income()
-    })
+```r
+# A reactive expression that returns a 
+filtered_df <- reactive({
+  read.csv.async("https://rstudio.github.io/promises/data.csv") %...>%
+    filter(state == "NY") %...>%
+    arrange(median_income)
+})
+
+# A reactive expression that reads the previous
+# (promise-returning) reactive, and returns a
+# new promise
+top_n_by_income <- reactive({
+  filtered_df() %...>%
+    head(input$n)
+})
+
+output$table <- renderTable({
+  top_n_by_income()
+})
+```
 
 Third, you can use promises in reactive observers. Use them to perform
 asynchronous tasks in response to reactivity.
 
-    observeEvent(input$save, {
-      filtered_df() %...>%
-        write.csv("ny_data.csv")
-    })
+```r
+observeEvent(input$save, {
+  filtered_df() %...>%
+    write.csv("ny_data.csv")
+})
+```
 
 **Alright, I think I see what you mean. You can’t escape from promise-land, but
 there’s no need to, because Shiny knows what to do with them.**

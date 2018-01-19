@@ -4,7 +4,7 @@ Title: Abstractions for Promise-based Async Programming
 Version: 0.1.0.9001
 Authors@R: c(
       person("Joe", "Cheng", email = "joe@rstudio.com", role = c("aut", "cre")),
-      person("RStudio", role = c("cph"))
+      person("RStudio", role = c("cph", "fnd"))
     )
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
