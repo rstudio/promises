@@ -6,7 +6,7 @@ magrittr::"%>%"
 #' @export
 magrittr::"%T>%"
 
-#' Pipe all the things
+#' Promise pipe operators
 #'
 #' Promise-aware pipe operators, in the style of [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html).
 #' Like magrittr pipes, these operators can be used to chain together pipelines
@@ -14,10 +14,15 @@ magrittr::"%T>%"
 #' for promise resolution and pass the unwrapped value (or error) to the `rhs`
 #' function call.
 #'
+#' The `>` variants are for handling successful resolution, the `!` variants are
+#' for handling errors. The `T` variants of each return the lhs instead of the
+#' rhs, which is useful for pipeline steps that are used for side effects
+#' (printing, plotting, saving).
+#'
 #' 1. \code{promise \%...>\% func()} is equivalent to \code{promise \%>\% then(func)}.
 #' 2. \code{promise \%...!>\% func()} is equivalent to \code{promise \%>\% catch(func)}.
 #' 3. \code{promise \%...T>\% func()} is equivalent to \code{promise \%T>\% then(func)}.
-#' 4. \code{promise \%...T!>\% func()} is equivalent to \code{promise \%T>\%
+#' 4. \code{promise \%...T!\% func()} is equivalent to \code{promise \%T>\%
 #' catch(func)} or \code{promise \%>\% catch(func, tee = TRUE)}.
 #'
 #' One situation where 3. and 4. above break down is when `func()` throws an
@@ -34,9 +39,19 @@ magrittr::"%T>%"
 #'   a promise or non-promise value, or throw an error.
 #'
 #' @examples
-#' # TODO
+#' \dontrun{
+#' future(cars) %...>%
+#'   head(5) %...T>%
+#'   print()
+#'
+#' # If the read.csv fails, resolve to NULL instead
+#' future(read.csv("http://example.com/data.csv")) %...!%
+#'   { NULL }
+#' }
 #'
 #' @return A new promise.
+#'
+#' @seealso https://rstudio.github.io/promises/articles/overview.html#using-pipes
 #'
 #' @name pipes
 #' @export

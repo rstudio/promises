@@ -6,7 +6,7 @@
 \alias{\%...T>\%}
 \alias{\%...!\%}
 \alias{\%...T!\%}
-\title{Pipe all the things}
+\title{Promise pipe operators}
 \usage{
 lhs \%...>\% rhs
 
@@ -33,11 +33,15 @@ for promise resolution and pass the unwrapped value (or error) to the \code{rhs}
 function call.
 }
 \details{
+The \code{>} variants are for handling successful resolution, the \code{!} variants are
+for handling errors. The \code{T} variants of each return the lhs instead of the
+rhs, which is useful for pipeline steps that are used for side effects
+(printing, plotting, saving).
 \enumerate{
 \item \code{promise \%...>\% func()} is equivalent to \code{promise \%>\% then(func)}.
 \item \code{promise \%...!>\% func()} is equivalent to \code{promise \%>\% catch(func)}.
 \item \code{promise \%...T>\% func()} is equivalent to \code{promise \%T>\% then(func)}.
-\item \code{promise \%...T!>\% func()} is equivalent to \code{promise \%T>\%
+\item \code{promise \%...T!\% func()} is equivalent to \code{promise \%T>\%
 catch(func)} or \code{promise \%>\% catch(func, tee = TRUE)}.
 }
 
@@ -51,6 +55,17 @@ using a \code{.} at the head of a pipeline to turn the entire pipeline into a
 function instead of an expression.
 }
 \examples{
-# TODO
+\dontrun{
+future(cars) \%...>\%
+  head(5) \%...T>\%
+  print()
 
+# If the read.csv fails, resolve to NULL instead
+future(read.csv("http://example.com/data.csv")) \%...!\%
+  { NULL }
+}
+
+}
+\seealso{
+https://rstudio.github.io/promises/articles/overview.html#using-pipes
 }
