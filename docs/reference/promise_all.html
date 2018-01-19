@@ -66,10 +66,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/index.html">Start here</a>
-    </li>
-    <li class="divider"></li>
-    <li>
       <a href="../articles/motivation.html">1. Why use promises?</a>
     </li>
     <li>
@@ -120,9 +116,7 @@ objects to be either fulfilled or rejected.</p>
 
     <pre class="usage"><span class='fu'>promise_all</span>(<span class='no'>...</span>, <span class='kw'>list</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>promise_race</span>(<span class='no'>...</span>, <span class='kw'>list</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
-
-<span class='fu'>promise_lapply</span>(<span class='no'>X</span>, <span class='no'>FUN</span>, <span class='no'>...</span>)</pre>
+<span class='fu'>promise_race</span>(<span class='no'>...</span>, <span class='kw'>list</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -136,16 +130,6 @@ ignored.</p></td>
     <tr>
       <th>list</th>
       <td><p>A list of promise objects--an alternative to <code>...</code>.</p></td>
-    </tr>
-    <tr>
-      <th>X</th>
-      <td><p>A vector (atomic or list) or an expression object. Other objects
-(including classed objects) will be coerced by base::as.list.</p></td>
-    </tr>
-    <tr>
-      <th>FUN</th>
-      <td><p>The function to be applied to each element of <code>X</code>. The function is
-permitted, but not required, to return a promise.</p></td>
     </tr>
     </table>
     
@@ -161,9 +145,20 @@ will be passed through to the returned promise.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'># TODO
+    <pre class="examples"><div class='input'><span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='promise.html'>promise</a></span>(~<span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/later/topics/later'>later</a></span>(~<span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='fl'>1</span>), <span class='kw'>delay</span> <span class='kw'>=</span> <span class='fl'>1</span>))
+<span class='no'>p2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='promise.html'>promise</a></span>(~<span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/later/topics/later'>later</a></span>(~<span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='fl'>2</span>), <span class='kw'>delay</span> <span class='kw'>=</span> <span class='fl'>2</span>))
 
-</div></pre>
+<span class='co'># Resolves after 1 second, to the value 1</span>
+<span class='fu'>promise_race</span>(<span class='no'>p1</span>, <span class='no'>p2</span>) <span class='kw'>%...&gt;%</span> {
+  <span class='fu'>cat</span>(<span class='st'>"promise_race:\n"</span>)
+  <span class='fu'>str</span>(<span class='no'>.</span>)
+}
+
+<span class='co'># Resolves after 2 seconds, to the value list(1, 2)</span>
+<span class='fu'>promise_all</span>(<span class='no'>p1</span>, <span class='no'>p2</span>) <span class='kw'>%...&gt;%</span> {
+  <span class='fu'>cat</span>(<span class='st'>"promise_all:\n"</span>)
+  <span class='fu'>str</span>(<span class='no'>.</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

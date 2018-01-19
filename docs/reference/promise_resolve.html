@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Promise pipe operators — pipes • promises</title>
+<title>Create a resolved or rejected promise — promise_resolve • promises</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -105,77 +105,43 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Promise pipe operators</h1>
+    <h1>Create a resolved or rejected promise</h1>
     </div>
 
     
-    <p>Promise-aware pipe operators, in the style of <a href='https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html'>magrittr</a>.
-Like magrittr pipes, these operators can be used to chain together pipelines
-of promise-transforming operations. Unlike magrittr pipes, these pipes wait
-for promise resolution and pass the unwrapped value (or error) to the <code>rhs</code>
-function call.</p>
+    <p>Helper functions to conveniently create a promise that is resolved to the
+given value (or rejected with the given reason).</p>
     
 
-    <pre class="usage"><span class='no'>lhs</span> <span class='kw'>%...&gt;%</span> <span class='no'>rhs</span>
+    <pre class="usage"><span class='fu'>promise_resolve</span>(<span class='no'>value</span>)
 
-<span class='no'>lhs</span> <span class='kw'>%...T&gt;%</span> <span class='no'>rhs</span>
-
-<span class='no'>lhs</span> <span class='kw'>%...!%</span> <span class='no'>rhs</span>
-
-<span class='no'>lhs</span> <span class='kw'>%...T!%</span> <span class='no'>rhs</span></pre>
+<span class='fu'>promise_reject</span>(<span class='no'>reason</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>lhs</th>
-      <td><p>A promise object.</p></td>
+      <th>value</th>
+      <td><p>A value, or promise, that the new promise should be resolved to.
+This expression will be lazily evaluated, and if evaluating the expression
+raises an error, then the new promise will be rejected with that error as
+the reason.</p></td>
     </tr>
     <tr>
-      <th>rhs</th>
-      <td><p>A function call using the magrittr semantics. It can return either
-a promise or non-promise value, or throw an error.</p></td>
+      <th>reason</th>
+      <td><p>An error message string, or error object.</p></td>
     </tr>
     </table>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>A new promise.</p>
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>The <code>&gt;</code> variants are for handling successful resolution, the <code>!</code> variants are
-for handling errors. The <code>T</code> variants of each return the lhs instead of the
-rhs, which is useful for pipeline steps that are used for side effects
-(printing, plotting, saving).</p><ol>
-<li><p><code>promise %...&gt;% func()</code> is equivalent to <code>promise %&gt;% then(func)</code>.</p></li>
-<li><p><code>promise %...!&gt;% func()</code> is equivalent to <code>promise %&gt;% catch(func)</code>.</p></li>
-<li><p><code>promise %...T&gt;% func()</code> is equivalent to <code>promise %T&gt;% then(func)</code>.</p></li>
-<li><p><code>promise %...T!% func()</code> is equivalent to <code>promise %T&gt;%
-catch(func)</code> or <code>promise %&gt;% catch(func, tee = TRUE)</code>.</p></li>
-</ol>
-    <p>One situation where 3. and 4. above break down is when <code>func()</code> throws an
-error, or returns a promise that ultimately fails. In that case, the failure
-will be propagated by our pipe operators but not by the
-magrittr-plus-function "equivalents".</p>
-<p>For simplicity of implementation, we do not support the magrittr feature of
-using a <code>.</code> at the head of a pipeline to turn the entire pipeline into a
-function instead of an expression.</p>
-    
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <p>https://rstudio.github.io/promises/articles/overview.html#using-pipes</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='fu'>future</span>(<span class='no'>cars</span>) <span class='kw'>%...&gt;%</span>
-  <span class='fu'>head</span>(<span class='fl'>5</span>) <span class='kw'>%...T&gt;%</span>
+<span class='fu'>promise_resolve</span>(<span class='no'>mtcars</span>) <span class='kw'>%...&gt;%</span>
+  <span class='fu'>head</span>() <span class='kw'>%...&gt;%</span>
   <span class='fu'>print</span>()
 
-<span class='co'># If the read.csv fails, resolve to NULL instead</span>
-<span class='fu'>future</span>(<span class='fu'>read.csv</span>(<span class='st'>"http://example.com/data.csv"</span>)) <span class='kw'>%...!%</span>
-  { <span class='kw'>NULL</span> }
+<span class='fu'>promise_reject</span>(<span class='st'>"Something went wrong"</span>) <span class='kw'>%...T!%</span>
+  { <span class='fu'>message</span>(<span class='fu'>conditionMessage</span>(<span class='no'>.</span>)) }
 <span class='co'># }</span><div class='input'>
 </div></pre>
   </div>
@@ -183,13 +149,7 @@ function instead of an expression.</p>
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-
-      <li><a href="#details">Details</a></li>
-
-      <li><a href="#see-also">See also</a></li>
-      
+            
       <li><a href="#examples">Examples</a></li>
     </ul>
 

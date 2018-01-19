@@ -19,9 +19,6 @@ navbar:
       href: index.html
     - text: Learning
       menu:
-      - text: Start here
-        href: articles/index.html
-      - text: ------
       - text: 1. Why use promises?
         href: articles/motivation.html
       - text: 2. An informal intro to async programming

@@ -66,10 +66,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/index.html">Start here</a>
-    </li>
-    <li class="divider"></li>
-    <li>
       <a href="../articles/motivation.html">1. Why use promises?</a>
     </li>
     <li>
@@ -153,8 +149,23 @@ equivalent of a function call that never returns, i.e. hangs).</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'># TODO
+    <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='co'># Create a promise that resolves to a random value after 2 secs</span>
+<span class='no'>p1</span> <span class='kw'>&lt;-</span> <span class='fu'>promise</span>(<span class='kw'>function</span>(<span class='no'>resolve</span>, <span class='no'>reject</span>) {
+  <span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/later/topics/later'>later</a></span>(~<span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='fu'>runif</span>(<span class='fl'>1</span>)), <span class='kw'>delay</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+})
 
+<span class='no'>p1</span> <span class='kw'>%...&gt;%</span> <span class='fu'>print</span>()
+
+<span class='co'># Create a promise that errors immediately</span>
+<span class='no'>p2</span> <span class='kw'>&lt;-</span> <span class='fu'>promise</span>(~{
+  <span class='fu'><a href='resolve.html'>reject</a></span>(<span class='st'>"An error has occurred"</span>)
+})
+<span class='fu'><a href='then.html'>then</a></span>(<span class='no'>p2</span>,
+  <span class='kw'>onFulfilled</span> <span class='kw'>=</span> ~<span class='fu'>message</span>(<span class='st'>"Success"</span>),
+  <span class='kw'>onRejected</span> <span class='kw'>=</span> ~<span class='fu'>message</span>(<span class='st'>"Failure"</span>)
+)
+<span class='co'># }</span><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
