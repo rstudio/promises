@@ -22,6 +22,7 @@ reference:
     contents:
       - with_promise_domain
 navbar:
+  type: inverse
   left:
     - text: Home
       icon: fa-home
