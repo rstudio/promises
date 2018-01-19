@@ -1,9 +1,9 @@
 ---
-title: "Motivation and limitations"
+title: "Why use promises?"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Motivation and limitations}
+  %\VignetteIndexEntry{1. Why use promises?}
   %\VignetteEncoding{UTF-8}
 ---
 

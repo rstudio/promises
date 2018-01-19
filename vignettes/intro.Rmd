@@ -1,9 +1,9 @@
 ---
-title: "An informal intro to async in R and Shiny"
+title: "An informal introduction to async programming"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{An informal intro to async in R and Shiny}
+  %\VignetteIndexEntry{An informal introduction to async programming}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -215,7 +215,7 @@ It’s a different way of thinking about things, to be sure, but it turns out
 there’s not much limit in usefulness—especially in the context of a Shiny app.
 
 First, you can use promises with Shiny outputs. If you’re using an
-async-compatible version of Shiny (TODO: put version number), all of the
+async-compatible version of Shiny (version >=1.1), all of the
 built-in `renderXXX` functions can deal with either regular values or promises.
 An example of the latter:
 
@@ -239,7 +239,7 @@ works perfectly fine:
         filter(state == "NY") %...>%
         arrange(median_income)
     })
-
+    
     # A reactive expression that reads the previous
     # (promise-returning) reactive, and returns a
     # new promise
@@ -247,7 +247,7 @@ works perfectly fine:
       filtered_df() %...>%
         head(input$n)
     })
-
+    
     output$table <- renderTable({
       top_n_by_income()
     })
@@ -287,15 +287,14 @@ with some additional functions for working with promises.
 
 So far, the only actual async function we’ve talked about has been
 `read.csv.async`, which doesn’t actually exist. To learn where actual async
-functions come from, read [TODO: link].
+functions come from, read [this guide to the `future` package](futures.html).
 
 There are the lower-level functions `then`, `catch`, and `finally`, which are
 the non-pipe, non-operator equivalents of the promise operators we’ve been
-discussing. [TODO: link]
+discussing. See [reference](https://rstudio.github.io/promises/reference/then.html).
 
-And finally, there are `promise_all` and `promise_race`, both used to combine
-multiple promises into a single promise. Learn more about them here. [TODO:
-link]
+And finally, there are `promise_all`, `promise_race`, and `promise_lapply`, used to combine
+multiple promises into a single promise. Learn more about them [here](https://rstudio.github.io/promises/reference/promise_all.html).
 
 **OK, looks like I have a lot of stuff to read up on. And I’ll probably have to
 reread this conversation a few times before it fully sinks in.**
@@ -304,12 +303,3 @@ Sorry. I told you it was complicated. If you understand this guide, the one
 about error handling, and the one about creating promises, you’ll be 95% of the
 way there.
 
-*****
-
-TODO:
-
-* read.csv.async is a terrible example, unless it could be implemented without
-data serialization. Change the example to something else — maybe downloading
-instead of reading/parsing.
-* Talk about how promise-pipe stages can themselves return promises (the “real”
-promise chaining).

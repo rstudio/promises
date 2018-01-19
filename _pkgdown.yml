@@ -1,3 +1,36 @@
 template:
   params:
     bootswatch: cosmo
+articles:
+  - title: "Learning about promises"
+    desc: >
+      These articles are essential reading if you intend to use async programming
+      techniques to speed up your Shiny apps.
+    contents:
+      - motivation
+      - intro
+      - overview
+      - futures
+      - shiny
+navbar:
+  left:
+    - text: Home
+      icon: fa-home
+      href: index.html
+    - text: Learning
+      menu:
+      - text: Start here
+        href: articles/index.html
+      - text: ------
+      - text: 1. Why use promises?
+        href: articles/motivation.html
+      - text: 2. An informal intro to async programming
+        href: articles/intro.html
+      - text: 3. Working with promises
+        href: articles/overview.html
+      - text: 4. Launching tasks
+        href: articles/futures.html
+      - text: 5. Using promises with Shiny
+        href: articles/shiny.html
+    - text: Reference
+      href: reference/index.html
