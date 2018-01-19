@@ -28,3 +28,7 @@ While promises can make a huge difference in the scalability of a Shiny app, the
 (The exception to this is if the Shiny app has several distinct long computations that don't depend very much on each other—then you could use asynchronous programming to exploit a little parallelism. But I think this will be a less common use of async programming, as R already has other good tools designed specifically for data parallelism.)
 
 **DON'T use promises to improve the performance of Shiny apps for a single user.**
+
+<div style="font-size: 20px; margin-top: 40px; text-align: right;">
+Next: [An informal intro to async programming](intro.html)
+</div>

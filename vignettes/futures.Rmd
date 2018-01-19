@@ -80,3 +80,7 @@ Regardless of future method, the return value will be copied back into the paren
 First, if the return value is very large, the copying process can take some time—and because the data must essentially be serialized to and deserialized from rds format, it can take a surprising amount of time. In the case of future blocks that execute fairly quickly but return huge amounts of data, you may be better off not using future/async techniques at all.
 
 Second, objects that refer to native resources are unlikely to work in this direction either; just as you can't use the parent's database connections in the child process, you also cannot have the child process return a database connection for the parent to use.
+
+<div style="font-size: 20px; margin-top: 40px; text-align: right;">
+Next: [Using promises with Shiny](shiny.html)
+</div>

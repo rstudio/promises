@@ -341,6 +341,9 @@ png_bytes &lt;-
 <span class="st">  </span><span class="kw">readBin</span>(<span class="kw">raw</span>(), <span class="dt">size =</span> <span class="kw">file.info</span>(file_path)<span class="op">$</span>size) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw"><a href="../reference/then.html">finally</a></span>(<span class="op">~</span><span class="kw">unlink</span>(file_path))</code></pre></div>
 <p>In this example, we need a temp file for the duration of the pipeline. Our <code>finally</code> makes sure the temp file is deleted when the operation is done, regardless of whether it succeeded or failed.</p>
+<div style="font-size: 20px; margin-top: 40px; text-align: right;">
+<p>Next: <a href="futures.html">Launching tasks</a></p>
+</div>
 </div>
 </div>
   </div>

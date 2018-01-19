@@ -105,6 +105,9 @@
 <p>While promises can make a huge difference in the scalability of a Shiny app, they make relatively little difference in the latency of a single session. That is to say, if a Shiny application is slow when only a single user is hitting it, converting it to use promises is unlikely to make it perform any faster (and in fact may slightly slow it down). Promises will just help prevent <em>other</em> sessions from being slowed down by one session’s computations.</p>
 <p>(The exception to this is if the Shiny app has several distinct long computations that don’t depend very much on each other—then you could use asynchronous programming to exploit a little parallelism. But I think this will be a less common use of async programming, as R already has other good tools designed specifically for data parallelism.)</p>
 <p><strong>DON’T use promises to improve the performance of Shiny apps for a single user.</strong></p>
+<div style="font-size: 20px; margin-top: 40px; text-align: right;">
+<p>Next: <a href="intro.html">An informal intro to async programming</a></p>
+</div>
 </div>
 </div>
   </div>

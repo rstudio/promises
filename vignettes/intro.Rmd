@@ -303,3 +303,6 @@ Sorry. I told you it was complicated. If you understand this guide, the one
 about error handling, and the one about creating promises, you’ll be 95% of the
 way there.
 
+<div style="font-size: 20px; margin-top: 40px; text-align: right;">
+Next: [Working with promises](overview.html)
+</div>

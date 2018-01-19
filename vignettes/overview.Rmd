@@ -363,3 +363,7 @@ png_bytes <-
 ```
 
 In this example, we need a temp file for the duration of the pipeline. Our `finally` makes sure the temp file is deleted when the operation is done, regardless of whether it succeeded or failed.
+
+<div style="font-size: 20px; margin-top: 40px; text-align: right;">
+Next: [Launching tasks](futures.html)
+</div>
