@@ -11,7 +11,7 @@ The `future` package provides a lightweight way to launch R tasks that don't blo
 
 The `promises` package provides the API for working with the results of async tasks, but it totally abdicates responsibility for actually launching/creating async tasks. The idea is that any number of different packages could be capable of launching async tasks, using whatever techniques they want, but all of them would either return promise objects (or objects that can be converted to promise objects, as is the case for `future`). However, for now, `future` is likely to be the primary or even exclusive way that async tasks are created.
 
-This document will give an introduction to the parts of `future` that are most relevant to promises. For more information, please consult the vignettes that come with `future`, especially the [Comprehensive Overview](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html).
+This document will give an introduction to the parts of `future` that are most relevant to promises. For more information, please consult the vignettes that come with `future`, especially the [Comprehensive Overview](https://CRAN.R-project.org/package=future/vignettes/future-1-overview.html).
 
 ## How future works
 

@@ -8,7 +8,7 @@ magrittr::"%T>%"
 
 #' Promise pipe operators
 #'
-#' Promise-aware pipe operators, in the style of [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html).
+#' Promise-aware pipe operators, in the style of [magrittr](https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html).
 #' Like magrittr pipes, these operators can be used to chain together pipelines
 #' of promise-transforming operations. Unlike magrittr pipes, these pipes wait
 #' for promise resolution and pass the unwrapped value (or error) to the `rhs`

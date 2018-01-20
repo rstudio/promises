@@ -104,7 +104,7 @@ Note that the call to `then()` always returns immediately, without invoking the 
 
 You don’t have to use anonymous functions as callbacks; you can use named functions as well. So `promise %>% then(print)` works, if you just want to print a value.
 
-If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use the [tidyeval](https://cran.r-project.org/web/packages/rlang/vignettes/tidy-evaluation.html) model; if you’re not familiar with tidyeval, for now just know that you can access the value (or error) using `.` as a variable name.
+If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use the [tidyeval](https://CRAN.R-project.org/package=rlang/vignettes/tidy-evaluation.html) model; if you’re not familiar with tidyeval, for now just know that you can access the value (or error) using `.` as a variable name.
 
 ```r
 promise %>%

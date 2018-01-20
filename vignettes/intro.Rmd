@@ -133,7 +133,7 @@ the `...` stands for promise, and `>` mimics the standard pipe operator.
 In many ways `%...>%` does work like a regular pipe: it rewrites each stage’s
 function call to take the previous stage’s output as the first argument. (All
 the [standard magrittr
-tricks](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html)
+tricks](https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html)
 apply here: `.`, `{`, parenthesized lambdas, etc.) But the differences, while
 subtle, are profound.
 

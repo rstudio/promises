@@ -175,6 +175,8 @@ promise_lapply <- function(X, FUN, ...) {
 #' @param func A function that takes two parameters. The first parameter will be
 #'   the "result" (initially `init`, and then set to the result of the most
 #'   recent call to `func`), and the second parameter will be an element of `x`.
+#' @param init The initial result value of the fold, passed into `func` when it
+#'   is first executed.
 #'
 #' @return A promise that will resolve to the result of calling `func` on the
 #'   last element (or `init` if `x` had no elements). If any invocation of

@@ -12,6 +12,9 @@ promise_reduce(x, func, init = NULL)
 \item{func}{A function that takes two parameters. The first parameter will be
 the "result" (initially \code{init}, and then set to the result of the most
 recent call to \code{func}), and the second parameter will be an element of \code{x}.}
+
+\item{init}{The initial result value of the fold, passed into \code{func} when it
+is first executed.}
 }
 \value{
 A promise that will resolve to the result of calling \code{func} on the

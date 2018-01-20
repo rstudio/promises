@@ -26,7 +26,7 @@ a promise or non-promise value, or throw an error.}
 A new promise.
 }
 \description{
-Promise-aware pipe operators, in the style of \href{https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html}{magrittr}.
+Promise-aware pipe operators, in the style of \href{https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html}{magrittr}.
 Like magrittr pipes, these operators can be used to chain together pipelines
 of promise-transforming operations. Unlike magrittr pipes, these pipes wait
 for promise resolution and pass the unwrapped value (or error) to the \code{rhs}

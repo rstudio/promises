@@ -162,7 +162,7 @@
 <h2 class="hasAnchor">
 <a href="#using-formulas" class="anchor"></a>Using formulas</h2>
 <p>You don’t have to use anonymous functions as callbacks; you can use named functions as well. So <code>promise %&gt;% then(print)</code> works, if you just want to print a value.</p>
-<p>If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use the <a href="https://cran.r-project.org/web/packages/rlang/vignettes/tidy-evaluation.html">tidyeval</a> model; if you’re not familiar with tidyeval, for now just know that you can access the value (or error) using <code>.</code> as a variable name.</p>
+<p>If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use the <a href="https://CRAN.R-project.org/package=rlang/vignettes/tidy-evaluation.html">tidyeval</a> model; if you’re not familiar with tidyeval, for now just know that you can access the value (or error) using <code>.</code> as a variable name.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">promise <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw"><a href="../reference/then.html">then</a></span>(<span class="op">~</span>{
     <span class="kw">cat</span>(<span class="st">"The operation completed!"</span>)
