@@ -1,8 +1,8 @@
 # promises
 
-A promise library for R.
+[![Build Status](https://travis-ci.org/rstudio/promises.svg?branch=master)](https://travis-ci.org/rstudio/promises)
 
-[Documentation (draft)](https://medium.com/@joe.cheng)
+A promise library for R. https://rstudio.github.io/promises
 
 ## Installation
 
