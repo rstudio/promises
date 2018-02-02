@@ -6,6 +6,24 @@ This website provides a multi-step guide that will help familiarize you with sev
 
 ---
 
+## Installation
+
+The promises package is not yet on CRAN, and support for promises has not yet been merged into Shiny's master branch. You can install promises and an async-compatible version of Shiny with this command:
+
+```r
+devtools::install_github("rstudio/shiny@async")
+```
+
+There are also some supporting packages that have experimental async-compatible branches:
+
+```r
+devtools::install_github("ramnathv/htmlwidgets@async")
+devtools::install_github("jcheng5/plotly@joe/feature/async")
+devtools::install_github("rstudio/DT@async")
+```
+
+---
+
 <style>
 .contents a.anchor { display: none; }
 </style>

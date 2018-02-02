@@ -87,9 +87,20 @@
 <p>The promises package brings asynchronous programming capabilities to R. Asynchronous programming is a technique used by many programming languages to increase scalability and responsiveness. Traditionally, this style of programming has not been useful to R users. But the advent of R web applications like Shiny has made async programming relevant.</p>
 <p>This website provides a multi-step guide that will help familiarize you with several related concepts that are required for effective async programming. It is highly recommended that you go through the topics in order.</p>
 <hr>
+<div id="installation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#installation" class="anchor"></a>Installation</h2>
+<p>The promises package is not yet on CRAN, and support for promises has not yet been merged into Shiny’s master branch. You can install promises and an async-compatible version of Shiny with this command:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"rstudio/shiny@async"</span>)</code></pre></div>
+<p>There are also some supporting packages that have experimental async-compatible branches:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"ramnathv/htmlwidgets@async"</span>)
+devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"jcheng5/plotly@joe/feature/async"</span>)
+devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"rstudio/DT@async"</span>)</code></pre></div>
+<hr>
 <style>
 .contents a.anchor { display: none; }
 </style>
+</div>
 <div id="contents" class="section level2">
 <h2 class="hasAnchor">
 <a href="#contents" class="anchor"></a>Contents</h2>
