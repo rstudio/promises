@@ -5,16 +5,16 @@
 \alias{promise_race}
 \title{Combine multiple promise objects}
 \usage{
-promise_all(..., list = NULL)
+promise_all(..., .list = NULL)
 
-promise_race(..., list = NULL)
+promise_race(..., .list = NULL)
 }
 \arguments{
 \item{...}{Promise objects. Either all arguments must be named, or all
-arguments must be unnamed. If \code{list} is provided, then these arguments are
+arguments must be unnamed. If \code{.list} is provided, then these arguments are
 ignored.}
 
-\item{list}{A list of promise objects--an alternative to \code{...}.}
+\item{.list}{A list of promise objects--an alternative to \code{...}.}
 }
 \value{
 A promise.

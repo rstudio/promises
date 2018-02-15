@@ -49,3 +49,7 @@ A guide to the future package, the place where we expect most async programming 
 #### [5. Using promises with Shiny](articles/shiny.html)
 
 Learn how to integrate promises into your Shiny applications.
+
+#### [6. Combining promises](articles/combining.html)
+
+Functions and techniques for working with multiple promises simultaneously.

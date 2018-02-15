@@ -39,6 +39,11 @@ extract <- function(promise) {
     promise_value
 }
 
+resolve_later <- function(value, delaySecs) {
+  force(value)
+  promise(~later::later(~resolve(value), delaySecs))
+}
+
 # Prevent "Unhandled promise error" warning that happens if you don't handle the
 # rejection of a promise
 squelch_unhandled_promise_error <- function(promise) {

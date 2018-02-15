@@ -114,9 +114,9 @@ fulfilled. Use <code>promise_race</code> to wait for the first of multiple promi
 objects to be either fulfilled or rejected.</p>
     
 
-    <pre class="usage"><span class='fu'>promise_all</span>(<span class='no'>...</span>, <span class='kw'>list</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+    <pre class="usage"><span class='fu'>promise_all</span>(<span class='no'>...</span>, <span class='kw'>.list</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-<span class='fu'>promise_race</span>(<span class='no'>...</span>, <span class='kw'>list</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+<span class='fu'>promise_race</span>(<span class='no'>...</span>, <span class='kw'>.list</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -124,11 +124,11 @@ objects to be either fulfilled or rejected.</p>
     <tr>
       <th>...</th>
       <td><p>Promise objects. Either all arguments must be named, or all
-arguments must be unnamed. If <code>list</code> is provided, then these arguments are
+arguments must be unnamed. If <code>.list</code> is provided, then these arguments are
 ignored.</p></td>
     </tr>
     <tr>
-      <th>list</th>
+      <th>.list</th>
       <td><p>A list of promise objects--an alternative to <code>...</code>.</p></td>
     </tr>
     </table>

@@ -82,3 +82,21 @@ describe("finally()", {
     expect_error(extract(p2), "^bar$")
   })
 })
+
+describe("future", {
+  it("is treated as promise when used as resolution", {
+    p <- promise_resolve(future::future(1))
+    expect_identical(extract(p), 1)
+
+    p2 <- promise_resolve(future::future(stop("boom")))
+    expect_error(extract(p2))
+  })
+
+  it("is treated as promise when used as resolution", {
+    p <- promise_reject(future::future(1))
+    expect_identical(extract(p), 1)
+
+    p2 <- promise_reject(future::future(stop("boom")))
+    expect_error(extract(p2))
+  })
+})

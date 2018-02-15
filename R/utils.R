@@ -5,9 +5,9 @@
 #' objects to be either fulfilled or rejected.
 #'
 #' @param ... Promise objects. Either all arguments must be named, or all
-#'   arguments must be unnamed. If `list` is provided, then these arguments are
+#'   arguments must be unnamed. If `.list` is provided, then these arguments are
 #'   ignored.
-#' @param list A list of promise objects--an alternative to `...`.
+#' @param .list A list of promise objects--an alternative to `...`.
 #'
 #' @return A promise.
 #'
@@ -38,18 +38,18 @@
 #' }
 #'
 #' @export
-promise_all <- function(..., list = NULL) {
-  if (missing(list)) {
-    list <- list(...)
+promise_all <- function(..., .list = NULL) {
+  if (missing(.list)) {
+    .list <- list(...)
   }
 
-  if (length(list) == 0) {
+  if (length(.list) == 0) {
     return(promise(~resolve(list())))
   }
 
-  # Verify that list members are either all named or all unnamed
-  nameCount <- sum(nzchar(names(list)))
-  if (nameCount != 0 && nameCount != length(list)) {
+  # Verify that .list members are either all named or all unnamed
+  nameCount <- sum(nzchar(names(.list)))
+  if (nameCount != 0 && nameCount != length(.list)) {
     stop("promise_all expects promise arguments (or list) to be either all named or all unnamed")
   }
 
@@ -57,16 +57,18 @@ promise_all <- function(..., list = NULL) {
   results <- list()
 
   promise(function(resolve, reject) {
-    keys <- if (is.null(names(list))) {
-      1:length(list)
+    keys <- if (is.null(names(.list))) {
+      1:length(.list)
     } else {
-      names(list)
+      names(.list)
     }
 
     lapply(keys, function(key) {
       done[[key]] <<- FALSE
+      # Forces correct/deterministic ordering of the result list's elements
+      results[[key]] <<- NA
 
-      then(list[[key]],
+      then(.list[[key]],
         onFulfilled = function(value) {
           # Save the result so we can return it to the user.
           results[[key]] <<- value
@@ -89,13 +91,13 @@ promise_all <- function(..., list = NULL) {
 
 #' @rdname promise_all
 #' @export
-promise_race <- function(..., list = NULL) {
-  if (missing(list)) {
-    list <- list(...)
+promise_race <- function(..., .list = NULL) {
+  if (missing(.list)) {
+    .list <- list(...)
   }
 
   promise(function(resolve, reject) {
-    lapply(list, function(promise) {
+    lapply(.list, function(promise) {
       then(promise, resolve, reject)
     })
   })
