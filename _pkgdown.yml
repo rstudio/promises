@@ -39,5 +39,7 @@ navbar:
         href: articles/futures.html
       - text: 5. Using promises with Shiny
         href: articles/shiny.html
+      - text: 6. Combining promises
+        href: articles/combining.html
     - text: Reference
       href: reference/index.html
