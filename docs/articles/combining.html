@@ -176,7 +176,7 @@ first &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promi
 <div id="mapping" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mapping" class="anchor"></a>Mapping</h2>
-<p>Use <code>promise_lapply</code> to run an async operation on each element of a list or vector, and collect the results in a list. It’s very similar to <code>lapply</code>, except that the function to apply can return a promise, and the return value is also a promise.</p>
+<p>Use <code>promise_map</code> to run an async operation on each element of a list or vector, and collect the results in a list. It’s very similar to <code>lapply</code> or <code><a href="http://www.rdocumentation.org/packages/purrr/topics/map">purrr::map</a></code>, except that the function to apply can return a promise, and the return value is also a promise.</p>
 <p>In the example below, we iterate over a named vector of package names. For each package name, we launch an async task to download the package’s description file from CRAN pick out the last published date.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(promises)
 <span class="kw">library</span>(future)
@@ -191,7 +191,7 @@ get_pub_date &lt;-<span class="st"> </span><span class="cf">function</span>(pkg)
 
 packages &lt;-<span class="st"> </span><span class="kw">setNames</span>(, <span class="kw">c</span>(<span class="st">"ggplot2"</span>, <span class="st">"dplyr"</span>, <span class="st">"knitr"</span>))
 
-pkg_dates &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promise_lapply.html">promise_lapply</a></span>(packages, get_pub_date)
+pkg_dates &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promise_map.html">promise_map</a></span>(packages, get_pub_date)
 
 pkg_dates <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</code></pre></div>
 <p>The resulting output looks like this:</p>
@@ -203,9 +203,9 @@ $dplyr
 
 $knitr
 [1] "2018-01-29 11:01:22 UTC"</code></pre>
-<p><code>promise_lapply</code> works serially; each time it calls the given function on an element of the list/vector, it will wait for the returned promise to resolve before proceeding to the next element. Furthermore, any error or rejected promise will cause the entire <code>promise_lapply</code> operation to reject.</p>
-<p>If you want behavior that’s similar to <code>promise_lapply</code> but for all the async operations to occur in parallel, you can achieve that with a combination of a regular <code>lapply</code> and <code>promise_all</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pkg_dates &lt;-<span class="st"> </span><span class="kw">lapply</span>(packages, get_pub_date) <span class="op">%&gt;%</span>
+<p><code>promise_map</code> works serially; each time it calls the given function on an element of the list/vector, it will wait for the returned promise to resolve before proceeding to the next element. Furthermore, any error or rejected promise will cause the entire <code>promise_map</code> operation to reject.</p>
+<p>If you want behavior that’s similar to <code>promise_map</code> but for all the async operations to occur in parallel, you can achieve that with a combination of a regular <code><a href="http://www.rdocumentation.org/packages/purrr/topics/map">purrr::map</a></code> and <code>promise_all</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pkg_dates &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map</a></span>(packages, get_pub_date) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">.list =</span> .)
 
 pkg_dates <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</code></pre></div>
@@ -239,7 +239,7 @@ cran_mirrors &lt;-<span class="st"> </span><span class="kw">c</span>(
       <span class="cf">if</span> (<span class="op">!</span>httr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/httr/topics/http_error">http_error</a></span>(mirror)) mirror
     })
   }
-}, <span class="ot">NULL</span>) <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</code></pre></div>
+}, <span class="dt">.init =</span> <span class="ot">NULL</span>) <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</code></pre></div>
 </div>
 </div>
   </div>

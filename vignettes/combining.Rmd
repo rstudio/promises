@@ -108,7 +108,7 @@ Note that promises does not currently support cancellation. So losing promises w
 
 ## Mapping
 
-Use `promise_lapply` to run an async operation on each element of a list or vector, and collect the results in a list. It's very similar to `lapply`, except that the function to apply can return a promise, and the return value is also a promise.
+Use `promise_map` to run an async operation on each element of a list or vector, and collect the results in a list. It's very similar to `lapply` or `purrr::map`, except that the function to apply can return a promise, and the return value is also a promise.
 
 In the example below, we iterate over a named vector of package names. For each package name, we launch an async task to download the package's description file from CRAN pick out the last published date.
 
@@ -126,7 +126,7 @@ get_pub_date <- function(pkg) {
 
 packages <- setNames(, c("ggplot2", "dplyr", "knitr"))
 
-pkg_dates <- promise_lapply(packages, get_pub_date)
+pkg_dates <- promise_map(packages, get_pub_date)
 
 pkg_dates %...>% print()
 ```
@@ -144,12 +144,12 @@ $knitr
 [1] "2018-01-29 11:01:22 UTC"
 ```
 
-`promise_lapply` works serially; each time it calls the given function on an element of the list/vector, it will wait for the returned promise to resolve before proceeding to the next element. Furthermore, any error or rejected promise will cause the entire `promise_lapply` operation to reject.
+`promise_map` works serially; each time it calls the given function on an element of the list/vector, it will wait for the returned promise to resolve before proceeding to the next element. Furthermore, any error or rejected promise will cause the entire `promise_map` operation to reject.
 
-If you want behavior that's similar to `promise_lapply` but for all the async operations to occur in parallel, you can achieve that with a combination of a regular `lapply` and `promise_all`:
+If you want behavior that's similar to `promise_map` but for all the async operations to occur in parallel, you can achieve that with a combination of a regular `purrr::map` and `promise_all`:
 
 ```r
-pkg_dates <- lapply(packages, get_pub_date) %>%
+pkg_dates <- purrr::map(packages, get_pub_date) %>%
   promise_all(.list = .)
 
 pkg_dates %...>% print()
@@ -192,6 +192,6 @@ promise_reduce(cran_mirrors, function(result, mirror) {
       if (!httr::http_error(mirror)) mirror
     })
   }
-}, NULL) %...>% print()
+}, .init = NULL) %...>% print()
 ```
 

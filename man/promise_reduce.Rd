@@ -4,32 +4,33 @@
 \alias{promise_reduce}
 \title{Promise-aware version of Reduce}
 \usage{
-promise_reduce(x, func, init = NULL)
+promise_reduce(.x, .f, ..., .init = NULL)
 }
 \arguments{
-\item{x}{A vector or list to reduce. (Not a promise.)}
+\item{.x}{A vector or list to reduce. (Not a promise.)}
 
-\item{func}{A function that takes two parameters. The first parameter will be
-the "result" (initially \code{init}, and then set to the result of the most
-recent call to \code{func}), and the second parameter will be an element of \code{x}.}
+\item{.f}{A function that takes two parameters. The first parameter will be
+the "result" (initially \code{.init}, and then set to the result of the most
+recent call to \code{func}), and the second parameter will be an element of \code{.x}.}
 
-\item{init}{The initial result value of the fold, passed into \code{func} when it
+\item{...}{Other arguments to pass to \code{.f}}
+
+\item{.init}{The initial result value of the fold, passed into \code{.f} when it
 is first executed.}
 }
 \value{
-A promise that will resolve to the result of calling \code{func} on the
-last element (or \code{init} if \code{x} had no elements). If any invocation of
-\code{func} results in an error or a rejected promise, then the overall
+A promise that will resolve to the result of calling \code{.f} on the last
+element (or \code{.init} if \code{.x} had no elements). If any invocation of \code{.f}
+results in an error or a rejected promise, then the overall
 \code{promise_reduce} promise will immediately reject with that error.
 }
 \description{
-Similar to \code{\link[base:Reduce]{base::Reduce()}} (left fold), but the \code{func} function is
-permitted to return a promise. (Note also that the order of the parameters is
-different than \code{Reduce}, in order to be more tidyverse friendly; and
-right-fold and accumulate options are not included.) \code{promise_reduce} will
-wait for any returned promise to resolve before invoking the \code{func} with the
-next element; in other words, \code{func} can return a promise as output but
-should never encounter a promise as input.
+Similar to \code{\link[purrr:reduce]{purrr::reduce}} (left fold), but the function \code{.f} is permitted
+to return a promise. \code{promise_reduce} will wait for any returned promise to
+resolve before invoking \code{.f} with the next element; in other words, execution
+is serial. \code{.f} can return a promise as output but should never encounter a
+promise as input (unless \code{.x} itself is a list of promises to begin with, in
+which case the second parameter would be a promise).
 }
 \examples{
 \dontrun{
@@ -39,7 +40,7 @@ slowly_add <- function(e1, e2) {
 }
 
 # Prints 55 after a little over 5 seconds
-promise_reduce(1:10, slowly_add, 0) \%...>\% print()
+promise_reduce(1:10, slowly_add, .init = 0) \%...>\% print()
 }
 
 }

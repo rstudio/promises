@@ -11,8 +11,8 @@ reference:
       - promise_all
   - title: Functional promises
     contents:
+      - promise_map
       - promise_reduce
-      - promise_lapply
   - title: Creating promises
     contents:
       - promise
