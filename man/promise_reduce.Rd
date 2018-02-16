@@ -4,7 +4,7 @@
 \alias{promise_reduce}
 \title{Promise-aware version of Reduce}
 \usage{
-promise_reduce(.x, .f, ..., .init = NULL)
+promise_reduce(.x, .f, ..., .init)
 }
 \arguments{
 \item{.x}{A vector or list to reduce. (Not a promise.)}
