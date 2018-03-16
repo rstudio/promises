@@ -10,10 +10,10 @@ A promise library for R. https://rstudio.github.io/promises
 devtools::install_github("rstudio/promises")
 ```
 
-Neither the CRAN nor GitHub master branch versions of Shiny support promises. Until support is merged, you'll have to install from this branch:
+The CRAN version of Shiny doesn't (yet) support promises. Until support is merged, you'll have to install from GitHub:
 
 ```r
-devtools::install_github("rstudio/shiny@async")
+devtools::install_github("rstudio/shiny")
 ```
 
 ## License
