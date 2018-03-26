@@ -18,13 +18,16 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+<meta property="og:title" content="Function reference" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,8 +50,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">promises</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">promises</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0.9002</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -108,10 +115,7 @@
       <div class="row">
   <div class="col-md-9">
     <div class="page-header">
-      <h1>
-        Reference
-        <small>version&nbsp;0.1.0.9002</small>
-      </h1>
+      <h1>Reference</h1>
     </div>
 
     <div class="contents">
@@ -132,13 +136,13 @@
         <tr>
           <!--  -->
           <td>
-            <p><code><a href="then.html">then</a></code> <code><a href="then.html">catch</a></code> <code><a href="then.html">finally</a></code> </p>
+            <p><code><a href="then.html">then()</a></code> <code><a href="then.html">catch()</a></code> <code><a href="then.html">finally()</a></code> </p>
           </td>
           <td><p>Access the results of a promise</p></td>
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="pipes.html">%...&gt;%</a></code> <code><a href="pipes.html">%...T&gt;%</a></code> <code><a href="pipes.html">%...!%</a></code> <code><a href="pipes.html">%...T!%</a></code> </p>
+            <p><code><a href="pipes.html">`%...>%`()</a></code> <code><a href="pipes.html">`%...T>%`()</a></code> <code><a href="pipes.html">`%...!%`()</a></code> <code><a href="pipes.html">`%...T!%`()</a></code> </p>
           </td>
           <td><p>Promise pipe operators</p></td>
         </tr>
@@ -152,7 +156,7 @@
         <tr>
           <!--  -->
           <td>
-            <p><code><a href="promise_all.html">promise_all</a></code> <code><a href="promise_all.html">promise_race</a></code> </p>
+            <p><code><a href="promise_all.html">promise_all()</a></code> <code><a href="promise_all.html">promise_race()</a></code> </p>
           </td>
           <td><p>Combine multiple promise objects</p></td>
         </tr>
@@ -166,13 +170,13 @@
         <tr>
           <!--  -->
           <td>
-            <p><code><a href="promise_map.html">promise_map</a></code> </p>
+            <p><code><a href="promise_map.html">promise_map()</a></code> </p>
           </td>
           <td><p>Promise-aware lapply/map</p></td>
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="promise_reduce.html">promise_reduce</a></code> </p>
+            <p><code><a href="promise_reduce.html">promise_reduce()</a></code> </p>
           </td>
           <td><p>Promise-aware version of Reduce</p></td>
         </tr>
@@ -186,19 +190,19 @@
         <tr>
           <!--  -->
           <td>
-            <p><code><a href="promise.html">promise</a></code> </p>
+            <p><code><a href="promise.html">promise()</a></code> </p>
           </td>
           <td><p>Create a new promise object</p></td>
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="promise_resolve.html">promise_resolve</a></code> <code><a href="promise_resolve.html">promise_reject</a></code> </p>
+            <p><code><a href="promise_resolve.html">promise_resolve()</a></code> <code><a href="promise_resolve.html">promise_reject()</a></code> </p>
           </td>
           <td><p>Create a resolved or rejected promise</p></td>
         </tr><tr>
           <!--  -->
           <td>
-            <p><code><a href="is.promise.html">is.promise</a></code> <code><a href="is.promise.html">is.promising</a></code> <code><a href="is.promise.html">as.promise</a></code> </p>
+            <p><code><a href="is.promise.html">is.promise()</a></code> <code><a href="is.promise.html">is.promising()</a></code> <code><a href="is.promise.html">as.promise()</a></code> </p>
           </td>
           <td><p>Coerce to a promise</p></td>
         </tr>
@@ -212,7 +216,7 @@
         <tr>
           <!--  -->
           <td>
-            <p><code><a href="with_promise_domain.html">with_promise_domain</a></code> <code><a href="with_promise_domain.html">new_promise_domain</a></code> </p>
+            <p><code><a href="with_promise_domain.html">with_promise_domain()</a></code> <code><a href="with_promise_domain.html">new_promise_domain()</a></code> </p>
           </td>
           <td><p>Promise domains</p></td>
         </tr>
@@ -235,7 +239,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src='http://tidyverse.org/rstudio-logo.svg' height='24' /></a>.</p>
+  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src="https://tidyverse.org/rstudio-logo.svg" height="24" /></a>.</p>
 </div>
 
 <div class="pkgdown">
@@ -247,3 +251,4 @@
 
   </body>
 </html>
+

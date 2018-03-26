@@ -18,13 +18,22 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+<meta property="og:title" content="Coerce to a promise — is.promise" />
+
+<meta property="og:description" content="Use is.promise to determine whether an R object is a promise. Use
+as.promise (an S3 generic method) to attempt to coerce an R object to a
+promise. This package includes support for converting future::Future
+objects into promises." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,8 +56,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">promises</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">promises</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0.9002</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -109,6 +122,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Coerce to a promise</h1>
+    <small>Source: <a href='https://github.com/rstudio/promises/blob/master/R/promise.R'><code>R/promise.R</code></a></small>
     </div>
 
     
@@ -124,7 +138,7 @@ objects into promises.</p>
 
 <span class='fu'>as.promise</span>(<span class='no'>x</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -136,12 +150,10 @@ objects into promises.</p>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p><code>as.promise</code> returns a promise object, or throws an error if the
-object cannot be converted.
-
-<code>is.promise</code> returns <code>TRUE</code> if the given value is a promise object, and
-<code>FALSE</code> otherwise.
-
-<code>is.promising</code> returns <code>TRUE</code> if the given value is a promise object or
+object cannot be converted.</p>
+<p><code>is.promise</code> returns <code>TRUE</code> if the given value is a promise object, and
+<code>FALSE</code> otherwise.</p>
+<p><code>is.promising</code> returns <code>TRUE</code> if the given value is a promise object or
 if it can be converted to a promise object using <code>as.promise</code>, and <code>FALSE</code>
 otherwise.</p>
     
@@ -160,7 +172,7 @@ otherwise.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src='http://tidyverse.org/rstudio-logo.svg' height='24' /></a>.</p>
+  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src="https://tidyverse.org/rstudio-logo.svg" height="24" /></a>.</p>
 </div>
 
 <div class="pkgdown">
@@ -172,3 +184,4 @@ otherwise.</p>
 
   </body>
 </html>
+

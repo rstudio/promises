@@ -43,3 +43,8 @@ navbar:
         href: articles/combining.html
     - text: Reference
       href: reference/index.html
+authors:
+  RStudio:
+    href: https://www.rstudio.com
+    html: <img src="https://tidyverse.org/rstudio-logo.svg" height="24" />
+

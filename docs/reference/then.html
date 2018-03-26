@@ -18,13 +18,19 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+<meta property="og:title" content="Access the results of a promise — then" />
+
+<meta property="og:description" content="Use the then function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to then is non-blocking, that is, it returns immediately; so what it does not do is immediately return the result value of the promise. Instead, you pass logic you want to execute to then, in the form of function callbacks (or formulas, see Details). If you provide an onFulfilled callback, it will be called upon the promise's successful resolution, with a single argument value: the result value. If you provide an onRejected callback, it will be called if the operation fails, with a single argument reason: the error that caused the failure." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,8 +53,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">promises</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">promises</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0.9002</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -109,6 +119,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Access the results of a promise</h1>
+    <small>Source: <a href='https://github.com/rstudio/promises/blob/master/R/then.R'><code>R/then.R</code></a></small>
     </div>
 
     
@@ -121,7 +132,7 @@
 
 <span class='fu'>finally</span>(<span class='no'>promise</span>, <span class='no'>onFinally</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -205,8 +216,8 @@ promise_d &lt;- then(promise_c,
 )
 </pre>
     <p>Now, <code>promise_d</code> will be rejected if <code>promise_c</code> is fulfilled, and vice
-versa.
-    <strong>Warning:</strong> Be very careful not to accidentally turn failure into success,
+versa.</p>
+<p><strong>Warning:</strong> Be very careful not to accidentally turn failure into success,
 if your error handling code is not the last item in a chain!</p><pre>some_async_operation() <!-- %&gt;% -->
   catch(function(reason) {
     warning("An error occurred: ", reason)
@@ -260,7 +271,7 @@ which will be <code>FALSE</code> if the result value is <a href='http://www.rdoc
 
       <footer>
       <div class="copyright">
-  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src='http://tidyverse.org/rstudio-logo.svg' height='24' /></a>.</p>
+  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src="https://tidyverse.org/rstudio-logo.svg" height="24" /></a>.</p>
 </div>
 
 <div class="pkgdown">
@@ -272,3 +283,4 @@ which will be <code>FALSE</code> if the result value is <a href='http://www.rdoc
 
   </body>
 </html>
+
