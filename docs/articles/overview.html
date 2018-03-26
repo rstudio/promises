@@ -152,7 +152,7 @@
 <h2 class="hasAnchor">
 <a href="#accessing-results-with-then" class="anchor"></a>Accessing results with <code>then</code>
 </h2>
-<p>The <code>then</code> function is what ultimately makes promise objects useful. It is used to register success and failure handlers on a promise. Its signature looks like:</p>
+<p>The <code><a href="../reference/then.html">promises::then</a></code> function is what ultimately makes promise objects useful. It is used to register success and failure handlers on a promise. Its signature looks like:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/then.html">then</a></span>(promise, <span class="dt">onFulfilled =</span> <span class="ot">NULL</span>, <span class="dt">onRejected =</span> <span class="ot">NULL</span>)</code></pre></div>
 <p>In promise terminology, “fulfilled” (and equivalently, “resolved”) means success and “rejected” means failure. You can pass functions with single arguments to <code>onFulfilled</code> and <code>onRejected</code> to be notified when a promise succeeds or fails. (If the promise has already been fulfilled or resolved by the time <code>then</code> is called, don’t worry—the appropriate callback will be still be called. It’s never too late to call <code>then</code> on a promise.)</p>
 <p>The promise library guarantees that only one of <code>onFulfilled</code> or <code>onRejected</code> will be called, never both. And a callback will never be invoked more than once. It is possible, though, that neither callback will ever be called, i.e. the async operation never completes. (This is analogous to calling a regular function that never returns.)</p>

@@ -66,7 +66,7 @@ You might guess that you could call a function or method on a promise to extract
 
 ## Accessing results with `then`
 
-The `then` function is what ultimately makes promise objects useful. It is used to register success and failure handlers on a promise. Its signature looks like:
+The `promises::then` function is what ultimately makes promise objects useful. It is used to register success and failure handlers on a promise. Its signature looks like:
 
 ```r
 then(promise, onFulfilled = NULL, onRejected = NULL)
