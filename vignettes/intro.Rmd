@@ -261,7 +261,7 @@ treat promises about the same as they treat other values, actually. But this
 works perfectly fine:
 
 ```r
-# A reactive expression that returns a 
+# A reactive expression that returns a promise
 filtered_df <- reactive({
   read.csv.async("https://rstudio.github.io/promises/data.csv") %...>%
     filter(state == "NY") %...>%
