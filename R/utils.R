@@ -20,7 +20,6 @@
 #'   will be passed through to the returned promise.
 #'
 #' @examples
-#' \dontrun{
 #' p1 <- promise(~later::later(~resolve(1), delay = 1))
 #' p2 <- promise(~later::later(~resolve(2), delay = 2))
 #'
@@ -34,7 +33,6 @@
 #' promise_all(p1, p2) %...>% {
 #'   cat("promise_all:\n")
 #'   str(.)
-#' }
 #' }
 #'
 #' @export
@@ -124,7 +122,6 @@ promise_race <- function(..., .list = NULL) {
 #' @return A promise that resolves to a list (of values, not promises).
 #'
 #' @examples
-#' \dontrun{
 #' # Waits x seconds, then returns x*10
 #' wait_this_long <- function(x) {
 #'   promise(~later::later(~{
@@ -134,7 +131,6 @@ promise_race <- function(..., .list = NULL) {
 #'
 #' promise_map(list(A=1, B=2, C=3), wait_this_long) %...>%
 #'   print()
-#' }
 #'
 #' @export
 promise_map <- function(.x, .f, ...) {
@@ -187,7 +183,6 @@ promise_map <- function(.x, .f, ...) {
 #'   `promise_reduce` promise will immediately reject with that error.
 #'
 #' @examples
-#' \dontrun{
 #' # Returns a promise for the sum of e1 + e2, with a 0.5 sec delay
 #' slowly_add <- function(e1, e2) {
 #'   promise(~later::later(~resolve(e1 + e2), delay = 0.5))
@@ -195,7 +190,6 @@ promise_map <- function(.x, .f, ...) {
 #'
 #' # Prints 55 after a little over 5 seconds
 #' promise_reduce(1:10, slowly_add, .init = 0) %...>% print()
-#' }
 #'
 #' @export
 promise_reduce <- function(.x, .f, ..., .init) {

@@ -16,6 +16,8 @@ reject(reason)
 }
 \description{
 Use these functions to satisfy a promise with either success (\code{resolve})
-or failure (\code{reject}).
+or failure (\code{reject}). These functions are not exported, but rather, are
+passed as arguments to the \code{action} function you pass to a \link{promise}
+constructor.
 }
 \keyword{internal}

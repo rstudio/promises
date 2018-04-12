@@ -22,13 +22,11 @@ Helper functions to conveniently create a promise that is resolved to the
 given value (or rejected with the given reason).
 }
 \examples{
-\dontrun{
 promise_resolve(mtcars) \%...>\%
   head() \%...>\%
   print()
 
 promise_reject("Something went wrong") \%...T!\%
   { message(conditionMessage(.)) }
-}
 
 }

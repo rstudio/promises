@@ -37,7 +37,6 @@ equivalent of a function call that never returns, i.e. hangs).
 The return value of \code{action} will be ignored.
 }
 \examples{
-\dontrun{
 # Create a promise that resolves to a random value after 2 secs
 p1 <- promise(function(resolve, reject) {
   later::later(~resolve(runif(1)), delay = 2)
@@ -53,6 +52,5 @@ then(p2,
   onFulfilled = ~message("Success"),
   onRejected = ~message("Failure")
 )
-}
 
 }

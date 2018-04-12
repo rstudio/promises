@@ -275,7 +275,6 @@ normalizeOnRejected <- function(onRejected) {
 #' @return A promise object (see \code{\link{then}}).
 #'
 #' @examples
-#' \dontrun{
 #' # Create a promise that resolves to a random value after 2 secs
 #' p1 <- promise(function(resolve, reject) {
 #'   later::later(~resolve(runif(1)), delay = 2)
@@ -291,7 +290,6 @@ normalizeOnRejected <- function(onRejected) {
 #'   onFulfilled = ~message("Success"),
 #'   onRejected = ~message("Failure")
 #' )
-#' }
 #'
 #' @export
 promise <- function(action) {
@@ -355,14 +353,12 @@ promise <- function(action) {
 #' @param reason An error message string, or error object.
 #'
 #' @examples
-#' \dontrun{
 #' promise_resolve(mtcars) %...>%
 #'   head() %...>%
 #'   print()
 #'
 #' promise_reject("Something went wrong") %...T!%
 #'   { message(conditionMessage(.)) }
-#' }
 #'
 #' @export
 promise_resolve <- function(value) {
@@ -462,7 +458,9 @@ as.promise.default <- function(x) {
 #' Fulfill a promise
 #'
 #' Use these functions to satisfy a promise with either success (\code{resolve})
-#' or failure (\code{reject}).
+#' or failure (\code{reject}). These functions are not exported, but rather, are
+#' passed as arguments to the \code{action} function you pass to a [promise]
+#' constructor.
 #'
 #' @param value The result from a successful calculation.
 #' @param reason An error or string that explains why the operation failed.

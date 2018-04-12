@@ -55,7 +55,9 @@ using a \code{.} at the head of a pipeline to turn the entire pipeline into a
 function instead of an expression.
 }
 \examples{
-\dontrun{
+library(future)
+plan(multisession)
+
 future(cars) \%...>\%
   head(5) \%...T>\%
   print()
@@ -63,7 +65,6 @@ future(cars) \%...>\%
 # If the read.csv fails, resolve to NULL instead
 future(read.csv("http://example.com/data.csv")) \%...!\%
   { NULL }
-}
 
 }
 \seealso{

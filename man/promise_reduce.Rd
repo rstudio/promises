@@ -33,7 +33,6 @@ promise as input (unless \code{.x} itself is a list of promises to begin with, i
 which case the second parameter would be a promise).
 }
 \examples{
-\dontrun{
 # Returns a promise for the sum of e1 + e2, with a 0.5 sec delay
 slowly_add <- function(e1, e2) {
   promise(~later::later(~resolve(e1 + e2), delay = 0.5))
@@ -41,6 +40,5 @@ slowly_add <- function(e1, e2) {
 
 # Prints 55 after a little over 5 seconds
 promise_reduce(1:10, slowly_add, .init = 0) \%...>\% print()
-}
 
 }

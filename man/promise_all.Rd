@@ -33,7 +33,6 @@ fulfilled. Use \code{promise_race} to wait for the first of multiple promise
 objects to be either fulfilled or rejected.
 }
 \examples{
-\dontrun{
 p1 <- promise(~later::later(~resolve(1), delay = 1))
 p2 <- promise(~later::later(~resolve(2), delay = 2))
 
@@ -47,7 +46,6 @@ promise_race(p1, p2) \%...>\% {
 promise_all(p1, p2) \%...>\% {
   cat("promise_all:\\n")
   str(.)
-}
 }
 
 }
