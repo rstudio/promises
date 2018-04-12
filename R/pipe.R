@@ -39,6 +39,7 @@ magrittr::"%T>%"
 #'   a promise or non-promise value, or throw an error.
 #'
 #' @examples
+#' \donttest{
 #' library(future)
 #' plan(multisession)
 #'
@@ -49,6 +50,7 @@ magrittr::"%T>%"
 #' # If the read.csv fails, resolve to NULL instead
 #' future(read.csv("http://example.com/data.csv")) %...!%
 #'   { NULL }
+#' }
 #'
 #' @return A new promise.
 #'

@@ -1,7 +1,7 @@
 Package: promises
 Type: Package
 Title: Abstractions for Promise-Based Asynchronous Programming
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
       person("Joe", "Cheng", email = "joe@rstudio.com", role = c("aut", "cre")),
       person("RStudio", role = c("cph", "fnd"))

@@ -55,6 +55,7 @@ using a \code{.} at the head of a pipeline to turn the entire pipeline into a
 function instead of an expression.
 }
 \examples{
+\donttest{
 library(future)
 plan(multisession)
 
@@ -65,6 +66,7 @@ future(cars) \%...>\%
 # If the read.csv fails, resolve to NULL instead
 future(read.csv("http://example.com/data.csv")) \%...!\%
   { NULL }
+}
 
 }
 \seealso{
