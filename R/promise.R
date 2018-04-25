@@ -187,9 +187,12 @@ Promise <- R6::R6Class("Promise",
     },
     finally = function(onFinally) {
       invisible(self$then(
-        onFulfilled = function(value) {
+        onFulfilled = function(value, .visible) {
           onFinally()
-          value
+          if (.visible)
+            value
+          else
+            invisible(value)
         },
         onRejected = function(reason) {
           onFinally()
