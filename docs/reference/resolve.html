@@ -28,7 +28,9 @@
 <meta property="og:title" content="Fulfill a promise — resolve" />
 
 <meta property="og:description" content="Use these functions to satisfy a promise with either success (resolve)
-or failure (reject)." />
+or failure (reject). These functions are not exported, but rather, are
+passed as arguments to the action function you pass to a promise
+constructor." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -56,7 +58,7 @@ or failure (reject)." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1</span>
       </span>
     </div>
 
@@ -125,7 +127,9 @@ or failure (reject)." />
 
     
     <p>Use these functions to satisfy a promise with either success (<code>resolve</code>)
-or failure (<code>reject</code>).</p>
+or failure (<code>reject</code>). These functions are not exported, but rather, are
+passed as arguments to the <code>action</code> function you pass to a <a href='promise.html'>promise</a>
+constructor.</p>
     
 
     <pre class="usage"><span class='fu'>resolve</span>(<span class='kw'>value</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)

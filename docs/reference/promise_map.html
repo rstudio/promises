@@ -58,7 +58,7 @@ values only, no promises)." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1</span>
       </span>
     </div>
 
@@ -169,8 +169,7 @@ by <code>promise_map</code> immediately rejects with that err.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='co'># Waits x seconds, then returns x*10</span>
+    <pre class="examples"><div class='input'><span class='co'># Waits x seconds, then returns x*10</span>
 <span class='no'>wait_this_long</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>x</span>) {
   <span class='fu'><a href='promise.html'>promise</a></span>(~<span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/later/topics/later'>later</a></span>(~{
     <span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='no'>x</span>*<span class='fl'>10</span>)
@@ -178,9 +177,7 @@ by <code>promise_map</code> immediately rejects with that err.</p>
 }
 
 <span class='fu'>promise_map</span>(<span class='fu'>list</span>(<span class='kw'>A</span><span class='kw'>=</span><span class='fl'>1</span>, <span class='kw'>B</span><span class='kw'>=</span><span class='fl'>2</span>, <span class='kw'>C</span><span class='kw'>=</span><span class='fl'>3</span>), <span class='no'>wait_this_long</span>) <span class='kw'>%...&gt;%</span>
-  <span class='fu'>print</span>()
-<span class='co'># }</span><div class='input'>
-</div></pre>
+  <span class='fu'>print</span>()</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

@@ -60,7 +60,7 @@ which case the second parameter would be a promise)." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1</span>
       </span>
     </div>
 
@@ -171,16 +171,13 @@ results in an error or a rejected promise, then the overall
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='co'># Returns a promise for the sum of e1 + e2, with a 0.5 sec delay</span>
+    <pre class="examples"><div class='input'><span class='co'># Returns a promise for the sum of e1 + e2, with a 0.5 sec delay</span>
 <span class='no'>slowly_add</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>e1</span>, <span class='no'>e2</span>) {
   <span class='fu'><a href='promise.html'>promise</a></span>(~<span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/later/topics/later'>later</a></span>(~<span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='no'>e1</span> + <span class='no'>e2</span>), <span class='kw'>delay</span> <span class='kw'>=</span> <span class='fl'>0.5</span>))
 }
 
 <span class='co'># Prints 55 after a little over 5 seconds</span>
-<span class='fu'>promise_reduce</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='no'>slowly_add</span>, <span class='kw'>.init</span> <span class='kw'>=</span> <span class='fl'>0</span>) <span class='kw'>%...&gt;%</span> <span class='fu'>print</span>()
-<span class='co'># }</span><div class='input'>
-</div></pre>
+<span class='fu'>promise_reduce</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='no'>slowly_add</span>, <span class='kw'>.init</span> <span class='kw'>=</span> <span class='fl'>0</span>) <span class='kw'>%...&gt;%</span> <span class='fu'>print</span>()</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
