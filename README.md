@@ -7,14 +7,10 @@ A promise library for R. https://rstudio.github.io/promises
 ## Installation
 
 ```r
-devtools::install_github("rstudio/promises")
+install.packages("promises")
 ```
 
-The CRAN version of Shiny doesn't (yet) support promises. Until support is merged, you'll have to install from GitHub:
-
-```r
-devtools::install_github("rstudio/shiny")
-```
+To use promises with Shiny, make sure you have Shiny v1.1.0 or later.
 
 ## License
 
