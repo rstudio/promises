@@ -545,10 +545,16 @@
 <p>In our case, our current code has an elegant design that’s easy to understand: the <code>data</code> reactive provides all the rows, which the other reactives and outputs are free to subset and aggregate however they want. We can probably make our code significantly faster by doing more summarizing, aggregation, and filtering inside the future; not only does this make more of the work happen in parallel, but by returning the data in already-processed form, we can have much less data to transfer from the worker process back to the Shiny process. (For example, the data for May 31, 2018 weighs 75MB before optimization, and 8.8MB afterwards.)</p>
 <p>You can see the results below, as “async2”:</p>
 <p><img src="case-study-gantt3.png"></p>
-<p>You can see the <a href="https://github.com/rstudio/cranwhales/compare/async...async2?diff=split">code changes here</a>. The code has not changed that much, but I do feel it has lost some elegance and maintainability, simply because the code for each of the affected outputs now has one foot in the the render function and one foot in the future. If your app’s total audience is a team of a hundred analysts and execs, you might want to just forgo the extra performance and stick with the clearer, more maintainable code. But if you have serious scaling needs, this is probably a small price to pay.</p>
-<p>(Let’s get real for a second, though. If this weren’t an example app written for exposition purposes, but a real production app that was intended to scale to thousands of concurrent users across dozens of R processes, we wouldn’t download and parse CSV files on the fly. Instead, we’d establish a proper <a href="http://solutions.rstudio.com/twitter_etl/">ETL procedure</a> to run every night and put the results into a properly indexed database table, or RDS files with just the data we need.)</p>
+<p>The homepage load times have dropped further, and the calculation times are now as fast or faster than the sync code pretty much across the board. The overall test completion time has dropped by an additional minute compared to our previous effort.</p>
+<p>Note also that the maximum “skyscraper height” has gone down, not up, as might’ve been expected. While the sync version’s effective concurrency was limited because of long page load times, the reason for async2 is the opposite: sessions are finishing more quickly than before, so they aren’t stacking up as much. In other words, the sync version’s sessions are slow to come in through the front door, while async2’s sessions are quick to leave through the back.</p>
+<p>Take a look at the <a href="https://github.com/rstudio/cranwhales/compare/async...async2?diff=split">code diff for async vs. async2</a>. While the code has not changed very dramatically, it has lost a little elegance and maintainability: the code for each of the affected outputs now has one foot in the the render function and one foot in the future. If your app’s total audience is a team of a hundred analysts and execs, you may choose to forgo the extra performance and stick with the original async (or even sync) code. But if you have serious scaling needs, the refactoring is probably a small price to pay.</p>
+<p>Let’s get real for a second, though. If this weren’t an example app written for exposition purposes, but a real production app that was intended to scale to thousands of concurrent users across dozens of R processes, we wouldn’t download and parse CSV files on the fly. Instead, we’d establish a proper <a href="http://solutions.rstudio.com/twitter_etl/">ETL procedure</a> to run every night and put the results into a properly indexed database table, or RDS files with just the data we need.</p>
 <p>At this point, the clear majority of the latency for the async2 branch is from ggplot2 plotting. <a href="https://www.rstudio.com/resources/videos/scaling-shiny/">Sean’s talk</a> alluded to some upcoming plot caching features we’re adding to Shiny, and I imagine they would have as dramatic an effect for this test as they did for Sean.</p>
 </div>
+</div>
+<div id="summing-up" class="section level2">
+<h2 class="hasAnchor">
+<a href="#summing-up" class="anchor"></a>Summing up</h2>
 </div>
 </div>
   </div>
@@ -564,6 +570,7 @@
       <li><a href="#the-implementation">The implementation</a></li>
       <li><a href="#converting-to-async">Converting to async</a></li>
       <li><a href="#measuring-scalability">Measuring scalability</a></li>
+      <li><a href="#summing-up">Summing up</a></li>
       </ul>
 </div>
       </div>
