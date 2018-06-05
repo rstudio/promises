@@ -345,13 +345,12 @@
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co"># ASYNCHRONOUS version</span></a>
 <a class="sourceLine" id="cb11-2" data-line-number="2"></a>
 <a class="sourceLine" id="cb11-3" data-line-number="3">whale_downloads &lt;-<span class="st"> </span><span class="kw">reactive</span>({</a>
-<a class="sourceLine" id="cb11-4" data-line-number="4">  <span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">data =</span> <span class="kw">data</span>(), <span class="dt">whales =</span> <span class="kw">whales</span>()) <span class="op">%...&gt;%</span></a>
-<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="st">    </span><span class="kw">with</span>({</a>
-<a class="sourceLine" id="cb11-6" data-line-number="6">      data <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb11-7" data-line-number="7"><span class="st">        </span><span class="kw">inner_join</span>(whales, <span class="st">"ip_id"</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb11-8" data-line-number="8"><span class="st">        </span><span class="kw">select</span>(<span class="op">-</span>n)</a>
-<a class="sourceLine" id="cb11-9" data-line-number="9">    })</a>
-<a class="sourceLine" id="cb11-10" data-line-number="10">})</a></code></pre></div>
+<a class="sourceLine" id="cb11-4" data-line-number="4">  <span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">data =</span> <span class="kw">data</span>(), <span class="dt">whales =</span> <span class="kw">whales</span>()) <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">with</span>({</a>
+<a class="sourceLine" id="cb11-5" data-line-number="5">    data <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb11-6" data-line-number="6"><span class="st">      </span><span class="kw">inner_join</span>(whales, <span class="st">"ip_id"</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb11-7" data-line-number="7"><span class="st">      </span><span class="kw">select</span>(<span class="op">-</span>n)</a>
+<a class="sourceLine" id="cb11-8" data-line-number="8">  })</a>
+<a class="sourceLine" id="cb11-9" data-line-number="9">})</a></code></pre></div>
 <div id="promises-the-gathering" class="section level4">
 <h4 class="hasAnchor">
 <a href="#promises-the-gathering" class="anchor"></a>Promises: the Gathering</h4>
@@ -571,7 +570,7 @@
 <div id="summing-up" class="section level2">
 <h2 class="hasAnchor">
 <a href="#summing-up" class="anchor"></a>Summing up</h2>
-<p>With async programming, expensive computations or tasks no longer need to be the scalability killers that they once were for Shiny. Armed with this and other common techniques like precomputation, caching, and load balancing, it’s possible to write responsive and scalable Shiny applications that can be safely deployed to thousands of concurrent users.</p>
+<p>With async programming, expensive computations and tasks no longer need to be the scalability killers that they once were for Shiny. Armed with this and other common techniques like precomputation, caching, and load balancing, it’s possible to write responsive and scalable Shiny applications that can be safely deployed to thousands of concurrent users.</p>
 </div>
 </div>
   </div>

@@ -312,12 +312,11 @@ Here's what the real solution looks like:
 # ASYNCHRONOUS version
 
 whale_downloads <- reactive({
-  promise_all(data = data(), whales = whales()) %...>%
-    with({
-      data %>%
-        inner_join(whales, "ip_id") %>%
-        select(-n)
-    })
+  promise_all(data = data(), whales = whales()) %...>% with({
+    data %>%
+      inner_join(whales, "ip_id") %>%
+      select(-n)
+  })
 })
 ```
 
@@ -604,4 +603,4 @@ Much of the remaining latency for the async2 branch is from ggplot2 plotting. [S
 
 ## Summing up
 
-With async programming, expensive computations or tasks no longer need to be the scalability killers that they once were for Shiny. Armed with this and other common techniques like precomputation, caching, and load balancing, it's possible to write responsive and scalable Shiny applications that can be safely deployed to thousands of concurrent users.
+With async programming, expensive computations and tasks no longer need to be the scalability killers that they once were for Shiny. Armed with this and other common techniques like precomputation, caching, and load balancing, it's possible to write responsive and scalable Shiny applications that can be safely deployed to thousands of concurrent users.
