@@ -312,9 +312,9 @@ Here's what the real solution looks like:
 # ASYNCHRONOUS version
 
 whale_downloads <- reactive({
-  promise_all(data = data(), whales = whales()) %...>% with({
-    data %>%
-      inner_join(whales, "ip_id") %>%
+  promise_all(data_df = data(), whales_df = whales()) %...>% with({
+    data_df %>%
+      inner_join(whales_df, "ip_id") %>%
       select(-n)
   })
 })
