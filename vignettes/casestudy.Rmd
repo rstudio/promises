@@ -590,6 +590,12 @@ This last plot shows the same data as above, but with the sessions aligned by st
 
 ![](case-study-gantt-aligned.png)
 
+To get a visceral sense for what it feels like to use the app under load, here's a video that shows what it's like to browse the app while the load test is running at its peak. The left side of the screen shows "sync", the right shows "async2". In both cases, I navigated to the app when session #40 was started.
+
+<p class="embed-responsive embed-responsive-16by9">
+<iframe class="embed-responsive-item" src="https://www.youtube-nocookie.com/embed/HsjdEZMnb0w?rel=0&amp;showinfo=0&amp;ecver=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</p>
+
 Take a look at the [code diff for async vs. async2](https://github.com/rstudio/cranwhales/compare/async...async2?diff=split). While the code has not changed very dramatically, it has lost a little elegance and maintainability: the code for each of the affected outputs now has one foot in the the render function and one foot in the future. If your app's total audience is a team of a hundred analysts and execs, you may choose to forgo the extra performance and stick with the original async (or even sync) code. But if you have serious scaling needs, the refactoring is probably a small price to pay.
 
 Let's get real for a second, though. If this weren't an example app written for exposition purposes, but a real production app that was intended to scale to thousands of concurrent users across dozens of R processes, we wouldn't download and parse CSV files on the fly. Instead, we'd establish a proper [ETL procedure](http://solutions.rstudio.com/twitter_etl/) to run every night and put the results into a properly indexed database table, or RDS files with just the data we need. As I said [earlier](#improving-performance-and-scalability), a little precomputation and caching can make a huge difference!
