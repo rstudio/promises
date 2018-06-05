@@ -17,8 +17,8 @@ install.packages("shiny")
 There are also some supporting packages that have experimental async-compatible branches:
 
 ```r
-devtools::install_github("ramnathv/htmlwidgets@async")
-devtools::install_github("jcheng5/plotly@joe/feature/async")
+devtools::install_github("ramnathv/htmlwidgets")
+devtools::install_github("ropensci/plotly@async")
 devtools::install_github("rstudio/DT@async")
 ```
 
@@ -53,3 +53,7 @@ Learn how to integrate promises into your Shiny applications.
 #### [6. Combining promises](articles/combining.html)
 
 Functions and techniques for working with multiple promises simultaneously.
+
+#### [7. Case study: converting a Shiny app to async](articles/casestudy.html)
+
+Walk through the conversion of a realistic Shiny example app to async.
