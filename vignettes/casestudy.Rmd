@@ -29,7 +29,6 @@ RStudio maintains the popular `0-Cloud` CRAN mirror, and the log files it genera
 Here are the first few lines of http://cran-logs.rstudio.com/2018/2018-05-26.csv.gz:
 
 ```
-JMC15-2017:cranwhales jcheng$ zless data_cache/2018-05-26.csv.gz
 "date","time","size","r_version","r_arch","r_os","package","version","country","ip_id"
 "2018-05-26","20:42:23",450377,"3.4.4","x86_64","linux-gnu","lubridate","1.7.4","NL",1
 "2018-05-26","20:42:30",484348,NA,NA,NA,"homals","0.9-7","GB",2
@@ -126,6 +125,22 @@ In terms of reactive dependencies, `data => whales`, and `data + whales => whale
 
 The outputs in this app are mostly either `renderPlot`s that we populate with `ggplot2`, or `shinydashboard::renderValueBox`es. They all rely on one or more of the reactive expressions we just described. We won't catalog them all here, as they're not individually interesting, but we will look at some archetypes below.
 
+## Improving performance and scalability
+
+While this article is specifically about async, this is a good time to remind you that there are lots of ways to improve the performance of a Shiny app. Async is just one tool in the toolbox, and before reaching for that hammer, take a moment to consider your other options:
+
+1. Have I used [profvis](https://rstudio.github.io/profvis/) to **profile my code** and determine what's actually taking so long? (Human intuition is a notoriously bad profiler!)
+2. Can I perform any **calculations, summarizations, and aggregations offline**, when my Shiny app isn't even running, and save the results to .rds files to be read by the app?
+3. Are there any opportunities to **cache**--that is, save the results of my calculations and use them if I get the same request later? (See [memoise](https://cran.r-project.org/web/packages/memoise/index.html), or roll your own.)
+4. Am I effectively leveraging [reactive programming](https://www.rstudio.com/resources/videos/effective-reactive-programming/) to make sure my reactives are doing as little work as possible?
+5. When deploying my app, am I load balancing across multiple R processes and/or multiple servers? ([Shiny Server Pro](http://docs.rstudio.com/shiny-server/#utilization-scheduler), [RStudio Connect](http://docs.rstudio.com/connect/admin/appendix-configuration.html#appendix-configuration-scheduler), [ShinyApps.io](https://shiny.rstudio.com/articles/scaling-and-tuning.html))
+
+These options are more generally useful than using async techniques because they can dramatically speed up the performance of an app even if only a single user is using it. While it obviously depends on the particulars of the app itself, a few lines of precomputation or caching logic can often lead to 10X-100X better performance. Async, on the other hand, generally doesn't help make a single session faster. Instead, it helps a single Shiny process support more concurrent sessions without getting bogged down.
+
+Async can be an essential tool when there is no way around performing expensive tasks (i.e. taking multiple seconds) while the user waits. For example, an app that analyzes any user-specified Twitter profile may get too many unique queries (assuming most people specify their own Twitter handle) for caching to be much help. And applications that invite users to upload their own datasets won't have an opportunity to do any offline summarizing in advance. If you need to run apps like that and support lots of concurrent users, async can be a huge help.
+
+In that sense, the cranwhales app isn't a perfect example, because it has lots of opportunities for precomputation and caching that we'll willfully ignore today so that I can better illustrate the points I want to make about async. When you're working on your own app, though, please think carefully about _all_ of the different techniques you have for improving performance.
+
 ## Converting to async
 
 To quote the article [*Using promises with Shiny*](https://rstudio.github.io/promises/articles/shiny.html), async programming with Shiny boils down to following a few steps:
@@ -189,6 +204,8 @@ data <- eventReactive(input$date, {
   })
 })
 ```
+
+(Earlier, I said we wouldn't take advantage of precomputation or caching. That wasn't entirely true; in the code above, we cache the log files we download in a `data_cache` directory. I couldn't bring myself to put my internet connection through that level of abuse, as I knew I'd be running this code thousands of times as I load tested it.)
 
 For now, we'll lose the `withProgress`/`setProgress` reporting, since doing that correctly requires some more advanced techniques that we'll talk about later. We'll come back and fix this code later, but for now:
 
@@ -547,46 +564,38 @@ I then used this test script to generate load against the Shiny app running in m
 
 ### Sync vs. async performance
 
-![](case-study-gantt1.png)
+![](case-study-gantt-async.png)
 
-In this plot, each row represents a single session, and the x dimension represents time. Each of the rectangles represents a single "step" in the test script, be it downloading the HTML for the homepage, fetching one of the two dozen JavaScript/CSS files, or waiting for the server to update outputs. So the wider a rectangle is, the longer the user had to wait.
+In this plot, each row represents a single session, and the x dimension represents time. Each of the rectangles represents a single "step" in the test script, be it downloading the HTML for the homepage, fetching one of the two dozen JavaScript/CSS files, or waiting for the server to update outputs. So the wider a rectangle is, the longer the user had to wait. (The empty gaps between rectangles represents time the app is waiting for the user to click an input; their widths are hard-coded into the test script.)
 
-Of particular importance are the red and pink rectangles, as these represent the initial page load. While these are taking place, the user is staring at a blank page, probably wondering if the server is down. Long waits during this stage are not only undesirable, but surprising and incomprehensible; whereas the user might be prepared to wait a little while for a complicated chart involving millions of rows of data to be rendered in response to an input change.
+Of particular importance are the red and pink rectangles, as these represent the initial page load. While these are taking place, the user is staring at a blank page, probably wondering if the server is down. Long waits during this stage are not only undesirable, but surprising and incomprehensible to the user; whereas the same user is probably prepared to wait a little while for a complicated visualization to be rendered in response to an input change.
 
-And as you can see from this plot, the behavior of the async app is much improved in homepage/JS/CSS loading time. The sync version of the app starts displaying unacceptably long red/pink loading times as early as session 10, and by session #40 the maximum page load time has exceeded two minutes. The async version at that point is showing 40 second load times, which is not great, but still a huge improvement. Judging by page load time alone, the async branch can support 3X the number of concurrent users.
-
-I was surprised, though, to see that the blue areas of the chart were showing noticeably more latency for async than for sync.
-
-There are several reasons for this, but one is that the slow page load times for the sync version actually ends up limiting the number of sessions that are contending to perform expensive computations. If you draw a vertical line anywhere through one of the Gantt charts, the number of blue rectangles you intersect represents the amount of concurrent sessions that are actively trying to do work on the server side.
-
-![](case-study-gantt2.png)
-
-Notice that the large swaths of red and pink on the left limit the height of the blue "skyscraper" I've highlighted in yellow, while on the right, the skyscrapers get both taller (more contention) and wider (more latent). Due to the way this load test is structured, the async version's efficiency in loading the homepage means it's "rewarded" by having more contention on the server side. Taken in aggregate, though, the async version ultimately runs each session faster from start to finish, and also finishes the full 50-session test run about a minute sooner.
+And as you can see from this plot, the behavior of the async app is much improved in the critical metric of homepage/JS/CSS loading time. The sync version of the app starts displaying unacceptably long red/pink loading times as early as session 15, and by session #44 the maximum page load time has exceeded one minute. The async version at that point is showing 25 second load times, which is far from great, but still a significant step in the right direction.
 
 ### Further optimizations
 
-But why isn't it faster still? The sync version does all of its work on a single thread, and I specifically designed this app to be a nightmare for scalability by having each session kick off by parsing hundreds of megabytes of CSV, an operation that takes several long seconds. The async version gets to spread these jobs across seven different workers. Why aren't we seeing a greater time savings?
+I was surprised that the async version's page load times weren't even faster, and even more surprised to see that the blue rectangles were just as wide as the sync version. Why isn't the async version way faster? The sync version does all of its work on a single thread, and I specifically designed this app to be a nightmare for scalability by having each session kick off by parsing hundreds of megabytes of CSV, an operation that is quite expensive. The async version gets to spread these jobs across several workers. Why aren't we seeing a greater time savings?
 
-First, calling `future(read_csv("big_file.csv"))` is a bit of a worst-case scenario for future and async. `read_csv` is generally fast, but because the CRAN log files are so big, `read_csv("big_file.csv")` is slow. The value it returns is a very large data frame, that has now been loaded not into the Shiny process, but a `future` worker process. In order to return that data frame to the Shiny process, that data must first be serialized (I believe `future` essentially uses `saveRDS` for this), transmitted to the Shiny process, and then deserialized; to make matters worse, the transmitting and deserialization steps happen on the main R thread that we're working so hard to try to keep idle. With all this extra overhead, it's not that futures have _no_ value here, as we've seen, but it's definitely not ideal.
+Mostly, it's because calling `future(read_csv("big_file.csv"))` is almost a worst-case scenario for future and async. `read_csv` is generally fast, but because the CRAN log files are so big, `read_csv("big_file.csv")` is slow. The value it returns is a very large data frame, that has now been loaded not into the Shiny process, but a `future` worker process. In order to return that data frame to the Shiny process, that data must first be serialized (I believe `future` essentially uses `saveRDS` for this), transmitted to the Shiny process, and then deserialized; to make matters worse, the transmitting and deserialization steps happen on the main R thread that we're working so hard to try to keep idle. **The larger the data we send back and forth to the future, the more performance suffers,** and in this case we're sending back quite a lot of data.
 
-This is where we have to start asking ourselves what's important to us. Both the sync and async versions of this app were written to be as idiomatic, simple, and clear as possible. Computer scientists love to talk about [space-time tradeoffs](https://en.wikipedia.org/wiki/Space%E2%80%93time_tradeoff), but just as common in my experience is a tradeoff between elegance and performance, and that goes double where functional programming is concerned.
+We can make our code significantly faster by doing more summarizing, aggregation, and filtering _inside_ the future; not only does this make more of the work happen in parallel, but by returning the data in already-processed form, we can have much less data to transfer from the worker process back to the Shiny process. (For example, the data for May 31, 2018 weighs 75MB before optimization, and 8.8MB afterwards.)
 
-In our case, our current code has an elegant design that's easy to understand: the `data` reactive provides all the rows, which the other reactives and outputs are free to subset and aggregate however they want. We can probably make our code significantly faster by doing more summarizing, aggregation, and filtering inside the future; not only does this make more of the work happen in parallel, but by returning the data in already-processed form, we can have much less data to transfer from the worker process back to the Shiny process. (For example, the data for May 31, 2018 weighs 75MB before optimization, and 8.8MB afterwards.)
+Compare all three runs in the image below (the newly optimized version is labelled "async2"). The homepage load times have dropped further, and the calculation times are now dramatically faster than the sync code.
 
-You can see the results below, as "async2":
+![](case-study-gantt-async2.png)
 
-![](case-study-gantt3.png)
+Looking at the "async2" graph, the leading (bottom-left) edge has the same shape as before, as that's simply the rate at which the load testing tool launches new sessions. But notice how much more closely the trailing (upper-right) edge matches the leading edge! It means that even as the number of active sessions ramped up, the amount of latency didn't get dramatically worse, unlike with the "sync" and "async" versions. And each of the individual blue rectangles in the "async2" are comparatively tiny, meaning that users never have to wait more than a dozen seconds at the most for plots to update.
 
-The homepage load times have dropped further, and the calculation times are now as fast or faster than the sync code pretty much across the board. The overall test completion time has dropped by an additional minute compared to our previous effort.
+This last plot shows the same data as above, but with the sessions aligned by start time. You can clearly see how the sessions are both shorter and less variable in "async2" compared to the others. I've added a yellow vertical line at the 10 second mark; if the page load (red/pink) has not completed at this point, it's likely that your visitor has left in disgust. While "async" does better than "sync", they both break through the 10 second mark early and often. In contrast, the "async2" version just barely peeks over the line three times.
 
-Note also that the maximum "skyscraper height" has gone down, not up, as might've been expected. While the sync version's effective concurrency was limited because of long page load times, the reason for async2 is the opposite: sessions are finishing more quickly than before, so they aren't stacking up as much. In other words, the sync version's sessions are slow to come in through the front door, while async2's sessions are quick to leave through the back.
+![](case-study-gantt-aligned.png)
 
 Take a look at the [code diff for async vs. async2](https://github.com/rstudio/cranwhales/compare/async...async2?diff=split). While the code has not changed very dramatically, it has lost a little elegance and maintainability: the code for each of the affected outputs now has one foot in the the render function and one foot in the future. If your app's total audience is a team of a hundred analysts and execs, you may choose to forgo the extra performance and stick with the original async (or even sync) code. But if you have serious scaling needs, the refactoring is probably a small price to pay.
 
-Let's get real for a second, though. If this weren't an example app written for exposition purposes, but a real production app that was intended to scale to thousands of concurrent users across dozens of R processes, we wouldn't download and parse CSV files on the fly. Instead, we'd establish a proper [ETL procedure](http://solutions.rstudio.com/twitter_etl/) to run every night and put the results into a properly indexed database table, or RDS files with just the data we need.
+Let's get real for a second, though. If this weren't an example app written for exposition purposes, but a real production app that was intended to scale to thousands of concurrent users across dozens of R processes, we wouldn't download and parse CSV files on the fly. Instead, we'd establish a proper [ETL procedure](http://solutions.rstudio.com/twitter_etl/) to run every night and put the results into a properly indexed database table, or RDS files with just the data we need. As I said [earlier](#improving-performance-and-scalability), a little precomputation and caching can make a huge difference!
 
-At this point, the clear majority of the latency for the async2 branch is from ggplot2 plotting. [Sean's talk](https://www.rstudio.com/resources/videos/scaling-shiny/) alluded to some upcoming plot caching features we're adding to Shiny, and I imagine they would have as dramatic an effect for this test as they did for Sean.
+Much of the remaining latency for the async2 branch is from ggplot2 plotting. [Sean's talk](https://www.rstudio.com/resources/videos/scaling-shiny/) alluded to some upcoming plot caching features we're adding to Shiny, and I imagine they will have as dramatic an effect for this test as they did for Sean.
 
 ## Summing up
 
-
+With async programming, expensive computations or tasks no longer need to be the scalability killers that they once were for Shiny. Armed with this and other common techniques like precomputation, caching, and load balancing, it's possible to write responsive and scalable Shiny applications that can be safely deployed to thousands of concurrent users.
