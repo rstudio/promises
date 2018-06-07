@@ -29,7 +29,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1.9000</span>
       </span>
     </div>
 
@@ -66,6 +66,9 @@
     </li>
     <li>
       <a href="../articles/combining.html">6. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
@@ -113,14 +116,14 @@
 <p>It’s mostly helpful for apps that have a few specific operations that take a long time, rather than lots of little operations that are all a bit slow on their own and add up to one big slow mess. We’re looking for watermelons, not blueberries.</p>
 <p><strong>Watermelons… sure. So then, how does this all work?</strong></p>
 <p>It all starts with <em>async functions</em>. An async function is one that performs an operation that takes a long time, yet returns control to you immediately. Whereas a normal function like <code>read.csv</code> will not return until its work is done and it has the value you requested, an asynchronous <code>read.csv.async</code> function would kick off the CSV reading operation, but then return immediately, long before the real work has actually completed.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(future)
-<span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multiprocess)
-
-read.csv.async &lt;-<span class="st"> </span><span class="cf">function</span>(file, <span class="dt">header =</span> <span class="ot">TRUE</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>) {
-  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
-    <span class="kw">read.csv</span>(file, <span class="dt">header =</span> header, <span class="dt">stringsAsFactors =</span> stringsAsFactors)
-  })
-}</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(future)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multiprocess)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">read.csv.async &lt;-<span class="st"> </span><span class="cf">function</span>(file, <span class="dt">header =</span> <span class="ot">TRUE</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>) {</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5">  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">    <span class="kw">read.csv</span>(file, <span class="dt">header =</span> header, <span class="dt">stringsAsFactors =</span> stringsAsFactors)</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">  })</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">}</a></code></pre></div>
 <p>(Don’t worry about what this definition means for now. You’ll learn more about defining async functions in <a href="futures.html">Launching tasks</a>.)</p>
 <p><strong>So instead of “read this CSV file” it’s more like “begin reading this CSV file”?</strong></p>
 <p>Yes! That’s what async functions do: they start things, and give you back a special object called a <em>promise</em>. If it doesn’t return a promise, it’s not an async function.</p>
@@ -134,15 +137,15 @@ read.csv.async &lt;-<span class="st"> </span><span class="cf">function</span>(fi
 <p>Instead, a promise lets you <em>chain together operations</em> that should be performed whenever the operation completes. These operations might have side effects (like plotting, or writing to disk, or printing to the console) or they might transform the result values somehow.</p>
 <p><strong>Chain together operations? Using the <code>%&gt;%</code> operator?</strong></p>
 <p>A lot like that! You can’t use the <code>%&gt;%</code> operator itself, but we provide a promise-compatible version of it: <code>%...&gt;%</code>. So whereas you might do this to a regular data frame:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
-<span class="kw">read.csv</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">View</span>()</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">read.csv</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="st">  </span><span class="kw">View</span>()</a></code></pre></div>
 <p>The async version would look like:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
-<span class="kw">read.csv.async</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>) <span class="op">%...&gt;%</span>
-<span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>) <span class="op">%...&gt;%</span>
-<span class="st">  </span><span class="kw">View</span>()</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">read.csv.async</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>) <span class="op">%...&gt;%</span></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="st">  </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>) <span class="op">%...&gt;%</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="st">  </span><span class="kw">View</span>()</a></code></pre></div>
 <p>The <code>%...&gt;%</code> operator here is the secret sauce. It’s called the <em>promise pipe</em>; the <code>...</code> stands for promise, and <code>&gt;</code> mimics the standard pipe operator.</p>
 <p><strong>What a strange looking operator. Does it work just like a regular pipe?</strong></p>
 <p>In many ways <code>%...&gt;%</code> does work like a regular pipe: it rewrites each stage’s function call to take the previous stage’s output as the first argument. (All the <a href="https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html">standard magrittr tricks</a> apply here: <code>.</code>, <code>{</code>, parenthesized lambdas, etc.) But the differences, while subtle, are profound.</p>
@@ -153,57 +156,57 @@ read.csv.async &lt;-<span class="st"> </span><span class="cf">function</span>(fi
 <p>However, that work often can’t be done in the present, since the whole point of a promise is that it represents work that hasn’t completed yet. So <code>%...&gt;%</code> does the work of extracting and piping not at the time that it’s called, but rather, sometime in the future.</p>
 <p><strong>You lost me.</strong></p>
 <p>OK, let’s slow down and take this step by step. We’ll generate a promise by calling an async function:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_promise &lt;-<span class="st"> </span><span class="kw">read.csv.async</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">df_promise &lt;-<span class="st"> </span><span class="kw">read.csv.async</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>)</a></code></pre></div>
 <p>Even if <code>data.csv</code> is many gigabytes, <code>read.csv.async</code> returns immediately with a new promise. We store it as <code>df_promise</code>. Eventually, when the CSV reading operation successfully completes, the promise will contain a data frame, but for now it’s just an empty placeholder.</p>
 <p>One thing we definitely <em>can’t</em> do is treat <code>df_promise</code> as if it’s simply a data frame:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Doesn't work!</span>
-dplyr<span class="op">::</span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(df_promise, state <span class="op">==</span><span class="st"> "NY"</span>)</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># Doesn't work!</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">dplyr<span class="op">::</span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(df_promise, state <span class="op">==</span><span class="st"> "NY"</span>)</a></code></pre></div>
 <p>Try this and you’ll get an error like <code>no applicable method for 'filter_' applied to an object of class "promise"</code>. And the pipe won’t help you either; <code>df_promise %&gt;% filter(state == "NY")</code> will give you the same error.</p>
 <p><strong>Right, that makes sense. <code>filter</code> is designed to work on data frames, and <code>df_promise</code> isn’t a data frame.</strong></p>
 <p>Exactly. Now let’s try something that actually works:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_promise <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>)</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">df_promise <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>)</a></code></pre></div>
 <p>At the moment it’s called, this code won’t appear to do much of anything, really. But whenever the <code>df_promise</code> operation actually completes successfully, then the result of that operation—the plain old data frame—will be passed to <code><a href="http://dplyr.tidyverse.org/reference/filter.html">filter(., state = "NY")</a></code>.</p>
 <p><strong>OK, so that’s good. I see what you mean about <code>%...&gt;%</code> letting you use non-promise functions with promises. But the whole point of using the <code>filter</code> function is to get a data frame back. If <code>filter</code> isn’t even going to be called until some random time in the future, how do we get its value back?</strong></p>
 <p>I’ll tell you the answer, but it’s not going to be satisfying at first.</p>
 <p>When you use a regular <code>%&gt;%</code>, the result you get back is the return value from the right-hand side:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_filtered &lt;-<span class="st"> </span>df <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>)</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">df_filtered &lt;-<span class="st"> </span>df <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>)</a></code></pre></div>
 <p>When you use <code>%...&gt;%</code>, the result you get back is a promise, whose <em>eventual</em> result will be the return value from the right-hand side:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df_filtered_promise &lt;-<span class="st"> </span>df_promise <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>)</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">df_filtered_promise &lt;-<span class="st"> </span>df_promise <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>)</a></code></pre></div>
 <p><strong>Wait, what? If I have a promise, I can do stuff to it using <code>%...&gt;%</code>, but then I just end up with another promise? Why not just have <code>%...&gt;%</code> return a regular value instead of a promise?</strong></p>
 <p>Remember, the whole point of a promise is that we don’t know its value yet! So to write a function that uses a promise as input and returns some non-promise value as output, you’d need to either be a time traveler or an oracle.</p>
 <p>To summarize, once you start working with a promise, any calculations and actions that are “downstream” of that promise will need to become promise-oriented. Generally, this means once you have a promise, you need to use <code>%...&gt;%</code> and keep using it until your pipeline terminates.</p>
 <p><strong>I guess that makes sense. Still, if the only thing you can do with promises is make more promises, that limits their usefulness, doesn’t it?</strong></p>
 <p>It’s a different way of thinking about things, to be sure, but it turns out there’s not much limit in usefulness—especially in the context of a Shiny app.</p>
 <p>First, you can use promises with Shiny outputs. If you’re using an async-compatible version of Shiny (version &gt;=1.1), all of the built-in <code>renderXXX</code> functions can deal with either regular values or promises. An example of the latter:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({
-  <span class="kw">read.csv.async</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>) <span class="op">%...&gt;%</span>
-<span class="st">    </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>)
-})</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">  <span class="kw">read.csv.async</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>) <span class="op">%...&gt;%</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="st">    </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>)</a>
+<a class="sourceLine" id="cb9-4" data-line-number="4">})</a></code></pre></div>
 <p>When <code>output$table</code> executes the <code>renderTable</code> code block, it will notice that the result is a promise, and wait for it to complete before continuing with the table rendering. While it’s waiting, the R process can move on to do other things.</p>
 <p>Second, you can use promises with reactive expressions. Reactive expressions treat promises about the same as they treat other values, actually. But this works perfectly fine:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># A reactive expression that returns a </span>
-filtered_df &lt;-<span class="st"> </span><span class="kw">reactive</span>({
-  <span class="kw">read.csv.async</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>) <span class="op">%...&gt;%</span>
-<span class="st">    </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>) <span class="op">%...&gt;%</span>
-<span class="st">    </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(median_income)
-})
-
-<span class="co"># A reactive expression that reads the previous</span>
-<span class="co"># (promise-returning) reactive, and returns a</span>
-<span class="co"># new promise</span>
-top_n_by_income &lt;-<span class="st"> </span><span class="kw">reactive</span>({
-  <span class="kw">filtered_df</span>() <span class="op">%...&gt;%</span>
-<span class="st">    </span><span class="kw">head</span>(input<span class="op">$</span>n)
-})
-
-output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({
-  <span class="kw">top_n_by_income</span>()
-})</code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># A reactive expression that returns a </span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2">filtered_df &lt;-<span class="st"> </span><span class="kw">reactive</span>({</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3">  <span class="kw">read.csv.async</span>(<span class="st">"https://rstudio.github.io/promises/data.csv"</span>) <span class="op">%...&gt;%</span></a>
+<a class="sourceLine" id="cb10-4" data-line-number="4"><span class="st">    </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(state <span class="op">==</span><span class="st"> "NY"</span>) <span class="op">%...&gt;%</span></a>
+<a class="sourceLine" id="cb10-5" data-line-number="5"><span class="st">    </span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(median_income)</a>
+<a class="sourceLine" id="cb10-6" data-line-number="6">})</a>
+<a class="sourceLine" id="cb10-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb10-8" data-line-number="8"><span class="co"># A reactive expression that reads the previous</span></a>
+<a class="sourceLine" id="cb10-9" data-line-number="9"><span class="co"># (promise-returning) reactive, and returns a</span></a>
+<a class="sourceLine" id="cb10-10" data-line-number="10"><span class="co"># new promise</span></a>
+<a class="sourceLine" id="cb10-11" data-line-number="11">top_n_by_income &lt;-<span class="st"> </span><span class="kw">reactive</span>({</a>
+<a class="sourceLine" id="cb10-12" data-line-number="12">  <span class="kw">filtered_df</span>() <span class="op">%...&gt;%</span></a>
+<a class="sourceLine" id="cb10-13" data-line-number="13"><span class="st">    </span><span class="kw">head</span>(input<span class="op">$</span>n)</a>
+<a class="sourceLine" id="cb10-14" data-line-number="14">})</a>
+<a class="sourceLine" id="cb10-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb10-16" data-line-number="16">output<span class="op">$</span>table &lt;-<span class="st"> </span><span class="kw">renderTable</span>({</a>
+<a class="sourceLine" id="cb10-17" data-line-number="17">  <span class="kw">top_n_by_income</span>()</a>
+<a class="sourceLine" id="cb10-18" data-line-number="18">})</a></code></pre></div>
 <p>Third, you can use promises in reactive observers. Use them to perform asynchronous tasks in response to reactivity.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">observeEvent</span>(input<span class="op">$</span>save, {
-  <span class="kw">filtered_df</span>() <span class="op">%...&gt;%</span>
-<span class="st">    </span><span class="kw">write.csv</span>(<span class="st">"ny_data.csv"</span>)
-})</code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">observeEvent</span>(input<span class="op">$</span>save, {</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">  <span class="kw">filtered_df</span>() <span class="op">%...&gt;%</span></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="st">    </span><span class="kw">write.csv</span>(<span class="st">"ny_data.csv"</span>)</a>
+<a class="sourceLine" id="cb11-4" data-line-number="4">})</a></code></pre></div>
 <p><strong>Alright, I think I see what you mean. You can’t escape from promise-land, but there’s no need to, because Shiny knows what to do with them.</strong></p>
 <p>Yes, that’s basically right. You just need to keep track of which functions and reactive expressions return promises instead of regular values, and be sure to interact with them using <code>%...&gt;%</code> or other promise-aware operators and functions.</p>
 <p><strong>Wait, there are other promise-aware operators and functions?</strong></p>

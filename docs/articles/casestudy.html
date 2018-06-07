@@ -198,7 +198,8 @@
 <li>
 <code>whale_downloads</code> (<code>reactive</code>): Joins the <code>data()</code> and <code>whales()</code> data frames, to return all of the details of the cetacean downloads.</li>
 </ul>
-<p>In terms of reactive dependencies, <code>data =&gt; whales</code>, and <code>data + whales =&gt; whale_downloads</code>. [TODO: make a diagram]</p>
+<p>The <code>whales</code> reactive expression depends on <code>data</code>, and <code>whale_downloads</code> depends on <code>data</code> and <code>whales</code>.</p>
+<p><img src="case-study-react.png"></p>
 <p>The outputs in this app are mostly either <code>renderPlot</code>s that we populate with <code>ggplot2</code>, or <code><a href="http://www.rdocumentation.org/packages/shinydashboard/topics/renderValueBox">shinydashboard::renderValueBox</a></code>es. They all rely on one or more of the reactive expressions we just described. We won’t catalog them all here, as they’re not individually interesting, but we will look at some archetypes below.</p>
 </div>
 </div>

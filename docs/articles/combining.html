@@ -29,7 +29,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1.9000</span>
       </span>
     </div>
 
@@ -66,6 +66,9 @@
     </li>
     <li>
       <a href="../articles/combining.html">6. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
@@ -119,32 +122,32 @@
 <h2 class="hasAnchor">
 <a href="#gathering" class="anchor"></a>Gathering</h2>
 <p>The most common pattern for combining promises is gathering, where you have two or more promises in hand and you want to use all of their results in a computation. The <code>promise_all</code> function is designed for this. Its signature looks like this:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(..., <span class="dt">.list =</span> <span class="ot">NULL</span>)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(..., <span class="dt">.list =</span> <span class="ot">NULL</span>)</a></code></pre></div>
 <p><code>promise_all</code> takes any number of promises as named arguments, and returns a promise of a list containing named elements with the results of those promises.</p>
 <p>Here’s an example using <code>promise_all</code> to combine the results of two async <code>read.csv</code> operations:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(promises)
-<span class="kw">library</span>(future)
-<span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)
-
-a &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="kw">read.csv</span>(<span class="st">"a.csv"</span>))
-b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="kw">read.csv</span>(<span class="st">"b.csv"</span>))
-
-result &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">a =</span> a, <span class="dt">b =</span> b) <span class="op">%...&gt;%</span><span class="st"> </span>{
-  <span class="kw">rbind</span>(.<span class="op">$</span>a, .<span class="op">$</span>b)
-}</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(promises)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">library</span>(future)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">a &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="kw">read.csv</span>(<span class="st">"a.csv"</span>))</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="kw">read.csv</span>(<span class="st">"b.csv"</span>))</a>
+<a class="sourceLine" id="cb2-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb2-8" data-line-number="8">result &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">a =</span> a, <span class="dt">b =</span> b) <span class="op">%...&gt;%</span><span class="st"> </span>{</a>
+<a class="sourceLine" id="cb2-9" data-line-number="9">  <span class="kw">rbind</span>(.<span class="op">$</span>a, .<span class="op">$</span>b)</a>
+<a class="sourceLine" id="cb2-10" data-line-number="10">}</a></code></pre></div>
 <p>In this example, the value of <code>.</code> within the curly braces is a list whose elements <code>a</code> and <code>b</code> are both data frames. We use <code>rbind</code> to combine them.</p>
 <p>The <code>.$</code> prefix is a bit inelegant, so we recommend the use of the base R function <code>with</code>, which lets you skip the prefix. Here’s the same example, with <code>with</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(promises)
-<span class="kw">library</span>(future)
-<span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)
-
-a &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="kw">read.csv</span>(<span class="st">"a.csv"</span>))
-b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="kw">read.csv</span>(<span class="st">"b.csv"</span>))
-
-<span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">a =</span> a, <span class="dt">b =</span> b) <span class="op">%...&gt;%</span>
-<span class="st">  </span><span class="kw">with</span>({
-    <span class="kw">rbind</span>(a, b)
-  })</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">library</span>(promises)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">library</span>(future)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">a &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="kw">read.csv</span>(<span class="st">"a.csv"</span>))</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="kw">read.csv</span>(<span class="st">"b.csv"</span>))</a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">a =</span> a, <span class="dt">b =</span> b) <span class="op">%...&gt;%</span></a>
+<a class="sourceLine" id="cb3-9" data-line-number="9"><span class="st">  </span><span class="kw">with</span>({</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">    <span class="kw">rbind</span>(a, b)</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">  })</a></code></pre></div>
 <p>(Note that since the <code>promise_all</code> argument names are the same as the variable names (<code>a = a</code>, <code>b = b</code>), the original variables are masked: inside the <code>with</code> block, <code>a</code> now refers to the <em>result</em> of the promise <code>a</code>, not the promise object itself. If you find this confusing, you can just choose a different argument name, like <code>promise_all(a_result = a, …)</code>.)</p>
 <p>The combination of <code>promise_all</code> and <code>with</code> is a concise and powerful way to gather the results of multiple promises.</p>
 <p><code>promise_all</code> also gives you two other options for passing input promises. First, if you would rather your result list be unnamed, you can pass in promises as unnamed arguments: <code><a href="../reference/promise_all.html">promise_all(a, b)</a></code> would yield <code>list(1, 2)</code>. Second, if you have a list of promises already in hand, you can pass the list as a single argument using <code><a href="../reference/promise_all.html">promise_all(.list = x)</a></code> (instead of, say, using <code>do.call(promise_all, x)</code>).</p>
@@ -153,32 +156,32 @@ b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentat
 <h2 class="hasAnchor">
 <a href="#nesting" class="anchor"></a>Nesting</h2>
 <p>Gathering is easy and convenient, but sometimes not flexible enough. For example, if you use the result of promise <code>a</code> to decide whether to launch a second async task, whose result you then use in combination with the result of <code>a</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(promises)
-<span class="kw">library</span>(future)
-<span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)
-
-a &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="dv">1</span>)
-
-a <span class="op">%...&gt;%</span><span class="st"> </span>(<span class="cf">function</span>(a) {
-  b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="dv">2</span>)
-  b <span class="op">%...&gt;%</span><span class="st"> </span>(<span class="cf">function</span>(b) {
-    a <span class="op">+</span><span class="st"> </span>b
-  })
-})</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">library</span>(promises)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">library</span>(future)</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)</a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">a &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">a <span class="op">%...&gt;%</span><span class="st"> </span>(<span class="cf">function</span>(a) {</a>
+<a class="sourceLine" id="cb4-8" data-line-number="8">  b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>(<span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb4-9" data-line-number="9">  b <span class="op">%...&gt;%</span><span class="st"> </span>(<span class="cf">function</span>(b) {</a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">    a <span class="op">+</span><span class="st"> </span>b</a>
+<a class="sourceLine" id="cb4-11" data-line-number="11">  })</a>
+<a class="sourceLine" id="cb4-12" data-line-number="12">})</a></code></pre></div>
 <p>(We use anonymous functions here to mask the names of the original promises–i.e. once inside the first anonymous function, the symbol <code>a</code> now refers to the result of the promise <code>a</code>.)</p>
 <p>The nesting pattern is effective and flexible. The main downside is the physical nesting of the source code; if you use this pattern to a depth of more than a couple of promises, your code will be quite indented (in programming jargon this is referred to as the “pyramid of doom”).</p>
 </div>
 <div id="racing" class="section level2">
 <h2 class="hasAnchor">
 <a href="#racing" class="anchor"></a>Racing</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(promises)
-<span class="kw">library</span>(future)
-<span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)
-
-a &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ <span class="kw">Sys.sleep</span>(<span class="dv">1</span>); <span class="dv">1</span> })
-b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ <span class="kw">Sys.sleep</span>(<span class="fl">0.5</span>); <span class="dv">2</span> })
-
-first &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promise_all.html">promise_race</a></span>(a, b)</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">library</span>(promises)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">library</span>(future)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">a &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ <span class="kw">Sys.sleep</span>(<span class="dv">1</span>); <span class="dv">1</span> })</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">b &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({ <span class="kw">Sys.sleep</span>(<span class="fl">0.5</span>); <span class="dv">2</span> })</a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">first &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promise_all.html">promise_race</a></span>(a, b)</a></code></pre></div>
 <p><code>promise_race</code> takes multiple promises and returns a new promise that will be fulfilled with the first promise that succeeds. In the example above, <code>first</code> is a promise that will be fulfilled with <code>2</code> after 0.5 seconds.</p>
 <p>If one of the input promises rejects before any succeed, then the returned promise will be rejected.</p>
 <p>Note that promises does not currently support cancellation. So losing promises will attempt to run to completion even after the race ends.</p>
@@ -188,22 +191,22 @@ first &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promi
 <a href="#mapping" class="anchor"></a>Mapping</h2>
 <p>Use <code>promise_map</code> to run an async operation on each element of a list or vector, and collect the results in a list. It’s very similar to <code>lapply</code> or <code><a href="http://www.rdocumentation.org/packages/purrr/topics/map">purrr::map</a></code>, except that the function to apply can return a promise, and the return value is also a promise.</p>
 <p>In the example below, we iterate over a named vector of package names. For each package name, we launch an async task to download the package’s description file from CRAN pick out the last published date.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(promises)
-<span class="kw">library</span>(future)
-<span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)
-
-get_pub_date &lt;-<span class="st"> </span><span class="cf">function</span>(pkg) {
-  desc_url &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">"https://cran.r-project.org/web/packages/"</span>, pkg, <span class="st">"/DESCRIPTION"</span>)
-  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
-    <span class="kw">read.dcf</span>(<span class="kw">url</span>(desc_url))[, <span class="st">"Date/Publication"</span>] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">unname</span>()
-  })
-}
-
-packages &lt;-<span class="st"> </span><span class="kw">setNames</span>(, <span class="kw">c</span>(<span class="st">"ggplot2"</span>, <span class="st">"dplyr"</span>, <span class="st">"knitr"</span>))
-
-pkg_dates &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promise_map.html">promise_map</a></span>(packages, get_pub_date)
-
-pkg_dates <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">library</span>(promises)</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">library</span>(future)</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">get_pub_date &lt;-<span class="st"> </span><span class="cf">function</span>(pkg) {</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6">  desc_url &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">"https://cran.r-project.org/web/packages/"</span>, pkg, <span class="st">"/DESCRIPTION"</span>)</a>
+<a class="sourceLine" id="cb6-7" data-line-number="7">  <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({</a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">    <span class="kw">read.dcf</span>(<span class="kw">url</span>(desc_url))[, <span class="st">"Date/Publication"</span>] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">unname</span>()</a>
+<a class="sourceLine" id="cb6-9" data-line-number="9">  })</a>
+<a class="sourceLine" id="cb6-10" data-line-number="10">}</a>
+<a class="sourceLine" id="cb6-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb6-12" data-line-number="12">packages &lt;-<span class="st"> </span><span class="kw">setNames</span>(, <span class="kw">c</span>(<span class="st">"ggplot2"</span>, <span class="st">"dplyr"</span>, <span class="st">"knitr"</span>))</a>
+<a class="sourceLine" id="cb6-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb6-14" data-line-number="14">pkg_dates &lt;-<span class="st"> </span><span class="kw"><a href="../reference/promise_map.html">promise_map</a></span>(packages, get_pub_date)</a>
+<a class="sourceLine" id="cb6-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb6-16" data-line-number="16">pkg_dates <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</a></code></pre></div>
 <p>The resulting output looks like this:</p>
 <pre><code>$ggplot2
 [1] "2016-12-30 22:45:17"
@@ -215,41 +218,41 @@ $knitr
 [1] "2018-01-29 11:01:22 UTC"</code></pre>
 <p><code>promise_map</code> works serially; each time it calls the given function on an element of the list/vector, it will wait for the returned promise to resolve before proceeding to the next element. Furthermore, any error or rejected promise will cause the entire <code>promise_map</code> operation to reject.</p>
 <p>If you want behavior that’s similar to <code>promise_map</code> but for all the async operations to occur in parallel, you can achieve that with a combination of a regular <code><a href="http://www.rdocumentation.org/packages/purrr/topics/map">purrr::map</a></code> and <code>promise_all</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pkg_dates &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map</a></span>(packages, get_pub_date) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">.list =</span> .)
-
-pkg_dates <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">pkg_dates &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map</a></span>(packages, get_pub_date) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="st">  </span><span class="kw"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="dt">.list =</span> .)</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">pkg_dates <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</a></code></pre></div>
 </div>
 <div id="reducing" class="section level2">
 <h2 class="hasAnchor">
 <a href="#reducing" class="anchor"></a>Reducing</h2>
 <p>Use <code>promise_reduce</code> when you have a list where you want to run an async operation on each of the elements, and to do so serially (i.e. only one async operation runs at a time). This can be helpful when you’re searching through some elements using an async operation and want to terminate early when your search succeeds.</p>
 <p>The signature of <code>promise_reduce</code> is as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/promise_reduce.html">promise_reduce</a></span>(x, func, <span class="dt">init =</span> <span class="ot">NULL</span>)</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw"><a href="../reference/promise_reduce.html">promise_reduce</a></span>(x, func, <span class="dt">init =</span> <span class="ot">NULL</span>)</a></code></pre></div>
 <p>If you’ve worked with <code><a href="http://www.rdocumentation.org/packages/base/topics/funprog">base::Reduce()</a></code> or <code>purr:::reduce()</code>, this should seem reasonably familiar: <code>x</code> is a vector or list; <code>func</code> is a function that takes two arguments, the accumulated value and the “next” value; and <code>init</code> is the default accumulated value.</p>
 <p>The main difference between <code>promise_reduce</code> and <code>purrr:::reduce</code> is that with <code>promise_reduce</code>, your <code>func</code> can return a promise. If it does, <code>promise_reduce</code> will wait for it to resolve before updating the accumulated value and invoking <code>func</code> on the next element. The result returned from <code>promise_reduce</code> is a promise that resolves to the ultimate accumulated value.</p>
 <p>The following example loops through a partial list of CRAN mirrors, returning the first one that passes whatever check <code>http::http_error</code> performs.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(promises)
-<span class="kw">library</span>(future)
-<span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)
-
-cran_mirrors &lt;-<span class="st"> </span><span class="kw">c</span>(
-  <span class="st">"https://cloud.r-project.org"</span>,
-  <span class="st">"https://cran.usthb.dz"</span>,
-  <span class="st">"https://cran.csiro.au"</span>,
-  <span class="st">"https://cran.wu.ac.at"</span>
-)
-
-<span class="kw"><a href="../reference/promise_reduce.html">promise_reduce</a></span>(cran_mirrors, <span class="cf">function</span>(result, mirror) {
-  <span class="cf">if</span> (<span class="op">!</span><span class="kw">is.null</span>(result)) {
-    result
-  } <span class="cf">else</span> {
-    <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({
-      <span class="co"># Test the URL; return the URL on success, or NULL on failure</span>
-      <span class="cf">if</span> (<span class="op">!</span>httr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/httr/topics/http_error">http_error</a></span>(mirror)) mirror
-    })
-  }
-}, <span class="dt">.init =</span> <span class="ot">NULL</span>) <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">library</span>(promises)</a>
+<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw">library</span>(future)</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3"><span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/plan">plan</a></span>(multisession)</a>
+<a class="sourceLine" id="cb10-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb10-5" data-line-number="5">cran_mirrors &lt;-<span class="st"> </span><span class="kw">c</span>(</a>
+<a class="sourceLine" id="cb10-6" data-line-number="6">  <span class="st">"https://cloud.r-project.org"</span>,</a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">  <span class="st">"https://cran.usthb.dz"</span>,</a>
+<a class="sourceLine" id="cb10-8" data-line-number="8">  <span class="st">"https://cran.csiro.au"</span>,</a>
+<a class="sourceLine" id="cb10-9" data-line-number="9">  <span class="st">"https://cran.wu.ac.at"</span></a>
+<a class="sourceLine" id="cb10-10" data-line-number="10">)</a>
+<a class="sourceLine" id="cb10-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb10-12" data-line-number="12"><span class="kw"><a href="../reference/promise_reduce.html">promise_reduce</a></span>(cran_mirrors, <span class="cf">function</span>(result, mirror) {</a>
+<a class="sourceLine" id="cb10-13" data-line-number="13">  <span class="cf">if</span> (<span class="op">!</span><span class="kw">is.null</span>(result)) {</a>
+<a class="sourceLine" id="cb10-14" data-line-number="14">    result</a>
+<a class="sourceLine" id="cb10-15" data-line-number="15">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb10-16" data-line-number="16">    <span class="kw"><a href="http://www.rdocumentation.org/packages/future/topics/future">future</a></span>({</a>
+<a class="sourceLine" id="cb10-17" data-line-number="17">      <span class="co"># Test the URL; return the URL on success, or NULL on failure</span></a>
+<a class="sourceLine" id="cb10-18" data-line-number="18">      <span class="cf">if</span> (<span class="op">!</span>httr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/httr/topics/http_error">http_error</a></span>(mirror)) mirror</a>
+<a class="sourceLine" id="cb10-19" data-line-number="19">    })</a>
+<a class="sourceLine" id="cb10-20" data-line-number="20">  }</a>
+<a class="sourceLine" id="cb10-21" data-line-number="21">}, <span class="dt">.init =</span> <span class="ot">NULL</span>) <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</a></code></pre></div>
 </div>
 </div>
   </div>

@@ -121,7 +121,9 @@ The reactive expressions:
 * `whales` (`reactive`): Reads from `data()`, tallies the number of downloads performed by each unique IP, and returns a data frame of the top `input$count` most prolific downloaders, along with their download counts.
 * `whale_downloads` (`reactive`): Joins the `data()` and `whales()` data frames, to return all of the details of the cetacean downloads.
 
-In terms of reactive dependencies, `data => whales`, and `data + whales => whale_downloads`. [TODO: make a diagram]
+The `whales` reactive expression depends on `data`, and `whale_downloads` depends on `data` and `whales`.
+
+![](case-study-react.png)
 
 The outputs in this app are mostly either `renderPlot`s that we populate with `ggplot2`, or `shinydashboard::renderValueBox`es. They all rely on one or more of the reactive expressions we just described. We won't catalog them all here, as they're not individually interesting, but we will look at some archetypes below.
 

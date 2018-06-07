@@ -41,6 +41,8 @@ navbar:
         href: articles/shiny.html
       - text: 6. Combining promises
         href: articles/combining.html
+      - text: "7. Case study: Converting a Shiny app to async"
+        href: articles/casestudy.html
     - text: Reference
       href: reference/index.html
 authors:

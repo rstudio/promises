@@ -29,7 +29,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">1.0.1.9000</span>
       </span>
     </div>
 
@@ -66,6 +66,9 @@
     </li>
     <li>
       <a href="../articles/combining.html">6. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
@@ -109,12 +112,12 @@
 <h2 class="hasAnchor">
 <a href="#how-future-works" class="anchor"></a>How future works</h2>
 <p>The main API that <code>future</code> provides couldn’t be simpler. You call <code>future()</code> and pass it the code that you want executed asynchronously:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f &lt;-<span class="st"> </span><span class="kw">future</span>({
-  <span class="co"># expensive operations go here...</span>
-  df &lt;-<span class="st"> </span><span class="kw">download_lots_of_data</span>()
-  <span class="kw">fit_model</span>(df)
-})</code></pre></div>
-<p>The object that’s returned is a future, which for all intents and purposes is a promise object<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, which will eventually resolve to the return value of the code block (i.e. the last expression) or an error if the code does not complete executing successfully. The important thing is that no matter how long the expensive operation takes, these lines will execute almost instantly, while the operation continues in the background.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">f &lt;-<span class="st"> </span><span class="kw">future</span>({</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">  <span class="co"># expensive operations go here...</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">  df &lt;-<span class="st"> </span><span class="kw">download_lots_of_data</span>()</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">  <span class="kw">fit_model</span>(df)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5">})</a></code></pre></div>
+<p>The object that’s returned is a future, which for all intents and purposes is a promise object<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, which will eventually resolve to the return value of the code block (i.e. the last expression) or an error if the code does not complete executing successfully. The important thing is that no matter how long the expensive operation takes, these lines will execute almost instantly, while the operation continues in the background.</p>
 <p>But we know that R is single-threaded, so how does <code>future</code> accomplish this? The answer: by utilizing another R process. <code>future</code> delegates the execution of the expensive operation to a totally different R process, so that the original R process can move on.</p>
 </div>
 <div id="choosing-a-launch-method" class="section level2">
@@ -148,10 +151,7 @@
 <a href="#package-loading" class="anchor"></a>Package loading</h3>
 <p>Besides variables, <code>future()</code> also tries to automatically infer what R packages need to be loaded in the child process. If the automatic detection is not sufficient, you can use the <code>future()</code> function’s <code>packages</code> parameter to pass in a character vector of package names, e.g. <code>packages = c("dplyr", "ggplot2")</code>.</p>
 <p>Again, this is especially important for multisession, because multicore will inherit all of the attached packages of the parent process.</p>
-</div>
-<div id="native-resources" class="section level3">
-<h3 class="hasAnchor">
-<a href="#native-resources" class="anchor"></a>Native resources</h3>
+<p>###Native resources</p>
 <p>Future code blocks cannot use resources such as database connections and network sockets that were created in the parent process. This is true regardless of what future implementation you use! Even if it seems to work with a simple test, you are asking for crashes or worse by sharing these kinds of resources across processes.</p>
 <p>Instead, make sure you create, use, and destroy such resources entirely within the scope of the future code block.</p>
 </div>
@@ -175,7 +175,7 @@
 <div class="footnotes">
 <hr>
 <ol>
-<li id="fn1"><p>(The <code>future</code> package provides several functions for working with future objects, but they are not relevant for our purposes.)<a href="#fnref1">↩</a></p></li>
+<li id="fn1"><p>(The <code>future</code> package provides several functions for working with future objects, but they are not relevant for our purposes.)<a href="#fnref1" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
 </div>
