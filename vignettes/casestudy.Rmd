@@ -40,7 +40,7 @@ Fortunately for our purposes, there's no need to analyze these logs at a high le
 
 ## A tour of the app
 
-The app I built to explore this data, **cranwhales**, let us examine the behavior of the top downloaders ("whales") for any given day, at varying levels of detail. You can view this app live at https://jcheng.shinyapps.io/cranwhales/, or download and run the code yourself at https://github.com/rstudio/cranwhales.
+The app I built to explore this data, **cranwhales**, let us examine the behavior of the top downloaders ("whales") for any given day, at varying levels of detail. You can view this app live at https://gallery.shinyapps.io/cranwhales/, or download and run the code yourself at https://github.com/rstudio/cranwhales.
 
 When the app starts, the "All traffic" tab shows you the number of package downloads per hour for all users vs. whales. In this screenshot, you can see the proportion of files downloaded by the top six downloaders on May 28, 2018. It may not look like a huge fraction at first, but keep in mind, we are only talking about six downloaders out of 52,815 total!
 
