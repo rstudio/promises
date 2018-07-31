@@ -19,7 +19,7 @@ There are also some supporting packages that have experimental async-compatible 
 ```r
 devtools::install_github("ramnathv/htmlwidgets")
 devtools::install_github("ropensci/plotly@async")
-devtools::install_github("rstudio/DT@async")
+devtools::install_github("rstudio/DT")
 ```
 
 ---
