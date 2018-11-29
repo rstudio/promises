@@ -39,7 +39,7 @@ rhs, which is useful for pipeline steps that are used for side effects
 (printing, plotting, saving).
 \enumerate{
 \item \code{promise \%...>\% func()} is equivalent to \code{promise \%>\% then(func)}.
-\item \code{promise \%...!>\% func()} is equivalent to \code{promise \%>\% catch(func)}.
+\item \code{promise \%...!\% func()} is equivalent to \code{promise \%>\% catch(func)}.
 \item \code{promise \%...T>\% func()} is equivalent to \code{promise \%T>\% then(func)}.
 \item \code{promise \%...T!\% func()} is equivalent to \code{promise \%T>\%
 catch(func)} or \code{promise \%>\% catch(func, tee = TRUE)}.

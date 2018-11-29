@@ -92,10 +92,10 @@ Now, \code{promise_d} will be rejected if \code{promise_c} is fulfilled, and vic
 versa.
 
 \strong{Warning:} Be very careful not to accidentally turn failure into success,
-if your error handling code is not the last item in a chain!\preformatted{some_async_operation() %>%
+if your error handling code is not the last item in a chain!\preformatted{some_async_operation() \%>\%
   catch(function(reason) {
     warning("An error occurred: ", reason)
-  }) %>%
+  }) \%>\%
   then(function() {
     message("I guess we succeeded...?")  # No!
   })

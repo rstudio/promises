@@ -30,9 +30,6 @@ values only, no promises).
 returns a promise, then \code{.f(.x[[2]])} will not be invoked until that promise
 is resolved. If any such promise rejects (errors), then the promise returned
 by \code{promise_map} immediately rejects with that err.
-
-[[1]: R:[1
-[[2]: R:[2
 }
 \examples{
 # Waits x seconds, then returns x*10
