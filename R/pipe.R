@@ -20,7 +20,7 @@ magrittr::"%T>%"
 #' (printing, plotting, saving).
 #'
 #' 1. \code{promise \%...>\% func()} is equivalent to \code{promise \%>\% then(func)}.
-#' 2. \code{promise \%...!>\% func()} is equivalent to \code{promise \%>\% catch(func)}.
+#' 2. \code{promise \%...!\% func()} is equivalent to \code{promise \%>\% catch(func)}.
 #' 3. \code{promise \%...T>\% func()} is equivalent to \code{promise \%T>\% then(func)}.
 #' 4. \code{promise \%...T!\% func()} is equivalent to \code{promise \%T>\%
 #' catch(func)} or \code{promise \%>\% catch(func, tee = TRUE)}.
