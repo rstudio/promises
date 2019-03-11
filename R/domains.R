@@ -11,29 +11,67 @@ tryCatch <- function(expr, ..., finally) {
   )
 }
 
+spliceOnFinally <- function(onFinally) {
+  list(
+    onFulfilled = finallyToFulfilled(onFinally),
+    onRejected = finallyToRejected(onFinally)
+  )
+}
+
+finallyToFulfilled <- function(onFinally) {
+  force(onFinally)
+  function(value, .visible) {
+    onFinally()
+    if (.visible)
+      value
+    else
+      invisible(value)
+  }
+}
+
+finallyToRejected <- function(onFinally) {
+  force(onFinally)
+  function(reason) {
+    onFinally()
+    stop(reason)
+  }
+}
+
 promiseDomain <- list(
-  onThen = function(onFulfilled, onRejected) {
+  onThen = function(onFulfilled, onRejected, onFinally) {
+    force(onFulfilled)
+    force(onRejected)
+    force(onFinally)
+
+    # Verify that if onFinally is non-NULL, onFulfilled and onRejected are NULL
+    if (!is.null(onFinally) && (!is.null(onFulfilled) || !is.null(onRejected))) {
+      stop("A single `then` call cannot combine `onFinally` with `onFulfilled`/`onRejected`")
+    }
+
+    # TODO: All wrapped functions should also be rewritten to reenter the domain
+
     domain <- current_promise_domain()
 
-    if (is.null(domain))
-      return()
-    if (is.null(onFulfilled) && is.null(onRejected))
-      return()
+    shouldWrapFinally <- !is.null(onFinally) && !is.null(domain) && !is.null(domain$wrapOnFinally)
 
-    results <- list()
-    if (!is.null(onFulfilled)) {
-      newOnFulfilled <- domain$wrapOnFulfilled(onFulfilled)
-      results$onFulfilled <- function(...) {
-        reenter_promise_domain(domain, newOnFulfilled(...))
-      }
+    if (shouldWrapFinally) {
+      onFinally <- domain$wrapOnFinally(onFinally)
     }
-    if (!is.null(onRejected)) {
-      newOnRejected <- domain$wrapOnRejected(onRejected)
-      results$onRejected <- function(...) {
-        reenter_promise_domain(domain, newOnRejected(...))
-      }
+
+    if (!is.null(onFinally)) {
+      spliced <- spliceOnFinally(onFinally)
+      onFulfilled <- spliced$onFulfilled
+      onRejected <- spliced$onRejected
     }
-    results
+
+    shouldWrapFulfilled <- !is.null(onFulfilled) && !is.null(domain) && !shouldWrapFinally
+    shouldWrapRejected <- !is.null(onRejected) && !is.null(domain) && !shouldWrapFinally
+
+    results <- list(
+      onFulfilled = if (shouldWrapFulfilled) domain$wrapOnFulfilled(onFulfilled) else onFulfilled,
+      onRejected = if (shouldWrapRejected) domain$wrapOnRejected(onRejected) else onRejected
+    )
+    results[!vapply(results, is.null, logical(1))]
   },
   onError = function(error) {
     domain <- current_promise_domain()
@@ -88,7 +126,10 @@ with_promise_domain <- function(domain, expr, replace = FALSE) {
     globals$domain <- compose_domains(oldval, domain)
   on.exit(globals$domain <- oldval)
 
-  globals$domain$wrapSync(expr)
+  if (!is.null(domain))
+    domain$wrapSync(expr)
+  else
+    force(expr)
 }
 
 # Like with_promise_domain, but doesn't include the wrapSync call.
@@ -130,11 +171,13 @@ new_promise_domain <- function(
   wrapOnRejected = identity,
   wrapSync = force,
   onError = force,
-  ...
+  ...,
+  wrapOnFinally = NULL
 ) {
   list2env(list(
     wrapOnFulfilled = wrapOnFulfilled,
     wrapOnRejected = wrapOnRejected,
+    wrapOnFinally = wrapOnFinally,
     wrapSync = wrapSync,
     onError = onError,
     ...
@@ -168,4 +211,8 @@ compose_domains <- function(base, new) {
       new$onError(e)
     }
   )
+}
+
+without_promise_domain <- function(expr) {
+  with_promise_domain(NULL, expr, replace = TRUE)
 }

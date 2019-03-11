@@ -29,10 +29,15 @@ Promise <- R6::R6Class("Promise",
         if (identical(self, attr(value, "promise_impl", exact = TRUE))) {
           return(private$doReject(simpleError("Chaining cycle detected for promise")))
         }
-        value$then(
-          private$doResolve,
-          private$doReject
-        )
+        # This then() call doesn't need promise domains; semantically, it doesn't
+        # really exist, as it's just a convenient way to implement the new promise
+        # inhabiting the old promise's corpse.
+        without_promise_domain({
+          value$then(
+            private$doResolve,
+            private$doReject
+          )
+        })
       } else {
         private$doResolveFinalValue(value, visible)
       }
@@ -40,10 +45,15 @@ Promise <- R6::R6Class("Promise",
     doReject = function(reason) {
       if (is.promising(reason)) {
         reason <- as.promise(reason)
-        reason$then(
-          private$doResolve,
-          private$doReject
-        )
+        # This then() call doesn't need promise domains; semantically, it doesn't
+        # really exist, as it's just a convenient way to implement the new promise
+        # inhabiting the old promise's corpse.
+        without_promise_domain({
+          reason$then(
+            private$doResolve,
+            private$doReject
+          )
+        })
       } else {
         private$doRejectFinalReason(reason)
       }
@@ -129,13 +139,14 @@ Promise <- R6::R6Class("Promise",
 
       invisible()
     },
-    then = function(onFulfilled = NULL, onRejected = NULL) {
+    then = function(onFulfilled = NULL, onRejected = NULL, onFinally = NULL) {
       onFulfilled <- normalizeOnFulfilled(onFulfilled)
       onRejected <- normalizeOnRejected(onRejected)
+      # TODO: Verify onFinally is NULL or has one argument
 
       promise2 <- promise(function(resolve, reject) {
+          res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
 
-          res <- promiseDomain$onThen(onFulfilled, onRejected)
           if (!is.null(res)) {
             onFulfilled <- res$onFulfilled
             onRejected <- res$onRejected
@@ -187,14 +198,7 @@ Promise <- R6::R6Class("Promise",
     },
     finally = function(onFinally) {
       invisible(self$then(
-        onFulfilled = function(value) {
-          onFinally()
-          value
-        },
-        onRejected = function(reason) {
-          onFinally()
-          stop(reason)
-        }
+        onFinally = onFinally
       ))
     },
     format = function() {
