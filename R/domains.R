@@ -54,12 +54,14 @@ promiseDomain <- list(
 
     shouldWrapFinally <- !is.null(onFinally) && !is.null(domain) && !is.null(domain$wrapOnFinally)
 
-    if (shouldWrapFinally) {
-      onFinally <- domain$wrapOnFinally(onFinally)
+    newOnFinally <- if (shouldWrapFinally) {
+      domain$wrapOnFinally(onFinally)
+    } else {
+      onFinally
     }
 
-    if (!is.null(onFinally)) {
-      spliced <- spliceOnFinally(onFinally)
+    if (!is.null(newOnFinally)) {
+      spliced <- spliceOnFinally(newOnFinally)
       onFulfilled <- spliced$onFulfilled
       onRejected <- spliced$onRejected
     }
