@@ -67,11 +67,11 @@ describe("Promise domains", {
           expect_identical(cd2$counts$onFulfilledActive, 0L)
           expect_identical(cd2$counts$onRejectedActive, 1L)
         })
-      expect_identical(cd2$counts$onFulfilledBound, 1L)
-      expect_identical(cd2$counts$onRejectedBound, 1L)
       p1
     }) %>% squelch_unhandled_promise_error()
 
+    expect_identical(cd2$counts$onFulfilledBound, 1L)
+    expect_identical(cd2$counts$onRejectedBound, 1L)
     wait_for_it()
     expect_identical(cd2$counts$onFulfilledCalled, 0L)
     expect_identical(cd2$counts$onRejectedCalled, 1L)
@@ -105,12 +105,12 @@ describe("Promise domains", {
           expect_identical(cd2$counts$onFulfilledActive, 0L)
           expect_identical(cd2$counts$onRejectedActive, 0L)
         })
-      expect_identical(cd2$counts$onFinallyBound, 1L)
-      expect_identical(cd2$counts$onFulfilledBound, 0L)
-      expect_identical(cd2$counts$onRejectedBound, 0L)
       p2
     }) %>% squelch_unhandled_promise_error()
 
+    expect_identical(cd2$counts$onFinallyBound, 1L)
+    expect_identical(cd2$counts$onFulfilledBound, 0L)
+    expect_identical(cd2$counts$onRejectedBound, 0L)
     wait_for_it()
     expect_identical(cd2$counts$onFinallyCalled, 1L)
     expect_identical(cd2$counts$onFulfilledCalled, 0L)

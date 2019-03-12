@@ -166,6 +166,14 @@ reenter_promise_domain <- function(domain, expr, replace = FALSE) {
 #' @param ... Arbitrary named values that will become elements of the promise
 #'   domain object, and can be accessed as items in an environment (i.e. using
 #'   `[[` or `$`).
+#' @param wrapOnFinally A function that takes a single argument: a function
+#'   that was passed as an `onFinally` argument to [then()]. The
+#'   `wrapOnFinally` function should return a function that is suitable for
+#'   `onFinally` duty. If `wrapOnFinally` is `NULL` (the default), then the
+#'   domain will use both `wrapOnFulfilled` and `wrapOnRejected` to wrap the
+#'   `onFinally`. If it's important to distinguish between normal
+#'   fulfillment/rejection handlers and finally handlers, then be sure to
+#'   provide `wrapOnFinally`, even if it's just [base::identity()].
 #' @rdname with_promise_domain
 #' @export
 new_promise_domain <- function(
