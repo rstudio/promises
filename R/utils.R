@@ -69,7 +69,9 @@ promise_all <- function(..., .list = NULL) {
       then(.list[[key]],
         onFulfilled = function(value) {
           # Save the result so we can return it to the user.
-          results[[key]] <<- value
+          # This weird assignment is similar to `results[[key]] <- value`, except
+          # that it handles NULL values correctly.
+          results[key] <<- list(value)
 
           # Record the fact that the promise was completed.
           done[[key]] <<- TRUE

@@ -11,4 +11,14 @@ describe("promise_all", {
     x <- promise_all(.list = list(a=a, b=b, c=c))
     expect_identical(extract(x), list(a=1, b=2, c=3))
   })
+
+  it("Handles NULLs correctly", {
+    x <- promise_all(promise_resolve(NULL), promise_resolve(NULL),
+                     promise_resolve(NULL))
+    expect_identical(extract(x), list(NULL, NULL, NULL))
+
+    x <- promise_all(a = promise_resolve(NULL), b = promise_resolve(NULL),
+                     c = promise_resolve(NULL))
+    expect_identical(extract(x), list(a = NULL, b = NULL, c = NULL))
+  })
 })
