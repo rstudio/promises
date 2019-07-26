@@ -8,7 +8,8 @@
 with_promise_domain(domain, expr, replace = FALSE)
 
 new_promise_domain(wrapOnFulfilled = identity,
-  wrapOnRejected = identity, wrapSync = force, onError = force, ...)
+  wrapOnRejected = identity, wrapSync = force, onError = force, ...,
+  wrapOnFinally = NULL)
 }
 \arguments{
 \item{domain}{A promise domain object to install while \code{expr} is evaluated.}
@@ -45,6 +46,15 @@ handlers.}
 \item{...}{Arbitrary named values that will become elements of the promise
 domain object, and can be accessed as items in an environment (i.e. using
 \code{[[} or \code{$}).}
+
+\item{wrapOnFinally}{A function that takes a single argument: a function
+that was passed as an \code{onFinally} argument to \code{\link[=then]{then()}}. The
+\code{wrapOnFinally} function should return a function that is suitable for
+\code{onFinally} duty. If \code{wrapOnFinally} is \code{NULL} (the default), then the
+domain will use both \code{wrapOnFulfilled} and \code{wrapOnRejected} to wrap the
+\code{onFinally}. If it's important to distinguish between normal
+fulfillment/rejection handlers and finally handlers, then be sure to
+provide \code{wrapOnFinally}, even if it's just \code{\link[base:identity]{base::identity()}}.}
 }
 \description{
 Promise domains are used to temporarily set up custom environments that

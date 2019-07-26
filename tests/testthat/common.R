@@ -54,3 +54,67 @@ squelch_unhandled_promise_error <- function(promise) {
   # Detect unexpected "Unhandled promise error" warnings.
   wait_for_it()
 }
+
+create_counting_domain <- function(trackFinally = FALSE) {
+  counts <- list2env(parent = emptyenv(), list(
+    onFulfilledBound = 0L,
+    onFulfilledCalled = 0L,
+    onFulfilledActive = 0L,
+    onRejectedBound = 0L,
+    onRejectedCalled = 0L,
+    onRejectedActive = 0L
+  ))
+
+  incr <- function(field) {
+    field <- as.character(substitute(field))
+    counts[[field]] <- counts[[field]] + 1L
+  }
+
+  decr <- function(field) {
+    field <- as.character(substitute(field))
+    counts[[field]] <- counts[[field]] - 1L
+  }
+
+  pd <- new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      incr(onFulfilledBound)
+      function(...) {
+        incr(onFulfilledCalled)
+        incr(onFulfilledActive)
+        on.exit(decr(onFulfilledActive))
+
+        onFulfilled(...)
+      }
+    },
+    wrapOnRejected = function(onRejected) {
+      incr(onRejectedBound)
+      function(...) {
+        incr(onRejectedCalled)
+        incr(onRejectedActive)
+        on.exit(decr(onRejectedActive))
+
+        onRejected(...)
+      }
+    },
+    counts = counts
+  )
+
+  if (trackFinally) {
+    counts$onFinallyBound <- 0L
+    counts$onFinallyCalled <- 0L
+    counts$onFinallyActive <- 0L
+
+    pd$wrapOnFinally <- function(onFinally) {
+      incr(onFinallyBound)
+      function() {
+        incr(onFinallyCalled)
+        incr(onFinallyActive)
+        on.exit(incr(onFinallyActive))
+
+        onFinally()
+      }
+    }
+  }
+
+  pd
+}
