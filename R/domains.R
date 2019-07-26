@@ -49,6 +49,9 @@ promiseDomain <- list(
     }
 
     # TODO: All wrapped functions should also be rewritten to reenter the domain
+    # jcheng 2019-07-26: Actually, this seems not to be necessary--the domain
+    # is getting reentered during callbacks. But I can't figure out now how it's
+    # happening.
 
     domain <- current_promise_domain()
 

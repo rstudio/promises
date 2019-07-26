@@ -41,6 +41,21 @@ describe("Promise domains", {
     })
 
     expect_identical(cd$counts$onFulfilledBound, 2L)
+
+    with_promise_domain(cd, {
+      p <- p %...>% {
+        expect_identical(cd$counts$onFulfilledCalled, 3L)
+        # This tests if promise domain membership infects subscriptions made
+        # in handlers.
+        p %...>% {
+          expect_true(!is.null(current_promise_domain()))
+          expect_identical(cd$counts$onFulfilledCalled, 4L)
+        }
+      }
+    })
+    expect_true(is.null(current_promise_domain()))
+    expect_identical(cd$counts$onFulfilledCalled, 2L)
+    wait_for_it()
   })
 
   it("pass finally binding to fulfill/reject by default", {

@@ -30,6 +30,14 @@ describe("then()", {
     expect_identical(result$value, 1)
     expect_identical(result$visible, FALSE)
   })
+  it("method ignores non-functions or NULL...", {
+    p1 <- promise(~resolve(1))$then(10)$then(NULL)
+    expect_identical(extract(p1), 1)
+  })
+  it("...but function only ignores NULL, not non-functions", {
+    expect_error(promise(~resolve(1)) %>% then(10))
+    expect_error(promise(~resolve(1)) %>% then(NULL), NA)
+  })
 })
 
 describe("catch()", {
@@ -42,6 +50,14 @@ describe("catch()", {
   it("can throw", {
     p <- promise(~stop("foo")) %>% catch(~stop("bar"))
     expect_error(extract(p), "^bar$")
+  })
+  it("method ignores non-functions or NULL...", {
+    p1 <- promise(~resolve(1))$catch(10)$catch(NULL)
+    expect_identical(extract(p1), 1)
+  })
+  it("...but function only ignores NULL, not non-functions", {
+    expect_error(promise(~resolve(1)) %>% catch(10))
+    expect_error(promise(~resolve(1)) %>% catch(NULL), NA)
   })
 })
 
@@ -80,6 +96,14 @@ describe("finally()", {
 
     p2 <- promise(~reject("foo")) %>% finally(~stop("bar"))
     expect_error(extract(p2), "^bar$")
+  })
+  it("method ignores non-functions or NULL...", {
+    p1 <- promise(~resolve(1))$finally(10)$finally(NULL)
+    expect_identical(extract(p1), 1)
+  })
+  it("...but function only ignores NULL, not non-functions", {
+    expect_error(promise(~resolve(1)) %>% finally(10))
+    expect_error(promise(~resolve(1)) %>% finally(NULL), NA)
   })
 })
 

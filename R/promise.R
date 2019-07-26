@@ -142,7 +142,9 @@ Promise <- R6::R6Class("Promise",
     then = function(onFulfilled = NULL, onRejected = NULL, onFinally = NULL) {
       onFulfilled <- normalizeOnFulfilled(onFulfilled)
       onRejected <- normalizeOnRejected(onRejected)
-      # TODO: Verify onFinally is NULL or has one argument
+      if (!is.function(onFinally)) {
+        onFinally <- NULL
+      }
 
       promise2 <- promise(function(resolve, reject) {
           res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
@@ -216,7 +218,7 @@ Promise <- R6::R6Class("Promise",
 
 normalizeOnFulfilled <- function(onFulfilled) {
   if (!is.function(onFulfilled))
-    return(onFulfilled)
+    return(NULL)
 
   args <- formals(onFulfilled)
   arg_count <- length(args)
@@ -236,7 +238,7 @@ normalizeOnFulfilled <- function(onFulfilled) {
 
 normalizeOnRejected <- function(onRejected) {
   if (!is.function(onRejected))
-    return(onRejected)
+    return(NULL)
 
   args <- formals(onRejected)
   arg_count <- length(args)
