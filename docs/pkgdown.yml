@@ -1,6 +1,6 @@
-pandoc: 2.2.1
-pkgdown: 0.1.0.9000
-pkgdown_sha: 966bc9d667ab87806ef684bab22e39effe62c8a5
+pandoc: 2.3.1
+pkgdown: 1.4.1
+pkgdown_sha: ~
 articles:
   casestudy: casestudy.html
   combining: combining.html
