@@ -433,13 +433,21 @@ as.promise.Future <- function(x) {
     poll_interval <- 0.1
     check <- function() {
       # timeout = 0 is important, the default waits for 200ms
-      if (future::resolved(x, timeout = 0)) {
+      is_resolved <- tryCatch({
+        future::resolved(x, timeout = 0)
+      }, FutureError = function(e) {
+         reject(e)
+         TRUE
+      })
+      if (is_resolved) {
         tryCatch(
           {
             result <- future::value(x, signal = TRUE)
             resolve(result)
-          },
-          error = function(e) {
+          }, FutureError = function(e) {
+            reject(e)
+            TRUE
+          }, error = function(e) {
             reject(e)
           }
         )
