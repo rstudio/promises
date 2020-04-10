@@ -1,5 +1,5 @@
-promises 1.1.0.9000
-===================
+promises 1.1.1
+==============
 
 * Fix handling of FutureErrors during `future::resolved()` and `future::value()` by discarding the corrupt future. (#37)
 
