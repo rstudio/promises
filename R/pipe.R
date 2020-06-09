@@ -39,7 +39,7 @@ magrittr::"%T>%"
 #'   a promise or non-promise value, or throw an error.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' library(future)
 #' plan(multisession)
 #'

@@ -55,7 +55,7 @@ using a \code{.} at the head of a pipeline to turn the entire pipeline into a
 function instead of an expression.
 }
 \examples{
-\donttest{
+\dontrun{
 library(future)
 plan(multisession)
 
