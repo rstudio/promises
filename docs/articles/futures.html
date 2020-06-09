@@ -6,19 +6,19 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Launching tasks with future • promises</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="Launching tasks with future">
-<meta property="og:description" content="">
-<meta name="twitter:card" content="summary">
+<meta property="og:description" content="promises">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
-<body>
+<body data-spy="scroll" data-target="#toc">
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/rstudio/promises">
+  <a href="https://github.com/rstudio/promises/">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -95,10 +95,10 @@
 
       
 
-      </header><div class="row">
+      </header><script src="futures_files/header-attrs-2.1.2/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>Launching tasks with future</h1>
+      <h1 data-toc-skip>Launching tasks with future</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/master/vignettes/futures.Rmd"><code>vignettes/futures.Rmd</code></a></small>
@@ -115,11 +115,11 @@
 <h2 class="hasAnchor">
 <a href="#how-future-works" class="anchor"></a>How future works</h2>
 <p>The main API that <code>future</code> provides couldn’t be simpler. You call <code>future()</code> and pass it the code that you want executed asynchronously:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">f &lt;-<span class="st"> </span><span class="kw">future</span>({</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2">  <span class="co"># expensive operations go here...</span></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">  df &lt;-<span class="st"> </span><span class="kw">download_lots_of_data</span>()</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4">  <span class="kw">fit_model</span>(df)</a>
-<a class="sourceLine" id="cb1-5" data-line-number="5">})</a></code></pre></div>
+<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="no">f</span> <span class="kw">&lt;-</span> <span class="fu">future</span>({
+  <span class="co"># expensive operations go here...</span>
+  <span class="no">df</span> <span class="kw">&lt;-</span> <span class="fu">download_lots_of_data</span>()
+  <span class="fu">fit_model</span>(<span class="no">df</span>)
+})</pre></body></html></div>
 <p>The object that’s returned is a future, which for all intents and purposes is a promise object<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, which will eventually resolve to the return value of the code block (i.e. the last expression) or an error if the code does not complete executing successfully. The important thing is that no matter how long the expensive operation takes, these lines will execute almost instantly, while the operation continues in the background.</p>
 <p>But we know that R is single-threaded, so how does <code>future</code> accomplish this? The answer: by utilizing another R process. <code>future</code> delegates the execution of the expensive operation to a totally different R process, so that the original R process can move on.</p>
 </div>
@@ -147,12 +147,12 @@
 <p>Most future code chunks will need to reference data from the original process, e.g. data to be fitted, URLs to be requested, file paths to read from. The future package goes to some lengths to try to make this process seamless for you, by inspecting your code chunk and predicting which variables from the original process should be copied to the child process. In our testing this works fairly reliably with multicore, somewhat less reliably with multisession.</p>
 <p>Multisession also has the distinct disadvantage that any identified variables must be physically (though automatically) copied between the main and child processes, which can be extremely time-consuming if the data is large. (The multicore strategy does not need to do this, because every forked process starts out with its memory in the same state as its parent at the time of the fork.)</p>
 <p>In summary, it’s possible for both false positives (data copied that doesn’t need to be) and false negatives (data not available when it’s needed) to occur. Therefore, for all but the simplest cases, we suggest suppressing future’s automated variable copying and instead manually specifying the relevant variables, using the <code>future()</code> function’s <code>globals</code> parameter. You can pass it a character vector (<code>globals = c("var_a", "var_b")</code>) or a named list (<code>globals = c(data = mtcars, iterations = n)</code>).</p>
-<p>One final note about globals: as a safety measure, <code>future()</code> will error if the size of the data to be shuttled between the processes exceeds 500MB. This is true whether the variables to copy were identified by automatic detection, or explicitly via the <code>globals</code> parameter; and it’s even true if you’re using the multicore strategy, where no copies are actually made. If your data is potentially large, you’ll want to increase the limit by setting the <code>future.globals.maxSize</code> option to a suitably high number of bytes, e.g. <code><a href="https://rdrr.io/r/base/options.html">options(future.globals.maxSize=1e9)</a></code> for a billion bytes.</p>
+<p>One final note about globals: as a safety measure, <code>future()</code> will error if the size of the data to be shuttled between the processes exceeds 500MB. This is true whether the variables to copy were identified by automatic detection, or explicitly via the <code>globals</code> parameter; and it’s even true if you’re using the multicore strategy, where no copies are actually made. If your data is potentially large, you’ll want to increase the limit by setting the <code>future.globals.maxSize</code> option to a suitably high number of bytes, e.g. <code><a href="https://rdrr.io/r/base/options.html">options(future.globals.maxSize=1e9)</a></code> for a billion bytes.</p>
 </div>
 <div id="package-loading" class="section level3">
 <h3 class="hasAnchor">
 <a href="#package-loading" class="anchor"></a>Package loading</h3>
-<p>Besides variables, <code>future()</code> also tries to automatically infer what R packages need to be loaded in the child process. If the automatic detection is not sufficient, you can use the <code>future()</code> function’s <code>packages</code> parameter to pass in a character vector of package names, e.g. <code>packages = c("dplyr", "ggplot2")</code>.</p>
+<p>Besides variables, <code>future()</code> also tries to automatically infer what R packages need to be loaded in the child process. If the automatic detection is not sufficient, you can use the <code>future()</code> function’s <code>packages</code> parameter to pass in a character vector of package names, e.g. <code>packages = c("dplyr", "ggplot2")</code>.</p>
 <p>Again, this is especially important for multisession, because multicore will inherit all of the attached packages of the parent process.</p>
 </div>
 <div id="native-resources" class="section level3">
@@ -181,22 +181,16 @@
 <div class="footnotes">
 <hr>
 <ol>
-<li id="fn1"><p>(The <code>future</code> package provides several functions for working with future objects, but they are not relevant for our purposes.)<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>(The <code>future</code> package provides several functions for working with future objects, but they are not relevant for our purposes.)<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
   </div>
 
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-        <div id="tocnav">
-      <h2 class="hasAnchor">
-<a href="#tocnav" class="anchor"></a>Contents</h2>
-      <ul class="nav nav-pills nav-stacked">
-<li><a href="#how-future-works">How future works</a></li>
-      <li><a href="#choosing-a-launch-method">Choosing a launch method</a></li>
-      <li><a href="#caveats-and-limitations">Caveats and limitations</a></li>
-      </ul>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+
+        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
+    </nav>
 </div>
-      </div>
 
 </div>
 
@@ -207,7 +201,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>

@@ -8,23 +8,29 @@
 
 <title>Access the results of a promise — then • promises</title>
 
-<!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<!-- Bootstrap -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<!-- jquery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<!-- Bootstrap -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -32,10 +38,10 @@
 
 
 
-<meta property="og:title" content="Access the results of a promise — then" />
 
+<meta property="og:title" content="Access the results of a promise — then" />
 <meta property="og:description" content="Use the then function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to then is non-blocking, that is, it returns immediately; so what it does not do is immediately return the result value of the promise. Instead, you pass logic you want to execute to then, in the form of function callbacks (or formulas, see Details). If you provide an onFulfilled callback, it will be called upon the promise's successful resolution, with a single argument value: the result value. If you provide an onRejected callback, it will be called if the operation fails, with a single argument reason: the error that caused the failure." />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -52,7 +58,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -66,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
       </span>
     </div>
 
@@ -113,10 +119,9 @@
   <a href="../reference/index.html">Reference</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/rstudio/promises">
+  <a href="https://github.com/rstudio/promises/">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -140,9 +145,7 @@
     </div>
 
     <div class="ref-description">
-    
     <p>Use the <code>then</code> function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to <code>then</code> is non-blocking, that is, it returns immediately; so what it does <em>not</em> do is immediately return the result value of the promise. Instead, you pass logic you want to execute to <code>then</code>, in the form of function callbacks (or formulas, see Details). If you provide an <code>onFulfilled</code> callback, it will be called upon the promise's successful resolution, with a single argument <code>value</code>: the result value. If you provide an <code>onRejected</code> callback, it will be called if the operation fails, with a single argument <code>reason</code>: the error that caused the failure.</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>then</span>(<span class='no'>promise</span>, <span class='kw'>onFulfilled</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>onRejected</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
@@ -150,7 +153,7 @@
 <span class='fu'>catch</span>(<span class='no'>promise</span>, <span class='no'>onRejected</span>, <span class='kw'>tee</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='fu'>finally</span>(<span class='no'>promise</span>, <span class='no'>onFinally</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -193,7 +196,7 @@ operation either succeeds or fails. Usually used for freeing resources that
 were used during async operations.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="formulas"><a class="anchor" href="#formulas"></a>Formulas</h2>
 
     
@@ -204,7 +207,6 @@ were used during async operations.</p></td>
 <code>onFinally</code> arguments to functions. This means that you can use formulas to
 create very compact anonymous functions, using <code>.</code> to access the value (in
 the case of <code>onFulfilled</code>) or error (in the case of <code>onRejected</code>).</p>
-    
     <h2 class="hasAnchor" id="chaining-promises"><a class="anchor" href="#chaining-promises"></a>Chaining promises</h2>
 
     
@@ -216,9 +218,8 @@ the return value of <code>then</code> is also a (newly created) promise. This ne
 promise waits for the original promise to be fulfilled or rejected, and for
 <code>onFulfilled</code> or <code>onRejected</code> to be called. The result of (or error raised
 by) calling <code>onFulfilled</code>/<code>onRejected</code> will be used to fulfill (reject) the
-new promise.</p><pre>promise_a &lt;- get_data_frame_async()
-promise_b &lt;- then(promise_a, onFulfilled = head)
-</pre>
+new promise.</p><pre><span class='no'>promise_a</span> <span class='kw'>&amp;</span><span class='no'>lt</span>;- <span class='fu'>get_data_frame_async</span>()
+<span class='no'>promise_b</span> <span class='kw'>&amp;</span><span class='no'>lt</span>;- <span class='fu'>then</span>(<span class='no'>promise_a</span>, <span class='kw'>onFulfilled</span> <span class='kw'>=</span> <span class='no'>head</span>)</pre>
 
 <p>In this example, assuming <code>get_data_frame_async</code> returns a promise that
 eventually resolves to a data frame, <code>promise_b</code> will eventually resolve to
@@ -228,33 +229,30 @@ whether <code>onFulfilled</code>/<code>onRejected</code> returns a value or thro
 whether the original promise was fulfilled or rejected. In other words, it's
 possible to turn failure to success and success to failure. Consider this
 example, where we expect <code>some_async_operation</code> to fail, and want to consider
-it an error if it doesn't:</p><pre>promise_c &lt;- some_async_operation()
-promise_d &lt;- then(promise_c,
-  onFulfilled = function(value) {
-    stop("That's strange, the operation didn't fail!")
+it an error if it doesn't:</p><pre><span class='no'>promise_c</span> <span class='kw'>&amp;</span><span class='no'>lt</span>;- <span class='fu'>some_async_operation</span>()
+<span class='no'>promise_d</span> <span class='kw'>&amp;</span><span class='no'>lt</span>;- <span class='fu'>then</span>(<span class='no'>promise_c</span>,
+  <span class='kw'>onFulfilled</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>value</span>) {
+    <span class='fu'><a href='https://rdrr.io/r/base/stop.html'>stop</a></span>(<span class='st'>"That's strange, the operation didn't fail!"</span>)
   },
-  onRejected = function(reason) {
-    # Great, the operation failed as expected
-    NULL
+  <span class='kw'>onRejected</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>reason</span>) {
+    <span class='co'># Great, the operation failed as expected</span>
+    <span class='kw'>NULL</span>
   }
-)
-</pre>
+)</pre>
 
 <p>Now, <code>promise_d</code> will be rejected if <code>promise_c</code> is fulfilled, and vice
 versa.</p>
 <p><strong>Warning:</strong> Be very careful not to accidentally turn failure into success,
-if your error handling code is not the last item in a chain!</p><pre>some_async_operation() %&gt;%
-  catch(function(reason) {
-    warning("An error occurred: ", reason)
-  }) %&gt;%
-  then(function() {
-    message("I guess we succeeded...?")  # No!
-  })
-</pre>
+if your error handling code is not the last item in a chain!</p><pre><span class='fu'>some_async_operation</span>() <span class='kw'>%&amp;gt;%</span>
+  <span class='fu'>catch</span>(<span class='kw'>function</span>(<span class='no'>reason</span>) {
+    <span class='fu'><a href='https://rdrr.io/r/base/warning.html'>warning</a></span>(<span class='st'>"An error occurred: "</span>, <span class='no'>reason</span>)
+  }) <span class='kw'>%&amp;gt;%</span>
+  <span class='fu'>then</span>(<span class='kw'>function</span>() {
+    <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span>(<span class='st'>"I guess we succeeded...?"</span>)  <span class='co'># No!</span>
+  })</pre>
 
 <p>In this example, the <code>catch</code> callback does not itself throw an error, so the
 subsequent <code>then</code> call will consider its promise fulfilled!</p>
-    
     <h2 class="hasAnchor" id="convenience-functions"><a class="anchor" href="#convenience-functions"></a>Convenience functions</h2>
 
     
@@ -271,7 +269,6 @@ at the end of a promise chain to perform cleanup tasks, like closing file
 handles or database connections. Unlike <code>then</code> and <code>catch</code>, the return value
 of <code>finally</code> is ignored; however, if an error is thrown in <code>finally</code>, that
 error will be propagated forward into the returned promise.</p>
-    
     <h2 class="hasAnchor" id="visibility"><a class="anchor" href="#visibility"></a>Visibility</h2>
 
     
@@ -279,23 +276,12 @@ error will be propagated forward into the returned promise.</p>
 
 <p><code>onFulfilled</code> functions can optionally have a second parameter <code>visible</code>,
 which will be <code>FALSE</code> if the result value is <a href='https://rdrr.io/r/base/invisible.html'>invisible</a>.</p>
-    
 
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#formulas">Formulas</a></li>
-
-      <li><a href="#chaining-promises">Chaining promises</a></li>
-
-      <li><a href="#convenience-functions">Convenience functions</a></li>
-
-      <li><a href="#visibility">Visibility</a></li>
-          </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -306,7 +292,7 @@ which will be <code>FALSE</code> if the result value is <a href='https://rdrr.io
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>

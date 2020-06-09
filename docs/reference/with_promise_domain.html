@@ -8,23 +8,29 @@
 
 <title>Promise domains — with_promise_domain • promises</title>
 
-<!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<!-- Bootstrap -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<!-- jquery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<!-- Bootstrap -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -32,14 +38,14 @@
 
 
 
-<meta property="og:title" content="Promise domains — with_promise_domain" />
 
+<meta property="og:title" content="Promise domains — with_promise_domain" />
 <meta property="og:description" content="Promise domains are used to temporarily set up custom environments that
 intercept and influence the registration of callbacks. Create new promise
 domain objects using new_promise_domain, and temporarily activate a promise
 domain object (for the duration of evaluating a given expression) using
 with_promise_domain." />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -56,7 +62,7 @@ with_promise_domain." />
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -70,7 +76,7 @@ with_promise_domain." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
       </span>
     </div>
 
@@ -117,10 +123,9 @@ with_promise_domain." />
   <a href="../reference/index.html">Reference</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/rstudio/promises">
+  <a href="https://github.com/rstudio/promises/">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -144,21 +149,24 @@ with_promise_domain." />
     </div>
 
     <div class="ref-description">
-    
     <p>Promise domains are used to temporarily set up custom environments that
 intercept and influence the registration of callbacks. Create new promise
 domain objects using <code>new_promise_domain</code>, and temporarily activate a promise
 domain object (for the duration of evaluating a given expression) using
 <code>with_promise_domain</code>.</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>with_promise_domain</span>(<span class='no'>domain</span>, <span class='no'>expr</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
-<span class='fu'>new_promise_domain</span>(<span class='kw'>wrapOnFulfilled</span> <span class='kw'>=</span> <span class='no'>identity</span>,
-  <span class='kw'>wrapOnRejected</span> <span class='kw'>=</span> <span class='no'>identity</span>, <span class='kw'>wrapSync</span> <span class='kw'>=</span> <span class='no'>force</span>, <span class='kw'>onError</span> <span class='kw'>=</span> <span class='no'>force</span>, <span class='no'>...</span>,
-  <span class='kw'>wrapOnFinally</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
-    
+<span class='fu'>new_promise_domain</span>(
+  <span class='kw'>wrapOnFulfilled</span> <span class='kw'>=</span> <span class='no'>identity</span>,
+  <span class='kw'>wrapOnRejected</span> <span class='kw'>=</span> <span class='no'>identity</span>,
+  <span class='kw'>wrapSync</span> <span class='kw'>=</span> <span class='no'>force</span>,
+  <span class='kw'>onError</span> <span class='kw'>=</span> <span class='no'>force</span>,
+  <span class='no'>...</span>,
+  <span class='kw'>wrapOnFinally</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -225,7 +233,7 @@ fulfillment/rejection handlers and finally handlers, then be sure to
 provide <code>wrapOnFinally</code>, even if it's just <code><a href='https://rdrr.io/r/base/identity.html'>base::identity()</a></code>.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>While <code>with_promise_domain</code> is on the call stack, any calls to <code><a href='then.html'>then()</a></code> (or
@@ -239,17 +247,12 @@ to <code>then</code>.</p>
 <a href='https://gist.github.com/jcheng5/b1c87bb416f6153643cd0470ac756231'>original design doc</a>.</p>
 <p>For examples, see the source code of the Shiny package, which uses promise
 domains extensively to manage graphics devices and reactivity.</p>
-    
 
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#details">Details</a></li>
-          </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -260,7 +263,7 @@ domains extensively to manage graphics devices and reactivity.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>
