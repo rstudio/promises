@@ -7,9 +7,14 @@
 \usage{
 with_promise_domain(domain, expr, replace = FALSE)
 
-new_promise_domain(wrapOnFulfilled = identity,
-  wrapOnRejected = identity, wrapSync = force, onError = force, ...,
-  wrapOnFinally = NULL)
+new_promise_domain(
+  wrapOnFulfilled = identity,
+  wrapOnRejected = identity,
+  wrapSync = force,
+  onError = force,
+  ...,
+  wrapOnFinally = NULL
+)
 }
 \arguments{
 \item{domain}{A promise domain object to install while \code{expr} is evaluated.}

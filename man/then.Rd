@@ -78,13 +78,13 @@ possible to turn failure to success and success to failure. Consider this
 example, where we expect \code{some_async_operation} to fail, and want to consider
 it an error if it doesn't:\preformatted{promise_c <- some_async_operation()
 promise_d <- then(promise_c,
-  onFulfilled = function(value) {
+  onFulfilled = function(value) \{
     stop("That's strange, the operation didn't fail!")
-  },
-  onRejected = function(reason) {
+  \},
+  onRejected = function(reason) \{
     # Great, the operation failed as expected
     NULL
-  }
+  \}
 )
 }
 
@@ -93,12 +93,12 @@ versa.
 
 \strong{Warning:} Be very careful not to accidentally turn failure into success,
 if your error handling code is not the last item in a chain!\preformatted{some_async_operation() \%>\%
-  catch(function(reason) {
+  catch(function(reason) \{
     warning("An error occurred: ", reason)
-  }) \%>\%
-  then(function() {
+  \}) \%>\%
+  then(function() \{
     message("I guess we succeeded...?")  # No!
-  })
+  \})
 }
 
 In this example, the \code{catch} callback does not itself throw an error, so the

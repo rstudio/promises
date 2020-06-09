@@ -7,7 +7,7 @@
 promise(action)
 }
 \arguments{
-\item{action}{A function with signature \code{function(resolve, reject)}, or a
+\item{action}{A function with signature \verb{function(resolve, reject)}, or a
 one-sided formula. See Details.}
 }
 \value{
