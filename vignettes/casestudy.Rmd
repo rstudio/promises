@@ -26,7 +26,7 @@ Our application will let us examine downloads from CRAN for this kind of behavio
 
 RStudio maintains the popular `0-Cloud` CRAN mirror, and the log files it generates are freely available at http://cran-logs.rstudio.com/. Each day is a separate gzipped CSV file, and each row is a single package download. For privacy, IP addresses are anonymized by substituting each day's IP addresses with unique integer IDs.
 
-Here are the first few lines of http://cran-logs.rstudio.com/2018/2018-05-26.csv.gz:
+Here are the first few lines of http://cran-logs.rstudio.com/2018/2018-05-26.csv.gz :
 
 ```
 "date","time","size","r_version","r_arch","r_os","package","version","country","ip_id"
@@ -135,7 +135,7 @@ While this article is specifically about async, this is a good time to remind yo
 2. Can I perform any **calculations, summarizations, and aggregations offline**, when my Shiny app isn't even running, and save the results to .rds files to be read by the app?
 3. Are there any opportunities to **cache**--that is, save the results of my calculations and use them if I get the same request later? (See [memoise](https://cran.r-project.org/package=memoise), or roll your own.)
 4. Am I effectively leveraging [reactive programming](https://resources.rstudio.com/shiny-developer-conference/shinydevcon-reactivity-joecheng-part-1-1080p) to make sure my reactives are doing as little work as possible?
-5. When deploying my app, am I load balancing across multiple R processes and/or multiple servers? ([Shiny Server Pro](http://docs.rstudio.com/shiny-server/#utilization-scheduler), [RStudio Connect](http://docs.rstudio.com/connect/admin/appendix-configuration.html#appendix-configuration-scheduler), [ShinyApps.io](https://shiny.rstudio.com/articles/scaling-and-tuning.html))
+5. When deploying my app, am I load balancing across multiple R processes and/or multiple servers? ([Shiny Server Pro](https://docs.rstudio.com/shiny-server/#utilization-scheduler), [RStudio Connect](https://docs.rstudio.com/connect/admin/appendix/configuration/#Scheduler), [ShinyApps.io](https://shiny.rstudio.com/articles/scaling-and-tuning.html))
 
 These options are more generally useful than using async techniques because they can dramatically speed up the performance of an app even if only a single user is using it. While it obviously depends on the particulars of the app itself, a few lines of precomputation or caching logic can often lead to 10X-100X better performance. Async, on the other hand, generally doesn't help make a single session faster. Instead, it helps a single Shiny process support more concurrent sessions without getting bogged down.
 
