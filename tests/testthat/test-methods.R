@@ -38,6 +38,17 @@ describe("then()", {
     expect_error(promise(~resolve(1)) %>% then(10))
     expect_error(promise(~resolve(1)) %>% then(NULL), NA)
   })
+
+  it("honors visibility with no .visible argument", {
+    result <- NULL
+    p <- promise_resolve(invisible(1))$
+      then(function(value) {
+        result <<- withVisible(value)
+      })
+    wait_for_it()
+    expect_identical(result$value, 1)
+    expect_identical(result$visible, FALSE)
+  })
 })
 
 describe("catch()", {
