@@ -48,6 +48,15 @@ describe("then()", {
     wait_for_it()
     expect_identical(result$value, 1)
     expect_identical(result$visible, FALSE)
+
+    result <- NULL
+    p <- promise_resolve(2)$
+      then(function(value) {
+        result <<- withVisible(value)
+      })
+    wait_for_it()
+    expect_identical(result$value, 2)
+    expect_identical(result$visible, TRUE)
   })
 })
 
