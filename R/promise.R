@@ -227,7 +227,11 @@ normalizeOnFulfilled <- function(onFulfilled) {
     onFulfilled
   } else if (arg_count > 0) {
     function(value, .visible) {
-      onFulfilled(value)
+      if (isTRUE(.visible)) {
+        onFulfilled(value)
+      } else {
+        onFulfilled(invisible(value))
+      }
     }
   } else {
     function(value, .visible) {
