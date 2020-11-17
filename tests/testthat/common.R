@@ -19,7 +19,7 @@ ext_promise <- function() {
 wait_for_it <- function() {
   while (!loop_empty()) {
     run_now()
-    Sys.sleep(0.1)
+    Sys.sleep(0.01)
   }
 }
 
