@@ -1,4 +1,4 @@
-promises (development)
+promises 1.2.0
 ==============
 
 - Fix bug: `then(function(value) {})` causes `invisible()` to be dropped (#59)
