@@ -62,7 +62,7 @@ Others behave very differently, like `freezing_tapir`, who downloaded `devtools`
 
 ![](case-study-tab5.png)
 
-Sadly, the app can't tell us any more than that--it can't explain _why_ these downloaders are behaving this way, nor can it tell us their street addresses so that we can send ninjas in black RStudio helicoptors to make them stop.
+Sadly, the app can't tell us any more than that--it can't explain _why_ these downloaders are behaving this way, nor can it tell us their street addresses so that we can send ninjas in black RStudio helicopters to make them stop.
 
 ## The implementation
 
@@ -189,17 +189,17 @@ The next thing we'll do is convert the `data` event reactive to use `future` for
 data <- eventReactive(input$date, {
   date <- input$date  # Example: 2018-05-28
   year <- lubridate::year(date)  # Example: "2018"
-  
+
   url <- glue("http://cran-logs.rstudio.com/{year}/{date}.csv.gz")
   path <- file.path("data_cache", paste0(date, ".csv.gz"))
-  
+
   withProgress(value = NULL, {
-    
+
     if (!file.exists(path)) {
       setProgress(message = "Downloading data...")
       download.file(url, path)
     }
-    
+
     setProgress(message = "Parsing data...")
     read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
 
@@ -215,12 +215,12 @@ For now, we'll lose the `withProgress`/`setProgress` reporting, since doing that
 # ASYNCHRONOUS version
 
 data <- eventReactive(input$date, {
-  date <- input$date  
+  date <- input$date
   year <- lubridate::year(date)
-  
+
   url <- glue("http://cran-logs.rstudio.com/{year}/{date}.csv.gz")
   path <- file.path("data_cache", paste0(date, ".csv.gz"))
-  
+
   future({
     if (!file.exists(path)) {
       download.file(url, path)
@@ -483,17 +483,17 @@ Again, here's the original sync code:
 data <- eventReactive(input$date, {
   date <- input$date  # Example: 2018-05-28
   year <- lubridate::year(date)  # Example: "2018"
-  
+
   url <- glue("http://cran-logs.rstudio.com/{year}/{date}.csv.gz")
   path <- file.path("data_cache", paste0(date, ".csv.gz"))
-  
+
   withProgress(value = NULL, {
-    
+
     if (!file.exists(path)) {
       setProgress(message = "Downloading data...")
       download.file(url, path)
     }
-    
+
     setProgress(message = "Parsing data...")
     read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
 
@@ -503,7 +503,7 @@ data <- eventReactive(input$date, {
 
 Progress reporting currently presents two challenges for future.
 
-First, the `withProgress({...})` function cannot be used with async. `withProgress` is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to `future()` will return immediately even though the actual task is far from done, using `withProgress` won't work; the progress dialog would be dismissed before the download even got going. 
+First, the `withProgress({...})` function cannot be used with async. `withProgress` is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to `future()` will return immediately even though the actual task is far from done, using `withProgress` won't work; the progress dialog would be dismissed before the download even got going.
 
 It's conceivable that `withProgress` could gain promise compatibility someday, but it's not in Shiny v1.1.0. In the meantime, we can work around this by using the alternative, [object-oriented progress API](https://shiny.rstudio.com/reference/shiny/1.1.0/Progress.html) that Shiny offers. It's a bit more verbose and fiddly than `withProgress`/`setProgress`, but it is flexible enough to work with futures/promises.
 
@@ -517,12 +517,12 @@ The regrettably complicated solution is below.
 # ASYNCHRONOUS version
 
 data <- eventReactive(input$date, {
-  date <- input$date  
+  date <- input$date
   year <- lubridate::year(date)
-  
+
   url <- glue("http://cran-logs.rstudio.com/{year}/{date}.csv.gz")
   path <- file.path("data_cache", paste0(date, ".csv.gz"))
-  
+
   p <- Progress$new()
   p$set(value = NULL, message = "Downloading data...")
   future({
