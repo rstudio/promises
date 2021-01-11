@@ -32,5 +32,5 @@ RoxygenNote: 7.1.1
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
-URL: https://rstudio.github.io/promises, https://github.com/rstudio/promises
+URL: https://rstudio.github.io/promises/, https://github.com/rstudio/promises
 BugReports: https://github.com/rstudio/promises/issues
