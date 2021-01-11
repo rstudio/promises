@@ -20,6 +20,7 @@ Imports:
     stats,
     magrittr
 Suggests:
+    purrr,
     testthat,
     future,
     knitr,
