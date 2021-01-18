@@ -169,30 +169,37 @@ future_promise <- function(
   force(gp)
 
   message(counter_, " - making promise")
-  promises::promise(function(resolve, reject) {
-    message(counter_, " - scheduling work")
-    # add to queue
-    queue$schedule_work(function() {
-      message(counter_, " - submitting job")
-      # worker available!
-      ## TODO - barret - should the worker function be taken at creation time or submission time?
-      ### Current behavior is submission time to allow
-      make_future <- future::plan("next")
 
-      resolve(
-        make_future(
-          gp$expr,
-          envir = envir,
-          substitute = FALSE,
-          globals = gp$globals,
-          packages = unique(c(packages, gp$packages)),
-          ...
-        )
+  resolve_fn <- NULL
+  ret_p <-
+    promises::promise(
+      function(resolve, reject) {
+        resolve_fn <<- resolve
+      }
+    )
+  message(counter_, " - scheduling work")
+  # add to queue
+  queue$schedule_work(function() {
+    message(counter_, " - submitting job")
+    # worker available!
+    ## TODO - barret - should the worker function be taken at creation time or submission time?
+    ### Current behavior is submission time to allow
+    make_future <- future::plan("next")
+
+    resolve_fn(
+      make_future(
+        gp$expr,
+        envir = envir,
+        substitute = FALSE,
+        globals = gp$globals,
+        packages = unique(c(packages, gp$packages)),
+        ...
       )
-    })
-    queue$attempt_work()
+    )
+  })
+  queue$attempt_work()
 
-  }) %...>%
+  ret_p %...>%
   {
     message(counter_, " - finish job!")
     .
