@@ -21,7 +21,7 @@ Imports:
     magrittr
 Suggests:
     testthat,
-    future,
+    future (>= 1.21.0),
     knitr,
     rmarkdown
 LinkingTo: later,
