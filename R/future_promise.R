@@ -14,71 +14,168 @@ worker_is_free <- function() {
   future::nbrOfFreeWorkers() > 0
 }
 
-# future_stack <- function(max_workers) {
-#   stack <- list()
 
-#   return (future_promise)
-# }
+Delay <- R6::R6Class("Delay",
+  private = list(
+    delay_count = 0
+  ),
+  public = list(
+    is_reset = function() {
+      private$delay_count == 0
+    },
+    reset = function() {
+      private$delay_count <- 0
+    },
 
-# Know how to wait until a condition is met to execute scheduled work
-#
-# WorkQueue$constructor(can_proceed_func, polling_interval)
 # WorkQueue$schedule_work(func)
+    increase = function() {
+      private$delay_count <- private$delay_count + 1
+    },
+
+    delay = function() {
+      stop("$delay() not implemented")
+    }
+  )
+)
+
+ExpoDelay <- R6::R6Class("ExpoDelay",
+  inherit = Delay,
+  private = list(
+    base = 1 / 100,
+    min_seconds = 0.01,
+    max_seconds = 30
+  ),
+  public = list(
+    initialize = function(
+      base = 1 / 100,
+      min_seconds = 0.01,
+      max_seconds = 30
+    ) {
+      stopifnot(length(base) == 1 && is.numeric(base) && base >= 0)
+      stopifnot(length(min_seconds) == 1 && is.numeric(min_seconds) && min_seconds >= 0)
+      stopifnot(length(max_seconds) == 1 && is.numeric(max_seconds) && max_seconds >= 0)
+
+      private$base <- base
+      private$max_seconds <- max_seconds
+      private$min_seconds <- min_seconds
+
+      self
+    },
+
+    # return number of milliseconds until next attempt
+    # will randomly backoff to avoid extra work on long poll times
+    delay = function() {
+      # calculate expo backoff value
+      expo_val <- private$base * ((2 ^ private$delay_count) - 1)
+      # find random value
+      random_val <- runif(n = 1, min = private$min_seconds, max = min(private$max_seconds, expo_val))
+      message(random_val)
+      # perform `min()` on second step to avoid `runif(1, min = 5, max = 4)` which produces `NaN`
+      max(private$min_seconds, random_val)
+    }
+  )
+)
+
+ConstDelay <- R6::R6Class("ConstDelay",
+  inherit = Delay,
+  private = list(
+    const = 0.1,
+    random = TRUE
+  ),
+  public = list(
+    initialize = function(const = 0.1, random = TRUE) {
+      stopifnot(length(const) == 1 && is.numeric(const) && const >= 0)
+      private$const <- const
+      private$random <- isTRUE(random)
+
+      self
+    },
+    delay = function() {
+      if (private$random) {
+        runif(n = 1, max = private$const)
+      } else {
+        private$const
+      }
+    }
+  )
+)
+LinearDelay <- R6::R6Class("LinearDelay",
+  inherit = Delay,
+  private = list(
+    delta = 0.05,
+    random = TRUE
+  ),
+  public = list(
+    initialize = function(delta = 0.03, random = TRUE) {
+      stopifnot(length(delta) == 1 && is.numeric(delta) && delta >= 0)
+      private$delta <- delta
+      private$random <- isTRUE(random)
+
+      self
+    },
+
+    delay = function() {
+      delta_delay <- private$delay_count * private$delta
+      message(delta_delay)
+      if (private$random) {
+        runif(n = 1, max = delta_delay)
+      } else {
+        delta_delay
+      }
+    }
+  )
+)
 
 # FIFO queue of workers
 WorkQueue <- R6::R6Class("WorkQueue",
   private = list(
     queue = "fastmap::fastqueue()",
-    can_proceed_fn = "worker_is_free()",
+    can_proceed_fn = "future_worker_is_free()",
     loop = "later::current_loop()",
-
-    attempts = 0,
-
-    reset_attempts = function() {
-      private$attempts <- 0
-    },
-    increment_attempts = function() {
-      private$attempts <- private$attempts + 1
-    },
-
-    # return number of milliseconds until next attempt
-    # will randomly backoff to avoid extra work on long poll times
-    time_to_next_attempt = function() {
-      floor(runif(n = 1, min = 0, max = (2 ^ private$attempts) - 1)) / 100
-    },
+    delay = "ExpoDelay$new()",
 
     can_proceed = function() {
       isTRUE(private$can_proceed_fn())
     },
 
-    check_queue = function() {
+    attempt_work = function() {
+
       # check if we can actually proceed with submitting `future` work
       if (!private$can_proceed()) {
         # Can not do work
-        # Increment attempts and try again later
-        private$increment_attempts()
+
+        # Increment delay and try again later
+        private$delay$increase()
         later::later(
           loop = private$loop,
-          delay = private$time_to_next_attempt(),
+          delay = private$delay$delay(),
           function() {
-            private$check_queue()
+            private$attempt_work()
           }
         )
         return()
       }
 
       # Can do work!
-      private$reset_attempts()
 
+      # Reset the delay
+      private$delay$reset()
+
+      # Get first item in queue
       work_fn <- private$queue$remove()
       # no work to be done. return
-      if (is.null(work_fn)) return()
 
-      # do work
+      # safety check...
+      # If nothing is returned, no work to be done. Return early
+      if (!is.function(work_fn)) return()
+
+      # Do scheduled work
+      message("doing work")
       work_fn()
 
       if (private$queue$size() > 0) {
-        private$check_queue()
+        message("attempting more work")
+        private$attempt_work()
       }
 
       return()
@@ -87,37 +184,47 @@ WorkQueue <- R6::R6Class("WorkQueue",
   public = list(
     initialize = function(
       # defaults to a plan agnostic function
-      can_proceed_fn = worker_is_free,
-      loop = later::current_loop()
+      can_proceed = future_worker_is_free,
+      queue = fastmap::fastqueue(), # FIFO
+      loop = later::current_loop(),
+      delay = ExpoDelay$new()
     ) {
-      private$attempts <- 0
-      private$can_proceed_fn <- can_proceed_fn
-      private$queue <- fastmap::fastqueue()
+      stopifnot(is.function(can_proceed))
+      stopifnot(
+        is.function(queue$add) &&
+        is.function(queue$remove) &&
+        is.function(queue$size)
+      )
+      stopifnot(inherits(loop, "event_loop"))
+      stopifnot(inherits(delay, "Delay"))
+
+      private$can_proceed_fn <- can_proceed
+      private$queue <- queue
       private$loop <- loop
+      private$delay <- delay
+
+      # make sure delay is reset
+      private$delay$reset()
+
       self
     },
 
     # add to schedule only
     schedule_work = function(fn) {
       stopifnot(is.function(fn))
+      message("added to queue")
       private$queue$add(fn)
 
-      invisible(self)
-    },
-
-    # try to attempt to do work
-    attempt_work = function() {
-      # If the number of check attempts is 0, start a worker
-      if (private$attempts == 0) {
-        # Attempt to do work right away
-        private$check_queue()
-
-        TRUE
-      } else {
-        FALSE
+      # If we are not waiting on someone else, we can do work now
+      ## fn was added above, so an _empty_ queue is of size 1
+      if (private$queue$size() == 1) {
+      # if (private$can_proceed()) {
+        message("attempting new work")
+        # Do work right away
+        private$attempt_work()
       }
 
-
+      invisible(self)
     }
   )
 )
@@ -127,10 +234,7 @@ future_promise_queue <- local({
   future_promise_queue_ <- NULL
   function() {
     if (is.null(future_promise_queue_)) {
-      future_promise_queue_ <<- WorkQueue$new(
-        can_proceed_fn = worker_is_free,
-        loop = later::current_loop()
-      )
+      future_promise_queue_ <<- WorkQueue$new()
     }
     future_promise_queue_
   }
