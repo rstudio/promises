@@ -9,7 +9,7 @@ assert_future_version <- local({
     return()
   }
 })
-worker_is_free <- function() {
+future_worker_is_free <- function() {
   assert_future_version()
   future::nbrOfFreeWorkers() > 0
 }
