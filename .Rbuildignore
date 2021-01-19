@@ -4,3 +4,4 @@
 ^docs$
 ^index.md$
 ^\.github$
+^revdep$
