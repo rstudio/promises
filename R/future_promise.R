@@ -1,3 +1,11 @@
+
+fp_message_can_print <- FALSE
+fp_message <- function(...) {
+  if (fp_message_can_print) {
+    message(...)
+  }
+}
+
 assert_future_version <- local({
   val <- NULL
   function() {
@@ -26,13 +34,16 @@ Delay <- R6::R6Class("Delay",
       private$delay_count <- 0
     },
 
-# WorkQueue$schedule_work(func)
     increase = function() {
       private$delay_count <- private$delay_count + 1
     },
 
     delay = function() {
       stop("$delay() not implemented")
+    }
+  ), active = list(
+    count = function() {
+      private$delay_count
     }
   )
 )
@@ -42,13 +53,13 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
   private = list(
     base = 1 / 100,
     min_seconds = 0.01,
-    max_seconds = 30
+    max_seconds = 5
   ),
   public = list(
     initialize = function(
       base = 1 / 100,
       min_seconds = 0.01,
-      max_seconds = 30
+      max_seconds = 10
     ) {
       stopifnot(length(base) == 1 && is.numeric(base) && base >= 0)
       stopifnot(length(min_seconds) == 1 && is.numeric(min_seconds) && min_seconds >= 0)
@@ -67,8 +78,7 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
       # calculate expo backoff value
       expo_val <- private$base * ((2 ^ private$delay_count) - 1)
       # find random value
-      random_val <- runif(n = 1, min = private$min_seconds, max = min(private$max_seconds, expo_val))
-      message(random_val)
+      random_val <- runif(n = 1, max = min(private$max_seconds, expo_val))
       # perform `min()` on second step to avoid `runif(1, min = 5, max = 4)` which produces `NaN`
       max(private$min_seconds, random_val)
     }
@@ -115,7 +125,6 @@ LinearDelay <- R6::R6Class("LinearDelay",
 
     delay = function() {
       delta_delay <- private$delay_count * private$delta
-      message(delta_delay)
       if (private$random) {
         runif(n = 1, max = delta_delay)
       } else {
@@ -125,18 +134,77 @@ LinearDelay <- R6::R6Class("LinearDelay",
   )
 )
 
+# Situations
+# √ No future workers are busy. All future calls are `future_promises()`
+#  * Can be accomplished using followup promise to `$start_work()`
+# √ All future workers are busy with other tasks (but will become available).
+#  * Require using delay
+# √ While processing the first batch, existing future workers are taken over
+#  * Require delay
+
 # FIFO queue of workers
 WorkQueue <- R6::R6Class("WorkQueue",
   private = list(
     queue = "fastmap::fastqueue()",
     can_proceed_fn = "future_worker_is_free()",
     loop = "later::current_loop()",
+    delay = "ExpoDelay$new()",
+
+    cancel_delay_fn = NULL,
+
+    increase_delay = function() {
+      fp_message("increase_delay()...", private$delay$count)
+      # Increment delay and try again later
+      private$delay$increase()
+    },
+
+    reset_delay = function() {
+      fp_message("reset_delay()")
+      private$delay$reset()
+      if (is.function(private$cancel_delay_fn)) {
+        private$cancel_delay_fn()
+      }
+      private$cancel_delay_fn <- NULL
+    },
 
     can_proceed = function() {
       isTRUE(private$can_proceed_fn())
     },
 
-    attempt_work = function() {
+    start_work = function(can_check_delay = FALSE) {
+      fp_message('start_work()')
+
+      # If we are not waiting on someone else, we can do work now
+      while ((private$queue$size() > 0) && private$can_proceed()) {
+
+        private$reset_delay()
+
+        # Do work right away
+        private$do_work()
+      }
+
+      # if there are still items to be processed, but we can not proceed...
+      if (private$queue$size() > 0 && ! private$can_proceed()) {
+        # if we are allowed to delay (default FALSE), or nothing is currently delaying
+        if (can_check_delay || is.null(private$cancel_delay_fn)) {
+          # bump up the delay
+          private$increase_delay()
+
+          # try again later
+          private$cancel_delay_fn <-
+            later::later(
+              loop = private$loop,
+              delay = private$delay$delay(),
+              function() {
+                private$start_work(can_check_delay = TRUE)
+              }
+            )
+        }
+      }
+    },
+
+    do_work = function() {
+      fp_message("do_work()")
 
       # Get first item in queue
       work_fn <- private$queue$remove()
@@ -146,16 +214,15 @@ WorkQueue <- R6::R6Class("WorkQueue",
       if (!is.function(work_fn)) return()
 
       # Do scheduled work
-      message("doing work")
+      fp_message("execute work")
       future_job <- work_fn()
+      # make sure a promise like object was returned
+      stopifnot(is.promising(future_job))
 
-      # If there is more work to do, try to do work
+      # If there is more work to do, try to do work once future job has finished
       future_job %...>% {
-        message("post work queue size: ", private$queue$size())
-        if (private$queue$size() > 0) {
-          message("attempting more work")
-          private$attempt_work()
-        }
+        fp_message("finished work. queue size: ", private$queue$size())
+        private$start_work()
       }
 
       return()
@@ -163,7 +230,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
   ),
   public = list(
     initialize = function(
-      # defaults to a plan agnostic function
+      # defaults to a future::plan agnostic function
       can_proceed = future_worker_is_free,
       queue = fastmap::fastqueue(), # FIFO
       loop = later::current_loop()
@@ -175,27 +242,27 @@ WorkQueue <- R6::R6Class("WorkQueue",
         is.function(queue$size)
       )
       stopifnot(inherits(loop, "event_loop"))
+      delay <- ExpoDelay$new()
+      stopifnot(inherits(delay, "Delay"))
 
       private$can_proceed_fn <- can_proceed
       private$queue <- queue
       private$loop <- loop
+      private$delay <- delay
+
+      # make sure delay is reset
+      private$reset_delay()
 
       self
     },
 
     # add to schedule only
     schedule_work = function(fn) {
+      fp_message("schedule_work()")
       stopifnot(is.function(fn))
-      message("added to queue")
       private$queue$add(fn)
 
-      # If we are not waiting on someone else, we can do work now
-      ## fn was added above, so an _empty_ queue is of size 1
-      if (private$can_proceed()) {
-        message("attempting new work")
-        # Do work right away
-        private$attempt_work()
-      }
+      private$start_work()
 
       invisible(self)
     }
@@ -242,8 +309,6 @@ future_promise <- function(
   promises::promise(function(resolve, reject) {
     # add to queue
     queue$schedule_work(function() {
-      # worker available!
-
       ## TODO - barret - should the worker function be taken at creation time or submission time?
       ### Current behavior is submission time to allow
       exec_future <- future::plan("next")
@@ -257,6 +322,7 @@ future_promise <- function(
         packages = unique(c(packages, gp$packages)),
         ...
       )
+
       # When the future job is complete, resolve it~
       # Return the future job so that more promises can be added to it
       then(future_job, resolve)
@@ -273,7 +339,27 @@ if (FALSE) {
   # library("future.callr")
   # plan(callr(workers = 2))
 
-  # source("plumber/calc.R")
+  print_i <- function(i = 0) { if (i <= 50) { print(i); later::later(function() { print_i(i + 1) }, delay = 0.1) } }
+
+  # dev_load <- pkgload::load_all
+
+  # ## test
+  # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) };
+
+  # ## block workers mid job
+  # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:2, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i) }) -> ignore;
+
+  # ## block main worker mid job
+  # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:4, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i/4) }) -> ignore;
+
+
+  # ## block workers pre job
+  # dev_load(); print_i(); lapply(1:2, function(i) { message("*************** adding blockage", i); future::future({ Sys.sleep(4); message("*************** blockage done", i); i}) }) -> future_jobs; lapply(future_jobs, function(fj) { as.promise(fj) %...>% { print(.) } }); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) };
+
+  # ## block main worker workers pre job
+  # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:4, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i/4) }) -> ignore;
+
+
   slow_calc <- function(n) {
     Sys.sleep(n)
     "slow!"
