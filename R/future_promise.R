@@ -14,7 +14,6 @@ future_worker_is_free <- function() {
   future::nbrOfFreeWorkers() > 0
 }
 
-
 Delay <- R6::R6Class("Delay",
   private = list(
     delay_count = 0
@@ -132,7 +131,6 @@ WorkQueue <- R6::R6Class("WorkQueue",
     queue = "fastmap::fastqueue()",
     can_proceed_fn = "future_worker_is_free()",
     loop = "later::current_loop()",
-    delay = "ExpoDelay$new()",
 
     can_proceed = function() {
       isTRUE(private$can_proceed_fn())
@@ -140,30 +138,8 @@ WorkQueue <- R6::R6Class("WorkQueue",
 
     attempt_work = function() {
 
-      # check if we can actually proceed with submitting `future` work
-      if (!private$can_proceed()) {
-        # Can not do work
-
-        # Increment delay and try again later
-        private$delay$increase()
-        later::later(
-          loop = private$loop,
-          delay = private$delay$delay(),
-          function() {
-            private$attempt_work()
-          }
-        )
-        return()
-      }
-
-      # Can do work!
-
-      # Reset the delay
-      private$delay$reset()
-
       # Get first item in queue
       work_fn <- private$queue$remove()
-      # no work to be done. return
 
       # safety check...
       # If nothing is returned, no work to be done. Return early
@@ -171,11 +147,15 @@ WorkQueue <- R6::R6Class("WorkQueue",
 
       # Do scheduled work
       message("doing work")
-      work_fn()
+      future_job <- work_fn()
 
-      if (private$queue$size() > 0) {
-        message("attempting more work")
-        private$attempt_work()
+      # If there is more work to do, try to do work
+      future_job %...>% {
+        message("post work queue size: ", private$queue$size())
+        if (private$queue$size() > 0) {
+          message("attempting more work")
+          private$attempt_work()
+        }
       }
 
       return()
@@ -186,8 +166,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
       # defaults to a plan agnostic function
       can_proceed = future_worker_is_free,
       queue = fastmap::fastqueue(), # FIFO
-      loop = later::current_loop(),
-      delay = ExpoDelay$new()
+      loop = later::current_loop()
     ) {
       stopifnot(is.function(can_proceed))
       stopifnot(
@@ -196,15 +175,10 @@ WorkQueue <- R6::R6Class("WorkQueue",
         is.function(queue$size)
       )
       stopifnot(inherits(loop, "event_loop"))
-      stopifnot(inherits(delay, "Delay"))
 
       private$can_proceed_fn <- can_proceed
       private$queue <- queue
       private$loop <- loop
-      private$delay <- delay
-
-      # make sure delay is reset
-      private$delay$reset()
 
       self
     },
@@ -217,8 +191,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
 
       # If we are not waiting on someone else, we can do work now
       ## fn was added above, so an _empty_ queue is of size 1
-      if (private$queue$size() == 1) {
-      # if (private$can_proceed()) {
+      if (private$can_proceed()) {
         message("attempting new work")
         # Do work right away
         private$attempt_work()
@@ -242,7 +215,6 @@ future_promise_queue <- local({
 
 
 
-counter <- 0
 future_promise <- function(
   expr = NULL,
   envir = parent.frame(),
@@ -254,11 +226,6 @@ future_promise <- function(
 ) {
 
   if (substitute) expr <- substitute(expr)
-
-  counter <<- counter + 1
-  counter_ <- force(counter)
-
-  message(counter_, " - received expr")
 
   # Force all variables to curb values changing before execution
   # Does NOT fix R environment values changing
@@ -272,35 +239,29 @@ future_promise <- function(
   gp <- future::getGlobalsAndPackages(expr, envir = envir, globals = globals)
   force(gp)
 
-  message(counter_, " - making promise")
   promises::promise(function(resolve, reject) {
-    message(counter_, " - scheduling work")
     # add to queue
     queue$schedule_work(function() {
-      message(counter_, " - submitting job")
       # worker available!
+
       ## TODO - barret - should the worker function be taken at creation time or submission time?
       ### Current behavior is submission time to allow
-      make_future <- future::plan("next")
+      exec_future <- future::plan("next")
 
-      resolve(
-        make_future(
-          gp$expr,
-          envir = envir,
-          substitute = FALSE,
-          globals = gp$globals,
-          packages = unique(c(packages, gp$packages)),
-          ...
-        )
+      # execute the future and return a promise so the schedule knows exactly when it is done
+      future_job <- exec_future(
+        gp$expr,
+        envir = envir,
+        substitute = FALSE,
+        globals = gp$globals,
+        packages = unique(c(packages, gp$packages)),
+        ...
       )
+      # When the future job is complete, resolve it~
+      # Return the future job so that more promises can be added to it
+      then(future_job, resolve)
     })
-    queue$attempt_work()
-
-  }) %...>%
-  {
-    message(counter_, " - finish job!")
-    .
-  }
+  })
 }
 
 
@@ -317,20 +278,22 @@ if (FALSE) {
     Sys.sleep(n)
     "slow!"
   }
-  n <- 5
-  a1 <- future_promise({
+  n <- 2
+  prom <- future_promise
+  # prom <- future::future
+  a1 <- prom({
     print(paste0("start 1 - ", Sys.time()))
     print(slow_calc(n))
   })
-  a2 <- future_promise({
+  a2 <- prom({
     print(paste0("start 2 - ", Sys.time()))
     print(slow_calc(n))
   })
-  a3 <- future_promise({
+  a3 <- prom({
     print(paste0("start 3 - ", Sys.time()))
     print(slow_calc(n))
   })
-  a4 <- future_promise({
+  a4 <- prom({
     print(paste0("start 4 - ", Sys.time()))
     print(slow_calc(n))
   })
