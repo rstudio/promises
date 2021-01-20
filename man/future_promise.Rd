@@ -46,7 +46,7 @@ When submitting \pkg{future} work, \pkg{future} (by design) will block the main 
 This can occur when submitting more \pkg{future} work than there are \pkg{future} workers.
 }
 \details{
-If your \code{\link[future:plan]{future::plan()}} allows for more workers than you expect to require simultaneously, you are encouraged to continue to use \code{\link[future:future]{future::future()}} like normal.  However, if you generate more simultaneous \pkg{future} work than there are available workers AND you would like to keep the main R sessino free, then you should use \code{future_promise()}.
+If your \code{\link[future:plan]{future::plan()}} allows for more workers than you expect to require simultaneously, you are encouraged to continue to use \code{\link[future:future]{future::future()}} like normal.  However, if you generate more simultaneous \pkg{future} work than there are available workers AND you would like to keep the main R session free, then you should use \code{future_promise()}.
 
 Typically, the expression to be executed can be delayed in a \code{\link[=promise]{promise()}} before submission to a \pkg{future} worker.
 }
@@ -60,9 +60,9 @@ Typically, the expression to be executed can be delayed in a \code{\link[=promis
 \section{\code{promise} vs \code{future}}{
 
 
-With future blocking on the main R session, this prevents values from being changed.  It is known that evironments can change their values unexpectedly. As with \code{\link[=promise]{promise()}}, it is recommended to pull out important variables and force them to a local value before creating your \code{future_promise()}.
+With future blocking on the main R session, this prevents values from being changed.  It is known that environments can change their values unexpectedly. As with \code{\link[=promise]{promise()}}, it is recommended to pull out important variables and force them to a local value before creating your \code{future_promise()}.
 
-For example, the environtment \code{env} below will have its value \code{a} changed before it is used.\if{html}{\out{<div class="r">}}\preformatted{\{
+For example, the environment \code{env} below will have its value \code{a} changed before it is used.\if{html}{\out{<div class="r">}}\preformatted{\{
   env <- new.env()
   env$a <- 1
 
@@ -93,12 +93,18 @@ To address this, we can capture the value \code{a} or turn the environment into 
 
 When using \code{future_promise()}, be sure to scope your variables if the context can change. \code{future_promise()} will behave more like a \code{\link[=promise]{promise()}} that executes using \code{\link[future:future]{future::future()}}.
 
-Changing context example:\if{html}{\out{<div class="r">}}\preformatted{}\if{html}{\out{</div>}}
+Changing context example:\if{html}{\out{<div class="r">}}\preformatted{items <- list()
+for (i in 1:10) \{
+  items <- c(items, list(
+    promise_resolve(TRUE) \%...>\% \{i\}
+  ))
+\}
+promise_all(.list = items) \%...>\%
+  \{ print(unlist(.)) \}
+}\if{html}{\out{</div>}}
 
 Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10, function(i) \{
-  promise(function(resolve, reject) \{
-    later::later(function() \{ resolve(i) \})
-  \})
+  promise_resolve(TRUE) \%...>\% \{i\}
 \}) \%>\%
   promise_all(.list = .) \%...>\%
   \{ print(unlist(.)) \}
@@ -122,13 +128,13 @@ Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10
   on.exit({unlink(log)}, add = TRUE)
   start <- Sys.time()
   cat_ex <- function(...) {
-    msg <- paste0(..., "; ", sprintf("\%.2f", difftime(Sys.time(), start, units = "secs")))
+    msg <- paste0(Sys.getpid(), " ", ..., "; ", sprintf("\%.2f", difftime(Sys.time(), start, units = "secs")))
     message(msg)
     cat(msg, "\n", sep = "", file = log, append = TRUE)
   }
 
   # This function will print every `delay` seconds
-  # The thing to notes is that the function will not execute unless the main R session is free
+  # The thing to notice is that the function will not execute unless the main R session is free
   # We should expect to see `print_every()` statements interleaved with `future_promise()` calls
   # We should NOT expect to see `print_every()` statements
   #   while `future::future()` is blocking the main R session
@@ -145,7 +151,8 @@ Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10
       later::run_now()
       Sys.sleep(0.01)
     }
-    message("done with run_ex_now()")
+    cat("\nlog:\n", paste0(readLines(log), collapse = "\n"), "\n", sep = "")
+    cat_ex("done with run_ex_now()")
   }
 
   # Consistent printing method for the example below
@@ -154,7 +161,6 @@ Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10
       {
         cat("\n")
         print(.);
-        cat("\nlog:\n", paste0(readLines(log), collapse = "\n"), "\n", sep = "")
       }
   }
 
