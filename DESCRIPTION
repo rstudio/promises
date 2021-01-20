@@ -22,6 +22,7 @@ Imports:
 Suggests:
     testthat,
     future (>= 1.21.0),
+    fastmap (>= 1.0.1.9000),
     knitr,
     rmarkdown
 LinkingTo: later,
