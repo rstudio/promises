@@ -1,4 +1,4 @@
-
+skip_on_cran()
 skip_if_not_installed("future", "1.21.0")
 
 source(test_path("common.R"))
