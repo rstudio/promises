@@ -402,7 +402,7 @@ future_promise_queue <- local({
 #'   }
 #'
 #'   # This function will print every `delay` seconds
-#'   # The thing to notes is that the function will not execute unless the main R session is free
+#'   # The thing to notice is that the function will not execute unless the main R session is free
 #'   # We should expect to see `print_every()` statements interleaved with `future_promise()` calls
 #'   # We should NOT expect to see `print_every()` statements
 #'   #   while `future::future()` is blocking the main R session
@@ -419,7 +419,7 @@ future_promise_queue <- local({
 #'       later::run_now()
 #'       Sys.sleep(0.01)
 #'     }
-#'     message("done with run_ex_now()")
+#'     cat_ex("done with run_ex_now()")
 #'   }
 #'
 #'   # Consistent printing method for the example below
@@ -515,7 +515,7 @@ future_promise <- function(
   gp <- future::getGlobalsAndPackages(expr, envir = envir, globals = globals)
   force(gp)
 
-  promises::promise(function(resolve, reject) {
+  promise(function(resolve, reject) {
     # add to queue
     queue$schedule_work(function() {
       ## TODO - barret - should the worker function be taken at creation time or submission time?
@@ -532,8 +532,8 @@ future_promise <- function(
         ...
       )
 
-      # When the future job is complete, resolve it~
-      # Return the future job so that more promises can be added to it
+      # When the future job is complete, resolve it
+      # Return a promise so that more promises can be added to it
       then(future_job, resolve)
     })
   })
