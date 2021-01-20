@@ -347,7 +347,7 @@ future_promise_queue <- local({
 #'   on.exit({unlink(log)}, add = TRUE)
 #'   start <- Sys.time()
 #'   cat_ex <- function(...) {
-#'     msg <- paste0(..., "; ", sprintf("%.2f", difftime(Sys.time(), start, units = "secs")))
+#'     msg <- paste0(Sys.getpid(), " ", ..., "; ", sprintf("%.2f", difftime(Sys.time(), start, units = "secs")))
 #'     message(msg)
 #'     cat(msg, "\n", sep = "", file = log, append = TRUE)
 #'   }
