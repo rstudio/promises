@@ -260,15 +260,15 @@ future_promise_queue <- local({
 #' When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until no worker is free.
 #' This can occur when submitting more \pkg{future} work than there are \pkg{future} workers.
 #'
-#' If your [future::plan()] allows for more workers than you expect to require simultaneously, you are encouraged to continue to use [future::future()] like normal.  However, if you generate more simultaneous \pkg{future} work than there are available workers AND you would like to keep the main R sessino free, then you should use `future_promise()`.
+#' If your [future::plan()] allows for more workers than you expect to require simultaneously, you are encouraged to continue to use [future::future()] like normal.  However, if you generate more simultaneous \pkg{future} work than there are available workers AND you would like to keep the main R session free, then you should use `future_promise()`.
 #'
 #' Typically, the expression to be executed can be delayed in a [promise()] before submission to a \pkg{future} worker.
 #'
 #' @section `promise` vs `future`:
 #'
-#' With future blocking on the main R session, this prevents values from being changed.  It is known that evironments can change their values unexpectedly. As with [promise()], it is recommended to pull out important variables and force them to a local value before creating your `future_promise()`.
+#' With future blocking on the main R session, this prevents values from being changed.  It is known that environments can change their values unexpectedly. As with [promise()], it is recommended to pull out important variables and force them to a local value before creating your `future_promise()`.
 #'
-#' For example, the environtment `env` below will have its value `a` changed before it is used.
+#' For example, the environment `env` below will have its value `a` changed before it is used.
 #' ```r
 #' {
 #'   env <- new.env()
@@ -305,25 +305,21 @@ future_promise_queue <- local({
 #'
 #' Changing context example:
 #' ```r
-# items <- list()
-# for (i in 1:10) {
-#   items <- c(items, list(
-#     promise(function(resolve, reject) {
-#       later::later(function() { resolve(i) })
-#     })
-#   ))
-# }
-# promise_all(.list = items) %...>%
-#   { print(unlist(.)) }
+#' items <- list()
+#' for (i in 1:10) {
+#'   items <- c(items, list(
+#'     promise_resolve(TRUE) %...>% {i}
+#'   ))
+#' }
+#' promise_all(.list = items) %...>%
+#'   { print(unlist(.)) }
 # #> [1] 10 10 10 10 10 10 10 10 10 10
 #' ```
 #'
 #' Scoped context example:
 #' ```r
 #' lapply(1:10, function(i) {
-#'   promise(function(resolve, reject) {
-#'     later::later(function() { resolve(i) })
-#'   })
+#'   promise_resolve(TRUE) %...>% {i}
 #' }) %>%
 #'   promise_all(.list = .) %...>%
 #'   { print(unlist(.)) }
