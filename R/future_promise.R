@@ -90,54 +90,6 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
   )
 )
 
-ConstDelay <- R6::R6Class("ConstDelay",
-  inherit = Delay,
-  private = list(
-    const = 0.1,
-    random = TRUE
-  ),
-  public = list(
-    initialize = function(const = 0.1, random = TRUE) {
-      stopifnot(length(const) == 1 && is.numeric(const) && const >= 0)
-      private$const <- const
-      private$random <- isTRUE(random)
-
-      self
-    },
-    delay = function() {
-      if (private$random) {
-        runif(n = 1, max = private$const)
-      } else {
-        private$const
-      }
-    }
-  )
-)
-LinearDelay <- R6::R6Class("LinearDelay",
-  inherit = Delay,
-  private = list(
-    delta = 0.05,
-    random = TRUE
-  ),
-  public = list(
-    initialize = function(delta = 0.03, random = TRUE) {
-      stopifnot(length(delta) == 1 && is.numeric(delta) && delta >= 0)
-      private$delta <- delta
-      private$random <- isTRUE(random)
-
-      self
-    },
-
-    delay = function() {
-      delta_delay <- private$delay_count * private$delta
-      if (private$random) {
-        runif(n = 1, max = delta_delay)
-      } else {
-        delta_delay
-      }
-    }
-  )
-)
 
 # Situations
 # √ No future workers are busy. All future calls are `future_promises()`
@@ -547,6 +499,56 @@ future_promise <- function(
 
 
 if (FALSE) {
+
+  # ConstDelay <- R6::R6Class("ConstDelay",
+  #   inherit = Delay,
+  #   private = list(
+  #     const = 0.1,
+  #     random = TRUE
+  #   ),
+  #   public = list(
+  #     initialize = function(const = 0.1, random = TRUE) {
+  #       stopifnot(length(const) == 1 && is.numeric(const) && const >= 0)
+  #       private$const <- const
+  #       private$random <- isTRUE(random)
+
+  #       self
+  #     },
+  #     delay = function() {
+  #       if (private$random) {
+  #         runif(n = 1, max = private$const)
+  #       } else {
+  #         private$const
+  #       }
+  #     }
+  #   )
+  # )
+  # LinearDelay <- R6::R6Class("LinearDelay",
+  #   inherit = Delay,
+  #   private = list(
+  #     delta = 0.05,
+  #     random = TRUE
+  #   ),
+  #   public = list(
+  #     initialize = function(delta = 0.03, random = TRUE) {
+  #       stopifnot(length(delta) == 1 && is.numeric(delta) && delta >= 0)
+  #       private$delta <- delta
+  #       private$random <- isTRUE(random)
+
+  #       self
+  #     },
+
+  #     delay = function() {
+  #       delta_delay <- private$delay_count * private$delta
+  #       if (private$random) {
+  #         runif(n = 1, max = delta_delay)
+  #       } else {
+  #         delta_delay
+  #       }
+  #     }
+  #   )
+  # )
+
 
   # dev_load <- pkgload::load_all
 
