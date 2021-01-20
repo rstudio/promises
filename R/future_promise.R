@@ -421,6 +421,7 @@ future_promise_queue <- local({
 #'       later::run_now()
 #'       Sys.sleep(0.01)
 #'     }
+#'     cat("\nlog:\n", paste0(readLines(log), collapse = "\n"), "\n", sep = "")
 #'     cat_ex("done with run_ex_now()")
 #'   }
 #'
@@ -430,7 +431,6 @@ future_promise_queue <- local({
 #'       {
 #'         cat("\n")
 #'         print(.);
-#'         cat("\nlog:\n", paste0(readLines(log), collapse = "\n"), "\n", sep = "")
 #'       }
 #'   }
 #'
