@@ -116,6 +116,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
     loop = "later::current_loop()",
     delay = "ExpoDelay$new()",
 
+    # Used as a semaphore to make sure only 1 call of `attempt_work()` is delayed
     cancel_delay_fn = NULL,
 
     increase_delay = function() {
