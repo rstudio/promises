@@ -6,19 +6,23 @@ fp_message <- function(...) {
   }
 }
 
-assert_future_version <- local({
+assert_work_queue_pkgs <- local({
   val <- NULL
   function() {
     if (!is.null(val)) return()
-    if (utils::packageVersion("future") < "1.21.0") {
-      stop("`future` version >= 1.21.0 is required")
+    for (pkg in list(
+      list(name = "future", version = "1.21.0"),
+      list(name = "fastmap", version = "1.0.1.9000")
+    )) {
+      if (!is_available(pkg$name, pkg$version)) {
+        stop("Package `", pkg$name, "` (", pkg$version, ") needs to be installed")
+      }
     }
     val <<- TRUE
     return()
   }
 })
 future_worker_is_free <- function() {
-  assert_future_version()
   future::nbrOfFreeWorkers() > 0
 }
 
@@ -293,6 +297,7 @@ future_promise_queue <- local({
   future_promise_queue_ <- NULL
   function() {
     if (is.null(future_promise_queue_)) {
+      assert_work_queue_pkgs()
       future_promise_queue_ <<- WorkQueue$new()
     }
     future_promise_queue_
