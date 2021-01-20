@@ -187,24 +187,23 @@ WorkQueue <- R6::R6Class("WorkQueue",
 
     start_work = function(can_check_delay = FALSE) {
       fp_message('start_work()')
+      # If nothing to start, return early
+      if (private$queue$size() == 0) return()
 
       # If we are not waiting on someone else, we can do work now
       while ((private$queue$size() > 0) && private$can_proceed()) {
-
-        private$reset_delay()
-
         # Do work right away
+        private$reset_delay()
         private$do_work()
       }
 
-      # if there are still items to be processed, but we can not proceed...
+      # If there are still items to be processed, but we can not proceed...
       if (private$queue$size() > 0 && ! private$can_proceed()) {
-        # if we are allowed to delay (default FALSE), or nothing is currently delaying
+        # If we are allowed to delay (default FALSE), or nothing is currently delaying
         if (can_check_delay || is.null(private$cancel_delay_fn)) {
-          # bump up the delay
-          private$increase_delay()
 
-          # try again later
+          # Try again later
+          private$increase_delay()
           private$cancel_delay_fn <-
             later::later(
               loop = private$loop,
@@ -223,7 +222,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
       # Get first item in queue
       work_fn <- private$queue$remove()
 
-      # safety check...
+      # Safety check...
       # If nothing is returned, no work to be done. Return early
       if (!is.function(work_fn)) return()
 
