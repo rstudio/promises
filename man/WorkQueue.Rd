@@ -39,7 +39,7 @@ Create a new \code{WorkQueue}
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{can_proceed}}{Function that should return a logical value. If \code{TRUE} is returned, then the next scheduled work will be executed. By default, this function uses checks \code{\link[future::nbrOfFreeWorkers]{future::nbrOfFreeWorkers()} > 0}}
+\item{\code{can_proceed}}{Function that should return a logical value. If \code{TRUE} is returned, then the next scheduled work will be executed. By default, this function uses checks \code{\link[future:nbrOfWorkers]{future::nbrOfFreeWorkers()} > 0}}
 
 \item{\code{queue}}{Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using \code{\link[fastmap:fastqueue]{fastmap::fastqueue()}}. If using your own queue, it should have the methods \verb{$add(x)}, \verb{$remove()}, \verb{$size()}.}
 

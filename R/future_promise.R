@@ -240,7 +240,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
   ),
   public = list(
     #' @description Create a new `WorkQueue`
-    #' @param can_proceed Function that should return a logical value. If `TRUE` is returned, then the next scheduled work will be executed. By default, this function uses checks \code{\link[future::nbrOfFreeWorkers]{future::nbrOfFreeWorkers()} > 0}
+    #' @param can_proceed Function that should return a logical value. If `TRUE` is returned, then the next scheduled work will be executed. By default, this function uses checks \code{\link[future:nbrOfWorkers]{future::nbrOfFreeWorkers()} > 0}
     #' @param queue Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using [fastmap::fastqueue()]. If using your own queue, it should have the methods `$add(x)`, `$remove()`, `$size()`.
     #' @param loop \pkg{later} loop to use. Defaults to [later::current_loop()].
     initialize = function(
@@ -404,7 +404,8 @@ future_promise_queue <- local({
 #'   # This function will print every `delay` seconds
 #'   # The thing to notes is that the function will not execute unless the main R session is free
 #'   # We should expect to see `print_every()` statements interleaved with `future_promise()` calls
-#'   # We should NOT expect to see `print_every()` statements while `future::future()` is blocking the main R session
+#'   # We should NOT expect to see `print_every()` statements
+#'   #   while `future::future()` is blocking the main R session
 #'   print_every <- function(i = 0, max = 5 / delay, delay = 0.25) {
 #'     if (i > max) return()
 #'     cat_ex("print_every(): ", i, "/", max)
@@ -414,7 +415,7 @@ future_promise_queue <- local({
 #'
 #'   # Act as if the main R session is free for the next `timeout` seconds
 #'   run_ex_now <- function() {
-#'     while (!loop_empty()) {
+#'     while (!later::loop_empty()) {
 #'       later::run_now()
 #'       Sys.sleep(0.01)
 #'     }
@@ -466,7 +467,7 @@ future_promise_queue <- local({
 #'   #     The remaining _creating_ statements will appear after prior work has completed
 #'   # * the first two `future::future()` calls should start immediately
 #'   # * two `future::future()` calls should execute simultaneously throughout the process
-#'   # * the log will NOT have `print_every()` statements interleaved with `future_promise()` statements.
+#'   # * the log will NOT have `print_every()` statements mixed with `future::future()` statements.
 #'   #     This means the main R session is blocked by `future` waiting for a worker to become free
 #'   {
 #'     log <- tempfile(); start <- Sys.time()
@@ -541,13 +542,6 @@ future_promise <- function(
 
 
 if (FALSE) {
-  library(future)
-  future::plan(future::multisession(workers = 2))
-
-  # library("future.callr")
-  # plan(callr(workers = 2))
-
-  print_i <- function(i = 0) { if (i <= 50) { print(i); later::later(function() { print_i(i + 1) }, delay = 0.1) } }
 
   # dev_load <- pkgload::load_all
 
@@ -567,6 +561,11 @@ if (FALSE) {
   # ## block main worker workers pre job
   # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:4, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i/4) }) -> ignore;
 
+  future::plan(future::multisession(workers = 2))
+
+  fp_message_can_print <- TRUE
+
+  print_i <- function(i = 0) { if (i <= 50) { print(i); later::later(function() { print_i(i + 1) }, delay = 0.1) } }
 
   slow_calc <- function(n) {
     Sys.sleep(n)

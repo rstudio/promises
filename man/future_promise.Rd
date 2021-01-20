@@ -130,7 +130,8 @@ Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10
   # This function will print every `delay` seconds
   # The thing to notes is that the function will not execute unless the main R session is free
   # We should expect to see `print_every()` statements interleaved with `future_promise()` calls
-  # We should NOT expect to see `print_every()` statements while `future::future()` is blocking the main R session
+  # We should NOT expect to see `print_every()` statements
+  #   while `future::future()` is blocking the main R session
   print_every <- function(i = 0, max = 5 / delay, delay = 0.25) {
     if (i > max) return()
     cat_ex("print_every(): ", i, "/", max)
@@ -140,7 +141,7 @@ Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10
 
   # Act as if the main R session is free for the next `timeout` seconds
   run_ex_now <- function() {
-    while (!loop_empty()) {
+    while (!later::loop_empty()) {
       later::run_now()
       Sys.sleep(0.01)
     }
@@ -192,7 +193,7 @@ Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10
   #     The remaining _creating_ statements will appear after prior work has completed
   # * the first two `future::future()` calls should start immediately
   # * two `future::future()` calls should execute simultaneously throughout the process
-  # * the log will NOT have `print_every()` statements interleaved with `future_promise()` statements.
+  # * the log will NOT have `print_every()` statements mixed with `future::future()` statements.
   #     This means the main R session is blocked by `future` waiting for a worker to become free
   {
     log <- tempfile(); start <- Sys.time()
