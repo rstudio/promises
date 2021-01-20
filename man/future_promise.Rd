@@ -128,7 +128,10 @@ Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10
   on.exit({unlink(log)}, add = TRUE)
   start <- Sys.time()
   cat_ex <- function(...) {
-    msg <- paste0(Sys.getpid(), " ", ..., "; ", sprintf("\%.2f", difftime(Sys.time(), start, units = "secs")))
+    msg <- paste0(
+      Sys.getpid(), " ", ...,
+      "; ", sprintf("\%.2f", difftime(Sys.time(), start, units = "secs"))
+    )
     message(msg)
     cat(msg, "\n", sep = "", file = log, append = TRUE)
   }

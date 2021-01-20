@@ -7,13 +7,12 @@ local({
   ## Setup ##
 
   # Set up a plan with 2 future workers
-  worker_count <- 2
-
   with_test_workers <- function(code) {
     old_plan <- future::plan()
     on.exit({future::plan(old_plan)}, add = TRUE)
 
-    future::plan(future::multisession(workers = worker_count))
+    # (Can not use a variable for workers if in a local({}))
+    future::plan(future::multisession(workers = 2))
 
     force(code)
   }
@@ -44,7 +43,7 @@ local({
 
   worker_jobs <- 8
   worker_job_time <- 1
-  expected_total_time <- worker_jobs * worker_job_time / worker_count
+  expected_total_time <- worker_jobs * worker_job_time / 2 # 2 workers
 
   do_future_test <- function(
     prom_fn = future_promise,
