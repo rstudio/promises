@@ -1,7 +1,7 @@
 
-fp_message_can_print <- FALSE
-fp_message <- function(...) {
-  if (fp_message_can_print) {
+debug_msg_can_print <- FALSE
+debug_msg <- function(...) {
+  if (debug_msg_can_print) {
     message(...)
   }
 }
@@ -93,7 +93,7 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
 
 # Situations
 # √ No future workers are busy. All future calls are `future_promises()`
-#  * Can be accomplished using followup promise to `$start_work()`
+#  * Can be accomplished using future job followup promise which calls `$attempt_work()`
 # √ All future workers are busy with other tasks (but will become available).
 #  * Require using delay
 # √ While processing the first batch, existing future workers are taken over
@@ -119,13 +119,13 @@ WorkQueue <- R6::R6Class("WorkQueue",
     cancel_delay_fn = NULL,
 
     increase_delay = function() {
-      fp_message("increase_delay()...", private$delay$count)
+      debug_msg("increase_delay()...", private$delay$count)
       # Increment delay and try again later
       private$delay$increase()
     },
 
     reset_delay = function() {
-      fp_message("reset_delay()")
+      debug_msg("reset_delay()")
       private$delay$reset()
       if (is.function(private$cancel_delay_fn)) {
         private$cancel_delay_fn()
@@ -137,8 +137,8 @@ WorkQueue <- R6::R6Class("WorkQueue",
       isTRUE(private$can_proceed_fn())
     },
 
-    start_work = function(can_check_delay = FALSE) {
-      fp_message('start_work()')
+    attempt_work = function(can_check_delay = FALSE) {
+      debug_msg('attempt_work()')
       # If nothing to start, return early
       if (private$queue$size() == 0) return()
 
@@ -161,7 +161,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
               loop = private$loop,
               delay = private$delay$delay(),
               function() {
-                private$start_work(can_check_delay = TRUE)
+                private$attempt_work(can_check_delay = TRUE)
               }
             )
         }
@@ -169,7 +169,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
     },
 
     do_work = function() {
-      fp_message("do_work()")
+      debug_msg("do_work()")
 
       # Get first item in queue
       work_fn <- private$queue$remove()
@@ -179,13 +179,13 @@ WorkQueue <- R6::R6Class("WorkQueue",
       if (!is.function(work_fn)) return()
 
       # Do scheduled work
-      fp_message("execute work")
+      debug_msg("execute work")
       future_job <- work_fn()
 
       # If there is queue'ed work, try to do work once future job has finished
       then(future_job, function(work_fn_value) {
-        fp_message("finished work. queue size: ", private$queue$size())
-        private$start_work()
+        debug_msg("finished work. queue size: ", private$queue$size())
+        private$attempt_work()
       })
 
       return()
@@ -227,11 +227,11 @@ WorkQueue <- R6::R6Class("WorkQueue",
     #' Schedule work
     #' @param fn function to execute when `can_proceed()` returns `TRUE`.
     schedule_work = function(fn) {
-      fp_message("schedule_work()")
+      debug_msg("schedule_work()")
       stopifnot(is.function(fn))
       private$queue$add(fn)
 
-      private$start_work()
+      private$attempt_work()
 
       invisible(self)
     }
@@ -570,7 +570,7 @@ if (FALSE) {
 
   future::plan(future::multisession(workers = 2))
 
-  fp_message_can_print <- TRUE
+  debug_msg_can_print <- TRUE
 
   print_i <- function(i = 0) { if (i <= 50) { print(i); later::later(function() { print_i(i + 1) }, delay = 0.1) } }
 
