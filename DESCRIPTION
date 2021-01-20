@@ -23,6 +23,7 @@ Suggests:
     testthat,
     future (>= 1.21.0),
     fastmap (>= 1.0.1.9000),
+    purrr,
     knitr,
     rmarkdown
 LinkingTo: later,
