@@ -229,14 +229,12 @@ WorkQueue <- R6::R6Class("WorkQueue",
       # Do scheduled work
       fp_message("execute work")
       future_job <- work_fn()
-      # make sure a promise like object was returned
-      stopifnot(is.promising(future_job))
 
-      # If there is more work to do, try to do work once future job has finished
-      future_job %...>% {
+      # If there is queue'ed work, try to do work once future job has finished
+      then(future_job, function(work_fn_value) {
         fp_message("finished work. queue size: ", private$queue$size())
         private$start_work()
-      }
+      })
 
       return()
     }
@@ -538,7 +536,10 @@ future_promise <- function(
 
       # When the future job is complete, resolve it
       # Return a promise so that more promises can be added to it
-      then(future_job, resolve)
+      then(future_job, function(job_value) {
+        resolve(job_value)
+        job_value
+      })
     })
   })
 }
