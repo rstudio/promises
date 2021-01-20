@@ -3,24 +3,33 @@ skip_if_not_installed("future", "1.21.0")
 
 source(test_path("common.R"))
 
-
 local({
   ## Setup ##
 
-  # Reset future plan on exit
-  old_plan <- future::plan()
-  on.exit({future::plan(old_plan)}, add = TRUE)
-
   # Set up a plan with 2 future workers
-  future::plan(future::multisession(workers = 2))
+  worker_count <- 2
+
+  with_test_workers <- function(code) {
+    old_plan <- future::plan()
+    on.exit({future::plan(old_plan)}, add = TRUE)
+
+    future::plan(future::multisession(workers = worker_count))
+
+    force(code)
+  }
+
 
   start <- Sys.time()
+  time_diffs <- c()
+
+  reset_baselines <- function() {
+    start <<- Sys.time()
+    time_diffs <<- c()
+  }
 
   time_diff <- function() {
     difftime(Sys.time(), start, units = "secs")
   }
-
-  time_diffs <- c()
 
   # This function will print every `delay` seconds
   # The thing to notes is that the function will not execute unless the main R session is free
@@ -33,151 +42,126 @@ local({
     later::later(function() { run_every(i + 1, max = max, delay = delay) }, delay = delay)
   }
 
-  reset_baselines <- function() {
-    start <<- Sys.time()
-    time_diffs <<- c()
+  worker_jobs <- 8
+  worker_job_time <- 1
+  expected_total_time <- worker_jobs * worker_job_time / worker_count
+
+  do_future_test <- function(
+    prom_fn = future_promise,
+    # Introduce extra future workers mid execution
+    block_mid_session = FALSE,
+    # expect that the average finish lag time is less than 2 * n_time
+    expect_reasonable_exec_lag_time = TRUE,
+    # expect the lapply to finish in less than 1s
+    expect_immediate_lapply = TRUE,
+    # expect `run_every()` delay to be < 1s (Expected 0.1s)
+    expect_no_main_blocking = TRUE
+  ) {
+
+    with_test_workers({
+      # prep future sessions
+      f1 <- future::future({1})
+      f2 <- future::future({2})
+      c(future::value(future::resolve(f1)), future::value(future::resolve(f2)))
+
+      expect_true(future_worker_is_free())
+      expect_equal(future::nbrOfWorkers(), 2)
+      expect_equal(future::nbrOfFreeWorkers(), 2)
+
+      reset_baselines()
+      run_every()
+
+      future_exec_times <- c()
+      if (block_mid_session) {
+        # Have `future` block the main R session 1 second into execution
+        lapply(1:8, function(i) {
+          later::later(
+            function() {
+              future::future({
+                Sys.sleep(1)
+                time_diff()
+              }) %...>% {
+                future_exec_times <<- c(future_exec_times, .)
+              }
+            },
+            delay = 1
+          )
+        })
+      }
+
+
+      exec_times <- NA
+      lapply(seq_len(worker_jobs), function(i) {
+        prom_fn({
+          Sys.sleep(worker_job_time)
+          time_diff()
+        })
+      }) %>%
+        promise_all(.list = .) %...>% {
+          exec_times <<- unlist(.)
+        }
+      post_lapply_time_diff <- time_diff()
+
+      wait_for_it()
+
+      # expect that the average time is less than the expected total time
+      expect_equal(median(exec_times) < expected_total_time, !block_mid_session)
+
+      # expect prom_fn to take a reasonable amount of time to finish
+      exec_times_lag <- exec_times[-1] - exec_times[-length(exec_times)]
+      expect_equal(all(exec_times_lag < (2 * worker_job_time)), expect_reasonable_exec_lag_time)
+
+      # post_lapply_time_diff should be ~ 0s
+      expect_equal(post_lapply_time_diff < 1, expect_immediate_lapply)
+
+      # time_diffs should never grow by more than 1s; (Expected 0.1)
+      time_diffs_lag <- time_diffs[-1] - time_diffs[-length(time_diffs)]
+      expect_equal(all(time_diffs_lag < 1), expect_no_main_blocking)
+    })
+
   }
 
-  n <- 8
-  n_time <- 1
-  expected_total_time <- n * n_time
 
   test_that("future_promise() allows the main thread to keep the main R process open", {
-    expect_true(future_worker_is_free())
 
-    reset_baselines()
-    run_every()
-
-    exec_times <- NA
-    lapply(seq_len(n), function(i) {
-      future_promise({
-        Sys.sleep(n_time)
-        time_diff()
-      })
-    }) %>%
-      promise_all(.list = .) %...>% {
-        exec_times <<- unlist(.)
-
-      }
-    post_lapply_time_diff <- time_diff()
-
-    wait_for_it()
-    # expect that the average time is less than the expected total time
-    expect_true(mean(exec_times) < expected_total_time)
-
-    # expect a future_promise to take more than a reasonable amount of time to begin
-    exec_times_lag <- exec_times[-1] - exec_times[-length(exec_times)]
-    expect_true(all(exec_times_lag < (2 * n_time)))
-
-    # post_lapply_time_diff should be ~ 0s
-    expect_true(post_lapply_time_diff < 1)
-
-    # time_diffs never grew by more than 1s; (Expected 0.1)
-    time_diffs_lag <- time_diffs[-1] - time_diffs[-length(time_diffs)]
-    expect_true(
-      all(time_diffs_lag < 1)
+    do_future_test(
+      prom_fn = future_promise,
+      # expect that the average finish lag time is less than 2 * n_time
+      expect_reasonable_exec_lag_time = TRUE,
+      # expect the lapply to finish in less than 1s
+      expect_immediate_lapply = TRUE,
+      # expect `run_every()` delay to be < 1s (Expected 0.1s)
+      expect_no_main_blocking = TRUE
     )
-
   })
 
 
   test_that("future::future() does not keep the main process open when all workers are busy", {
-    expect_true(future_worker_is_free())
-
-    reset_baselines()
-    run_every()
-
-    exec_times <- NA
-
-    lapply(seq_len(n), function(i) {
-      future::future({
-        Sys.sleep(n_time)
-        time_diff()
-      })
-    }) %>%
-      promise_all(.list = .) %...>% {
-        exec_times <<- unlist(.)
-      }
-    post_lapply_time_diff <- time_diff()
-
-    wait_for_it()
-
-    # expect that the average time is less than the expected total time
-    expect_true(mean(exec_times) < expected_total_time)
-
-    # expect a future_promise to take more than a reasonable amount of time to begin
-    exec_times_lag <- exec_times[-1] - exec_times[-length(exec_times)]
-    expect_true(all(exec_times_lag < (2 * n_time)))
-
-    # post_lapply_time_diff should be after the expected total time
-    # b/c future blocks the main R session
-    # ~ 3s (free at 3s while working on last two jobs)
-    expect_false(post_lapply_time_diff < 1)
-
-    # >=1 time_diffs should grew by more than 1s; (Expected 0.1)
-    time_diffs_lag <- time_diffs[-1] - time_diffs[-length(time_diffs)]
-    expect_false(
-      all(time_diffs_lag < 1)
+    do_future_test(
+      prom_fn = future::future,
+      # expect that the average finish lag time is less than 2 * n_time
+      expect_reasonable_exec_lag_time = TRUE,
+      # expect the lapply to finish after 1s
+      expect_immediate_lapply = FALSE,
+      # expect one `run_every()` delay to be >= 1s (Expected 0.1s)
+      expect_no_main_blocking = FALSE
     )
   })
 
 
   test_that("future_promise() recovers from losing all future workers", {
-    expect_true(future_worker_is_free())
 
-    reset_baselines()
-    run_every()
-
-    # Have `future` block the main R session 1 second into execution
-    future_time_diffs <- c()
-    ignore <- lapply(1:6, function(i) {
-      later::later(
-        function() {
-          then(
-            future::future({
-              Sys.sleep(1);
-              time_diff()
-            }),
-            function(val) {
-              future_time_diffs <<- c(future_time_diffs, val)
-            }
-          )
-        },
-        delay = 1
-      )
-    });
-
-    # Run many `future_promise()` calls
-    exec_times <- NA
-    lapply(seq_len(n), function(i) {
-      future_promise({
-        Sys.sleep(n_time)
-        time_diff()
-      })
-    }) %>%
-      promise_all(.list = .) %...>% {
-        exec_times <<- unlist(.)
-      }
-    post_lapply_time_diff <- time_diff()
-
-    # Throws after 30s
-    wait_for_it()
-
-    # expect that the average time is reasonable
-    expect_true(median(exec_times) < expected_total_time + (1 * 6 / 2))
-
-    # b/c `future::future()` blocks the main R session, expect >=1 unreasonable lag time
-    exec_times_lag <- exec_times[-1] - exec_times[-length(exec_times)]
-    expect_false(all(exec_times_lag < (2 * n_time)))
-
-    # post_lapply_time_diff should roughly immediate
-    # ~0s
-    expect_true(post_lapply_time_diff < 1)
-
-    # >=1 time_diffs_lag show that the main session was blocked.; (Expected 0.1)
-    time_diffs_lag <- time_diffs[-1] - time_diffs[-length(time_diffs)]
-    expect_false(
-      all(time_diffs_lag < 1)
+    do_future_test(
+      prom_fn = future_promise,
+      block_mid_session = TRUE,
+      # expect that the average finish lag time is less than 2 * n_time
+      # b/c `future::future()` blocks the main R session, expect >=1 unreasonable lag time
+      expect_reasonable_exec_lag_time = FALSE,
+      # expect the lapply to finish in less than 1s
+      expect_immediate_lapply = TRUE,
+      # expect one `run_every()` delay to be >= 1s (Expected 0.1s)
+      # b/c `future::future()` blocks the main R session, expect >=1 unreasonable lag time
+      expect_no_main_blocking = FALSE
     )
   })
 
