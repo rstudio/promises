@@ -28,6 +28,8 @@ Suggests:
     rmarkdown
 LinkingTo: later,
     Rcpp
+Remotes:
+    r-lib/fastmap
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Encoding: UTF-8
