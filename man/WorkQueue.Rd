@@ -18,6 +18,7 @@ Each time \code{WorkQueue} tries to start more work, it will repeat until \code{
 \seealso{
 \code{\link[=future_promise_queue]{future_promise_queue()}} which returns a \code{WorkQueue} which is cached per R session.
 }
+\keyword{internal}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
