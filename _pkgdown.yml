@@ -1,3 +1,6 @@
+development:
+  mode: auto
+
 template:
   params:
     bootswatch: cosmo
