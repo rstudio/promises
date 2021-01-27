@@ -4,6 +4,7 @@ development:
 template:
   params:
     bootswatch: cosmo
+
 reference:
   - title: Handling promises
     contents:
@@ -25,6 +26,7 @@ reference:
   - title: Domains
     contents:
       - with_promise_domain
+
 navbar:
   type: inverse
   left:
@@ -51,7 +53,3 @@ navbar:
         href: articles/casestudy.html
     - text: Reference
       href: reference/index.html
-authors:
-  RStudio:
-    href: https://www.rstudio.com
-    html: <img src="https://tidyverse.org/rstudio-logo.svg" height="24" />
