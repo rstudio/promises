@@ -16,6 +16,7 @@ reference:
   - title: Creating promises
     contents:
       - promise
+      - future_promise
       - promise_resolve
       - is.promise
   - title: Domains
