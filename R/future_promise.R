@@ -109,6 +109,7 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
 #' Each time `WorkQueue` tries to start more work, it will repeat until `can_proceed()` returns `FALSE` or there is no more work in the `queue`.
 #'
 #' @export
+#' @seealso [future_promise_queue()] which returns a `WorkQueue` which is cached per R session.
 WorkQueue <- R6::R6Class("WorkQueue",
   private = list(
     queue = "fastmap::fastqueue()",
@@ -117,28 +118,37 @@ WorkQueue <- R6::R6Class("WorkQueue",
     delay = "ExpoDelay$new()",
 
     # Used as a semaphore to make sure only 1 call of `attempt_work()` is delayed
-    cancel_delay_fn = NULL,
+    cancel_delayed_attempt_work = NULL,
 
+    # Increment delay. Used with ExpoDelay
     increase_delay = function() {
       debug_msg("increase_delay()...", private$delay$count)
       # Increment delay and try again later
       private$delay$increase()
     },
 
+    # Reset delay and cancel any delayed `attempt_work()` calls
     reset_delay = function() {
       debug_msg("reset_delay()")
       private$delay$reset()
-      if (is.function(private$cancel_delay_fn)) {
-        private$cancel_delay_fn()
+
+      # disable any delayed executions of `attempt_work`
+      if (is.function(private$cancel_delayed_attempt_work)) {
+        private$cancel_delayed_attempt_work()
       }
-      private$cancel_delay_fn <- NULL
+      private$cancel_delayed_attempt_work <- NULL
     },
 
+    # Returns a logical which let's work begin
     can_proceed = function() {
       isTRUE(private$can_proceed_fn())
     },
 
-    attempt_work = function(can_check_delay = FALSE) {
+    # Function to attempt as much work as possible
+    # If no workers are available and a queue has elements,
+    #   If a delayed check has already been registered, Return
+    #   Else, check again after some delay
+    attempt_work = function(can_delay = FALSE) {
       debug_msg('attempt_work()')
       # If nothing to start, return early
       if (private$queue$size() == 0) return()
@@ -153,22 +163,23 @@ WorkQueue <- R6::R6Class("WorkQueue",
       # If there are still items to be processed, but we can not proceed...
       if (private$queue$size() > 0 && ! private$can_proceed()) {
         # If we are allowed to delay (default FALSE), or nothing is currently delaying
-        if (can_check_delay || is.null(private$cancel_delay_fn)) {
+        if (can_delay || is.null(private$cancel_delayed_attempt_work)) {
 
           # Try again later
           private$increase_delay()
-          private$cancel_delay_fn <-
+          private$cancel_delayed_attempt_work <-
             later::later(
               loop = private$loop,
               delay = private$delay$delay(),
               function() {
-                private$attempt_work(can_check_delay = TRUE)
+                private$attempt_work(can_delay = TRUE)
               }
             )
         }
       }
     },
 
+    # Actually process an item in the queue
     do_work = function() {
       debug_msg("do_work()")
 
@@ -183,7 +194,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
       debug_msg("execute work")
       future_job <- work_fn()
 
-      # If there is queue'ed work, try to do work once future job has finished
+      # Try to attempt work immediately after the future job has finished
       then(future_job, function(work_fn_value) {
         debug_msg("finished work. queue size: ", private$queue$size())
         private$attempt_work()
@@ -194,7 +205,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
   ),
   public = list(
     #' @description Create a new `WorkQueue`
-    #' @param can_proceed Function that should return a logical value. If `TRUE` is returned, then the next scheduled work will be executed. By default, this function uses checks \code{\link[future:nbrOfWorkers]{future::nbrOfFreeWorkers()} > 0}
+    #' @param can_proceed Function that should return a logical value. If `TRUE` is returned, then the next scheduled work will be executed. By default, this function checks if \code{\link[future:nbrOfWorkers]{future::nbrOfFreeWorkers()} > 0}
     #' @param queue Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using [fastmap::fastqueue()]. If using your own queue, it should have the methods `$add(x)`, `$remove()`, `$size()`.
     #' @param loop \pkg{later} loop to use. Defaults to [later::current_loop()].
     initialize = function(
@@ -240,8 +251,8 @@ WorkQueue <- R6::R6Class("WorkQueue",
 )
 
 
-#' @describeIn future_promise Default `future_promise()` work queue to use. This function uses [WorkQueue] for its implementation.
-#' @seealso [WorkQueue]
+#' @describeIn future_promise Default `future_promise()` work queue to use. This function returns a [WorkQueue] that is cached per R session.
+#' @seealso [`WorkQueue`]
 #' @export
 future_promise_queue <- local({
   future_promise_queue_ <- NULL
@@ -257,190 +268,71 @@ future_promise_queue <- local({
 
 #' \pkg{future} promise
 #'
+#' Creates a promise to execute work using [future::future()].  Unlike [future::future()`, this function returns a [promise()] object.
+#'
 #' When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until no worker is free.
-#' This can occur when submitting more \pkg{future} work than there are \pkg{future} workers.
+#' This occurs when submitting more \pkg{future} work than there are available \pkg{future} workers.
+#' To counter this situations, we can create a promise to execute work using future and only begin the work if a \pkg{future} worker is available.
 #'
-#' If your [future::plan()] allows for more workers than you expect to require simultaneously, you are encouraged to continue to use [future::future()] like normal.  However, if you generate more simultaneous \pkg{future} work than there are available workers AND you would like to keep the main R session free, then you should use `future_promise()`.
+#' Using `future_promise()` is recommended when ever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
 #'
-#' Typically, the expression to be executed can be delayed in a [promise()] before submission to a \pkg{future} worker.
-#'
-#' @section `promise` vs `future`:
-#'
-#' With future blocking on the main R session, this prevents values from being changed.  It is known that environments can change their values unexpectedly. As with [promise()], it is recommended to pull out important variables and force them to a local value before creating your `future_promise()`.
-#'
-#' For example, the environment `env` below will have its value `a` changed before it is used.
-#' ```r
-#' {
-#'   env <- new.env()
-#'   env$a <- 1
-#'
-#'   promise_resolve(TRUE) %...>%
-#'     { Sys.sleep(1); env$a } %...>%
-#'     { print(.) }
-#'   env$a <- 2
-#'   print("done")
-#' }
-#' #> [1] "done"
-#' #> [1] 2
-#' ```
-#'
-#' To address this, we can capture the value `a` or turn the environment into a `list()`.
-#' ```r
-#' {
-#'   env <- new.env()
-#'   env$a <- 1
-#'
-#'   a_val <- env$a
-#'   promise_resolve(TRUE) %...>%
-#'     { Sys.sleep(1); a_val } %...>%
-#'     { print(.) }
-#'   env$a <- 2
-#'   print("done")
-#' }
-#' #> [1] "done"
-#' #> [1] 1
-#' ```
-#'
-#' When using `future_promise()`, be sure to scope your variables if the context can change. `future_promise()` will behave more like a [promise()] that executes using [future::future()].
-#'
-#' Changing context example:
-#' ```r
-#' items <- list()
-#' for (i in 1:10) {
-#'   items <- c(items, list(
-#'     promise_resolve(TRUE) %...>% {i}
-#'   ))
-#' }
-#' promise_all(.list = items) %...>%
-#'   { print(unlist(.)) }
-# #> [1] 10 10 10 10 10 10 10 10 10 10
-#' ```
-#'
-#' Scoped context example:
-#' ```r
-#' lapply(1:10, function(i) {
-#'   promise_resolve(TRUE) %...>% {i}
-#' }) %>%
-#'   promise_all(.list = .) %...>%
-#'   { print(unlist(.)) }
-#' #> [1]  1  2  3  4  5  6  7  8  9 10
-#' ```
-#'
+#' For more details and examples, please see the [`vignette("future_promise", "promises")`](https://rstudio.github.io/promises/articles/future_promise.html) vignette().
 #' @describeIn future_promise Creates a [promise()] that will execute the `expr` using [future::future()].
 #' @inheritParams future::future
 #' @param ... extra parameters provided to future
-#' @param queue A queue that is used to schedule work to be done using [future::future()].  See the details for more information.
-#' @return a [promise()] object that will return the result of the calculated `expr`.
+#' @param queue A queue that is used to schedule work to be done using [future::future()].  This queue defaults to [future_promise_queue()] and requires that method `queue$schedule_work(fn)` exist.  This method should take in a function that will execute the promised \pkg{future} work.
+#' @return a [promise()] object that will eventually return the result of the calculated `expr`.
 #' @examples
-#' \donttest{local({
-#'   ## Setup ##
-#'
-#'   # Reset future plan on exit
-#'   old_plan <- future::plan()
-#'   on.exit({future::plan(old_plan)}, add = TRUE)
-#'
-#'   # Set up a plan with 2 future workers
-#'   future::plan(future::multisession(workers = 2))
-#'
-#'   # `cat()` to file so that the console does not display confusing results
-#'   log <- tempfile()
-#'   on.exit({unlink(log)}, add = TRUE)
+#' \donttest{if (require("future")) {
+#'   # Relative start time
 #'   start <- Sys.time()
-#'   cat_ex <- function(...) {
-#'     msg <- paste0(
-#'       Sys.getpid(), " ", ...,
-#'       "; ", sprintf("%.2f", difftime(Sys.time(), start, units = "secs"))
+#'   # Helper to force two `future` workers
+#'   with_two_workers <- function(expr) {
+#'     old_plan <- future::plan()
+#'     on.exit({future::plan(old_plan)})
+#'     future::plan(future::multisession(workers = 2))
+#'     start <<- Sys.time()
+#'     force(expr)
+#'     while(!later::loop_empty()) {Sys.sleep(0.1); later::run_now()}
+#'     invisible()
+#'   }
+#'   # Print a status message. Ex: `"PID: XXX; 2.5s promise done"`
+#'   print_msg <- function(pid, msg) {
+#'     message(
+#'       "PID: ", pid, "; ",
+#'       round(difftime(Sys.time(), start, units = "secs"), digits = 1), "s " ,
+#'       msg
 #'     )
-#'     message(msg)
-#'     cat(msg, "\n", sep = "", file = log, append = TRUE)
 #'   }
 #'
-#'   # This function will print every `delay` seconds
-#'   # The thing to notice is that the function will not execute unless the main R session is free
-#'   # We should expect to see `print_every()` statements interleaved with `future_promise()` calls
-#'   # We should NOT expect to see `print_every()` statements
-#'   #   while `future::future()` is blocking the main R session
-#'   print_every <- function(i = 0, max = 5 / delay, delay = 0.25) {
-#'     if (i > max) return()
-#'     cat_ex("print_every(): ", i, "/", max)
-#'     # Print again, later
-#'     later::later(function() { print_every(i + 1, max = max, delay = delay) }, delay = delay)
-#'   }
+#'   # `"promise done"` will appear after four workers are done and the main R session is not blocked
+#'   # The important thing to note is the first four times will be roughly the same
+#'   with_two_workers({
+#'     promise_resolve(Sys.getpid()) %...>% print_msg("promise done")
+#'     for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) %...>% print_msg("future done")
+#'   })
+#'   #> PID: XXX; 2.5s promise done
+#'   #> PID: YYY; 2.6s future done
+#'   #> PID: ZZZ; 2.6s future done
+#'   #> PID: YYY; 2.6s future done
+#'   #> PID: ZZZ; 2.6s future done
+#'   #> PID: YYY; 3.4s future done
+#'   #> PID: ZZZ; 3.6s future done
 #'
-#'   # Act as if the main R session is free for the next `timeout` seconds
-#'   run_ex_now <- function() {
-#'     while (!later::loop_empty()) {
-#'       later::run_now()
-#'       Sys.sleep(0.01)
-#'     }
-#'     cat("\nlog:\n", paste0(readLines(log), collapse = "\n"), "\n", sep = "")
-#'     cat_ex("done with run_ex_now()")
-#'   }
-#'
-#'   # Consistent printing method for the example below
-#'   print_ex <- function(x) {
-#'     promise_all(.list = x) %...>%
-#'       {
-#'         cat("\n")
-#'         print(.);
-#'       }
-#'   }
-#'
-#'
-#'   ## Example ##
-#'
-#'   # Execute 10 `future_promise()` calls.
-#'   # In this example, we expect
-#'   # * all _creating_ statements should appear immediately
-#'   # * the first two `future_promise()` calls should start immediately
-#'   # * two `future_promise()` calls should execute simultaneously throughout the process
-#'   # * the log should have `print_every()` statements interleaved with `future_promise()` statements
-#'   {
-#'     log <- tempfile(); start <- Sys.time()
-#'     print_every()
-#'     lapply(1:10, function(i) {
-#'       cat_ex("future_promise(): ", i, " creating")
-#'       future_promise({
-#'         cat_ex("future_promise(): ", i, " starting")
-#'         Sys.sleep(1)
-#'         cat_ex("future_promise(): ", i, " finished")
-#'         i
-#'       })
-#'     }) %>%
-#'       print_ex()
-#'     cat_ex("done with lapply()")
-#'
-#'     run_ex_now() # ~5s; max(5s for `future_promise()`, 5s for `print_every()`)
-#'   }
-#'
-#'   ## Unexpected behavior - Blocking the main R session ##
-#'
-#'   # Execute 10 `future::future()` calls.
-#'   # In this example, we expect
-#'   # * the two _creating_ statements should appear immediately.
-#'   #     The remaining _creating_ statements will appear after prior work has completed
-#'   # * the first two `future::future()` calls should start immediately
-#'   # * two `future::future()` calls should execute simultaneously throughout the process
-#'   # * the log will NOT have `print_every()` statements mixed with `future::future()` statements.
-#'   #     This means the main R session is blocked by `future` waiting for a worker to become free
-#'   {
-#'     log <- tempfile(); start <- Sys.time()
-#'     print_every()
-#'     lapply(1:10, function(i) {
-#'       cat_ex("future::future(): ", i, " creating")
-#'       future::future({
-#'         cat_ex("future::future(): ", i, " starting")
-#'         Sys.sleep(1)
-#'         cat_ex("future::future(): ", i, " finished")
-#'         i
-#'       })
-#'     }) %>%
-#'       print_ex()
-#'     cat_ex("done with lapply()")
-#'
-#'     run_ex_now() # ~10s; 5s for `future::future()` + 5s for `print_every()`
-#'   }
-#' })}
+#'   # `"promise done"` will almost immediately, before any workers have completed
+#'   # The first two `"future done"` comments appear earlier the example above
+#'   with_two_workers({
+#'     promise_resolve(Sys.getpid()) %...>% print_msg("promise")
+#'     for (i in 1:6) future_promise({Sys.sleep(1); Sys.getpid()}) %...>% print_msg("future done")
+#'   })
+#'   #> PID: XXX; 0.2s promise done
+#'   #> PID: YYY; 1.3s future done
+#'   #> PID: ZZZ; 1.4s future done
+#'   #> PID: YYY; 2.5s future done
+#'   #> PID: ZZZ; 2.6s future done
+#'   #> PID: YYY; 3.4s future done
+#'   #> PID: ZZZ; 3.6s future done
+#' }}
 #' @export
 future_promise <- function(
   expr = NULL,
