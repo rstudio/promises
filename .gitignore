@@ -5,3 +5,5 @@
 *.so
 *.o
 inst/doc
+doc
+Meta
