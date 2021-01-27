@@ -25,7 +25,8 @@ Suggests:
     fastmap (>= 1.0.1.9000),
     purrr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    vembedr
 LinkingTo: later,
     Rcpp
 Remotes:
