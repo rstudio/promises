@@ -108,8 +108,8 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
 #'
 #' Each time `WorkQueue` tries to start more work, it will repeat until `can_proceed()` returns `FALSE` or there is no more work in the `queue`.
 #'
-#' @export
 #' @seealso [future_promise_queue()] which returns a `WorkQueue` which is cached per R session.
+# TODO - barret - Should this be exported?
 WorkQueue <- R6::R6Class("WorkQueue",
   private = list(
     queue = "fastmap::fastqueue()",
