@@ -212,6 +212,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
       # defaults to a future::plan agnostic function
       can_proceed = future_worker_is_free,
       queue = fastmap::fastqueue(), # FIFO
+      # TODO - barret - Should this be in the `future_promise()` function signature?
       loop = later::current_loop()
     ) {
       stopifnot(is.function(can_proceed))
