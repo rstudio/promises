@@ -3,7 +3,7 @@ title: "Advanced `future` and `promises` usage"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{5. Advanced `future` and `promises` usage}
+  %\VignetteIndexEntry{5. Advanced future and promises usage}
   %\VignetteEncoding{UTF-8}
 ---
 
