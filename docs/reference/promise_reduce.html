@@ -77,7 +77,7 @@ which case the second parameter would be a promise)." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1.9001</span>
       </span>
     </div>
 
@@ -85,7 +85,7 @@ which case the second parameter would be a promise)." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home"></span>
+    <span class="fas fa-home"></span>
      
     Home
   </a>
@@ -107,16 +107,19 @@ which case the second parameter would be a promise)." />
       <a href="../articles/overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks</a>
+      <a href="../articles/futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">5. Using promises with Shiny</a>
+      <a href="../articles/future_promise.html">5. Advanced future and promise usage</a>
     </li>
     <li>
-      <a href="../articles/combining.html">6. Combining promises</a>
+      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/combining.html">7. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
@@ -127,7 +130,7 @@ which case the second parameter would be a promise)." />
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/rstudio/promises/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -158,7 +161,7 @@ promise as input (unless <code>.x</code> itself is a list of promises to begin w
 which case the second parameter would be a promise).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>promise_reduce</span>(<span class='no'>.x</span>, <span class='no'>.f</span>, <span class='no'>...</span>, <span class='no'>.init</span>)</pre>
+    <pre class="usage"><span class='fu'>promise_reduce</span>(<span class='kw'>.x</span>, <span class='kw'>.f</span>, <span class='kw'>...</span>, <span class='kw'>.init</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -193,12 +196,14 @@ results in an error or a rejected promise, then the overall
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Returns a promise for the sum of e1 + e2, with a 0.5 sec delay</span>
-<span class='no'>slowly_add</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>e1</span>, <span class='no'>e2</span>) {
-  <span class='fu'><a href='promise.html'>promise</a></span>(~<span class='kw pkg'>later</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/later.html'>later</a></span>(~<span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='no'>e1</span> + <span class='no'>e2</span>), <span class='kw'>delay</span> <span class='kw'>=</span> <span class='fl'>0.5</span>))
+<span class='kw'>slowly_add</span> <span class='op'>&lt;-</span> <span class='fu'>function</span>(<span class='kw'>e1</span>, <span class='kw'>e2</span>) {
+  <span class='fu'><a href='promise.html'>promise</a></span>(<span class='op'>~</span><span class='kw'>later</span>::<span class='fu'><a href='https://rdrr.io/pkg/later/man/later.html'>later</a></span>(<span class='op'>~</span><span class='fu'><a href='resolve.html'>resolve</a></span>(<span class='kw'>e1</span> <span class='op'>+</span> <span class='kw'>e2</span>), delay = <span class='fl'>0.5</span>))
 }
 
 <span class='co'># Prints 55 after a little over 5 seconds</span>
-<span class='fu'>promise_reduce</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='no'>slowly_add</span>, <span class='kw'>.init</span> <span class='kw'>=</span> <span class='fl'>0</span>) <span class='kw'>%...&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>()</div></pre>
+<span class='fu'>promise_reduce</span>(<span class='fl'>1</span><span class='op'>:</span><span class='fl'>10</span>, <span class='kw'>slowly_add</span>, .init = <span class='fl'>0</span>) <span class='op'>%...&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>()
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -214,7 +219,7 @@ results in an error or a rejected promise, then the overall
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

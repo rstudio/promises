@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1.9001</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fa fa-home"></span>
+    <span class="fas fa-home"></span>
      
     Home
   </a>
@@ -61,16 +61,19 @@
       <a href="../articles/overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks</a>
+      <a href="../articles/futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">5. Using promises with Shiny</a>
+      <a href="../articles/future_promise.html">5. Advanced future and promise usage</a>
     </li>
     <li>
-      <a href="../articles/combining.html">6. Combining promises</a>
+      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/combining.html">7. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
@@ -81,7 +84,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/rstudio/promises/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -95,7 +98,7 @@
 
       
 
-      </header><script src="futures_files/header-attrs-2.1.2/header-attrs.js"></script><div class="row">
+      </header><script src="futures_files/header-attrs-2.6/header-attrs.js"></script><script src="futures_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Launching tasks with future</h1>
@@ -114,19 +117,20 @@
 <div id="how-future-works" class="section level2">
 <h2 class="hasAnchor">
 <a href="#how-future-works" class="anchor"></a>How future works</h2>
-<p>The main API that <code>future</code> provides couldn’t be simpler. You call <code>future()</code> and pass it the code that you want executed asynchronously:</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="no">f</span> <span class="kw">&lt;-</span> <span class="fu">future</span>({
+<p>The main API that <code>future</code> provides couldn’t be simpler. You call <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> and pass it the code that you want executed asynchronously:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit">
+<span class="kw">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span>({
   <span class="co"># expensive operations go here...</span>
-  <span class="no">df</span> <span class="kw">&lt;-</span> <span class="fu">download_lots_of_data</span>()
-  <span class="fu">fit_model</span>(<span class="no">df</span>)
-})</pre></body></html></div>
+  <span class="kw">df</span> <span class="op">&lt;-</span> <span class="fu">download_lots_of_data</span>()
+  <span class="fu">fit_model</span>(<span class="kw">df</span>)
+})</pre></div>
 <p>The object that’s returned is a future, which for all intents and purposes is a promise object<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, which will eventually resolve to the return value of the code block (i.e. the last expression) or an error if the code does not complete executing successfully. The important thing is that no matter how long the expensive operation takes, these lines will execute almost instantly, while the operation continues in the background.</p>
 <p>But we know that R is single-threaded, so how does <code>future</code> accomplish this? The answer: by utilizing another R process. <code>future</code> delegates the execution of the expensive operation to a totally different R process, so that the original R process can move on.</p>
 </div>
 <div id="choosing-a-launch-method" class="section level2">
 <h2 class="hasAnchor">
 <a href="#choosing-a-launch-method" class="anchor"></a>Choosing a launch method</h2>
-<p>There are several different methods we could use for launching R processes or attaching to existing R processes, and each method has its own advantages, disadvantages, limitations, and requirements. Rather than prescribing a single method, the <code>future</code> package provides an extensible mechanism that lets you, the R user, decide what method to use. Call the <code>plan()</code> function with one of the following values (without quotes—these are function names, not strings):</p>
+<p>There are several different methods we could use for launching R processes or attaching to existing R processes, and each method has its own advantages, disadvantages, limitations, and requirements. Rather than prescribing a single method, the <code>future</code> package provides an extensible mechanism that lets you, the R user, decide what method to use. Call the <code><a href="https://rdrr.io/pkg/future/man/plan.html">plan()</a></code> function with one of the following values (without quotes—these are function names, not strings):</p>
 <ul>
 <li>
 <code>multisession</code>: Launches up to <em>n</em> background R processes on the same machine (where <em>n</em> is the number of processor cores on the system, minus 1). These background processes will be used/recycled for the life of the originating R process. If a future is launched while all the background R processes are busy executing, then the new future will be queued until one of the background processes free up.</li>
@@ -146,13 +150,13 @@
 <a href="#globals-providing-input-to-future-code-chunks" class="anchor"></a>Globals: Providing input to future code chunks</h3>
 <p>Most future code chunks will need to reference data from the original process, e.g. data to be fitted, URLs to be requested, file paths to read from. The future package goes to some lengths to try to make this process seamless for you, by inspecting your code chunk and predicting which variables from the original process should be copied to the child process. In our testing this works fairly reliably with multicore, somewhat less reliably with multisession.</p>
 <p>Multisession also has the distinct disadvantage that any identified variables must be physically (though automatically) copied between the main and child processes, which can be extremely time-consuming if the data is large. (The multicore strategy does not need to do this, because every forked process starts out with its memory in the same state as its parent at the time of the fork.)</p>
-<p>In summary, it’s possible for both false positives (data copied that doesn’t need to be) and false negatives (data not available when it’s needed) to occur. Therefore, for all but the simplest cases, we suggest suppressing future’s automated variable copying and instead manually specifying the relevant variables, using the <code>future()</code> function’s <code>globals</code> parameter. You can pass it a character vector (<code>globals = c("var_a", "var_b")</code>) or a named list (<code>globals = c(data = mtcars, iterations = n)</code>).</p>
-<p>One final note about globals: as a safety measure, <code>future()</code> will error if the size of the data to be shuttled between the processes exceeds 500MB. This is true whether the variables to copy were identified by automatic detection, or explicitly via the <code>globals</code> parameter; and it’s even true if you’re using the multicore strategy, where no copies are actually made. If your data is potentially large, you’ll want to increase the limit by setting the <code>future.globals.maxSize</code> option to a suitably high number of bytes, e.g. <code><a href="https://rdrr.io/r/base/options.html">options(future.globals.maxSize=1e9)</a></code> for a billion bytes.</p>
+<p>In summary, it’s possible for both false positives (data copied that doesn’t need to be) and false negatives (data not available when it’s needed) to occur. Therefore, for all but the simplest cases, we suggest suppressing future’s automated variable copying and instead manually specifying the relevant variables, using the <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> function’s <code>globals</code> parameter. You can pass it a character vector (<code>globals = c("var_a", "var_b")</code>) or a named list (<code>globals = c(data = mtcars, iterations = n)</code>).</p>
+<p>One final note about globals: as a safety measure, <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> will error if the size of the data to be shuttled between the processes exceeds 500MB. This is true whether the variables to copy were identified by automatic detection, or explicitly via the <code>globals</code> parameter; and it’s even true if you’re using the multicore strategy, where no copies are actually made. If your data is potentially large, you’ll want to increase the limit by setting the <code>future.globals.maxSize</code> option to a suitably high number of bytes, e.g. <code><a href="https://rdrr.io/r/base/options.html">options(future.globals.maxSize=1e9)</a></code> for a billion bytes.</p>
 </div>
 <div id="package-loading" class="section level3">
 <h3 class="hasAnchor">
 <a href="#package-loading" class="anchor"></a>Package loading</h3>
-<p>Besides variables, <code>future()</code> also tries to automatically infer what R packages need to be loaded in the child process. If the automatic detection is not sufficient, you can use the <code>future()</code> function’s <code>packages</code> parameter to pass in a character vector of package names, e.g. <code>packages = c("dplyr", "ggplot2")</code>.</p>
+<p>Besides variables, <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> also tries to automatically infer what R packages need to be loaded in the child process. If the automatic detection is not sufficient, you can use the <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> function’s <code>packages</code> parameter to pass in a character vector of package names, e.g. <code>packages = c("dplyr", "ggplot2")</code>.</p>
 <p>Again, this is especially important for multisession, because multicore will inherit all of the attached packages of the parent process.</p>
 </div>
 <div id="native-resources" class="section level3">
@@ -174,7 +178,7 @@
 <p>First, if the return value is very large, the copying process can take some time—and because the data must essentially be serialized to and deserialized from rds format, it can take a surprising amount of time. In the case of future blocks that execute fairly quickly but return huge amounts of data, you may be better off not using future/async techniques at all.</p>
 <p>Second, objects that refer to native resources are unlikely to work in this direction either; just as you can’t use the parent’s database connections in the child process, you also cannot have the child process return a database connection for the parent to use.</p>
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
-<p>Next: <a href="shiny.html">Using promises with Shiny</a></p>
+<p>Next: <a href="future_promise.html">Advanced future and promise usage</a> and <a href="shiny.html">Using promises with Shiny</a></p>
 </div>
 </div>
 </div>
@@ -201,7 +205,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

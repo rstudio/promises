@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1.9001</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fa fa-home"></span>
+    <span class="fas fa-home"></span>
      
     Home
   </a>
@@ -61,16 +61,19 @@
       <a href="../articles/overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks</a>
+      <a href="../articles/futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">5. Using promises with Shiny</a>
+      <a href="../articles/future_promise.html">5. Advanced future and promise usage</a>
     </li>
     <li>
-      <a href="../articles/combining.html">6. Combining promises</a>
+      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/combining.html">7. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
@@ -81,7 +84,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/rstudio/promises/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -95,7 +98,7 @@
 
       
 
-      </header><script src="casestudy_files/header-attrs-2.1.2/header-attrs.js"></script><div class="row">
+      </header><script src="casestudy_files/header-attrs-2.6/header-attrs.js"></script><script src="casestudy_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Case study: converting a Shiny app to async</h1>
@@ -158,35 +161,37 @@
 <a href="#user-interface" class="anchor"></a>User interface</h3>
 <p>The user interface is a pretty typical shinydashboard. It’s important to note that the UI part of the app is entirely agnostic to whether the server is written in the sync or async style; when we port the app to async, we won’t touch the UI at all.</p>
 <p>There are two major pieces of input we need from users: what <strong>date</strong> to examine (this app only lets us look at one day at a time) and <strong>how many</strong> of the most prolific downloaders to look at. We’ll put these two controls in the dashboard sidebar.</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu">dashboardSidebar</span>(
-  <span class="fu">dateInput</span>(<span class="st">"date"</span>, <span class="st">"Date"</span>, <span class="kw">value</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span>() - <span class="fl">2</span>),
+<div class="sourceCode" id="cb2"><pre class="downlit">
+<span class="fu">dashboardSidebar</span>(
+  <span class="fu">dateInput</span>(<span class="st">"date"</span>, <span class="st">"Date"</span>, value = <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span>() <span class="op">-</span> <span class="fl">2</span>),
   <span class="fu">numericInput</span>(<span class="st">"count"</span>, <span class="st">"Show top N downloaders:"</span>, <span class="fl">6</span>)
-)</pre></body></html></div>
+)</pre></div>
 <p>(We set <code>date</code> to two days ago by default, because there’s some lag between when a day ends and when its logs are published.)</p>
 <p>The rest of the UI code is just typical shinydashboard scaffolding, plus some <code><a href="https://rdrr.io/pkg/shinydashboard/man/valueBoxOutput.html">shinydashboard::valueBoxOutput</a></code>s and <code>plotOutputs</code>. These are so trivial that they’re hardly worth talking about, but I’ll include the code here for completeness. Finally, there’s <code>detailViewUI</code>, a <a href="https://shiny.rstudio.com/articles/modules.html">Shiny module</a> that just contains more of the same (value boxes and plots).</p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r">  <span class="fu">dashboardBody</span>(
+<div class="sourceCode" id="cb3"><pre class="downlit">
+  <span class="fu">dashboardBody</span>(
     <span class="fu">fluidRow</span>(
-      <span class="fu">tabBox</span>(<span class="kw">width</span> <span class="kw">=</span> <span class="fl">12</span>,
+      <span class="fu">tabBox</span>(width = <span class="fl">12</span>,
         <span class="fu">tabPanel</span>(<span class="st">"All traffic"</span>,
           <span class="fu">fluidRow</span>(
-            <span class="fu">valueBoxOutput</span>(<span class="st">"total_size"</span>, <span class="kw">width</span> <span class="kw">=</span> <span class="fl">4</span>),
-            <span class="fu">valueBoxOutput</span>(<span class="st">"total_count"</span>, <span class="kw">width</span> <span class="kw">=</span> <span class="fl">4</span>),
-            <span class="fu">valueBoxOutput</span>(<span class="st">"total_downloaders"</span>, <span class="kw">width</span> <span class="kw">=</span> <span class="fl">4</span>)
+            <span class="fu">valueBoxOutput</span>(<span class="st">"total_size"</span>, width = <span class="fl">4</span>),
+            <span class="fu">valueBoxOutput</span>(<span class="st">"total_count"</span>, width = <span class="fl">4</span>),
+            <span class="fu">valueBoxOutput</span>(<span class="st">"total_downloaders"</span>, width = <span class="fl">4</span>)
           ),
           <span class="fu">plotOutput</span>(<span class="st">"all_hour"</span>)
         ),
         <span class="fu">tabPanel</span>(<span class="st">"Biggest whales"</span>,
-          <span class="fu">plotOutput</span>(<span class="st">"downloaders"</span>, <span class="kw">height</span> <span class="kw">=</span> <span class="fl">500</span>)
+          <span class="fu">plotOutput</span>(<span class="st">"downloaders"</span>, height = <span class="fl">500</span>)
         ),
         <span class="fu">tabPanel</span>(<span class="st">"Whales by hour"</span>,
-          <span class="fu">plotOutput</span>(<span class="st">"downloaders_hour"</span>, <span class="kw">height</span> <span class="kw">=</span> <span class="fl">500</span>)
+          <span class="fu">plotOutput</span>(<span class="st">"downloaders_hour"</span>, height = <span class="fl">500</span>)
         ),
         <span class="fu">tabPanel</span>(<span class="st">"Detail view"</span>,
           <span class="fu">detailViewUI</span>(<span class="st">"details"</span>)
         )
       )
     )
-  )</pre></body></html></div>
+  )</pre></div>
 </div>
 <div id="server-logic" class="section level3">
 <h3 class="hasAnchor">
@@ -243,54 +248,57 @@
 <a href="#loading-promises-and-future" class="anchor"></a>Loading <code>promises</code> and <code>future</code>
 </h3>
 <p>The first thing we’ll do is load the basic libraries of async programming.</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">promises</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">future</span>)
-<span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span>(<span class="no">multisession</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb4"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw"><a href="https://rstudio.github.io/promises">promises</a></span>)
+<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw"><a href="https://github.com/HenrikBengtsson/future">future</a></span>)
+<span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span>(<span class="kw">multisession</span>)</pre></div>
 <p>I originally used <code>multiprocess</code> but file downloading inside a future seemed to fail on Mac. (I’ve found that it’s usually not worth spending a lot of time trying to figure out why <code>multiprocess</code> doesn’t work for some specific code; instead, just use <code>multisession</code>, since that’s probably going to be the solution anyway.)</p>
 </div>
 <div id="the-data-reactive-future-all-the-things" class="section level3">
 <h3 class="hasAnchor">
 <a href="#the-data-reactive-future-all-the-things" class="anchor"></a>The <code>data</code> reactive: future() all the things</h3>
 <p>The next thing we’ll do is convert the <code>data</code> event reactive to use <code>future</code> for the expensive bits. The original code looks lke this:</p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="co"># SYNCHRONOUS version</span>
+<div class="sourceCode" id="cb5"><pre class="downlit">
+<span class="co"># SYNCHRONOUS version</span>
 
-<span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu">eventReactive</span>(<span class="no">input</span>$<span class="no">date</span>, {
-  <span class="no">date</span> <span class="kw">&lt;-</span> <span class="no">input</span>$<span class="no">date</span>  <span class="co"># Example: 2018-05-28</span>
-  <span class="no">year</span> <span class="kw">&lt;-</span> <span class="kw pkg">lubridate</span><span class="kw ns">::</span><span class="fu"><a href="http://lubridate.tidyverse.org/reference/year.html">year</a></span>(<span class="no">date</span>)  <span class="co"># Example: "2018"</span>
+<span class="kw">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span>(<span class="kw">input</span><span class="op">$</span><span class="kw">date</span>, {
+  <span class="kw">date</span> <span class="op">&lt;-</span> <span class="kw">input</span><span class="op">$</span><span class="kw">date</span>  <span class="co"># Example: 2018-05-28</span>
+  <span class="kw">year</span> <span class="op">&lt;-</span> <span class="kw">lubridate</span>::<span class="fu"><a href="http://lubridate.tidyverse.org/reference/year.html">year</a></span>(<span class="kw">date</span>)  <span class="co"># Example: "2018"</span>
 
-  <span class="no">url</span> <span class="kw">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)
-  <span class="no">path</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="no">date</span>, <span class="st">".csv.gz"</span>))
+  <span class="kw">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)
+  <span class="kw">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="kw">date</span>, <span class="st">".csv.gz"</span>))
 
-  <span class="fu">withProgress</span>(<span class="kw">value</span> <span class="kw">=</span> <span class="kw">NULL</span>, {
+  <span class="fu">withProgress</span>(value = <span class="kw">NULL</span>, {
 
-    <span class="kw">if</span> (!<span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="no">path</span>)) {
-      <span class="fu">setProgress</span>(<span class="kw">message</span> <span class="kw">=</span> <span class="st">"Downloading data..."</span>)
-      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="no">url</span>, <span class="no">path</span>)
+    <span class="co">if</span> (<span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="kw">path</span>)) {
+      <span class="fu">setProgress</span>(message = <span class="st">"Downloading data..."</span>)
+      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="kw">url</span>, <span class="kw">path</span>)
     }
 
-    <span class="fu">setProgress</span>(<span class="kw">message</span> <span class="kw">=</span> <span class="st">"Parsing data..."</span>)
-    <span class="fu">read_csv</span>(<span class="no">path</span>, <span class="kw">col_types</span> <span class="kw">=</span> <span class="st">"Dti---c-ci"</span>, <span class="kw">progress</span> <span class="kw">=</span> <span class="fl">FALSE</span>)
+    <span class="fu">setProgress</span>(message = <span class="st">"Parsing data..."</span>)
+    <span class="fu">read_csv</span>(<span class="kw">path</span>, col_types = <span class="st">"Dti---c-ci"</span>, progress = <span class="fl">FALSE</span>)
 
   })
-})</pre></body></html></div>
+})</pre></div>
 <p>(Earlier, I said we wouldn’t take advantage of precomputation or caching. That wasn’t entirely true; in the code above, we cache the log files we download in a <code>data_cache</code> directory. I couldn’t bring myself to put my internet connection through that level of abuse, as I knew I’d be running this code thousands of times as I load tested it.)</p>
 <p>For now, we’ll lose the <code>withProgress</code>/<code>setProgress</code> reporting, since doing that correctly requires some more advanced techniques that we’ll talk about later. We’ll come back and fix this code later, but for now:</p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="co"># ASYNCHRONOUS version</span>
+<div class="sourceCode" id="cb6"><pre class="downlit">
+<span class="co"># ASYNCHRONOUS version</span>
 
-<span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu">eventReactive</span>(<span class="no">input</span>$<span class="no">date</span>, {
-  <span class="no">date</span> <span class="kw">&lt;-</span> <span class="no">input</span>$<span class="no">date</span>
-  <span class="no">year</span> <span class="kw">&lt;-</span> <span class="kw pkg">lubridate</span><span class="kw ns">::</span><span class="fu"><a href="http://lubridate.tidyverse.org/reference/year.html">year</a></span>(<span class="no">date</span>)
+<span class="kw">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span>(<span class="kw">input</span><span class="op">$</span><span class="kw">date</span>, {
+  <span class="kw">date</span> <span class="op">&lt;-</span> <span class="kw">input</span><span class="op">$</span><span class="kw">date</span>
+  <span class="kw">year</span> <span class="op">&lt;-</span> <span class="kw">lubridate</span>::<span class="fu"><a href="http://lubridate.tidyverse.org/reference/year.html">year</a></span>(<span class="kw">date</span>)
 
-  <span class="no">url</span> <span class="kw">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)
-  <span class="no">path</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="no">date</span>, <span class="st">".csv.gz"</span>))
+  <span class="kw">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)
+  <span class="kw">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="kw">date</span>, <span class="st">".csv.gz"</span>))
 
   <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span>({
-    <span class="kw">if</span> (!<span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="no">path</span>)) {
-      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="no">url</span>, <span class="no">path</span>)
+    <span class="co">if</span> (<span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="kw">path</span>)) {
+      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="kw">url</span>, <span class="kw">path</span>)
     }
-    <span class="fu">read_csv</span>(<span class="no">path</span>, <span class="kw">col_types</span> <span class="kw">=</span> <span class="st">"Dti---c-ci"</span>, <span class="kw">progress</span> <span class="kw">=</span> <span class="fl">FALSE</span>)
+    <span class="fu">read_csv</span>(<span class="kw">path</span>, col_types = <span class="st">"Dti---c-ci"</span>, progress = <span class="fl">FALSE</span>)
   })
-})</pre></body></html></div>
+})</pre></div>
 <p>Pretty straightforward. This reactive now returns a future (which counts as a promise), not a data frame.</p>
 <p>Remember that we <strong>must</strong> read any reactive values (including <code>input</code>) and reactive expressions <a href="https://rstudio.github.io/promises/articles/shiny.html#shiny-specific-caveats-and-limitations">from <strong>outside</strong> the future</a>. (You will get an error if you attempt to read one from inside the future.)</p>
 <p>At this point, since there are no other long-running operations we want to make asynchronous, we’re actually done interacting directly with the <code>future</code> package. The rest of the reactive expressions will deal with the future returned by <code>data</code> using general async functions and operators from <code>promises</code>.</p>
@@ -299,27 +307,29 @@
 <h3 class="hasAnchor">
 <a href="#the-whales-reactive-simple-pipelines-are-simple" class="anchor"></a>The <code>whales</code> reactive: simple pipelines are simple</h3>
 <p>The <code>whales</code> reactive takes the data frame from <code>data</code>, and uses dplyr to find the top <code>input$count</code> most prolific downloaders.</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="co"># SYNCHRONOUS version</span>
+<div class="sourceCode" id="cb7"><pre class="downlit">
+<span class="co"># SYNCHRONOUS version</span>
 
-<span class="no">whales</span> <span class="kw">&lt;-</span> <span class="fu">reactive</span>({
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="kw">%&gt;%</span>
-    <span class="fu">count</span>(<span class="no">ip_id</span>) <span class="kw">%&gt;%</span>
-    <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="no">n</span>)) <span class="kw">%&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">input</span>$<span class="no">count</span>)
-})</pre></body></html></div>
+<span class="kw">whales</span> <span class="op">&lt;-</span> <span class="fu">reactive</span>({
+  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="op">%&gt;%</span>
+    <span class="fu">count</span>(<span class="kw">ip_id</span>) <span class="op">%&gt;%</span>
+    <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="kw">n</span>)) <span class="op">%&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="kw">input</span><span class="op">$</span><span class="kw">count</span>)
+})</pre></div>
 <p>Since <code><a href="https://rdrr.io/r/utils/data.html">data()</a></code> now returns a promise, the whole function needs to be modified to deal with promises.</p>
 <p>This is basically a best-case scenario for working with <code>promises</code>. The whole expression consists of a single magrittr pipeline. There’s only one object (<code><a href="https://rdrr.io/r/utils/data.html">data()</a></code>) that’s been converted to a promise. The promise object only appears once, at the head of the pipeline.</p>
-<p>When the stars align like this, converting this code to async is literally as easy as replacing each <code><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></code> with <code><a href="../reference/pipes.html">%...&gt;%</a></code>:</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="co"># ASYNCHRONOUS version</span>
+<p>When the stars align like this, converting this code to async is literally as easy as replacing each <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code> with <code><a href="../reference/pipes.html">%...&gt;%</a></code>:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit">
+<span class="co"># ASYNCHRONOUS version</span>
 
-<span class="no">whales</span> <span class="kw">&lt;-</span> <span class="fu">reactive</span>({
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="kw">%...&gt;%</span>
-    <span class="fu">count</span>(<span class="no">ip_id</span>) <span class="kw">%...&gt;%</span>
-    <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="no">n</span>)) <span class="kw">%...&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">input</span>$<span class="no">count</span>)
-})</pre></body></html></div>
+<span class="kw">whales</span> <span class="op">&lt;-</span> <span class="fu">reactive</span>({
+  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="op">%...&gt;%</span>
+    <span class="fu">count</span>(<span class="kw">ip_id</span>) <span class="op">%...&gt;%</span>
+    <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="kw">n</span>)) <span class="op">%...&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="kw">input</span><span class="op">$</span><span class="kw">count</span>)
+})</pre></div>
 <p>The input (<code><a href="https://rdrr.io/r/utils/data.html">data()</a></code>) is a promise, the resulting output object is a promise, each stage of the pipeline returns a promise; but we can read and write this code almost as easily as the synchronous version!</p>
-<p>An example this simple may seem reductive, but this best-case scenario happens surprisingly often, if your coding style is influenced by the tidyverse. In this example app, <strong>59%</strong> of the reactives, observers, and outputs were converted using nothing more than replacing <code><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></code> with <code><a href="../reference/pipes.html">%...&gt;%</a></code>.</p>
+<p>An example this simple may seem reductive, but this best-case scenario happens surprisingly often, if your coding style is influenced by the tidyverse. In this example app, <strong>59%</strong> of the reactives, observers, and outputs were converted using nothing more than replacing <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code> with <code><a href="../reference/pipes.html">%...&gt;%</a></code>.</p>
 <p>One last thing before we move on. In the last section, I emphasized that reactive values cannot be read from inside a future. Here, we’re using <code><a href="https://rdrr.io/r/utils/head.html">head(input$count)</a></code> inside a promise-pipeline; since <code><a href="https://rdrr.io/r/utils/data.html">data()</a></code> is written using a future, doesn’t that mean… well… isn’t this wrong?</p>
 <p>Nope—this code is just fine. The prohibition is against reading reactive values/expressions from <em>inside</em> a future, because code inside a future is executed in a totally different R process. The steps in a promise-pipeline aren’t futures, but promise handlers. These aren’t executed in a different process; rather, they’re executed back in the original R process after a promise is resolved. We’re allowed and expected to access reactive values and expressions from these handlers.</p>
 </div>
@@ -327,34 +337,37 @@
 <h3 class="hasAnchor">
 <a href="#the-whale_downloads-reactive-reading-from-multiple-promises" class="anchor"></a>The <code>whale_downloads</code> reactive: reading from multiple promises</h3>
 <p>The <code>whale_downloads</code> reactive is a bit more complicated case.</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="co"># SYNCHRONOUS version</span>
+<div class="sourceCode" id="cb9"><pre class="downlit">
+<span class="co"># SYNCHRONOUS version</span>
 
-<span class="no">whale_downloads</span> <span class="kw">&lt;-</span> <span class="fu">reactive</span>({
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="kw">%&gt;%</span>
-    <span class="fu">inner_join</span>(<span class="fu">whales</span>(), <span class="st">"ip_id"</span>) <span class="kw">%&gt;%</span>
-    <span class="fu">select</span>(-<span class="no">n</span>)
-})</pre></body></html></div>
+<span class="kw">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span>({
+  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="op">%&gt;%</span>
+    <span class="fu">inner_join</span>(<span class="fu">whales</span>(), <span class="st">"ip_id"</span>) <span class="op">%&gt;%</span>
+    <span class="fu">select</span>(<span class="op">-</span><span class="kw">n</span>)
+})</pre></div>
 <p>Looks simple, but we can’t just do a simple replacement this time. Can you see why?</p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="co"># BAD VERSION DOESN'T WORK</span>
+<div class="sourceCode" id="cb10"><pre class="downlit">
+<span class="co"># BAD VERSION DOESN'T WORK</span>
 
-<span class="no">whale_downloads</span> <span class="kw">&lt;-</span> <span class="fu">reactive</span>({
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="kw">%...&gt;%</span>
-    <span class="fu">inner_join</span>(<span class="fu">whales</span>(), <span class="st">"ip_id"</span>) <span class="kw">%...&gt;%</span>
-    <span class="fu">select</span>(-<span class="no">n</span>)
-})</pre></body></html></div>
+<span class="kw">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span>({
+  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="op">%...&gt;%</span>
+    <span class="fu">inner_join</span>(<span class="fu">whales</span>(), <span class="st">"ip_id"</span>) <span class="op">%...&gt;%</span>
+    <span class="fu">select</span>(<span class="op">-</span><span class="kw">n</span>)
+})</pre></div>
 <p>Remember, both <code><a href="https://rdrr.io/r/utils/data.html">data()</a></code> and <code>whales()</code> now return a promise object, not a data frame. None of the dplyr verbs know how to deal with promises natively (and the same is true for almost every other R function, anywhere in the R universe).</p>
 <p>We’re able to use <code><a href="../reference/pipes.html">%...&gt;%</a></code> with promises on the left-hand side and regular dplyr calls on the right-hand side, only because the <code><a href="../reference/pipes.html">%...&gt;%</a></code> operator “unwraps” the promise object for us, yielding a regular object (data frame or whatever) to be passed to dplyr. But in this case, we’re passing <code>whales()</code>, which a promise object, directly to <code>inner_join</code>, and <code>inner_join</code> has no idea what to do with it.</p>
 <p>The fundamental thing to pattern-match on here, is that <strong>we have a block of code that relies on more than one promise object</strong>, and that means <code><a href="../reference/pipes.html">%...&gt;%</a></code> won’t be enough. This is a pretty common situation as well, and occurs in <strong>12%</strong> of reactives and outputs in this example app.</p>
 <p>Here’s what the real solution looks like:</p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="co"># ASYNCHRONOUS version</span>
+<div class="sourceCode" id="cb11"><pre class="downlit">
+<span class="co"># ASYNCHRONOUS version</span>
 
-<span class="no">whale_downloads</span> <span class="kw">&lt;-</span> <span class="fu">reactive</span>({
-  <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span>(<span class="kw">data_df</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(), <span class="kw">whales_df</span> <span class="kw">=</span> <span class="fu">whales</span>()) <span class="kw">%...&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span>({
-    <span class="no">data_df</span> <span class="kw">%&gt;%</span>
-      <span class="fu">inner_join</span>(<span class="no">whales_df</span>, <span class="st">"ip_id"</span>) <span class="kw">%&gt;%</span>
-      <span class="fu">select</span>(-<span class="no">n</span>)
+<span class="kw">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span>({
+  <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span>(data_df = <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(), whales_df = <span class="fu">whales</span>()) <span class="op">%...&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span>({
+    <span class="kw">data_df</span> <span class="op">%&gt;%</span>
+      <span class="fu">inner_join</span>(<span class="kw">whales_df</span>, <span class="st">"ip_id"</span>) <span class="op">%&gt;%</span>
+      <span class="fu">select</span>(<span class="op">-</span><span class="kw">n</span>)
   })
-})</pre></body></html></div>
+})</pre></div>
 <div id="promises-the-gathering" class="section level4">
 <h4 class="hasAnchor">
 <a href="#promises-the-gathering" class="anchor"></a>Promises: the Gathering</h4>
@@ -362,28 +375,28 @@
 <ul>
 <li>The <code>promise_all</code> function gathers multiple promise objects together, and returns a single promise object. This new promise object doesn’t resolve until all the input promise objects are resolved, and it yields a list of those results.</li>
 </ul>
-<div class="sourceCode" id="cb12"><html><body><pre class="r">&gt; promise_all(a = future("Hello"), b = future("World")) %...&gt;% print()
-$a
-[1] "Hello"
-
-$b
-[1] "World"</pre></body></html></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="op">&gt;</span><span class="st"> </span><span class="kw">promise_all</span>(<span class="dt">a =</span> <span class="kw">future</span>(<span class="st">"Hello"</span>), <span class="dt">b =</span> <span class="kw">future</span>(<span class="st">"World"</span>)) <span class="op">%...&gt;%</span><span class="st"> </span><span class="kw">print</span>()</span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="op">$</span>a</span>
+<span id="cb12-3"><a href="#cb12-3"></a>[<span class="dv">1</span>] <span class="st">"Hello"</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="op">$</span>b</span>
+<span id="cb12-6"><a href="#cb12-6"></a>[<span class="dv">1</span>] <span class="st">"World"</span></span></code></pre></div>
 <ul>
 <li>The <code><a href="../reference/pipes.html">%...&gt;%</a></code>, as before, “unwraps” the promise object and passes the result to its right hand side.</li>
 <li>The <code>with</code> function (from base R) takes a named list, and makes it into a sort of virtual parent environment while evaluating a code block you pass it.</li>
 </ul>
-<div class="sourceCode" id="cb13"><html><body><pre class="r">&gt; x + y
-Error: object 'x' not found
-
-&gt; with(list(x = 1, y = 2), {
-+   x + y
-+ })
-[1] 3</pre></body></html></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="op">&gt;</span><span class="st"> </span>x <span class="op">+</span><span class="st"> </span>y</span>
+<span id="cb13-2"><a href="#cb13-2"></a>Error<span class="op">:</span><span class="st"> </span>object <span class="st">'x'</span> not found</span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="op">&gt;</span><span class="st"> </span><span class="kw">with</span>(<span class="kw">list</span>(<span class="dt">x =</span> <span class="dv">1</span>, <span class="dt">y =</span> <span class="dv">2</span>), {</span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="op">+</span><span class="st">   </span>x <span class="op">+</span><span class="st"> </span>y</span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="op">+</span><span class="st"> </span>})</span>
+<span id="cb13-7"><a href="#cb13-7"></a>[<span class="dv">1</span>] <span class="dv">3</span></span></code></pre></div>
 <p>Let’s once again combine the three, with the simplest possible example of the gathering pattern:</p>
-<div class="sourceCode" id="cb14"><html><body><pre class="r">&gt; promise_all(x = future("Hello"), y = future("World")) %...&gt;%
-+   with({ paste(x, y) }) %...&gt;%
-+   print()
-[1] "Hello World"</pre></body></html></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="op">&gt;</span><span class="st"> </span><span class="kw">promise_all</span>(<span class="dt">x =</span> <span class="kw">future</span>(<span class="st">"Hello"</span>), <span class="dt">y =</span> <span class="kw">future</span>(<span class="st">"World"</span>)) <span class="op">%...&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="op">+</span><span class="st">   </span><span class="kw">with</span>({ <span class="kw">paste</span>(x, y) }) <span class="op">%...&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="op">+</span><span class="st">   </span><span class="kw">print</span>()</span>
+<span id="cb14-4"><a href="#cb14-4"></a>[<span class="dv">1</span>] <span class="st">"Hello World"</span></span></code></pre></div>
 <p>You can make use of this pattern without remembering exactly how these pieces combine. Just remember that the arguments to <code>promise_all</code> provide the promise objects (<code><a href="https://rdrr.io/pkg/future/man/future.html">future(1)</a></code> and <code><a href="https://rdrr.io/pkg/future/man/future.html">future(2)</a></code>), along with the names you want to use to refer to their yielded values (<code>x</code> and <code>y</code>); and the code block you put in <code><a href="https://rdrr.io/r/base/with.html">with()</a></code> can refer to those names without worrying about the fact that they were ever promises to begin with.</p>
 </div>
 </div>
@@ -392,77 +405,84 @@ Error: object 'x' not found
 <a href="#the-total_downloaders-value-box-simple-pipelines-are-for-output-too" class="anchor"></a>The <code>total_downloaders</code> value box: simple pipelines are for output, too</h3>
 <p><img src="case-study-downloaders.png"></p>
 <p>All of the value boxes in this app ended up looking a lot like this:</p>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="co"># SYNCHRONOUS version</span>
+<div class="sourceCode" id="cb15"><pre class="downlit">
+<span class="co"># SYNCHRONOUS version</span>
 
-<span class="no">output</span>$<span class="no">total_downloaders</span> <span class="kw">&lt;-</span> <span class="fu">renderValueBox</span>({
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="kw">%&gt;%</span>
-    <span class="fu">pull</span>(<span class="no">ip_id</span>) <span class="kw">%&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>() <span class="kw">%&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>() <span class="kw">%&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span>(<span class="kw">big.mark</span> <span class="kw">=</span> <span class="st">","</span>) <span class="kw">%&gt;%</span>
+<span class="kw">output</span><span class="op">$</span><span class="kw">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span>({
+  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="op">%&gt;%</span>
+    <span class="fu">pull</span>(<span class="kw">ip_id</span>) <span class="op">%&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>() <span class="op">%&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>() <span class="op">%&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span>(big.mark = <span class="st">","</span>) <span class="op">%&gt;%</span>
     <span class="fu">valueBox</span>(<span class="st">"unique downloaders"</span>)
-})</pre></body></html></div>
+})</pre></div>
 <p>This is structurally no different than the <code>whales</code> best-case scenario reactive. One thing worth pointing out is that an async <code>renderValueBox</code> means you return a promise that returns a <code>valueBox</code>; you <em>don’t</em> return a <code>valueBox</code> to whom you have passed a promise.</p>
 <p>Meaning, you <em>don’t</em> do this:</p>
-<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="co"># BAD VERSION DOESN'T WORK</span>
+<div class="sourceCode" id="cb16"><pre class="downlit">
+<span class="co"># BAD VERSION DOESN'T WORK</span>
 
-<span class="no">output</span>$<span class="no">total_downloaders</span> <span class="kw">&lt;-</span> <span class="fu">renderValueBox</span>({
+<span class="kw">output</span><span class="op">$</span><span class="kw">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span>({
   <span class="fu">valueBox</span>(
-    <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="kw">%...&gt;%</span>
-      <span class="fu">pull</span>(<span class="no">ip_id</span>) <span class="kw">%...&gt;%</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>() <span class="kw">%...&gt;%</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>() <span class="kw">%...&gt;%</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span>(<span class="kw">big.mark</span> <span class="kw">=</span> <span class="st">","</span>),
+    <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="op">%...&gt;%</span>
+      <span class="fu">pull</span>(<span class="kw">ip_id</span>) <span class="op">%...&gt;%</span>
+      <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>() <span class="op">%...&gt;%</span>
+      <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>() <span class="op">%...&gt;%</span>
+      <span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span>(big.mark = <span class="st">","</span>),
     <span class="st">"unique downloaders"</span>
   )
-})</pre></body></html></div>
+})</pre></div>
 <p>Instead, you do this:</p>
-<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="co"># ASYNCHRONOUS version</span>
+<div class="sourceCode" id="cb17"><pre class="downlit">
+<span class="co"># ASYNCHRONOUS version</span>
 
-<span class="no">output</span>$<span class="no">total_downloaders</span> <span class="kw">&lt;-</span> <span class="fu">renderValueBox</span>({
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="kw">%...&gt;%</span>
-    <span class="fu">pull</span>(<span class="no">ip_id</span>) <span class="kw">%...&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>() <span class="kw">%...&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>() <span class="kw">%...&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span>(<span class="kw">big.mark</span> <span class="kw">=</span> <span class="st">","</span>) <span class="kw">%...&gt;%</span>
+<span class="kw">output</span><span class="op">$</span><span class="kw">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span>({
+  <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>() <span class="op">%...&gt;%</span>
+    <span class="fu">pull</span>(<span class="kw">ip_id</span>) <span class="op">%...&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>() <span class="op">%...&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>() <span class="op">%...&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span>(big.mark = <span class="st">","</span>) <span class="op">%...&gt;%</span>
     <span class="fu">valueBox</span>(<span class="st">"unique downloaders"</span>)
-})</pre></body></html></div>
+})</pre></div>
 <p>The other trick worth nothing is the <code>pull</code> verb, which is used to retrieve a specific column of a data frame as a vector (similar to <code><a href="https://rdrr.io/r/base/Extract.html">$</a></code> or <code><a href="https://rdrr.io/r/base/Extract.html">[[</a></code>). In this case, <code>pull(data, ip_id)</code> is equivalent to <code>data[["ip_id"]]</code>. Note that <code>pull</code> is part of dplyr and isn’t specific to promises.</p>
 </div>
 <div id="the-biggest_whales-plot-getting-untidy" class="section level3">
 <h3 class="hasAnchor">
 <a href="#the-biggest_whales-plot-getting-untidy" class="anchor"></a>The <code>biggest_whales</code> plot: getting untidy</h3>
 <p>In a cruel twist of API design fate, one of the cornerstone packages of the tidyverse lacks a tidy API. I’m referring, of course, to <code>ggplot2</code>:</p>
-<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="co"># SYNCHRONOUS version</span>
+<div class="sourceCode" id="cb18"><pre class="downlit">
+<span class="co"># SYNCHRONOUS version</span>
 
-<span class="no">output</span>$<span class="no">downloaders</span> <span class="kw">&lt;-</span> <span class="fu">renderPlot</span>({
-  <span class="fu">whales</span>() <span class="kw">%&gt;%</span>
-    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="no">ip_name</span>, <span class="no">n</span>)) +
-    <span class="fu">geom_bar</span>(<span class="kw">stat</span> <span class="kw">=</span> <span class="st">"identity"</span>) +
+<span class="kw">output</span><span class="op">$</span><span class="kw">downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span>({
+  <span class="fu">whales</span>() <span class="op">%&gt;%</span>
+    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="kw">ip_name</span>, <span class="kw">n</span>)) <span class="op">+</span>
+    <span class="fu">geom_bar</span>(stat = <span class="st">"identity"</span>) <span class="op">+</span>
     <span class="fu">ylab</span>(<span class="st">"Downloads on this day"</span>)
-})</pre></body></html></div>
-<p>While <code>dplyr</code> and other tidyverse packages are designed to link calls together with <code><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></code>, the older <code>ggplot2</code> package uses the <code><a href="https://rdrr.io/r/base/Arithmetic.html">+</a></code> operator. This is mostly a small aesthetic wart when synchronous code, but it’s a real problem with async, because the <code>promises</code> package doesn’t currently have a promise-aware replacement for <code><a href="https://rdrr.io/r/base/Arithmetic.html">+</a></code> like it does for <code><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></code>.</p>
-<p>Fortunately, there’s a pretty good escape hatch for <code><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></code>, and <code><a href="../reference/pipes.html">%...&gt;%</a></code> inherited it too. Instead of a pipeline stage being a simple function call, you can put a <code>{</code> and <code>}</code> delimited code block, and inside of that code block, you can access the “it” value using a period (<code>.</code>).</p>
-<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="co"># ASYNCHRONOUS version</span>
+})</pre></div>
+<p>While <code>dplyr</code> and other tidyverse packages are designed to link calls together with <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code>, the older <code>ggplot2</code> package uses the <code><a href="https://rdrr.io/r/base/Arithmetic.html">+</a></code> operator. This is mostly a small aesthetic wart when synchronous code, but it’s a real problem with async, because the <code>promises</code> package doesn’t currently have a promise-aware replacement for <code><a href="https://rdrr.io/r/base/Arithmetic.html">+</a></code> like it does for <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code>.</p>
+<p>Fortunately, there’s a pretty good escape hatch for <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code>, and <code><a href="../reference/pipes.html">%...&gt;%</a></code> inherited it too. Instead of a pipeline stage being a simple function call, you can put a <code>{</code> and <code>}</code> delimited code block, and inside of that code block, you can access the “it” value using a period (<code>.</code>).</p>
+<div class="sourceCode" id="cb19"><pre class="downlit">
+<span class="co"># ASYNCHRONOUS version</span>
 
-<span class="no">output</span>$<span class="no">downloaders</span> <span class="kw">&lt;-</span> <span class="fu">renderPlot</span>({
-  <span class="fu">whales</span>() <span class="kw">%...&gt;%</span> {
-    <span class="no">whale_df</span> <span class="kw">&lt;-</span> <span class="no">.</span>
-    <span class="fu">ggplot</span>(<span class="no">whale_df</span>, <span class="fu">aes</span>(<span class="no">ip_name</span>, <span class="no">n</span>)) +
-      <span class="fu">geom_bar</span>(<span class="kw">stat</span> <span class="kw">=</span> <span class="st">"identity"</span>) +
+<span class="kw">output</span><span class="op">$</span><span class="kw">downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span>({
+  <span class="fu">whales</span>() <span class="op">%...&gt;%</span> {
+    <span class="kw">whale_df</span> <span class="op">&lt;-</span> <span class="kw">.</span>
+    <span class="fu">ggplot</span>(<span class="kw">whale_df</span>, <span class="fu">aes</span>(<span class="kw">ip_name</span>, <span class="kw">n</span>)) <span class="op">+</span>
+      <span class="fu">geom_bar</span>(stat = <span class="st">"identity"</span>) <span class="op">+</span>
       <span class="fu">ylab</span>(<span class="st">"Downloads on this day"</span>)
   }
-})</pre></body></html></div>
+})</pre></div>
 <p><strong>The importance of this pattern cannot be overstated!</strong> Using <code><a href="../reference/pipes.html">%...&gt;%</a></code> and simple calls alone, you’re restricted to doing pipeline-compatible operations. But <code><a href="../reference/pipes.html">%...&gt;%</a></code> together with a curly-brace code block means your handler code can be any shape or size. Once inside that code block, you have a regular, non-promise value in <code>.</code> (if you even want to use it—sometimes you don’t, as we’ll see later). You can have zero, one, or more statements. You can use the <code>.</code> multiple times, in nested expressions, whatever.</p>
 <p>Tip: if you have extensive or complex code to put in a code block, start the block by creating a properly named variable to store the value of <code>.</code>. The reason for this is that <code>.</code> may acquire a different meaning than you intend as you add code to the code block. For example, if a magrittr pipeline starts with <code>.</code>, instead of evaluating the pipeline and returning a value, it creates a function that takes a single argument. So the following code wouldn’t filter the resolved value of <code>whales()</code>, but instead, create an anonymous function that calls <code><a href="https://rdrr.io/r/stats/filter.html">filter(n &gt; 1000)</a></code> on whatever you pass it.</p>
-<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="fu">whales</span>() <span class="kw">%...&gt;%</span> {
-  <span class="no">.</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(<span class="no">n</span> <span class="kw">&gt;</span> <span class="fl">1000</span>)
-}</pre></body></html></div>
+<div class="sourceCode" id="cb20"><pre class="downlit">
+<span class="fu">whales</span>() <span class="op">%...&gt;%</span> {
+  <span class="kw">.</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(<span class="kw">n</span> <span class="op">&gt;</span> <span class="fl">1000</span>)
+}</pre></div>
 <p>This fixes it:</p>
-<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="fu">whales</span>() <span class="kw">%...&gt;%</span> {
-  <span class="no">whales_df</span> <span class="kw">&lt;-</span> <span class="no">.</span>
-  <span class="no">whales_df</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(<span class="no">n</span> <span class="kw">&gt;</span> <span class="fl">1000</span>)
-}</pre></body></html></div>
+<div class="sourceCode" id="cb21"><pre class="downlit">
+<span class="fu">whales</span>() <span class="op">%...&gt;%</span> {
+  <span class="kw">whales_df</span> <span class="op">&lt;-</span> <span class="kw">.</span>
+  <span class="kw">whales_df</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(<span class="kw">n</span> <span class="op">&gt;</span> <span class="fl">1000</span>)
+}</pre></div>
 <p>There are other ways to work around the above problem as well, but I like this fix because it doesn’t require any thought or care. Just give the <code>.</code> value a new name, and forget the <code>.</code> exists.</p>
 <p>For untidy code with a single promise object, just remember: pair a single <code><a href="../reference/pipes.html">%...&gt;%</a></code> with a code block and you should be able to do almost anything.</p>
 </div>
@@ -471,53 +491,55 @@ Error: object 'x' not found
 <a href="#revisiting-the-data-reactive-progress-support" class="anchor"></a>Revisiting the <code>data</code> reactive: progress support</h3>
 <p>Now that we have discussed a few techniques for writing async code, let’s come back to our original <code>data</code> event reactive, and this time do a more faithful async conversion that preserves the progress reporting functionality of the original.</p>
 <p>Again, here’s the original sync code:</p>
-<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="co"># SYNCHRONOUS version</span>
+<div class="sourceCode" id="cb22"><pre class="downlit">
+<span class="co"># SYNCHRONOUS version</span>
 
-<span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu">eventReactive</span>(<span class="no">input</span>$<span class="no">date</span>, {
-  <span class="no">date</span> <span class="kw">&lt;-</span> <span class="no">input</span>$<span class="no">date</span>  <span class="co"># Example: 2018-05-28</span>
-  <span class="no">year</span> <span class="kw">&lt;-</span> <span class="kw pkg">lubridate</span><span class="kw ns">::</span><span class="fu"><a href="http://lubridate.tidyverse.org/reference/year.html">year</a></span>(<span class="no">date</span>)  <span class="co"># Example: "2018"</span>
+<span class="kw">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span>(<span class="kw">input</span><span class="op">$</span><span class="kw">date</span>, {
+  <span class="kw">date</span> <span class="op">&lt;-</span> <span class="kw">input</span><span class="op">$</span><span class="kw">date</span>  <span class="co"># Example: 2018-05-28</span>
+  <span class="kw">year</span> <span class="op">&lt;-</span> <span class="kw">lubridate</span>::<span class="fu"><a href="http://lubridate.tidyverse.org/reference/year.html">year</a></span>(<span class="kw">date</span>)  <span class="co"># Example: "2018"</span>
 
-  <span class="no">url</span> <span class="kw">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)
-  <span class="no">path</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="no">date</span>, <span class="st">".csv.gz"</span>))
+  <span class="kw">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)
+  <span class="kw">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="kw">date</span>, <span class="st">".csv.gz"</span>))
 
-  <span class="fu">withProgress</span>(<span class="kw">value</span> <span class="kw">=</span> <span class="kw">NULL</span>, {
+  <span class="fu">withProgress</span>(value = <span class="kw">NULL</span>, {
 
-    <span class="kw">if</span> (!<span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="no">path</span>)) {
-      <span class="fu">setProgress</span>(<span class="kw">message</span> <span class="kw">=</span> <span class="st">"Downloading data..."</span>)
-      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="no">url</span>, <span class="no">path</span>)
+    <span class="co">if</span> (<span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="kw">path</span>)) {
+      <span class="fu">setProgress</span>(message = <span class="st">"Downloading data..."</span>)
+      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="kw">url</span>, <span class="kw">path</span>)
     }
 
-    <span class="fu">setProgress</span>(<span class="kw">message</span> <span class="kw">=</span> <span class="st">"Parsing data..."</span>)
-    <span class="fu">read_csv</span>(<span class="no">path</span>, <span class="kw">col_types</span> <span class="kw">=</span> <span class="st">"Dti---c-ci"</span>, <span class="kw">progress</span> <span class="kw">=</span> <span class="fl">FALSE</span>)
+    <span class="fu">setProgress</span>(message = <span class="st">"Parsing data..."</span>)
+    <span class="fu">read_csv</span>(<span class="kw">path</span>, col_types = <span class="st">"Dti---c-ci"</span>, progress = <span class="fl">FALSE</span>)
 
   })
-})</pre></body></html></div>
+})</pre></div>
 <p>Progress reporting currently presents two challenges for future.</p>
 <p>First, the <code>withProgress({...})</code> function cannot be used with async. <code>withProgress</code> is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> will return immediately even though the actual task is far from done, using <code>withProgress</code> won’t work; the progress dialog would be dismissed before the download even got going.</p>
 <p>It’s conceivable that <code>withProgress</code> could gain promise compatibility someday, but it’s not in Shiny v1.1.0. In the meantime, we can work around this by using the alternative, <a href="https://shiny.rstudio.com/reference/shiny/1.1.0/Progress.html">object-oriented progress API</a> that Shiny offers. It’s a bit more verbose and fiddly than <code>withProgress</code>/<code>setProgress</code>, but it is flexible enough to work with futures/promises.</p>
 <p>Second, progress messages can’t be sent from futures. This is simply because futures are executed in child processes, which don’t have direct access to the browser like the main Shiny process does.</p>
 <p>It’s conceivable that <code>future</code> could gain the ability for child processes to communicate back to their parents, but no good solution exists at the time of this writing. In the meantime, we can work around this by taking the one future that does both downloading and parsing, and splitting it into two separate futures. After the download future has completed, we can send a progress message that parsing is beginning, and then start the parsing future.</p>
 <p>The regrettably complicated solution is below.</p>
-<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="co"># ASYNCHRONOUS version</span>
+<div class="sourceCode" id="cb23"><pre class="downlit">
+<span class="co"># ASYNCHRONOUS version</span>
 
-<span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu">eventReactive</span>(<span class="no">input</span>$<span class="no">date</span>, {
-  <span class="no">date</span> <span class="kw">&lt;-</span> <span class="no">input</span>$<span class="no">date</span>
-  <span class="no">year</span> <span class="kw">&lt;-</span> <span class="kw pkg">lubridate</span><span class="kw ns">::</span><span class="fu"><a href="http://lubridate.tidyverse.org/reference/year.html">year</a></span>(<span class="no">date</span>)
+<span class="kw">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span>(<span class="kw">input</span><span class="op">$</span><span class="kw">date</span>, {
+  <span class="kw">date</span> <span class="op">&lt;-</span> <span class="kw">input</span><span class="op">$</span><span class="kw">date</span>
+  <span class="kw">year</span> <span class="op">&lt;-</span> <span class="kw">lubridate</span>::<span class="fu"><a href="http://lubridate.tidyverse.org/reference/year.html">year</a></span>(<span class="kw">date</span>)
 
-  <span class="no">url</span> <span class="kw">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)
-  <span class="no">path</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="no">date</span>, <span class="st">".csv.gz"</span>))
+  <span class="kw">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)
+  <span class="kw">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="kw">date</span>, <span class="st">".csv.gz"</span>))
 
-  <span class="no">p</span> <span class="kw">&lt;-</span> <span class="no">Progress</span>$<span class="fu">new</span>()
-  <span class="no">p</span>$<span class="fu">set</span>(<span class="kw">value</span> <span class="kw">=</span> <span class="kw">NULL</span>, <span class="kw">message</span> <span class="kw">=</span> <span class="st">"Downloading data..."</span>)
+  <span class="kw">p</span> <span class="op">&lt;-</span> <span class="kw">Progress</span><span class="op">$</span><span class="fu">new</span>()
+  <span class="kw">p</span><span class="op">$</span><span class="fu">set</span>(value = <span class="kw">NULL</span>, message = <span class="st">"Downloading data..."</span>)
   <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span>({
-    <span class="kw">if</span> (!<span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="no">path</span>)) {
-      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="no">url</span>, <span class="no">path</span>)
+    <span class="co">if</span> (<span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span>(<span class="kw">path</span>)) {
+      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span>(<span class="kw">url</span>, <span class="kw">path</span>)
     }
-  }) <span class="kw">%...&gt;%</span>
-    { <span class="no">p</span>$<span class="fu">set</span>(<span class="kw">message</span> <span class="kw">=</span> <span class="st">"Parsing data..."</span>) } <span class="kw">%...&gt;%</span>
-    { <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span>(<span class="fu">read_csv</span>(<span class="no">path</span>, <span class="kw">col_types</span> <span class="kw">=</span> <span class="st">"Dti---c-ci"</span>, <span class="kw">progress</span> <span class="kw">=</span> <span class="fl">FALSE</span>)) } <span class="kw">%&gt;%</span>
-    <span class="fu"><a href="../reference/then.html">finally</a></span>(~<span class="no">p</span>$<span class="fu"><a href="https://rdrr.io/r/base/connections.html">close</a></span>())
-})</pre></body></html></div>
+  }) <span class="op">%...&gt;%</span>
+    { <span class="kw">p</span><span class="op">$</span><span class="fu">set</span>(message = <span class="st">"Parsing data..."</span>) } <span class="op">%...&gt;%</span>
+    { <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span>(<span class="fu">read_csv</span>(<span class="kw">path</span>, col_types = <span class="st">"Dti---c-ci"</span>, progress = <span class="fl">FALSE</span>)) } <span class="op">%&gt;%</span>
+    <span class="fu"><a href="../reference/then.html">finally</a></span>(<span class="op">~</span><span class="kw">p</span><span class="op">$</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html">close</a></span>())
+})</pre></div>
 <p>The single future we wrote earlier has now become a pipeline of promises:</p>
 <ol style="list-style-type: decimal">
 <li>future (download)</li>
@@ -526,7 +548,7 @@ Error: object 'x' not found
 <li>dismiss progress dialog</li>
 </ol>
 <p>Note that neither the R6 call <code>p$set(message = ...)</code> nor the second <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> call are tidy, so they use curly-brace blocks, as discussed in the above section about <code>biggest_whales</code>.</p>
-<p>The final step of dismissing the progress dialog doesn’t use <code><a href="../reference/pipes.html">%...&gt;%</a></code> at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use the regular pipe <code><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></code> and <code><a href="../reference/then.html">finally()</a></code> function instead. See the relevant section in <a href="https://rstudio.github.io/promises/articles/overview.html#cleaning-up-with-finally"><em>Working with promises in R</em></a> to learn more.</p>
+<p>The final step of dismissing the progress dialog doesn’t use <code><a href="../reference/pipes.html">%...&gt;%</a></code> at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use the regular pipe <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code> and <code><a href="../reference/then.html">finally()</a></code> function instead. See the relevant section in <a href="https://rstudio.github.io/promises/articles/overview.html#cleaning-up-with-finally"><em>Working with promises in R</em></a> to learn more.</p>
 <p>With these changes in place, we’ve now covered all of the changes to the application. You can see the full changes side-by-side via <a href="https://github.com/rstudio/cranwhales/compare/sync...async?diff=split">this GitHub diff</a>.</p>
 </div>
 </div>
@@ -593,7 +615,7 @@ Error: object 'x' not found
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -36,193 +36,82 @@ to be attached in the \R environment evaluating the future.}
 
 \item{...}{extra parameters provided to future}
 
-\item{queue}{A queue that is used to schedule work to be done using \code{\link[future:future]{future::future()}}.  See the details for more information.}
+\item{queue}{A queue that is used to schedule work to be done using \code{\link[future:future]{future::future()}}.  This queue defaults to \code{\link[=future_promise_queue]{future_promise_queue()}} and requires that method \code{queue$schedule_work(fn)} exist.  This method should take in a function that will execute the promised \pkg{future} work.}
 }
 \value{
-a \code{\link[=promise]{promise()}} object that will return the result of the calculated \code{expr}.
+a \code{\link[=promise]{promise()}} object that will eventually return the result of the calculated \code{expr}.
 }
 \description{
-When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until no worker is free.
-This can occur when submitting more \pkg{future} work than there are \pkg{future} workers.
+Creates a promise to execute work using \code{\link[future:future]{future::future()}}.  Unlike [future::future()`, this function returns a \code{\link[=promise]{promise()}} object.
 }
 \details{
-If your \code{\link[future:plan]{future::plan()}} allows for more workers than you expect to require simultaneously, you are encouraged to continue to use \code{\link[future:future]{future::future()}} like normal.  However, if you generate more simultaneous \pkg{future} work than there are available workers AND you would like to keep the main R session free, then you should use \code{future_promise()}.
+When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until no worker is free.
+This occurs when submitting more \pkg{future} work than there are available \pkg{future} workers.
+To counter this situations, we can create a promise to execute work using future and only begin the work if a \pkg{future} worker is available.
 
-Typically, the expression to be executed can be delayed in a \code{\link[=promise]{promise()}} before submission to a \pkg{future} worker.
+Using \code{future_promise()} is recommended when ever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
+
+For more details and examples, please see the \href{https://rstudio.github.io/promises/articles/future_promise.html}{\code{vignette("future_promise", "promises")}} vignette().
 }
 \section{Functions}{
 \itemize{
-\item \code{future_promise_queue}: Default \code{future_promise()} work queue to use. This function uses \link{WorkQueue} for its implementation.
+\item \code{future_promise_queue}: Default \code{future_promise()} work queue to use. This function returns a \link{WorkQueue} that is cached per R session.
 
 \item \code{future_promise}: Creates a \code{\link[=promise]{promise()}} that will execute the \code{expr} using \code{\link[future:future]{future::future()}}.
 }}
 
-\section{\code{promise} vs \code{future}}{
-
-
-With future blocking on the main R session, this prevents values from being changed.  It is known that environments can change their values unexpectedly. As with \code{\link[=promise]{promise()}}, it is recommended to pull out important variables and force them to a local value before creating your \code{future_promise()}.
-
-For example, the environment \code{env} below will have its value \code{a} changed before it is used.\if{html}{\out{<div class="r">}}\preformatted{\{
-  env <- new.env()
-  env$a <- 1
-
-  promise_resolve(TRUE) \%...>\%
-    \{ Sys.sleep(1); env$a \} \%...>\%
-    \{ print(.) \}
-  env$a <- 2
-  print("done")
-\}
-#> [1] "done"
-#> [1] 2
-}\if{html}{\out{</div>}}
-
-To address this, we can capture the value \code{a} or turn the environment into a \code{list()}.\if{html}{\out{<div class="r">}}\preformatted{\{
-  env <- new.env()
-  env$a <- 1
-
-  a_val <- env$a
-  promise_resolve(TRUE) \%...>\%
-    \{ Sys.sleep(1); a_val \} \%...>\%
-    \{ print(.) \}
-  env$a <- 2
-  print("done")
-\}
-#> [1] "done"
-#> [1] 1
-}\if{html}{\out{</div>}}
-
-When using \code{future_promise()}, be sure to scope your variables if the context can change. \code{future_promise()} will behave more like a \code{\link[=promise]{promise()}} that executes using \code{\link[future:future]{future::future()}}.
-
-Changing context example:\if{html}{\out{<div class="r">}}\preformatted{items <- list()
-for (i in 1:10) \{
-  items <- c(items, list(
-    promise_resolve(TRUE) \%...>\% \{i\}
-  ))
-\}
-promise_all(.list = items) \%...>\%
-  \{ print(unlist(.)) \}
-}\if{html}{\out{</div>}}
-
-Scoped context example:\if{html}{\out{<div class="r">}}\preformatted{lapply(1:10, function(i) \{
-  promise_resolve(TRUE) \%...>\% \{i\}
-\}) \%>\%
-  promise_all(.list = .) \%...>\%
-  \{ print(unlist(.)) \}
-#> [1]  1  2  3  4  5  6  7  8  9 10
-}\if{html}{\out{</div>}}
-}
-
 \examples{
-\donttest{local({
-  ## Setup ##
-
-  # Reset future plan on exit
-  old_plan <- future::plan()
-  on.exit({future::plan(old_plan)}, add = TRUE)
-
-  # Set up a plan with 2 future workers
-  future::plan(future::multisession(workers = 2))
-
-  # `cat()` to file so that the console does not display confusing results
-  log <- tempfile()
-  on.exit({unlink(log)}, add = TRUE)
+\donttest{if (require("future")) {
+  # Relative start time
   start <- Sys.time()
-  cat_ex <- function(...) {
-    msg <- paste0(
-      Sys.getpid(), " ", ...,
-      "; ", sprintf("\%.2f", difftime(Sys.time(), start, units = "secs"))
+  # Helper to force two `future` workers
+  with_two_workers <- function(expr) {
+    old_plan <- future::plan()
+    on.exit({future::plan(old_plan)})
+    future::plan(future::multisession(workers = 2))
+    start <<- Sys.time()
+    force(expr)
+    while(!later::loop_empty()) {Sys.sleep(0.1); later::run_now()}
+    invisible()
+  }
+  # Print a status message. Ex: `"PID: XXX; 2.5s promise done"`
+  print_msg <- function(pid, msg) {
+    message(
+      "PID: ", pid, "; ",
+      round(difftime(Sys.time(), start, units = "secs"), digits = 1), "s " ,
+      msg
     )
-    message(msg)
-    cat(msg, "\n", sep = "", file = log, append = TRUE)
   }
 
-  # This function will print every `delay` seconds
-  # The thing to notice is that the function will not execute unless the main R session is free
-  # We should expect to see `print_every()` statements interleaved with `future_promise()` calls
-  # We should NOT expect to see `print_every()` statements
-  #   while `future::future()` is blocking the main R session
-  print_every <- function(i = 0, max = 5 / delay, delay = 0.25) {
-    if (i > max) return()
-    cat_ex("print_every(): ", i, "/", max)
-    # Print again, later
-    later::later(function() { print_every(i + 1, max = max, delay = delay) }, delay = delay)
-  }
+  # `"promise done"` will appear after four workers are done and the main R session is not blocked
+  # The important thing to note is the first four times will be roughly the same
+  with_two_workers({
+    promise_resolve(Sys.getpid()) \%...>\% print_msg("promise done")
+    for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+  })
+  #> PID: XXX; 2.5s promise done
+  #> PID: YYY; 2.6s future done
+  #> PID: ZZZ; 2.6s future done
+  #> PID: YYY; 2.6s future done
+  #> PID: ZZZ; 2.6s future done
+  #> PID: YYY; 3.4s future done
+  #> PID: ZZZ; 3.6s future done
 
-  # Act as if the main R session is free for the next `timeout` seconds
-  run_ex_now <- function() {
-    while (!later::loop_empty()) {
-      later::run_now()
-      Sys.sleep(0.01)
-    }
-    cat("\nlog:\n", paste0(readLines(log), collapse = "\n"), "\n", sep = "")
-    cat_ex("done with run_ex_now()")
-  }
-
-  # Consistent printing method for the example below
-  print_ex <- function(x) {
-    promise_all(.list = x) \%...>\%
-      {
-        cat("\n")
-        print(.);
-      }
-  }
-
-
-  ## Example ##
-
-  # Execute 10 `future_promise()` calls.
-  # In this example, we expect
-  # * all _creating_ statements should appear immediately
-  # * the first two `future_promise()` calls should start immediately
-  # * two `future_promise()` calls should execute simultaneously throughout the process
-  # * the log should have `print_every()` statements interleaved with `future_promise()` statements
-  {
-    log <- tempfile(); start <- Sys.time()
-    print_every()
-    lapply(1:10, function(i) {
-      cat_ex("future_promise(): ", i, " creating")
-      future_promise({
-        cat_ex("future_promise(): ", i, " starting")
-        Sys.sleep(1)
-        cat_ex("future_promise(): ", i, " finished")
-        i
-      })
-    }) \%>\%
-      print_ex()
-    cat_ex("done with lapply()")
-
-    run_ex_now() # ~5s; max(5s for `future_promise()`, 5s for `print_every()`)
-  }
-
-  ## Unexpected behavior - Blocking the main R session ##
-
-  # Execute 10 `future::future()` calls.
-  # In this example, we expect
-  # * the two _creating_ statements should appear immediately.
-  #     The remaining _creating_ statements will appear after prior work has completed
-  # * the first two `future::future()` calls should start immediately
-  # * two `future::future()` calls should execute simultaneously throughout the process
-  # * the log will NOT have `print_every()` statements mixed with `future::future()` statements.
-  #     This means the main R session is blocked by `future` waiting for a worker to become free
-  {
-    log <- tempfile(); start <- Sys.time()
-    print_every()
-    lapply(1:10, function(i) {
-      cat_ex("future::future(): ", i, " creating")
-      future::future({
-        cat_ex("future::future(): ", i, " starting")
-        Sys.sleep(1)
-        cat_ex("future::future(): ", i, " finished")
-        i
-      })
-    }) \%>\%
-      print_ex()
-    cat_ex("done with lapply()")
-
-    run_ex_now() # ~10s; 5s for `future::future()` + 5s for `print_every()`
-  }
-})}
+  # `"promise done"` will almost immediately, before any workers have completed
+  # The first two `"future done"` comments appear earlier the example above
+  with_two_workers({
+    promise_resolve(Sys.getpid()) \%...>\% print_msg("promise")
+    for (i in 1:6) future_promise({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+  })
+  #> PID: XXX; 0.2s promise done
+  #> PID: YYY; 1.3s future done
+  #> PID: ZZZ; 1.4s future done
+  #> PID: YYY; 2.5s future done
+  #> PID: ZZZ; 2.6s future done
+  #> PID: YYY; 3.4s future done
+  #> PID: ZZZ; 3.6s future done
+}}
 }
 \seealso{
-\link{WorkQueue}
+\code{\link{WorkQueue}}
 }

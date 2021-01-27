@@ -76,7 +76,7 @@ function call." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1.9001</span>
       </span>
     </div>
 
@@ -84,7 +84,7 @@ function call." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home"></span>
+    <span class="fas fa-home"></span>
      
     Home
   </a>
@@ -106,16 +106,19 @@ function call." />
       <a href="../articles/overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks</a>
+      <a href="../articles/futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">5. Using promises with Shiny</a>
+      <a href="../articles/future_promise.html">5. Advanced future and promise usage</a>
     </li>
     <li>
-      <a href="../articles/combining.html">6. Combining promises</a>
+      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/combining.html">7. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
@@ -126,7 +129,7 @@ function call." />
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/rstudio/promises/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -156,13 +159,13 @@ for promise resolution and pass the unwrapped value (or error) to the <code>rhs<
 function call.</p>
     </div>
 
-    <pre class="usage"><span class='no'>lhs</span> <span class='kw'>%...&gt;%</span> <span class='no'>rhs</span>
+    <pre class="usage"><span class='kw'>lhs</span> <span class='op'>%...&gt;%</span> <span class='kw'>rhs</span>
 
-<span class='no'>lhs</span> <span class='kw'>%...T&gt;%</span> <span class='no'>rhs</span>
+<span class='kw'>lhs</span> <span class='op'>%...T&gt;%</span> <span class='kw'>rhs</span>
 
-<span class='no'>lhs</span> <span class='kw'>%...!%</span> <span class='no'>rhs</span>
+<span class='kw'>lhs</span> <span class='op'>%...!%</span> <span class='kw'>rhs</span>
 
-<span class='no'>lhs</span> <span class='kw'>%...T!%</span> <span class='no'>rhs</span></pre>
+<span class='kw'>lhs</span> <span class='op'>%...T!%</span> <span class='kw'>rhs</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -183,7 +186,7 @@ a promise or non-promise value, or throw an error.</p></td>
     <p>A new promise.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The <code>&gt;</code> variants are for handling successful resolution, the <code>!</code> variants are
+    <p>The <code>&gt;</code> variants are for handling successful resolution, the <code><a href='https://rdrr.io/r/base/Logic.html'>!</a></code> variants are
 for handling errors. The <code>T</code> variants of each return the lhs instead of the
 rhs, which is useful for pipeline steps that are used for side effects
 (printing, plotting, saving).</p><ol>
@@ -206,18 +209,20 @@ function instead of an expression.</p>
     <div class='dont-index'><p>https://rstudio.github.io/promises/articles/overview.html#using-pipes</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>future</span>)
-<span class='fu'><a href='https://rdrr.io/pkg/future/man/plan.html'>plan</a></span>(<span class='no'>multisession</span>)
+    <pre class="examples"><div class='input'><span class='co'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='kw'><a href='https://github.com/HenrikBengtsson/future'>future</a></span>)
+<span class='fu'><a href='https://rdrr.io/pkg/future/man/plan.html'>plan</a></span>(<span class='kw'>multisession</span>)
 
-<span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span>(<span class='no'>cars</span>) <span class='kw'>%...&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fl'>5</span>) <span class='kw'>%...T&gt;%</span>
+<span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span>(<span class='kw'>cars</span>) <span class='op'>%...&gt;%</span>
+  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fl'>5</span>) <span class='op'>%...T&gt;%</span>
   <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>()
 
 <span class='co'># If the read.csv fails, resolve to NULL instead</span>
-<span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='st'>"http://example.com/data.csv"</span>)) <span class='kw'>%...!%</span>
+<span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='st'>"http://example.com/data.csv"</span>)) <span class='op'>%...!%</span>
   { <span class='kw'>NULL</span> }
-}</div></pre>
+}
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -233,7 +238,7 @@ function instead of an expression.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
