@@ -58,13 +58,13 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
   private = list(
     base = 1 / 100,
     min_seconds = 0.01,
-    max_seconds = 5
+    max_seconds = 2
   ),
   public = list(
     initialize = function(
       base = 1 / 100,
       min_seconds = 0.01,
-      max_seconds = 10
+      max_seconds = 2
     ) {
       stopifnot(length(base) == 1 && is.numeric(base) && base >= 0)
       stopifnot(length(min_seconds) == 1 && is.numeric(min_seconds) && min_seconds >= 0)
