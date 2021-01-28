@@ -12,7 +12,7 @@ assert_work_queue_pkgs <- local({
     if (!is.null(val)) return()
     for (pkg in list(
       list(name = "future", version = "1.21.0"),
-      list(name = "fastmap", version = "1.0.1.9000")
+      list(name = "fastmap", version = "1.1.0")
     )) {
       if (!is_available(pkg$name, pkg$version)) {
         stop("Package `", pkg$name, "` (", pkg$version, ") needs to be installed")
