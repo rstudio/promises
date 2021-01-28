@@ -380,12 +380,9 @@ future_promise <- function(
         ...
       )
 
-      # When the future job is complete, resolve it
-      # Return a promise so that more promises can be added to it
-      then(future_job, function(job_value) {
-        resolve(job_value)
-        job_value
-      })
+      # Resolve the promising job value
+      # This will also return a promise that can be chained by the `queue`
+      resolve(job_value)
     })
   })
 }
