@@ -36,7 +36,7 @@ Create a new \code{WorkQueue}
 \if{html}{\out{<div class="r">}}\preformatted{WorkQueue$new(
   can_proceed = future_worker_is_free,
   queue = fastmap::fastqueue(),
-  loop = later::current_loop()
+  loop = later::global_loop()
 )}\if{html}{\out{</div>}}
 }
 
@@ -47,7 +47,7 @@ Create a new \code{WorkQueue}
 
 \item{\code{queue}}{Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using \code{\link[fastmap:fastqueue]{fastmap::fastqueue()}}. If using your own queue, it should have the methods \verb{$add(x)}, \verb{$remove()}, \verb{$size()}.}
 
-\item{\code{loop}}{\pkg{later} loop to use. Defaults to \code{\link[later:create_loop]{later::current_loop()}}.
+\item{\code{loop}}{\pkg{later} loop to use for calculating the next delayed check. Defaults to \code{\link[later:create_loop]{later::global_loop()}}.
 Schedule work}
 }
 \if{html}{\out{</div>}}

@@ -115,7 +115,8 @@ WorkQueue <- R6::R6Class("WorkQueue",
   private = list(
     queue = "fastmap::fastqueue()",
     can_proceed_fn = "future_worker_is_free()",
-    loop = "later::current_loop()",
+    # only _really_ used for delay checking
+    loop = "later::global_loop()",
     delay = "ExpoDelay$new()",
 
     # Used as a semaphore to make sure only 1 call of `attempt_work()` is delayed
@@ -208,13 +209,12 @@ WorkQueue <- R6::R6Class("WorkQueue",
     #' @description Create a new `WorkQueue`
     #' @param can_proceed Function that should return a logical value. If `TRUE` is returned, then the next scheduled work will be executed. By default, this function checks if \code{\link[future:nbrOfWorkers]{future::nbrOfFreeWorkers()} > 0}
     #' @param queue Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using [fastmap::fastqueue()]. If using your own queue, it should have the methods `$add(x)`, `$remove()`, `$size()`.
-    #' @param loop \pkg{later} loop to use. Defaults to [later::current_loop()].
+    #' @param loop \pkg{later} loop to use for calculating the next delayed check. Defaults to [later::global_loop()].
     initialize = function(
       # defaults to a future::plan agnostic function
       can_proceed = future_worker_is_free,
       queue = fastmap::fastqueue(), # FIFO
-      # TODO - barret - Should this be in the `future_promise()` function signature?
-      loop = later::current_loop()
+      loop = later::global_loop()
     ) {
       stopifnot(is.function(can_proceed))
       stopifnot(
