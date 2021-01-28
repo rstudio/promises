@@ -22,7 +22,7 @@ prom_1 <-
   local_promise_operation()
 ```
 
-Since the release of [`plumber`](https://www.rplumber.io/) v1.0.0, `plumber` allows for routes to return a _promising_ object and will wait until the _promising_ object is resolved before continuing with the route execution.  `plumber` checks for _promising_ objects using `promises::is_promising()`, which returns `TRUE` for both `promises::promise()` and `future::future()` objects.
+Since the release of [`plumber`](https://www.rplumber.io/) v1.0.0, `plumber` allows for routes to return a _promising_ object and will wait until the _promising_ object is resolved before continuing with the route execution.  `plumber` checks for _promising_ objects using `promises::is.promising()`, which returns `TRUE` for both `promises::promise()` and `future::future()` objects.
 
 In both cases, the result of the promising object is executed in a followup promise.  `promises` is built on top of `later`, which only executes when the main R session is _free_ (or allowed to execute `later::run_now()`). These are **key** bits of information for the remainder of the document.
 
