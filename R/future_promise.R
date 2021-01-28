@@ -110,6 +110,15 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
 #'
 #' Each time `WorkQueue` tries to start more work, it will repeat until `can_proceed()` returns `FALSE` or there is no more work in the `queue`.
 #'
+#' @section Global event loop:
+#'
+#' The global loop is used by default as the internal `WorkQueue` "delayed check" uses a single delay check for the whole queue, rather than having each item in the queue attempt to process.
+#' This behavior might change in the future, but we are not exactly sure how at this point.
+#'
+#' If a private `later` loop wants to become synchronous by runing until all jobs are completed but is waiting on a `future_promise()`, the private loop will not complete unless the global loop is allowed to move forward.
+#'
+#' However, it is possible to use a private loop inside a user-defined `WorkQueue` may work which can be provided directly to `future_promise(queue=custom_queue)`. Having a concrete example (or need) will help us understand the problem better. If you have an example, please reach out .
+#'
 #' @seealso [future_promise_queue()] which returns a `WorkQueue` which is cached per R session.
 #' @keywords internal
 WorkQueue <- R6::R6Class("WorkQueue",
