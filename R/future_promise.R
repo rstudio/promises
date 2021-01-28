@@ -110,7 +110,6 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
 #'
 #' @seealso [future_promise_queue()] which returns a `WorkQueue` which is cached per R session.
 #' @keywords internal
-# TODO - barret - Should this be exported?
 WorkQueue <- R6::R6Class("WorkQueue",
   private = list(
     queue = "fastmap::fastqueue()",
