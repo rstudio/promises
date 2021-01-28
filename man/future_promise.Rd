@@ -42,9 +42,11 @@ to be attached in the \R environment evaluating the future.}
 a \code{\link[=promise]{promise()}} object that will eventually return the result of the calculated \code{expr}.
 }
 \description{
-Creates a promise to execute work using \code{\link[future:future]{future::future()}}.  Unlike [future::future()`, this function returns a \code{\link[=promise]{promise()}} object.
+\ifelse{html}{\out{<a href='https://www.tidyverse.org/lifecycle/#experimental'><img src='figures/lifecycle-experimental.svg' alt='Experimental lifecycle'></a>}}{\strong{Experimental}}
 }
 \details{
+Creates a promise to execute work using \code{\link[future:future]{future::future()}}.  Unlike [future::future()`, this function returns a \code{\link[=promise]{promise()}} object.
+
 When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until no worker is free.
 This occurs when submitting more \pkg{future} work than there are available \pkg{future} workers.
 To counter this situations, we can create a promise to execute work using future and only begin the work if a \pkg{future} worker is available.

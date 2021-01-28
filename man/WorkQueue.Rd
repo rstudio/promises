@@ -9,12 +9,25 @@ Future promise work queue
 Future promise work queue
 }
 \details{
+#' \ifelse{html}{\out{<a href='https://www.tidyverse.org/lifecycle/#experimental'><img src='figures/lifecycle-experimental.svg' alt='Experimental lifecycle'></a>}}{\strong{Experimental}}
+
 An \pkg{R6} class to help with scheduling work to be completed. \code{WorkQueue} will only execute work if the \code{can_proceed()} reutrns \code{TRUE}. For the use case of \code{future}, \code{can_proceed()} defaults to \code{future::nbrOfFreeWorkers() > 0} which will not allow for work to be executed if a \pkg{future} worker is not available.
 
 \code{WorkQueue} will constantly try to start new work once prior work item finishes.  However, if \code{can_proceed()} returns \code{FALSE} (no future workers are available) and there is more work to be done, then work is attempted later a random amount of time later using exponential backoff.  The exponential backoff will cap out at 10 seconds to prevent unnecessarily large wait times.
 
 Each time \code{WorkQueue} tries to start more work, it will repeat until \code{can_proceed()} returns \code{FALSE} or there is no more work in the \code{queue}.
 }
+\section{Global event loop}{
+
+
+The global loop is used by default as the internal \code{WorkQueue} "delayed check" uses a single delay check for the whole queue, rather than having each item in the queue attempt to process.
+This behavior might change in the future, but we are not exactly sure how at this point.
+
+If a private \code{later} loop wants to become synchronous by runing until all jobs are completed but is waiting on a \code{future_promise()}, the private loop will not complete unless the global loop is allowed to move forward.
+
+However, it is possible to use a private loop inside a user-defined \code{WorkQueue} may work which can be provided directly to \code{future_promise(queue=custom_queue)}. Having a concrete example (or need) will help us understand the problem better. If you have an example, please reach out .
+}
+
 \seealso{
 \code{\link[=future_promise_queue]{future_promise_queue()}} which returns a \code{WorkQueue} which is cached per R session.
 }
