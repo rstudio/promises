@@ -365,9 +365,11 @@ future_promise <- function(
   promise(function(resolve, reject) {
     # add to queue
     queue$schedule_work(function() {
-      ## TODO - barret - should the worker function be taken at creation time or submission time?
-      ### Current behavior is submission time to allow
-      exec_future <- future::plan("next")
+      ### Should the worker function be taken at creation time or submission time?
+      ## The current implementation has `$can_proceed()` method of `WorkQueue` be plan agnostic.
+      ## Therefore, it will always ask the current plan if a worker is available.
+      ## If so, then the _current_ plan should be used. Not a plan that existed at initialization time.
+      exec_future <- future::plan()
 
       # execute the future and return a promise so the schedule knows exactly when it is done
       future_job <- exec_future(
