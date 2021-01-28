@@ -41,9 +41,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-deploy-1-${{ hashFiles('.github/r-depends.rds') }}
+          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-pkgdown-1-${{ hashFiles('.github/r-depends.rds') }}
           restore-keys: |
-            ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-deploy-
+            ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-pkgdown-
             ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-
 
       - name: Install system dependencies
