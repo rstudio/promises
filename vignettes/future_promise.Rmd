@@ -7,39 +7,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Be sure you are comfortable with the main concepts in [Launching tasks with future](future.html).
+This article discusses the benefits of using `promises::future_promise()` over a combination of `future::future()` + `promises::promise()` to better take advantage of computing resources available to your main R session. To demonstrate these benefits, we'll walk-through a use-case with the `plumber` package. ([See here](https://www.rplumber.io/) to learn more about `plumber` and [this article](futures.html) to learn more about `future`.)
 
-This article references `plumber`. To learn more about `plumber`, please visit its website: [www.rplumber.io/](https://www.rplumber.io/).
+In an ideal situation, the number of available `future` (>= 1.21.0) workers (`future::nbrOfFreeWorkers()`) is always **more than** the number of `future::future()` jobs. However, if a `future` job is attempted when the number of free workers is `0`, then `future` will block the current R session until one becomes available. For a concrete example of where this can become an issue, let's imagine a scenario with seven `plumber` requests being received at the same time with only two `future` workers.
 
------------------------
+The figure below displays the time required to process those seven requests. The trailing number at the end of each request is the request's arrival order.  The first six requests use `future::future()` and will take ~10s to compute. The final request will not be using any form of `future` or `promises`.
 
-
-When using the `future` package, the result of `future::future()` can be upgraded to a `promise` object by using the promise pipe (`%...>%`).  For example:
-
-```r
-prom_1 <-
-  future::future({ expensive_operation() }) %...>%
-  local_promise_operation()
-```
-
-Since the release of [`plumber`](https://www.rplumber.io/) v1.0.0, `plumber` allows for routes to return a _promising_ object and will wait until the _promising_ object is resolved before continuing with the route execution.  `plumber` checks for _promising_ objects using `promises::is.promising()`, which returns `TRUE` for both `promises::promise()` and `future::future()` objects.
-
-In both cases, the result of the promising object is executed in a followup promise.  `promises` is built on top of `later`, which only executes when the main R session is _free_ (or allowed to execute `later::run_now()`). These are **key** bits of information for the remainder of the document.
-
-Note: The same benefits of using `future_promise()` within `plumber`, described below, would also apply to using `future_promise()` with any other R package that continues to execute `later::run_now()`, such as `shiny`.
-
-
-## `future::future()`
-
-In an ideal situation, the number of available `future` (>= 1.21.0) workers (`future::nbrOfFreeWorkers()`) is always less than the number of `future::future()` requests.  If a `future` request is executed when the number of free workers is `0`, then `future` will block the current R session until a worker becomes available.
-
-Let's set up an example of seven `plumber` requests being received at the same time.  The first six requests will be processed using `future::future()` and the final request will be processed in the main R session. The trailing number at the end of each request is the request's arrival order.  Assuming the `future` work takes ~10s to compute, the execution timeline would look like:
+Using two `future` workers, the execution timeline would look like:
 
 ![Early workers take more time than expected. Main R session is blocked](./future_promise/future.png){width=75%}
 
-While the overall time is faster than if the requests were serially executed, the turn around time for earlier routes (e.g. `/slow/1`) will be longer than expected. This is because the main R session is blocked waiting for a `future` worker to become available.  Blocking the main R session prevents
-* any remaining `plumber` requests from being processed
-* any pending `promises` objects (or `later` callbacks) from being executed, such as responding to a `plumber` route executed by `future`.
+
+While the overall time is faster than if the requests were serially executed, the turn around time for earlier routes (e.g. `/slow/1`) will be longer than expected. This is because the main R session is blocked waiting for a `future` worker to become available.  Blocking the main R session prevents any pending `promises` objects (or `later` callbacks) from being executed, such as responding to a `plumber` route executed by `future`.
 
 ![future does not respond to anything until the main R session is _free_](./future_promise/blocked_future.png){width=75%}
 
@@ -51,17 +30,22 @@ embed_vimeo("505287449") %>%
   use_align("center")
 ```
 
+
 ## `future_promise()`
 
-`future_promise()` is a _promise_ to execute the expression using `future::future()` and returns a `promises::promise()`, rather than the original `future::future()` object.  `future_promise()` will resolve to the final value of the execution of `future::future()`.
+`future_promise()` creates a _promise_ that will resolve to the final value of `future::future()` execution.
 
-The advantage of `future_promise()` is that it will not submit `future` work unless a `future` worker is available. This keeps the main R session available as much as possible. If no workers are currently available, `future_promise()` will continue to periodically check for a worker to become available.
+The advantage of `future_promise()` is that it will not attempt `future` work unless a `future` worker is available. If no workers are available (due to other `future::future()` calls), `future_promise()` will continue to periodically check for a worker to become available. This keeps the main R session available even if there are more `future_promise()` objects submitted than there are `future` workers.
 
-Continuing with the same example, we can swap out the calls to `future::future()` with `future_promise()`.  In the timeline plot below, the `/fast/7` route will not have to wait on any `future` work to finish processing. The only times where the main R session was blocked was the initial requests submissions, creating the `future_promise()` promises, and resolving the `future_promise()` response.  All other times were available for other `promises` objects (or `later` callbacks) to execute.
+Continuing with the example above, we can swap out the calls to `future::future()` with `future_promise()`.  In the timeline plot below, the `/fast/7` route will not have to wait on any `future` work to finish processing.  While waiting for the `future` jobs to complete, the main R session is not blocked.
+
+Using two `future` workers and `future_promise()` instead of `future::future()`, the execution timeline would look like:
 
 ![future_promise() keeps the main R session free](./future_promise/blocked_future_promise.png){width=75%}
 
-The video below animates how `future_promise()` will use a waiting queue to submit work to executing using `future`:
+Only four main timepoints that caused the main R session to be busy. The remaining time allows for other `promises` objects (or `later` callbacks) to execute freely.
+
+The video below animates how `future_promise()` leverages `promises` if no `future` workers are available:
 
 ```{r, echo = FALSE}
 library(vembedr)
@@ -71,11 +55,12 @@ embed_vimeo("505286442") %>%
 
 
 
+
 ## Variable scope in `future_promise()` and `future::future()`
 
-`future_promise()` is a promise **first** and executes using `future::future()` **second**. `future_promise()` should use the same precautions that you would use with a regular `promises::promise()`.
+`future_promise()` is a promise **first** and executes using `future::future()` **second**. When using `future_promise()`, you should use the same precautions that you would use with a regular `promises::promise()`.
 
-With `future` blocking on the main R session, this prevents values from being changed before they are submitted to the external worker.  While a promise waits to be executed, it is known that variables that have not been forced or properly scoped can change from their expected values before evaluation occurs. This can also occur with properly scoped environment values as only the _pointer_ to the environment is static. This allows for the values within the environment to be altered before the promise is executed.
+When `future` blocks on the main R session, this prevents values from being changed before they are submitted to the external worker.  While a `promise` waits to be executed, it is known that variables that have **not been `forced()`** or properly **scoped** can change from their expected values before evaluation occurs. This can also occur with properly scoped environment values as only the _pointer_ to the environment is static. This allows for the values within the environment to be altered before the `promise` is executed.
 
 
 #### Scope
