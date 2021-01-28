@@ -290,9 +290,8 @@ future_promise_queue <- local({
 #'   start <- Sys.time()
 #'   # Helper to force two `future` workers
 #'   with_two_workers <- function(expr) {
-#'     old_plan <- future::plan()
-#'     on.exit({future::plan(old_plan)})
-#'     future::plan(future::multisession(workers = 2))
+#'     old_plan <- future::plan(future::multisession(workers = 2))
+#'     on.exit({future::plan(old_plan)}, add = TRUE)
 #'     start <<- Sys.time()
 #'     force(expr)
 #'     while(!later::loop_empty()) {Sys.sleep(0.1); later::run_now()}

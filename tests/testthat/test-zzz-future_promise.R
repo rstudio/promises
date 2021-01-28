@@ -8,11 +8,9 @@ local({
 
   # Set up a plan with 2 future workers
   with_test_workers <- function(code) {
-    old_plan <- future::plan()
-    on.exit({future::plan(old_plan)}, add = TRUE)
-
     # (Can not use a variable for workers if in a local({}))
-    future::plan(future::multisession(workers = 2))
+    old_plan <- future::plan(future::multisession(workers = 2))
+    on.exit({future::plan(old_plan)}, add = TRUE)
 
     force(code)
   }
