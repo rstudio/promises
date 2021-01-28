@@ -196,7 +196,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
       future_job <- work_fn()
 
       # Try to attempt work immediately after the future job has finished
-      then(future_job, function(work_fn_value) {
+      finally(future_job, function() {
         debug_msg("finished work. queue size: ", private$queue$size())
         private$attempt_work()
       })
@@ -380,9 +380,10 @@ future_promise <- function(
         ...
       )
 
-      # Resolve the promising job value
-      # This will also return a promise that can be chained by the `queue`
-      resolve(job_value)
+      # Resolve the outer promising job value
+      resolve(future_job)
+      # Return a promising object that can be chained by the `queue` after executing this _work_
+      future_job
     })
   })
 }
