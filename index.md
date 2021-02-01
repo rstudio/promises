@@ -46,7 +46,7 @@ A more thorough exploration of the concepts behind `promises`, and the API provi
 
 A guide to the `future` package, the place where we expect most async programming in R to begin.
 
-#### [5. Advance `future` and `promises` usasge](articles/future_promise.html)
+#### [5. Advance `future` and `promises` usage](articles/future_promise.html)
 
 Leverage `promises` to make sure that `future` execution does not block the main R process.
 
