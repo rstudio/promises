@@ -66,7 +66,7 @@
   <body data-spy="scroll" data-target="#toc">
     <div class="container template-news">
       <header>
-      <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
@@ -85,10 +85,12 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa-home"></span>
+    <span class="fas fa-home fa-lg"></span>
      
-    Home
   </a>
+</li>
+<li>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -124,7 +126,7 @@
   </ul>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -157,6 +159,15 @@
       <small>Source: <a href='https://github.com/rstudio/promises/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="promises-development-version" class="section level1">
+<h1 class="page-header" data-toc-text="development version">
+<a href="#promises-development-version" class="anchor"></a>promises (development version)<small> Unreleased </small>
+</h1>
+<ul>
+<li>Fix bug: <code><a href="../reference/then.html">then(function(value) {})</a></code> causes <code><a href="https://rdrr.io/r/base/invisible.html">invisible()</a></code> to be dropped (<a href='https://github.com/rstudio/promises/issues/59'>#59</a>)</li>
+<li>Fix bug: <code>finally</code> causes <code><a href="https://rdrr.io/r/base/invisible.html">invisible()</a></code> to be dropped (<a href='https://github.com/rstudio/promises/issues/59'>#59</a>)</li>
+</ul>
+</div>
     <div id="promises-111" class="section level1">
 <h1 class="page-header" data-toc-text="1.1.1">
 <a href="#promises-111" class="anchor"></a>promises 1.1.1<small> 2020-06-09 </small>

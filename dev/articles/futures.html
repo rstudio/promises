@@ -23,7 +23,7 @@
 </head>
 <body data-spy="scroll" data-target="#toc">
     <div class="container template-article">
-      <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
@@ -42,10 +42,12 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa-home"></span>
+    <span class="fas fa-home fa-lg"></span>
      
-    Home
   </a>
+</li>
+<li>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -81,7 +83,7 @@
   </ul>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -187,8 +189,17 @@
 <p>Regardless of future method, the return value will be copied back into the parent process. This matters for two reasons.</p>
 <p>First, if the return value is very large, the copying process can take some time—and because the data must essentially be serialized to and deserialized from rds format, it can take a surprising amount of time. In the case of future blocks that execute fairly quickly but return huge amounts of data, you may be better off not using future/async techniques at all.</p>
 <p>Second, objects that refer to native resources are unlikely to work in this direction either; just as you can’t use the parent’s database connections in the child process, you also cannot have the child process return a database connection for the parent to use.</p>
-<div style="font-size: 20px; margin-top: 40px; text-align: right;">
-<p>Next: <a href="future_promise.html">Advanced <code>future</code> and <code>promises</code> usage</a> and <a href="shiny.html">Using <code>promises</code> with Shiny</a></p>
+<div style="display:flex;">
+<div style="font-size: 20px; margin-top: 40px; margin-left: auto;">
+<p>Next:</p>
+<ul>
+<li><p><a href="future_promise.html">Advanced <code>future</code> and <code>promises</code> usage</a></p></li>
+<li>
+<p><a href="shiny.html">Using <code>promises</code> with Shiny</a></p>
+</li>
+</ul>
+</div>
+
 </div>
 </div>
 </div>
