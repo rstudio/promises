@@ -122,6 +122,29 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
 #' @seealso [future_promise_queue()] which returns a `WorkQueue` which is cached per R session.
 #' @keywords internal
 WorkQueue <- R6::R6Class("WorkQueue",
+
+  # TODO - private loop proposal:
+  # The queued data would actually be a list of queues whose _key_ matches
+  # the loop ID. This would require that `schedule_work()` take in `loop` and have each loop have its own queue.
+  # The scheduled work in each queue would contain the `work` function and `submission_time`.
+  # Once `can_proceed_fn()` returns TRUE, the queue with the earliest `submission_time` should be processed.
+  # This concept is similar to a merge sort when trying to merge two pre-sorted lists.
+  # Check time: O(k), k = number of later loops ever registered. (This could become big!)
+  # Maybe, if `ID != 0`, the queue is removed if the number of elements goes to 0.
+  # Check time: O(kk), kk <= k, kk = number of _active_ later loops.
+  #
+  # Thought process, let's say chromote used the global WorkQueue
+  # and wanted to have its local loop synchronize (.. while(later::loop_empty(local_loop)) later::run_now(local_loop))  ..).
+  # [ ] In `do_work()`, Get loop from `later::current_loop()`
+  #   * If is global loop, get item with earliest submission time
+  #   * If is private loop (ID != 0), get first item in private queue
+  # [ ] Validate that an work item finishing in loop X, has a promise created using loop X
+  # [ ] Would each private queue need its own delay check?
+  #
+  #
+  # Implementation question:
+  # * Would it be better if we have a larger WorkQueue class that managed many WorkQueues for each loop?
+  #    * This would allow for each loop to have its own delay check, delay counter, and loop
   private = list(
     queue = "fastmap::fastqueue()",
     can_proceed_fn = "future_worker_is_free()",
