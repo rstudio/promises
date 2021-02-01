@@ -1,8 +1,14 @@
+
+url: https://rstudio.github.io/promises/
+
 development:
   mode: auto
 
 template:
   params:
+    docsearch:
+      api_key: e02966c036b2b44dfdb6dede68b3b31b
+      index_name: rstudio
     bootswatch: cosmo
 
 reference:
