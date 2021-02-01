@@ -1,5 +1,5 @@
 ---
-title: "Working with promises in R"
+title: "Working with `promises` in R"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}

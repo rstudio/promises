@@ -1,6 +1,16 @@
+
+url: https://rstudio.github.io/promises/
+
+development:
+  mode: auto
+
 template:
   params:
+    docsearch:
+      api_key: e02966c036b2b44dfdb6dede68b3b31b
+      index_name: rstudio
     bootswatch: cosmo
+
 reference:
   - title: Handling promises
     contents:
@@ -16,11 +26,13 @@ reference:
   - title: Creating promises
     contents:
       - promise
+      - future_promise
       - promise_resolve
       - is.promise
   - title: Domains
     contents:
       - with_promise_domain
+
 navbar:
   type: inverse
   left:
@@ -35,18 +47,15 @@ navbar:
         href: articles/intro.html
       - text: 3. Working with promises
         href: articles/overview.html
-      - text: 4. Launching tasks
+      - text: 4. Launching tasks with future
         href: articles/futures.html
-      - text: 5. Using promises with Shiny
+      - text: 5. Advanced future and promises usage
+        href: articles/future_promise.html
+      - text: 6. Using promises with Shiny
         href: articles/shiny.html
-      - text: 6. Combining promises
+      - text: 7. Combining promises
         href: articles/combining.html
-      - text: "7. Case study: Converting a Shiny app to async"
+      - text: "8. Case study: Converting a Shiny app to async"
         href: articles/casestudy.html
     - text: Reference
       href: reference/index.html
-authors:
-  RStudio:
-    href: https://www.rstudio.com
-    html: <img src="https://tidyverse.org/rstudio-logo.svg" height="24" />
-

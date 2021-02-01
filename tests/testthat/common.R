@@ -16,8 +16,12 @@ ext_promise <- function() {
 }
 
 # Block until all pending later tasks have executed
-wait_for_it <- function() {
+wait_for_it <- function(timeout = 30) {
+  start <- Sys.time()
   while (!loop_empty()) {
+    if (difftime(Sys.time(), start, units = "secs") > timeout) {
+      stop("Waited too long")
+    }
     run_now()
     Sys.sleep(0.01)
   }
