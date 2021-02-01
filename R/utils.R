@@ -201,3 +201,11 @@ promise_reduce <- function(.x, .f, ..., .init) {
   })
   p
 }
+
+# Placeholder to make R cmd check.
+# * Need purrr for docs, but don't need purrr for functionality
+# * Get failure if we don't include it
+# * Get failure if we do include it, but don't use it. So using it below.
+function() {
+  purrr::reduce
+}

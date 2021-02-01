@@ -61,54 +61,60 @@ For more details and examples, please see the \href{https://rstudio.github.io/pr
 }}
 
 \examples{
-\donttest{if (require("future")) {
-  # Relative start time
-  start <- Sys.time()
-  # Helper to force two `future` workers
-  with_two_workers <- function(expr) {
-    old_plan <- future::plan(future::multisession(workers = 2))
-    on.exit({future::plan(old_plan)}, add = TRUE)
-    start <<- Sys.time()
-    force(expr)
-    while(!later::loop_empty()) {Sys.sleep(0.1); later::run_now()}
-    invisible()
+\donttest{# Relative start time
+start <- Sys.time()
+# Helper to force two `future` workers
+with_two_workers <- function(expr) {
+  if (!require("future")) {
+    message("`future` not installed")
+    return()
   }
-  # Print a status message. Ex: `"PID: XXX; 2.5s promise done"`
-  print_msg <- function(pid, msg) {
-    message(
-      "PID: ", pid, "; ",
-      round(difftime(Sys.time(), start, units = "secs"), digits = 1), "s " ,
-      msg
-    )
-  }
+  old_plan <- future::plan(future::multisession(workers = 2))
+  on.exit({future::plan(old_plan)}, add = TRUE)
+  start <<- Sys.time()
+  force(expr)
+  while(!later::loop_empty()) {Sys.sleep(0.1); later::run_now()}
+  invisible()
+}
+# Print a status message. Ex: `"PID: XXX; 2.5s promise done"`
+print_msg <- function(pid, msg) {
+  message(
+    "PID: ", pid, "; ",
+    round(difftime(Sys.time(), start, units = "secs"), digits = 1), "s " ,
+    msg
+  )
+}
 
-  # `"promise done"` will appear after four workers are done and the main R session is not blocked
-  # The important thing to note is the first four times will be roughly the same
-  with_two_workers({
-    promise_resolve(Sys.getpid()) \%...>\% print_msg("promise done")
-    for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
-  })
-  #> PID: XXX; 2.5s promise done
-  #> PID: YYY; 2.6s future done
-  #> PID: ZZZ; 2.6s future done
-  #> PID: YYY; 2.6s future done
-  #> PID: ZZZ; 2.6s future done
-  #> PID: YYY; 3.4s future done
-  #> PID: ZZZ; 3.6s future done
+# `"promise done"` will appear after four workers are done and the main R session is not blocked
+# The important thing to note is the first four times will be roughly the same
+with_two_workers({
+  promise_resolve(Sys.getpid()) \%...>\% print_msg("promise done")
+  for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+})
+{
+#> PID: XXX; 2.5s promise done
+#> PID: YYY; 2.6s future done
+#> PID: ZZZ; 2.6s future done
+#> PID: YYY; 2.6s future done
+#> PID: ZZZ; 2.6s future done
+#> PID: YYY; 3.4s future done
+#> PID: ZZZ; 3.6s future done
+}
 
-  # `"promise done"` will almost immediately, before any workers have completed
-  # The first two `"future done"` comments appear earlier the example above
-  with_two_workers({
-    promise_resolve(Sys.getpid()) \%...>\% print_msg("promise")
-    for (i in 1:6) future_promise({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
-  })
-  #> PID: XXX; 0.2s promise done
-  #> PID: YYY; 1.3s future done
-  #> PID: ZZZ; 1.4s future done
-  #> PID: YYY; 2.5s future done
-  #> PID: ZZZ; 2.6s future done
-  #> PID: YYY; 3.4s future done
-  #> PID: ZZZ; 3.6s future done
+# `"promise done"` will almost immediately, before any workers have completed
+# The first two `"future done"` comments appear earlier the example above
+with_two_workers({
+  promise_resolve(Sys.getpid()) \%...>\% print_msg("promise")
+  for (i in 1:6) future_promise({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+})
+{
+#> PID: XXX; 0.2s promise done
+#> PID: YYY; 1.3s future done
+#> PID: ZZZ; 1.4s future done
+#> PID: YYY; 2.5s future done
+#> PID: ZZZ; 2.6s future done
+#> PID: YYY; 3.4s future done
+#> PID: ZZZ; 3.6s future done
 }}
 }
 \seealso{
