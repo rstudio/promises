@@ -1,5 +1,6 @@
 skip_on_cran()
 skip_if_not_installed("future", "1.21.0")
+skip_if_not_installed("fastmap", "1.1.0")
 
 source(test_path("common.R"))
 
@@ -109,11 +110,11 @@ local({
       expect_equal(all(exec_times_lag < (2 * worker_job_time)), expect_reasonable_exec_lag_time)
 
       # post_lapply_time_diff should be ~ 0s
-      expect_equal(post_lapply_time_diff < 1, expect_immediate_lapply)
+      expect_equal(post_lapply_time_diff < worker_job_time, expect_immediate_lapply)
 
       # time_diffs should never grow by more than 1s; (Expected 0.1)
       time_diffs_lag <- time_diffs[-1] - time_diffs[-length(time_diffs)]
-      expect_equal(all(time_diffs_lag < 1), expect_no_main_blocking)
+      expect_equal(all(time_diffs_lag < worker_job_time), expect_no_main_blocking)
     })
 
   }
