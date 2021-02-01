@@ -18,7 +18,7 @@ future_promise(
 )
 }
 \arguments{
-\item{expr}{An \R \link[base]{expression}.}
+\item{expr}{An R expression. While the \code{expr} is eventually sent to \code{\link[future:future]{future::future()}}, please use the same precautions that you would use with regular \code{promises::promise()} expressions. \code{future_promise()} may have to hold the \code{expr} in a \code{\link[=promise]{promise()}} while waiting for a \pkg{future} worker to become available.}
 
 \item{envir}{The \link{environment} from where global objects should be
 identified.}
@@ -34,22 +34,20 @@ in the help for \code{\link[future:future]{future()}}.}
 \item{packages}{(optional) a character vector specifying packages
 to be attached in the \R environment evaluating the future.}
 
-\item{...}{extra parameters provided to future}
+\item{...}{extra parameters provided to \code{\link[future:future]{future::future()}}}
 
 \item{queue}{A queue that is used to schedule work to be done using \code{\link[future:future]{future::future()}}.  This queue defaults to \code{\link[=future_promise_queue]{future_promise_queue()}} and requires that method \code{queue$schedule_work(fn)} exist.  This method should take in a function that will execute the promised \pkg{future} work.}
 }
 \value{
-a \code{\link[=promise]{promise()}} object that will eventually return the result of the calculated \code{expr}.
+Unlike [future::future()\verb{], }future_promise()\verb{returns a [promise()] object that will eventually resolve the \pkg{future}}expr`.
 }
 \description{
 \ifelse{html}{\out{<a href='https://www.tidyverse.org/lifecycle/#experimental'><img src='figures/lifecycle-experimental.svg' alt='Experimental lifecycle'></a>}}{\strong{Experimental}}
 }
 \details{
-Creates a promise to execute work using \code{\link[future:future]{future::future()}}.  Unlike [future::future()`, this function returns a \code{\link[=promise]{promise()}} object.
-
-When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until no worker is free.
-This occurs when submitting more \pkg{future} work than there are available \pkg{future} workers.
-To counter this situations, we can create a promise to execute work using future and only begin the work if a \pkg{future} worker is available.
+When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until a worker becomes available.
+This occurs when there is more submitted \pkg{future} work than there are available \pkg{future} workers.
+To counter this situation, we can create a promise to execute work using future (using \code{future_promise()}) and only begin the work if a \pkg{future} worker is available.
 
 Using \code{future_promise()} is recommended when ever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
 

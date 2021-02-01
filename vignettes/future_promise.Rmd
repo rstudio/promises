@@ -14,9 +14,9 @@ This article discusses the benefits of using `promises::future_promise()` over a
 
 ## The problem with `future()`+`promise()`
 
-In an ideal situation, the number of available `future` _workers_ (`future::nbrOfFreeWorkers()`) is always **more than** the number of `future::future()` _jobs_. However, if a `future` job is attempted when the number of free workers is `0`, then `future` will block the current R session until one becomes available. 
+In an ideal situation, the number of available `future` _workers_ (`future::nbrOfFreeWorkers()`) is always **more than** the number of `future::future()` _jobs_. However, if a `future` job is attempted when the number of free workers is `0`, then `future` will block the current R session until one becomes available.
 
-For a concrete example, let's imagine a scenario, where seven `plumber` requests are received at the same time with only two `future` workers available. Also, let's assume the `plumber` route(s) serving the first 6 requests use `future::future()` and take ~10s to compute `slow_calc()`: 
+For a concrete example, let's imagine a scenario, where seven `plumber` requests are received at the same time with only two `future` workers available. Also, let's assume the `plumber` route(s) serving the first 6 requests use `future::future()` and take ~10s to compute `slow_calc()`:
 
 ```r
 #* @get /slow/<k>
@@ -55,7 +55,7 @@ embed_vimeo("505287449") %>%
 
 The advantage of using `future_promise()` over `future::future()` is that even if there aren't `future` workers available, the `future` is scheduled to be done when workers become available via `promises`. In other words, `future_promise()` ensures the main R thread isn't blocked when a `future` job is requested and can't immediately perform the work (i.e., the number of jobs exceeds the number of workers).
 
-Continuing with the example above, we can swap out the calls to `future::future()` with `future_promise()`.  
+Continuing with the example above, we can swap out the calls to `future::future()` with `future_promise()`.
 
 ```r
 #* @get /slow/<k>
@@ -78,79 +78,3 @@ library(vembedr)
 embed_vimeo("505286442") %>%
   use_align("center")
 ```
-
-## Variable scope in `future_promise()` and `future::future()`
-
-`future_promise()` is a promise **first** and executes using `future::future()` **second**. When using `future_promise()`, you should use the same precautions that you would use with a regular `promises::promise()`.
-
-When `future` blocks on the main R session, this prevents values from being changed before they are submitted to the external worker.  While a `promise` waits to be executed, it is known that variables that have **not been `forced()`** or properly **scoped** can change from their expected values before evaluation occurs. This can also occur with properly scoped environment values as only the _pointer_ to the environment is static. This allows for the values within the environment to be altered before the `promise` is executed, which is likely undesirable.
-
-
-#### Scope
-
-In the example below, the variable `i` is not forced to a specific value for the promise. With the promise resolving within the global environment, the latest `i` value will be used for all of the promises waiting to resolve.
-
-```r
-items <- list()
-for (i in 1:10) {
-  items <- c(items, list(
-    promise_resolve(TRUE) %...>% {i}
-  ))
-}
-promise_all(.list = items) %...>%
-  { print(unlist(.)) }
-# #> [1] 10 10 10 10 10 10 10 10 10 10
-```
-
-To combat variable scoping issues, functions can be used to create local environments that will _scope_ the expected `i` value.
-
-```r
-lapply(1:10, function(i) {
-  promise_resolve(TRUE) %...>% {i}
-}) %>%
-  promise_all(.list = .) %...>%
-  { print(unlist(.)) }
-#> [1]  1  2  3  4  5  6  7  8  9 10
-```
-
-
-#### Changing environments
-
-Environments can have their values changed after the original promise creation.  This can cause unexpected behavior when evaluating a promise.
-
-For example, the environment `env` below will have its value `a` changed from `1` to `2` before the promise is resolved.  This causes the unexpected value of `2` to be returned in the promise.
-```r
-{
-  env <- new.env()
-  env$a <- 1
-
-  promise_resolve(TRUE) %...>%
-    { Sys.sleep(1); env$a } %...>%
-    { print(.) }
-  env$a <- 2
-  print("Changed env$a")
-}
-#> [1] "Changed env$a"
-#> [1] 2
-```
-
-To address lazy evaluation and environment variable issues, we can store the values to a local variable and force their evaluation.
-
-Fixing the example, we can capture the value `a` (or turn the environment into a `list()`).
-```r
-{
-  env <- new.env()
-  env$a <- 1
-
-  a_value <- force(env$a)
-  promise_resolve(TRUE) %...>%
-    { Sys.sleep(1); a_value } %...>%
-    { print(.) }
-  env$a <- 2
-  print("done")
-}
-#> [1] "done"
-#> [1] 1
-```
-
-The expression in `future_promise(expr)` will behave like a promise and should have its volitile variables scoped and `force()`ed to achieve similar evaluations when using `future::future()` directly.
