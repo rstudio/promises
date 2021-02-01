@@ -1,9 +1,7 @@
 promises 1.2.0
 ==============
 
-- Fix bug: `then(function(value) {})` causes `invisible()` to be dropped (#59)
-- Fix bug: `finally` causes `invisible()` to be dropped (#59)
-
+- Add `future_promise()` which creates a `promise` to execute a `future::future()` expression. `future_promise()` will only submit `future` jobs if a worker is available. If no workers are available, `future_promise()` will hold the expression information until a worker does become available to better take advantage of computing resources available to the main R session. For more information, please see the [`future_promise()` article](https://rstudio.github.io/promises/articles/future_promise.html). (#62)
 
 promises 1.1.1
 ==============
