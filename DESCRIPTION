@@ -22,9 +22,12 @@ Imports:
 Suggests:
     purrr,
     testthat,
-    future,
+    future (>= 1.21.0),
+    fastmap (>= 1.1.0),
+    purrr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    vembedr
 LinkingTo: later,
     Rcpp
 Roxygen: list(markdown = TRUE)

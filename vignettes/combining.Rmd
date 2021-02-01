@@ -1,9 +1,9 @@
 ---
-title: "Combining promises"
+title: "Combining `promises`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{6. Combining promises}
+  %\VignetteIndexEntry{7. Combining promises}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -194,4 +194,3 @@ promise_reduce(cran_mirrors, function(result, mirror) {
   }
 }, .init = NULL) %...>% print()
 ```
-

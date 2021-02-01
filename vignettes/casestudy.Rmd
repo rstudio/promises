@@ -3,7 +3,7 @@ title: "Case study: converting a Shiny app to async"
 author: Joe Cheng (joe@rstudio.com)
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{7. Case study}
+  %\VignetteIndexEntry{8. Case study}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 ---

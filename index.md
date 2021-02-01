@@ -30,7 +30,7 @@ devtools::install_github("rstudio/DT")
 
 ## Contents
 
-#### [1. Why use promises?](articles/motivation.html)
+#### [1. Why use `promises`?](articles/motivation.html)
 
 Why do we need async programming? What is it good for, and not good for?
 
@@ -38,21 +38,25 @@ Why do we need async programming? What is it good for, and not good for?
 
 Async programming can require a serious mental shift, even for veteran programmers. This document attempts to introduce the "average" R user to the topic, as gently as possible.
 
-#### [3. Working with promises](articles/overview.html)
+#### [3. Working with `promises`](articles/overview.html)
 
-A more thorough exploration of the concepts behind promises, and the API provided by the promises package.
+A more thorough exploration of the concepts behind `promises`, and the API provided by the `promises` package.
 
 #### [4. Launching tasks](articles/futures.html)
 
-A guide to the future package, the place where we expect most async programming in R to begin.
+A guide to the `future` package, the place where we expect most async programming in R to begin.
+
+#### [5. Advance `future` and `promises` usage](articles/future_promise.html)
+
+Leverage `promises` to make sure that `future` execution does not block the main R process.
 
 #### [5. Using promises with Shiny](articles/shiny.html)
 
-Learn how to integrate promises into your Shiny applications.
+Learn how to integrate `promises` into your Shiny applications.
 
-#### [6. Combining promises](articles/combining.html)
+#### [6. Combining `promises`](articles/combining.html)
 
-Functions and techniques for working with multiple promises simultaneously.
+Functions and techniques for working with multiple `promises` simultaneously.
 
 #### [7. Case study: converting a Shiny app to async](articles/casestudy.html)
 

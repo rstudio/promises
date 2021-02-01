@@ -1,9 +1,9 @@
 ---
-title: "Using promises with Shiny"
+title: "Using `promises` with Shiny"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{5. Using promises with Shiny}
+  %\VignetteIndexEntry{6. Using promises with Shiny}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -101,7 +101,7 @@ This code, for example, will not work:
 ```R
 function(input, output, session) {
   r1 <- reactive({ ... })
-  
+
   r2 <- reactive({
     future({
       r1() # Will error--don't do this!
@@ -115,7 +115,7 @@ Even though `r1()` is called from inside the `r2` reactive expression, the fact 
 ```R
 function(input, output, session) {
   r1 <- reactive({ ... })
-  
+
   r2 <- reactive({
     val <- r1()
     future({
@@ -130,7 +130,7 @@ However, it's perfectly fine to read reactive values/expressions from inside a p
 ```R
 function(input, output, session) {
   r1 <- reactive({ ... })
-  
+
   r2 <- reactive({
     future({ ... }) %...>%
       rbind(r1()) # OK!
@@ -228,7 +228,7 @@ Here's a synchronous example that we'll convert to async. Clicking the `refresh_
 ```R
 data <- reactiveVal(readRDS("cached.rds"))
 
-function(input, output, session) {  
+function(input, output, session) {
   observeEvent(input$refresh_data, {
     df <- read.csv(url)
     saveRDS(df, "cached.rds")
@@ -269,11 +269,11 @@ function(input, output, session) {
   data <- eventReactive(input$refresh_data, {
     read.csv(url)
   })
-  
+
   filteredData <- reactive({
     data() %>% filter(date == input$date)
   })
-  
+
   output$table <- renderTable({
     filteredData() %>% head(5)
   })
@@ -287,11 +287,11 @@ function(input, output, session) {
   data <- eventReactive(input$refresh_data, {
     future({ read.csv(url) })
   })
-  
+
   filteredData <- reactive({
     data() %...>% filter(date == input$date)
   })
-  
+
   output$table <- renderTable({
     filteredData() %...>% head(5)
   })
@@ -342,4 +342,3 @@ The resulting behavior matches the synchronous version of the event loop, in tha
 
 1. No inputs are received from the browser until all pending async outputs/observers have completed. Unlike the synchronous version, this separation is enforced at the session level: if Session A has some async observers that have not finished executing, that only prevents Session A from processing new input values, while new input values from Session B can be handled immediately because they belong to a different session. Again, the goal of keeping input updates separate from output/observer execution is to prevent race conditions, which are even more pernicious to debug and understand when async code is involved.
 2. For a given session, no outputs are sent back to the client, until all outputs are ready. It doesn't matter whether the outputs in question are synchronous, asynchronous, or some combination; they all must complete execution before any can be sent.
-
