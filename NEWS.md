@@ -1,5 +1,5 @@
-promises (development)
-==============
+promises (development version)
+======================
 
 - Fix bug: `then(function(value) {})` causes `invisible()` to be dropped (#59)
 - Fix bug: `finally` causes `invisible()` to be dropped (#59)
