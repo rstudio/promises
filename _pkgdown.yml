@@ -34,12 +34,19 @@ reference:
       - with_promise_domain
 
 navbar:
-  type: inverse
-  left:
-    - text: Home
-      icon: fa-home
+  structure:
+    left:
+    - home
+    - reference
+    - articles
+    - changelog
+    right: github
+  components:
+    home:
+      icon: fas fa-home fa-lg
       href: index.html
-    - text: Learning
+    articles:
+      text: Learning
       menu:
       - text: 1. Why use promises?
         href: articles/motivation.html
@@ -57,5 +64,3 @@ navbar:
         href: articles/combining.html
       - text: "8. Case study: Converting a Shiny app to async"
         href: articles/casestudy.html
-    - text: Reference
-      href: reference/index.html
