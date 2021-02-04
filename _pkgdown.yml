@@ -34,6 +34,7 @@ reference:
       - with_promise_domain
 
 navbar:
+  type: inverse
   structure:
     left:
     - home
