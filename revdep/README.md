@@ -10,7 +10,7 @@
 |collate  |en_US.UTF-8                  |
 |ctype    |en_US.UTF-8                  |
 |tz       |America/New_York             |
-|date     |2021-01-11                   |
+|date     |2021-02-09                   |
 
 # Dependencies
 
@@ -20,22 +20,23 @@
 
 # Revdeps
 
-## All (16)
+## All (17)
 
 |package                              |version |error |warning |note |
 |:------------------------------------|:-------|:-----|:-------|:----|
+|[ambiorix](problems.md#ambiorix)     |1.0.2   |      |        |1    |
 |condformat                           |0.9.0   |      |        |     |
 |coro                                 |1.0.1   |      |        |     |
 |dipsaus                              |0.1.2   |      |        |     |
 |[dragon](problems.md#dragon)         |1.1.0   |      |        |1    |
 |[DT](problems.md#dt)                 |0.17    |      |        |1    |
-|[httpuv](problems.md#httpuv)         |1.5.4   |      |        |1    |
+|[httpuv](problems.md#httpuv)         |1.5.5   |      |        |1    |
 |ipc                                  |0.1.3   |      |        |     |
 |pagedown                             |0.13    |      |        |     |
 |[plotly](problems.md#plotly)         |4.9.3   |      |        |1    |
 |plumber                              |1.0.0   |      |        |     |
 |[Prostar](problems.md#prostar)       |1.20.0  |1     |        |     |
-|[shiny](problems.md#shiny)           |1.5.0   |      |        |1    |
+|[shiny](problems.md#shiny)           |1.6.0   |      |        |1    |
 |shinydashboard                       |0.7.1   |      |        |     |
 |[shinyrecap](problems.md#shinyrecap) |0.1.0   |      |        |1    |
 |shinyTree                            |0.2.7   |      |        |     |

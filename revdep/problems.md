@@ -1,3 +1,26 @@
+# ambiorix
+
+<details>
+
+* Version: 1.0.2
+* GitHub: https://github.com/JohnCoene/ambiorix
+* Source code: https://github.com/cran/ambiorix
+* Date/Publication: 2021-01-27 10:00:07 UTC
+* Number of recursive dependencies: 37
+
+Run `revdep_details(, "ambiorix")` for more info
+
+</details>
+
+## In both
+
+*   checking dependencies in R code ... NOTE
+    ```
+    Namespaces in Imports field not imported from:
+      ‘glue’ ‘promises’ ‘websocket’
+      All declared Imports should be used.
+    ```
+
 # dragon
 
 <details>
@@ -6,7 +29,7 @@
 * GitHub: https://github.com/sjspielman/dragon
 * Source code: https://github.com/cran/dragon
 * Date/Publication: 2020-12-08 08:10:15 UTC
-* Number of recursive dependencies: 131
+* Number of recursive dependencies: 135
 
 Run `revdep_details(, "dragon")` for more info
 
@@ -28,7 +51,7 @@ Run `revdep_details(, "dragon")` for more info
 * GitHub: https://github.com/rstudio/DT
 * Source code: https://github.com/cran/DT
 * Date/Publication: 2021-01-06 16:01:25 UTC
-* Number of recursive dependencies: 35
+* Number of recursive dependencies: 43
 
 Run `revdep_details(, "DT")` for more info
 
@@ -47,10 +70,10 @@ Run `revdep_details(, "DT")` for more info
 
 <details>
 
-* Version: 1.5.4
+* Version: 1.5.5
 * GitHub: https://github.com/rstudio/httpuv
 * Source code: https://github.com/cran/httpuv
-* Date/Publication: 2020-06-06 05:00:06 UTC
+* Date/Publication: 2021-01-13 06:40:06 UTC
 * Number of recursive dependencies: 41
 
 Run `revdep_details(, "httpuv")` for more info
@@ -72,7 +95,7 @@ Run `revdep_details(, "httpuv")` for more info
 * GitHub: https://github.com/ropensci/plotly
 * Source code: https://github.com/cran/plotly
 * Date/Publication: 2021-01-10 14:30:02 UTC
-* Number of recursive dependencies: 157
+* Number of recursive dependencies: 161
 
 Run `revdep_details(, "plotly")` for more info
 
@@ -95,7 +118,7 @@ Run `revdep_details(, "plotly")` for more info
 * GitHub: NA
 * Source code: https://github.com/cran/Prostar
 * Date/Publication: 2020-04-27
-* Number of recursive dependencies: 152
+* Number of recursive dependencies: 156
 
 Run `revdep_details(, "Prostar")` for more info
 
@@ -115,11 +138,11 @@ Run `revdep_details(, "Prostar")` for more info
 
 <details>
 
-* Version: 1.5.0
+* Version: 1.6.0
 * GitHub: https://github.com/rstudio/shiny
 * Source code: https://github.com/cran/shiny
-* Date/Publication: 2020-06-23 13:30:03 UTC
-* Number of recursive dependencies: 101
+* Date/Publication: 2021-01-25 21:50:02 UTC
+* Number of recursive dependencies: 107
 
 Run `revdep_details(, "shiny")` for more info
 
@@ -129,10 +152,10 @@ Run `revdep_details(, "shiny")` for more info
 
 *   checking installed package size ... NOTE
     ```
-      installed size is 11.7Mb
+      installed size is 12.1Mb
       sub-directories of 1Mb or more:
         R     2.0Mb
-        www   8.5Mb
+        www   8.8Mb
     ```
 
 # shinyrecap
@@ -143,7 +166,7 @@ Run `revdep_details(, "shiny")` for more info
 * GitHub: NA
 * Source code: https://github.com/cran/shinyrecap
 * Date/Publication: 2019-01-19 23:40:03 UTC
-* Number of recursive dependencies: 92
+* Number of recursive dependencies: 98
 
 Run `revdep_details(, "shinyrecap")` for more info
 
@@ -167,7 +190,7 @@ Run `revdep_details(, "shinyrecap")` for more info
 * GitHub: https://github.com/tylermorganwall/skpr
 * Source code: https://github.com/cran/skpr
 * Date/Publication: 2020-03-04 20:20:02 UTC
-* Number of recursive dependencies: 141
+* Number of recursive dependencies: 147
 
 Run `revdep_details(, "skpr")` for more info
 
