@@ -20,7 +20,6 @@ Imports:
     stats,
     magrittr
 Suggests:
-    purrr,
     testthat,
     future (>= 1.21.0),
     fastmap (>= 1.1.0),
