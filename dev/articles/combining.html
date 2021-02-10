@@ -149,8 +149,8 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
-<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op">%...&gt;%</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">a</span>, <span class="va">.</span><span class="op">$</span><span class="va">b</span><span class="op">)</span>
@@ -162,8 +162,8 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
-<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op">%...&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span><span class="op">(</span><span class="op">{</span>
@@ -182,10 +182,10 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
-<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
+<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
 
 <span class="va">a</span> <span class="op">%...&gt;%</span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>
+  <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>
   <span class="va">b</span> <span class="op">%...&gt;%</span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="op">{</span>
     <span class="va">a</span> <span class="op">+</span> <span class="va">b</span>
   <span class="op">}</span><span class="op">)</span>
@@ -201,8 +201,8 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
-<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="fl">1</span> <span class="op">}</span><span class="op">)</span>
-<span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>; <span class="fl">2</span> <span class="op">}</span><span class="op">)</span>
+<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="fl">1</span> <span class="op">}</span><span class="op">)</span>
+<span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>; <span class="fl">2</span> <span class="op">}</span><span class="op">)</span>
 
 <span class="va">first</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_all.html">promise_race</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></code></pre></div>
 <p><code>promise_race</code> takes multiple promises and returns a new promise that will be fulfilled with the first promise that succeeds. In the example above, <code>first</code> is a promise that will be fulfilled with <code>2</code> after 0.5 seconds.</p>
@@ -221,7 +221,7 @@
 
 <span class="va">get_pub_date</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pkg</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">desc_url</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"https://cran.r-project.org/web/packages/"</span>, <span class="va">pkg</span>, <span class="st">"/DESCRIPTION"</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="op">{</span>
+  <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
     <span class="fu"><a href="https://rdrr.io/r/base/dcf.html">read.dcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html">url</a></span><span class="op">(</span><span class="va">desc_url</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="st">"Date/Publication"</span><span class="op">]</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span>
@@ -274,7 +274,7 @@ $knitr
   <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
     <span class="va">result</span>
   <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="op">{</span>
+    <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
       <span class="co"># Test the URL; return the URL on success, or NULL on failure</span>
       <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/http_error.html">http_error</a></span><span class="op">(</span><span class="va">mirror</span><span class="op">)</span><span class="op">)</span> <span class="va">mirror</span>
     <span class="op">}</span><span class="op">)</span>
