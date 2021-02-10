@@ -43,12 +43,12 @@ magrittr::"%T>%"
 #' library(future)
 #' plan(multisession)
 #'
-#' future(cars) %...>%
+#' future_promise(cars) %...>%
 #'   head(5) %...T>%
 #'   print()
 #'
 #' # If the read.csv fails, resolve to NULL instead
-#' future(read.csv("http://example.com/data.csv")) %...!%
+#' future_promise(read.csv("http://example.com/data.csv")) %...!%
 #'   { NULL }
 #' }
 #'

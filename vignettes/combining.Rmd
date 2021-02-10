@@ -32,8 +32,8 @@ library(promises)
 library(future)
 plan(multisession)
 
-a <- future(read.csv("a.csv"))
-b <- future(read.csv("b.csv"))
+a <- future_promise(read.csv("a.csv"))
+b <- future_promise(read.csv("b.csv"))
 
 result <- promise_all(a = a, b = b) %...>% {
   rbind(.$a, .$b)
@@ -49,8 +49,8 @@ library(promises)
 library(future)
 plan(multisession)
 
-a <- future(read.csv("a.csv"))
-b <- future(read.csv("b.csv"))
+a <- future_promise(read.csv("a.csv"))
+b <- future_promise(read.csv("b.csv"))
 
 promise_all(a = a, b = b) %...>%
   with({
@@ -73,10 +73,10 @@ library(promises)
 library(future)
 plan(multisession)
 
-a <- future(1)
+a <- future_promise(1)
 
 a %...>% (function(a) {
-  b <- future(2)
+  b <- future_promise(2)
   b %...>% (function(b) {
     a + b
   })
@@ -94,8 +94,8 @@ library(promises)
 library(future)
 plan(multisession)
 
-a <- future({ Sys.sleep(1); 1 })
-b <- future({ Sys.sleep(0.5); 2 })
+a <- future_promise({ Sys.sleep(1); 1 })
+b <- future_promise({ Sys.sleep(0.5); 2 })
 
 first <- promise_race(a, b)
 ```
@@ -119,7 +119,7 @@ plan(multisession)
 
 get_pub_date <- function(pkg) {
   desc_url <- paste0("https://cran.r-project.org/web/packages/", pkg, "/DESCRIPTION")
-  future({
+  future_promise({
     read.dcf(url(desc_url))[, "Date/Publication"] %>% unname()
   })
 }
@@ -187,7 +187,7 @@ promise_reduce(cran_mirrors, function(result, mirror) {
   if (!is.null(result)) {
     result
   } else {
-    future({
+    future_promise({
       # Test the URL; return the URL on success, or NULL on failure
       if (!httr::http_error(mirror)) mirror
     })

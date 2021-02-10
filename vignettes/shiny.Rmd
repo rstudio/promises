@@ -13,7 +13,7 @@ Async programming with Shiny boils down to following a few steps.
 
 1. Identify slow operations (function calls or blocks of statements) in your app.
 
-2. Convert the slow operation into a future. (If you haven't read the [article on futures](futures.html), definitely do that before proceeding!)
+2. Convert the slow operation into a future using `future_promise()`. (If you haven't read the [article on futures](futures.html) and [`future_promise()`](future_promise.html), definitely do that before proceeding!)
 
 3. Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the future object.
 
@@ -34,11 +34,11 @@ We'd convert it to async like this:
 ```R
 library(promises)
 library(future)
-plan(multiprocess)
+plan(multisession)
 
 function(input, output, session) {
   output$plot <- renderPlot({
-    future({ expensive_operation() }) %...>%
+    future_promise({ expensive_operation() }) %...>%
       head(input$n) %...>%
       plot()
   })
@@ -47,13 +47,13 @@ function(input, output, session) {
 
 ## Adding prerequisites
 
-The easiest part is adding `library(promises)`, `library(future)`, and `plan(multiprocess)` to the top of the app.
+The easiest part is adding `library(promises)`, `library(future)`, and `plan(multisession)` to the top of the app.
 
 The `promises` library is necessary for the `%...>%` operator. You may also want to use promise utility functions like `promise_all` and `promise_race`.
 
-The `future` library is needed because the `future()` function is how you will launch asynchronous tasks.
+The `future` library is needed because the `future()` function call used inside `future_promise()` is how you will launch asynchronous tasks.
 
-`plan(multiprocess)` is a directive to the `future` package, telling it how future tasks should actually be executed. See the [article on futures](futures.html) for more details.
+`plan(multisession)` is a directive to the `future` package, telling it how future tasks should actually be executed. See the [article on futures](futures.html) for more details.
 
 ## Identifying slow operations
 
@@ -92,6 +92,8 @@ future({
 
 The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues. There are extremely important constraints that futures impose on their code blocks; certain objects cannot be safely used across process boundaries, and some of the default behaviors of the future library may severely impact the performance of your app. Again, see the [article on futures](futures.html) for more details.
 
+The remainder of this document will use `future_promise()` in place of `future()`. For more information on the differences, see the [article on the benefits of `future_promise()`](future_promise.html).
+
 ### Shiny-specific caveats and limitations
 
 In addition to the constraints that all futures face, there is an additional one for Shiny: reactive values and reactive expressions cannot be read from within a future. Whenever reactive values/expressions are read, side effects are carried out under the hood so that the currently executing observer or reactive expression can be notified when the reactive value/expression becomes invalidated. If a reactive value/expression is created in one process, but read in another process, there will be no way for readers to be notified about invalidation.
@@ -103,7 +105,7 @@ function(input, output, session) {
   r1 <- reactive({ ... })
 
   r2 <- reactive({
-    future({
+    future_promise({
       r1() # Will error--don't do this!
     })
   })
@@ -118,7 +120,7 @@ function(input, output, session) {
 
   r2 <- reactive({
     val <- r1()
-    future({
+    future_promise({
       val # No problem!
     })
   })
@@ -132,7 +134,7 @@ function(input, output, session) {
   r1 <- reactive({ ... })
 
   r2 <- reactive({
-    future({ ... }) %...>%
+    future_promise({ ... }) %...>%
       rbind(r1()) # OK!
   })
 }
@@ -159,7 +161,7 @@ could become:
 
 ```R
 output$table <- renderTable({
-  future({ read.csv(url) }) %...>%
+  future_promise({ read.csv(url) }) %...>%
     filter(date == input$date)
 })
 ```
@@ -169,7 +171,7 @@ or, trading elegance for efficiency:
 ```R
 output$table <- renderTable({
   input_date <- input$date
-  future({
+  future_promise({
     read.csv(url) %>% filter(date == input_date)
   })
 })
@@ -185,7 +187,7 @@ With promises, these render functions can work in a similar way, but with a cave
 
 ```R
 output$summary <- renderPrint({
-  future({
+  future_promise({
     read.csv(url) %>%
       summary() %>%
       print()
@@ -193,7 +195,7 @@ output$summary <- renderPrint({
 })
 
 output$plot <- renderPlot({
-  future({
+  future_promise({
     df <- read.csv(url)
     ggplot(df, aes(length, width)) + geom_point()
   })
@@ -204,13 +206,13 @@ Instead, do printing and plotting after control returns back to the original pro
 
 ```R
 output$summary <- renderPrint({
-  future({ read.csv(url) }) %...>%
+  future_promise({ read.csv(url) }) %...>%
     summary() %...>%
     print()
 })
 
 output$plot <- renderPlot({
-  future({ read.csv(url) }) %...>%
+  future_promise({ read.csv(url) }) %...>%
   {
     ggplot(., aes(length, width)) + geom_point()
   }
@@ -244,7 +246,7 @@ data <- reactiveVal(readRDS("cached.rds"))
 
 function(input, output, session) {
   observeEvent(input$refresh_data, {
-    future({
+    future_promise({
       df <- read.csv(url)
       saveRDS(df, "cached.rds")
       df
@@ -285,7 +287,7 @@ And now in async:
 ```R
 function(input, output, session) {
   data <- eventReactive(input$refresh_data, {
-    future({ read.csv(url) })
+    future_promise({ read.csv(url) })
   })
 
   filteredData <- reactive({
