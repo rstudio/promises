@@ -26,7 +26,8 @@ Suggests:
     purrr,
     knitr,
     rmarkdown,
-    vembedr
+    vembedr,
+    spelling
 LinkingTo: later,
     Rcpp
 Roxygen: list(markdown = TRUE)
@@ -36,3 +37,4 @@ LazyData: true
 VignetteBuilder: knitr
 URL: https://rstudio.github.io/promises/, https://github.com/rstudio/promises
 BugReports: https://github.com/rstudio/promises/issues
+Language: en-US
