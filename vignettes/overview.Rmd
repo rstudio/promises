@@ -54,10 +54,10 @@ So if a regular, synchronous function call generally looks like this:
 value <- read.csv("http://example.com/data/data.csv")
 ```
 
-An asynchronous function call (using [the future package](futures.html)) will look instead like:
+An asynchronous function call (which uses [the future package](futures.html) via [`future_promise()`](future_promise.html)) will look instead like:
 
 ```r
-promise <- future(read.csv("http://example.com/data/data.csv"))
+promise <- future_promise(read.csv("http://example.com/data/data.csv"))
 ```
 
 While the regular function call returns a data frame, the async call returns a promise, which is most definitely not a data frame. You cannot ask the promise how many rows it has, or the names of its columns. You cannot run dplyr operations on it, or turn it into a data.table.
@@ -273,7 +273,7 @@ value <- tryCatch(
 would be this, when the operation is performed asynchronously:
 
 ```r
-promise <- future(operation()) %>%
+promise <- future_promise(operation()) %>%
   then(onRejected = function(err) {
     warning("An error occurred: ", err)
     warning("Using default value of 0 instead")
@@ -302,21 +302,21 @@ Well, `then` has its own default version of `onRejected`. It’s *not* an empty 
 The same syntactic sugar that is offered for non-error cases, is available for error handling code as well. You can use formulas in `onRejected`:
 
 ```r
-future(operation()) %>%
+future_promise(operation()) %>%
   then(onRejected = ~warning(.))
 ```
 
 There’s an error handling pipe operator `%...!%`, that works similar to `%...>%` but it binds to `then(onRejected)` instead of `then(onFulfilled)`:
 
 ```r
-future(operation()) %...!%
+future_promise(operation()) %...!%
   warning()
 ```
 
 There’s also a `catch()` function that is just a shorthand for `then(onRejected)`. It saves a little typing, but more importantly, is easier to read:
 
 ```r
-future(operation()) %>%
+future_promise(operation()) %>%
   catch(warning)
 ```
 
@@ -352,7 +352,7 @@ In synchronous programming, you use either`tryCatch(expr, finally = ...)` or `on
 ```r
 file_path <- tempfile(fileext = ".png")
 png_bytes <-
-  future({
+  future_promise({
     png(file_path)
     plot(cars)
     dev.off()

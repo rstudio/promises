@@ -51,16 +51,16 @@ before the real work has actually completed.
 
 ```r
 library(future)
-plan(multiprocess)
+plan(multisession)
 
 read.csv.async <- function(file, header = TRUE, stringsAsFactors = FALSE) {
-  future({
+  future_promise({
     read.csv(file, header = header, stringsAsFactors = stringsAsFactors)
   })
 }
 ```
 
-(Don't worry about what this definition means for now. You'll learn more about defining async functions in [Launching tasks](futures.html).)
+(Don't worry about what this definition means for now. You'll learn more about defining async functions in [Launching tasks](futures.html) and [Advanced `future` and `promises` usage](future_promise.html).)
 
 **So instead of “read this CSV file” it’s more like “begin reading this CSV
 file”?**

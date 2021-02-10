@@ -179,7 +179,7 @@ plan(multisession)
 
 I originally used `multiprocess` but file downloading inside a future seemed to fail on Mac. (I've found that it's usually not worth spending a lot of time trying to figure out why `multiprocess` doesn't work for some specific code; instead, just use `multisession`, since that's probably going to be the solution anyway.)
 
-### The `data` reactive: future() all the things
+### The `data` reactive: future_promise() all the things
 
 The next thing we'll do is convert the `data` event reactive to use `future` for the expensive bits. The original code looks lke this:
 
@@ -221,7 +221,7 @@ data <- eventReactive(input$date, {
   url <- glue("http://cran-logs.rstudio.com/{year}/{date}.csv.gz")
   path <- file.path("data_cache", paste0(date, ".csv.gz"))
 
-  future({
+  future_promise({
     if (!file.exists(path)) {
       download.file(url, path)
     }
@@ -329,7 +329,7 @@ This solution uses the [promise gathering](https://rstudio.github.io/promises/ar
 * The `promise_all` function gathers multiple promise objects together, and returns a single promise object. This new promise object doesn't resolve until all the input promise objects are resolved, and it yields a list of those results.
 
 ```r
-> promise_all(a = future("Hello"), b = future("World")) %...>% print()
+> promise_all(a = future_promise("Hello"), b = future_promise("World")) %...>% print()
 $a
 [1] "Hello"
 
@@ -353,13 +353,13 @@ Error: object 'x' not found
 Let's once again combine the three, with the simplest possible example of the gathering pattern:
 
 ```r
-> promise_all(x = future("Hello"), y = future("World")) %...>%
+> promise_all(x = future_promise("Hello"), y = future_promise("World")) %...>%
 +   with({ paste(x, y) }) %...>%
 +   print()
 [1] "Hello World"
 ```
 
-You can make use of this pattern without remembering exactly how these pieces combine. Just remember that the arguments to `promise_all` provide the promise objects (`future(1)` and `future(2)`), along with the names you want to use to refer to their yielded values (`x ` and `y`); and the code block you put in `with()` can refer to those names without worrying about the fact that they were ever promises to begin with.
+You can make use of this pattern without remembering exactly how these pieces combine. Just remember that the arguments to `promise_all` provide the promise objects (`future_promise(1)` and `future_promise(2)`), along with the names you want to use to refer to their yielded values (`x ` and `y`); and the code block you put in `with()` can refer to those names without worrying about the fact that they were ever promises to begin with.
 
 ### The `total_downloaders` value box: simple pipelines are for output, too
 
@@ -503,7 +503,7 @@ data <- eventReactive(input$date, {
 
 Progress reporting currently presents two challenges for future.
 
-First, the `withProgress({...})` function cannot be used with async. `withProgress` is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to `future()` will return immediately even though the actual task is far from done, using `withProgress` won't work; the progress dialog would be dismissed before the download even got going.
+First, the `withProgress({...})` function cannot be used with async. `withProgress` is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to `future_promise()` will return immediately even though the actual task is far from done, using `withProgress` won't work; the progress dialog would be dismissed before the download even got going.
 
 It's conceivable that `withProgress` could gain promise compatibility someday, but it's not in Shiny v1.1.0. In the meantime, we can work around this by using the alternative, [object-oriented progress API](https://shiny.rstudio.com/reference/shiny/1.1.0/Progress.html) that Shiny offers. It's a bit more verbose and fiddly than `withProgress`/`setProgress`, but it is flexible enough to work with futures/promises.
 
@@ -525,13 +525,13 @@ data <- eventReactive(input$date, {
 
   p <- Progress$new()
   p$set(value = NULL, message = "Downloading data...")
-  future({
+  future_promise({
     if (!file.exists(path)) {
       download.file(url, path)
     }
   }) %...>%
     { p$set(message = "Parsing data...") } %...>%
-    { future(read_csv(path, col_types = "Dti---c-ci", progress = FALSE)) } %>%
+    { future_promise(read_csv(path, col_types = "Dti---c-ci", progress = FALSE)) } %>%
     finally(~p$close())
 })
 ```
@@ -543,7 +543,7 @@ The single future we wrote earlier has now become a pipeline of promises:
 3. future (parse)
 4. dismiss progress dialog
 
-Note that neither the R6 call `p$set(message = ...)` nor the second `future()` call are tidy, so they use curly-brace blocks, as discussed in the above section about `biggest_whales`.
+Note that neither the R6 call `p$set(message = ...)` nor the second `future_promise()` call are tidy, so they use curly-brace blocks, as discussed in the above section about `biggest_whales`.
 
 The final step of dismissing the progress dialog doesn't use `%...>%` at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use the regular pipe `%>%` and `finally()` function instead. See the relevant section in [*Working with promises in R*](https://rstudio.github.io/promises/articles/overview.html#cleaning-up-with-finally) to learn more.
 
@@ -577,7 +577,7 @@ And as you can see from this plot, the behavior of the async app is much improve
 
 I was surprised that the async version's page load times weren't even faster, and even more surprised to see that the blue rectangles were just as wide as the sync version. Why isn't the async version way faster? The sync version does all of its work on a single thread, and I specifically designed this app to be a nightmare for scalability by having each session kick off by parsing hundreds of megabytes of CSV, an operation that is quite expensive. The async version gets to spread these jobs across several workers. Why aren't we seeing a greater time savings?
 
-Mostly, it's because calling `future(read_csv("big_file.csv"))` is almost a worst-case scenario for future and async. `read_csv` is generally fast, but because the CRAN log files are so big, `read_csv("big_file.csv")` is slow. The value it returns is a very large data frame, that has now been loaded not into the Shiny process, but a `future` worker process. In order to return that data frame to the Shiny process, that data must first be serialized (I believe `future` essentially uses `saveRDS` for this), transmitted to the Shiny process, and then deserialized; to make matters worse, the transmitting and deserialization steps happen on the main R thread that we're working so hard to try to keep idle. **The larger the data we send back and forth to the future, the more performance suffers,** and in this case we're sending back quite a lot of data.
+Mostly, it's because calling `future_promise(read_csv("big_file.csv"))` is almost a worst-case scenario for future and async. `read_csv` is generally fast, but because the CRAN log files are so big, `read_csv("big_file.csv")` is slow. The value it returns is a very large data frame, that has now been loaded not into the Shiny process, but a `future` worker process. In order to return that data frame to the Shiny process, that data must first be serialized (I believe `future` essentially uses `saveRDS` for this), transmitted to the Shiny process, and then deserialized; to make matters worse, the transmitting and deserialization steps happen on the main R thread that we're working so hard to try to keep idle. **The larger the data we send back and forth to the future, the more performance suffers,** and in this case we're sending back quite a lot of data.
 
 We can make our code significantly faster by doing more summarizing, aggregation, and filtering _inside_ the future; not only does this make more of the work happen in parallel, but by returning the data in already-processed form, we can have much less data to transfer from the worker process back to the Shiny process. (For example, the data for May 31, 2018 weighs 75MB before optimization, and 8.8MB afterwards.)
 
