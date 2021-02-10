@@ -37,6 +37,12 @@
 <script src="../pkgdown.js"></script>
 
 
+<!-- docsearch -->
+<script src="../docsearch.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.3/docsearch.min.css" integrity="sha256-QOSRU/ra9ActyXkIBbiIB144aDBdtvXBcNc3OTNuX/Q=" crossorigin="anonymous" />
+<link href="../docsearch.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+
 
 
 <meta property="og:title" content="Access the results of a promise — then" />
@@ -72,7 +78,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -80,10 +86,12 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa-home"></span>
+    <span class="fas fa-home fa-lg"></span>
      
-    Home
   </a>
+</li>
+<li>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -102,21 +110,24 @@
       <a href="../articles/overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks</a>
+      <a href="../articles/futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">5. Using promises with Shiny</a>
+      <a href="../articles/future_promise.html">5. Advanced future and promises usage</a>
     </li>
     <li>
-      <a href="../articles/combining.html">6. Combining promises</a>
+      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/combining.html">7. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -127,6 +138,12 @@
   </a>
 </li>
       </ul>
+      
+      <form class="navbar-form navbar-right hidden-xs hidden-sm" role="search">
+        <div class="form-group">
+          <input type="search" class="form-control" name="search-input" id="search-input" placeholder="Search..." aria-label="Search for..." autocomplete="off">
+        </div>
+      </form>
       
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -148,11 +165,11 @@
     <p>Use the <code>then</code> function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to <code>then</code> is non-blocking, that is, it returns immediately; so what it does <em>not</em> do is immediately return the result value of the promise. Instead, you pass logic you want to execute to <code>then</code>, in the form of function callbacks (or formulas, see Details). If you provide an <code>onFulfilled</code> callback, it will be called upon the promise's successful resolution, with a single argument <code>value</code>: the result value. If you provide an <code>onRejected</code> callback, it will be called if the operation fails, with a single argument <code>reason</code>: the error that caused the failure.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>then</span>(<span class='kw'>promise</span>, onFulfilled = <span class='kw'>NULL</span>, onRejected = <span class='kw'>NULL</span>)
+    <pre class="usage"><span class='fu'>then</span><span class='op'>(</span><span class='va'>promise</span>, onFulfilled <span class='op'>=</span> <span class='cn'>NULL</span>, onRejected <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
-<span class='fu'>catch</span>(<span class='kw'>promise</span>, <span class='kw'>onRejected</span>, tee = <span class='fl'>FALSE</span>)
+<span class='fu'>catch</span><span class='op'>(</span><span class='va'>promise</span>, <span class='va'>onRejected</span>, tee <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 
-<span class='fu'>finally</span>(<span class='kw'>promise</span>, <span class='kw'>onFinally</span>)</pre>
+<span class='fu'>finally</span><span class='op'>(</span><span class='va'>promise</span>, <span class='va'>onFinally</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -218,8 +235,8 @@ the return value of <code>then</code> is also a (newly created) promise. This ne
 promise waits for the original promise to be fulfilled or rejected, and for
 <code>onFulfilled</code> or <code>onRejected</code> to be called. The result of (or error raised
 by) calling <code>onFulfilled</code>/<code>onRejected</code> will be used to fulfill (reject) the
-new promise.</p><pre><span class='kw'>promise_a</span> <span class='op'>&lt;-</span> <span class='fu'>get_data_frame_async</span>()
-<span class='kw'>promise_b</span> <span class='op'>&lt;-</span> <span class='fu'>then</span>(<span class='kw'>promise_a</span>, onFulfilled = <span class='kw'>head</span>)
+new promise.</p><pre><span class='va'>promise_a</span> <span class='op'>&lt;-</span> <span class='fu'>get_data_frame_async</span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>promise_b</span> <span class='op'>&lt;-</span> <span class='fu'>then</span><span class='op'>(</span><span class='va'>promise_a</span>, onFulfilled <span class='op'>=</span> <span class='va'>head</span><span class='op'>)</span>
 </pre>
 
 <p>In this example, assuming <code>get_data_frame_async</code> returns a promise that
@@ -230,28 +247,28 @@ whether <code>onFulfilled</code>/<code>onRejected</code> returns a value or thro
 whether the original promise was fulfilled or rejected. In other words, it's
 possible to turn failure to success and success to failure. Consider this
 example, where we expect <code>some_async_operation</code> to fail, and want to consider
-it an error if it doesn't:</p><pre><span class='kw'>promise_c</span> <span class='op'>&lt;-</span> <span class='fu'>some_async_operation</span>()
-<span class='kw'>promise_d</span> <span class='op'>&lt;-</span> <span class='fu'>then</span>(<span class='kw'>promise_c</span>,
-  onFulfilled = <span class='fu'>function</span>(<span class='kw'>value</span>) {
-    <span class='fu'><a href='https://rdrr.io/r/base/stop.html'>stop</a></span>(<span class='st'>"That's strange, the operation didn't fail!"</span>)
-  },
-  onRejected = <span class='fu'>function</span>(<span class='kw'>reason</span>) {
+it an error if it doesn't:</p><pre><span class='va'>promise_c</span> <span class='op'>&lt;-</span> <span class='fu'>some_async_operation</span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>promise_d</span> <span class='op'>&lt;-</span> <span class='fu'>then</span><span class='op'>(</span><span class='va'>promise_c</span>,
+  onFulfilled <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>value</span><span class='op'>)</span> <span class='op'>{</span>
+    <span class='kw'><a href='https://rdrr.io/r/base/stop.html'>stop</a></span><span class='op'>(</span><span class='st'>"That's strange, the operation didn't fail!"</span><span class='op'>)</span>
+  <span class='op'>}</span>,
+  onRejected <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>reason</span><span class='op'>)</span> <span class='op'>{</span>
     <span class='co'># Great, the operation failed as expected</span>
-    <span class='kw'>NULL</span>
-  }
-)
+    <span class='cn'>NULL</span>
+  <span class='op'>}</span>
+<span class='op'>)</span>
 </pre>
 
 <p>Now, <code>promise_d</code> will be rejected if <code>promise_c</code> is fulfilled, and vice
 versa.</p>
 <p><strong>Warning:</strong> Be very careful not to accidentally turn failure into success,
-if your error handling code is not the last item in a chain!</p><pre><span class='fu'>some_async_operation</span>() <span class='op'>%&gt;%</span>
-  <span class='fu'>catch</span>(<span class='fu'>function</span>(<span class='kw'>reason</span>) {
-    <span class='fu'><a href='https://rdrr.io/r/base/warning.html'>warning</a></span>(<span class='st'>"An error occurred: "</span>, <span class='kw'>reason</span>)
-  }) <span class='op'>%&gt;%</span>
-  <span class='fu'>then</span>(<span class='fu'>function</span>() {
-    <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span>(<span class='st'>"I guess we succeeded...?"</span>)  <span class='co'># No!</span>
-  })
+if your error handling code is not the last item in a chain!</p><pre><span class='fu'>some_async_operation</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>catch</span><span class='op'>(</span><span class='kw'>function</span><span class='op'>(</span><span class='va'>reason</span><span class='op'>)</span> <span class='op'>{</span>
+    <span class='kw'><a href='https://rdrr.io/r/base/warning.html'>warning</a></span><span class='op'>(</span><span class='st'>"An error occurred: "</span>, <span class='va'>reason</span><span class='op'>)</span>
+  <span class='op'>}</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>then</span><span class='op'>(</span><span class='kw'>function</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>{</span>
+    <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"I guess we succeeded...?"</span><span class='op'>)</span>  <span class='co'># No!</span>
+  <span class='op'>}</span><span class='op'>)</span>
 </pre>
 
 <p>In this example, the <code>catch</code> callback does not itself throw an error, so the
@@ -291,7 +308,7 @@ which will be <code>FALSE</code> if the result value is <a href='https://rdrr.io
 
       <footer>
       <div class="copyright">
-  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src="https://tidyverse.org/rstudio-logo.svg" height="24" /></a>.</p>
+  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src='https://www.tidyverse.org/rstudio-logo.svg' alt='RStudio' height='24' /></a>.</p>
 </div>
 
 <div class="pkgdown">
@@ -302,6 +319,23 @@ which will be <code>FALSE</code> if the result value is <a href='https://rdrr.io
    </div>
 
   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.1/docsearch.min.js" integrity="sha256-GKvGqXDznoRYHCwKXGnuchvKSwmx9SRMrZOTh2g4Sb0=" crossorigin="anonymous"></script>
+<script>
+  docsearch({
+    
+    
+    apiKey: 'e02966c036b2b44dfdb6dede68b3b31b',
+    indexName: 'rstudio',
+    inputSelector: 'input#search-input.form-control',
+    transformData: function(hits) {
+      return hits.map(function (hit) {
+        hit.url = updateHitURL(hit);
+        return hit;
+      });
+    }
+  });
+</script>
+
 
 
   </body>

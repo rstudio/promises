@@ -11,7 +11,9 @@
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Abstractions for Promise-Based Asynchronous Programming">
+<script src="pkgdown.js"></script><!-- docsearch --><script src="docsearch.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.3/docsearch.min.css" integrity="sha256-QOSRU/ra9ActyXkIBbiIB144aDBdtvXBcNc3OTNuX/Q=" crossorigin="anonymous">
+<link href="docsearch.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script><meta property="og:title" content="Abstractions for Promise-Based Asynchronous Programming">
 <meta property="og:description" content="Provides fundamental abstractions for doing asynchronous programming
     in R using promises. Asynchronous programming is useful for allowing a single
     R process to orchestrate multiple tasks in the background while also attending
@@ -35,7 +37,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -43,10 +45,12 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="index.html">
-    <span class="fas fa-home"></span>
+    <span class="fas fa-home fa-lg"></span>
      
-    Home
   </a>
+</li>
+<li>
+  <a href="reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -65,21 +69,24 @@
       <a href="articles/overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="articles/futures.html">4. Launching tasks</a>
+      <a href="articles/futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="articles/shiny.html">5. Using promises with Shiny</a>
+      <a href="articles/future_promise.html">5. Advanced future and promises usage</a>
     </li>
     <li>
-      <a href="articles/combining.html">6. Combining promises</a>
+      <a href="articles/shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
+      <a href="articles/combining.html">7. Combining promises</a>
+    </li>
+    <li>
+      <a href="articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
 <li>
-  <a href="reference/index.html">Reference</a>
+  <a href="news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -90,7 +97,13 @@
   </a>
 </li>
       </ul>
+<form class="navbar-form navbar-right hidden-xs hidden-sm" role="search">
+        <div class="form-group">
+          <input type="search" class="form-control" name="search-input" id="search-input" placeholder="Search..." aria-label="Search for..." autocomplete="off">
 </div>
+      </form>
+      
+    </div>
 <!--/.nav-collapse -->
   </div>
 <!--/.container -->
@@ -111,13 +124,13 @@
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>You can install both the promises package and an async-compatible version of Shiny (requires v1.1+) just by installing Shiny from CRAN:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"shiny"</span>)</pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"shiny"</span><span class="op">)</span></code></pre></div>
 <p>There are also some supporting packages that have experimental async-compatible branches:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="kw">devtools</span>::<span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"ramnathv/htmlwidgets"</span>)
-<span class="kw">devtools</span>::<span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"ropensci/plotly@async"</span>)
-<span class="kw">devtools</span>::<span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"rstudio/DT"</span>)</pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"ramnathv/htmlwidgets"</span><span class="op">)</span>
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"ropensci/plotly@async"</span><span class="op">)</span>
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"rstudio/DT"</span><span class="op">)</span></code></pre></div>
 <hr>
 <style>
 .contents a.anchor { display: none; }
@@ -128,7 +141,7 @@
 <a href="#contents" class="anchor"></a>Contents</h2>
 <div id="1-why-use-promises" class="section level4">
 <h4 class="hasAnchor">
-<a href="#1-why-use-promises" class="anchor"></a><a href="articles/motivation.html">1. Why use promises?</a>
+<a href="#1-why-use-promises" class="anchor"></a><a href="articles/motivation.html">1. Why use <code>promises</code>?</a>
 </h4>
 <p>Why do we need async programming? What is it good for, and not good for?</p>
 </div>
@@ -140,27 +153,33 @@
 </div>
 <div id="3-working-with-promises" class="section level4">
 <h4 class="hasAnchor">
-<a href="#3-working-with-promises" class="anchor"></a><a href="articles/overview.html">3. Working with promises</a>
+<a href="#3-working-with-promises" class="anchor"></a><a href="articles/overview.html">3. Working with <code>promises</code></a>
 </h4>
-<p>A more thorough exploration of the concepts behind promises, and the API provided by the promises package.</p>
+<p>A more thorough exploration of the concepts behind <code>promises</code>, and the API provided by the <code>promises</code> package.</p>
 </div>
 <div id="4-launching-tasks" class="section level4">
 <h4 class="hasAnchor">
 <a href="#4-launching-tasks" class="anchor"></a><a href="articles/futures.html">4. Launching tasks</a>
 </h4>
-<p>A guide to the future package, the place where we expect most async programming in R to begin.</p>
+<p>A guide to the <code>future</code> package, the place where we expect most async programming in R to begin.</p>
+</div>
+<div id="5-advance-future-and-promises-usage" class="section level4">
+<h4 class="hasAnchor">
+<a href="#5-advance-future-and-promises-usage" class="anchor"></a><a href="articles/future_promise.html">5. Advance <code>future</code> and <code>promises</code> usage</a>
+</h4>
+<p>Leverage <code>promises</code> to make sure that <code>future</code> execution does not block the main R process.</p>
 </div>
 <div id="5-using-promises-with-shiny" class="section level4">
 <h4 class="hasAnchor">
 <a href="#5-using-promises-with-shiny" class="anchor"></a><a href="articles/shiny.html">5. Using promises with Shiny</a>
 </h4>
-<p>Learn how to integrate promises into your Shiny applications.</p>
+<p>Learn how to integrate <code>promises</code> into your Shiny applications.</p>
 </div>
 <div id="6-combining-promises" class="section level4">
 <h4 class="hasAnchor">
-<a href="#6-combining-promises" class="anchor"></a><a href="articles/combining.html">6. Combining promises</a>
+<a href="#6-combining-promises" class="anchor"></a><a href="articles/combining.html">6. Combining <code>promises</code></a>
 </h4>
-<p>Functions and techniques for working with multiple promises simultaneously.</p>
+<p>Functions and techniques for working with multiple <code>promises</code> simultaneously.</p>
 </div>
 <div id="7-case-study-converting-a-shiny-app-to-async" class="section level4">
 <h4 class="hasAnchor">
@@ -197,7 +216,7 @@
 <ul class="list-unstyled">
 <li>Joe Cheng <br><small class="roles"> Author, maintainer </small>  </li>
 <li>
-<a href="https://www.rstudio.com"><img src="https://tidyverse.org/rstudio-logo.svg" height="24"></a> <br><small class="roles"> Copyright holder, funder </small>  </li>
+<a href="https://www.rstudio.com"><img src="https://www.tidyverse.org/rstudio-logo.svg" alt="RStudio" height="24"></a> <br><small class="roles"> Copyright holder, funder </small>  </li>
 </ul>
 </div>
 
@@ -206,7 +225,7 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Joe Cheng, <a href="https://www.rstudio.com"><img src="https://tidyverse.org/rstudio-logo.svg" height="24"></a>.</p>
+  <p>Developed by Joe Cheng, <a href="https://www.rstudio.com"><img src="https://www.tidyverse.org/rstudio-logo.svg" alt="RStudio" height="24"></a>.</p>
 </div>
 
 <div class="pkgdown">
@@ -217,7 +236,20 @@
 </div>
 
   
-
-
-  </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.1/docsearch.min.js" integrity="sha256-GKvGqXDznoRYHCwKXGnuchvKSwmx9SRMrZOTh2g4Sb0=" crossorigin="anonymous"></script><script>
+  docsearch({
+    
+    
+    apiKey: 'e02966c036b2b44dfdb6dede68b3b31b',
+    indexName: 'rstudio',
+    inputSelector: 'input#search-input.form-control',
+    transformData: function(hits) {
+      return hits.map(function (hit) {
+        hit.url = updateHitURL(hit);
+        return hit;
+      });
+    }
+  });
+</script>
+</body>
 </html>

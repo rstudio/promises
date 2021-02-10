@@ -37,6 +37,12 @@
 <script src="../pkgdown.js"></script>
 
 
+<!-- docsearch -->
+<script src="../docsearch.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.3/docsearch.min.css" integrity="sha256-QOSRU/ra9ActyXkIBbiIB144aDBdtvXBcNc3OTNuX/Q=" crossorigin="anonymous" />
+<link href="../docsearch.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+
 
 
 <meta property="og:title" content="Promise pipe operators — pipes" />
@@ -76,7 +82,7 @@ function call." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -84,10 +90,12 @@ function call." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa-home"></span>
+    <span class="fas fa-home fa-lg"></span>
      
-    Home
   </a>
+</li>
+<li>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -106,21 +114,24 @@ function call." />
       <a href="../articles/overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks</a>
+      <a href="../articles/futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">5. Using promises with Shiny</a>
+      <a href="../articles/future_promise.html">5. Advanced future and promises usage</a>
     </li>
     <li>
-      <a href="../articles/combining.html">6. Combining promises</a>
+      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">7. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/combining.html">7. Combining promises</a>
+    </li>
+    <li>
+      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -131,6 +142,12 @@ function call." />
   </a>
 </li>
       </ul>
+      
+      <form class="navbar-form navbar-right hidden-xs hidden-sm" role="search">
+        <div class="form-group">
+          <input type="search" class="form-control" name="search-input" id="search-input" placeholder="Search..." aria-label="Search for..." autocomplete="off">
+        </div>
+      </form>
       
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -156,13 +173,13 @@ for promise resolution and pass the unwrapped value (or error) to the <code>rhs<
 function call.</p>
     </div>
 
-    <pre class="usage"><span class='kw'>lhs</span> <span class='op'>%...&gt;%</span> <span class='kw'>rhs</span>
+    <pre class="usage"><span class='va'>lhs</span> <span class='op'>%...&gt;%</span> <span class='va'>rhs</span>
 
-<span class='kw'>lhs</span> <span class='op'>%...T&gt;%</span> <span class='kw'>rhs</span>
+<span class='va'>lhs</span> <span class='op'>%...T&gt;%</span> <span class='va'>rhs</span>
 
-<span class='kw'>lhs</span> <span class='op'>%...!%</span> <span class='kw'>rhs</span>
+<span class='va'>lhs</span> <span class='op'>%...!%</span> <span class='va'>rhs</span>
 
-<span class='kw'>lhs</span> <span class='op'>%...T!%</span> <span class='kw'>rhs</span></pre>
+<span class='va'>lhs</span> <span class='op'>%...T!%</span> <span class='va'>rhs</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -206,18 +223,18 @@ function instead of an expression.</p>
     <div class='dont-index'><p>https://rstudio.github.io/promises/articles/overview.html#using-pipes</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='kw'><a href='https://github.com/HenrikBengtsson/future'>future</a></span>)
-<span class='fu'><a href='https://rdrr.io/pkg/future/man/plan.html'>plan</a></span>(<span class='kw'>multisession</span>)
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/HenrikBengtsson/future'>future</a></span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/pkg/future/man/plan.html'>plan</a></span><span class='op'>(</span><span class='va'>multisession</span><span class='op'>)</span>
 
-<span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span>(<span class='kw'>cars</span>) <span class='op'>%...&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fl'>5</span>) <span class='op'>%...T&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>()
+<span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span><span class='op'>(</span><span class='va'>cars</span><span class='op'>)</span> <span class='op'>%...&gt;%</span>
+  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fl'>5</span><span class='op'>)</span> <span class='op'>%...T&gt;%</span>
+  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='op'>)</span>
 
 <span class='co'># If the read.csv fails, resolve to NULL instead</span>
-<span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='st'>"http://example.com/data.csv"</span>)) <span class='op'>%...!%</span>
-  { <span class='kw'>NULL</span> }
-}
+<span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span><span class='op'>(</span><span class='st'>"http://example.com/data.csv"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%...!%</span>
+  <span class='op'>{</span> <span class='cn'>NULL</span> <span class='op'>}</span>
+<span class='op'>}</span>
 
 </div></pre>
   </div>
@@ -231,7 +248,7 @@ function instead of an expression.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src="https://tidyverse.org/rstudio-logo.svg" height="24" /></a>.</p>
+  <p>Developed by Joe Cheng, <a href='https://www.rstudio.com'><img src='https://www.tidyverse.org/rstudio-logo.svg' alt='RStudio' height='24' /></a>.</p>
 </div>
 
 <div class="pkgdown">
@@ -242,6 +259,23 @@ function instead of an expression.</p>
    </div>
 
   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.1/docsearch.min.js" integrity="sha256-GKvGqXDznoRYHCwKXGnuchvKSwmx9SRMrZOTh2g4Sb0=" crossorigin="anonymous"></script>
+<script>
+  docsearch({
+    
+    
+    apiKey: 'e02966c036b2b44dfdb6dede68b3b31b',
+    indexName: 'rstudio',
+    inputSelector: 'input#search-input.form-control',
+    transformData: function(hits) {
+      return hits.map(function (hit) {
+        hit.url = updateHitURL(hit);
+        return hit;
+      });
+    }
+  });
+</script>
+
 
 
   </body>
