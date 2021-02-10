@@ -34,7 +34,7 @@ We'd convert it to async like this:
 ```R
 library(promises)
 library(future)
-plan(multiprocess)
+plan(multisession)
 
 function(input, output, session) {
   output$plot <- renderPlot({
@@ -47,13 +47,13 @@ function(input, output, session) {
 
 ## Adding prerequisites
 
-The easiest part is adding `library(promises)`, `library(future)`, and `plan(multiprocess)` to the top of the app.
+The easiest part is adding `library(promises)`, `library(future)`, and `plan(multisession)` to the top of the app.
 
 The `promises` library is necessary for the `%...>%` operator. You may also want to use promise utility functions like `promise_all` and `promise_race`.
 
 The `future` library is needed because the `future()` function call used inside `future_promise()` is how you will launch asynchronous tasks.
 
-`plan(multiprocess)` is a directive to the `future` package, telling it how future tasks should actually be executed. See the [article on futures](futures.html) for more details.
+`plan(multisession)` is a directive to the `future` package, telling it how future tasks should actually be executed. See the [article on futures](futures.html) for more details.
 
 ## Identifying slow operations
 

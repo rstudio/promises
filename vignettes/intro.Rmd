@@ -51,7 +51,7 @@ before the real work has actually completed.
 
 ```r
 library(future)
-plan(multiprocess)
+plan(multisession)
 
 read.csv.async <- function(file, header = TRUE, stringsAsFactors = FALSE) {
   future_promise({
