@@ -1,5 +1,25 @@
 ## Comments
 
+#### 2021-02-11
+
+Had a bad regex in .Rbuildignore. My fault. Fixed the regex.
+
+Also reduced a couple image file sizes.
+
+Thank you,
+Joe
+
+#### 2021-02-11
+
+Thanks, we see:
+
+   Size of tarball: 6063083 bytes
+
+Not more than 5 MB for a CRAN package, please.
+
+Best,
+Uwe Ligges
+
 #### 2021-02-10
 
 Bug fixes and a new function.
