@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.1.9001</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.2.0.1</span>
       </span>
     </div>
 
@@ -140,7 +140,7 @@
 <span class="op">}</span></code></pre></div>
 <p>We’d convert it to async like this:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises">promises</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
@@ -154,7 +154,7 @@
 <div id="adding-prerequisites" class="section level2">
 <h2 class="hasAnchor">
 <a href="#adding-prerequisites" class="anchor"></a>Adding prerequisites</h2>
-<p>The easiest part is adding <code><a href="https://rstudio.github.io/promises">library(promises)</a></code>, <code><a href="https://github.com/HenrikBengtsson/future">library(future)</a></code>, and <code><a href="https://rdrr.io/pkg/future/man/plan.html">plan(multisession)</a></code> to the top of the app.</p>
+<p>The easiest part is adding <code><a href="https://rstudio.github.io/promises/">library(promises)</a></code>, <code><a href="https://github.com/HenrikBengtsson/future">library(future)</a></code>, and <code><a href="https://rdrr.io/pkg/future/man/plan.html">plan(multisession)</a></code> to the top of the app.</p>
 <p>The <code>promises</code> library is necessary for the <code><a href="../reference/pipes.html">%...&gt;%</a></code> operator. You may also want to use promise utility functions like <code>promise_all</code> and <code>promise_race</code>.</p>
 <p>The <code>future</code> library is needed because the <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> function call used inside <code><a href="../reference/future_promise_queue.html">future_promise()</a></code> is how you will launch asynchronous tasks.</p>
 <p><code><a href="https://rdrr.io/pkg/future/man/plan.html">plan(multisession)</a></code> is a directive to the <code>future</code> package, telling it how future tasks should actually be executed. See the <a href="futures.html">article on futures</a> for more details.</p>

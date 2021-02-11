@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.1.9001</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.2.0.1</span>
       </span>
     </div>
 
@@ -124,7 +124,7 @@
     
 <p>One persistent challenge with developing Shiny apps for live deployment is the R language runtime’s single-threaded nature. Because of this, a given Shiny app process can only do one thing at a time: if it is fitting a linear model for one client, it cannot simultaneously prepare a CSV download for another client, and vice versa.</p>
 <p>For many Shiny apps, this isn’t a big problem; because no one processing step takes very long, no client has to wait an undue amount of time before they start seeing results. But for apps that perform long-running operations — either expensive computations that take a while to complete, or waiting on slow network operations like database or web API queries — your users’ experience can suffer dramatically as traffic ramps up.</p>
-<p>The traditional approach to scaling web applications is to launch multiple processes and balance traffic between them, and indeed, Shiny Server Pro and RStudio Connect both implement a variant of this strategy. You do some load testing to determine how many concurrent users a single process can support, then <a href="http://docs.rstudio.com/shiny-server/#utilization-scheduler">configure Shiny Server Pro</a> to launch new processes as those limits are approached.</p>
+<p>The traditional approach to scaling web applications is to launch multiple processes and balance traffic between them, and indeed, Shiny Server Pro and RStudio Connect both implement a variant of this strategy. You do some load testing to determine how many concurrent users a single process can support, then <a href="https://docs.rstudio.com/shiny-server/">configure Shiny Server Pro</a> to launch new processes as those limits are approached.</p>
 <p>But there are some applications that perform truly expensive operations, like simulations, training neural networks, or complex per-row processing, that take <em>minutes</em> to complete. Again, while this is happening, any other users that are unfortunate enough to be assigned to the same process are completely blocked from proceeding in any way — even loading static JavaScript/CSS assets must wait until the blocking operation is complete.</p>
 <p>Asynchronous (async) programming offers a way to offload certain classes of long-running operations from the main R thread, such that Shiny apps can remain responsive.</p>
 <p>A warning before we dive in: async code is hard to write! It is hard in C++, it is hard in Java, it is hard in JavaScript, and sadly, R is no exception. We have attempted to make the API as simple and elegant as possible, but just as with reactive programming, it will likely take some effort to internalize the main concepts, and plenty of practice before expressing logic this way begins to feel natural.</p>
@@ -187,7 +187,7 @@
     <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"The operation completed!\n"</span><span class="op">)</span>
     <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span></code></pre></div>
-<p>If this code looks ugly to you, don’t worry — you’ll rarely write promise code that looks like this. As we go, we’ll introduce several types of syntactic sugar to make working with promises more pleasant. To start with, we can use the <a href="http://r4ds.had.co.nz/pipes.html">magrittr pipe operator</a>, which gives us a pretty marginal benefit right now but will pay dividends shortly:</p>
+<p>If this code looks ugly to you, don’t worry — you’ll rarely write promise code that looks like this. As we go, we’ll introduce several types of syntactic sugar to make working with promises more pleasant. To start with, we can use the <a href="https://r4ds.had.co.nz/pipes.html">magrittr pipe operator</a>, which gives us a pretty marginal benefit right now but will pay dividends shortly:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">promise</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">{</span>
@@ -200,7 +200,7 @@
 <h2 class="hasAnchor">
 <a href="#using-formulas" class="anchor"></a>Using formulas</h2>
 <p>You don’t have to use anonymous functions as callbacks; you can use named functions as well. So <code>promise %&gt;% then(print)</code> works, if you just want to print a value.</p>
-<p>If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use <a href="http://r4ds.had.co.nz/iteration.html#shortcuts">purrr’s “lambda formula” style</a>; if you’re not familiar with purrr, for now just know that you can access the value (or error) using <code>.</code> as a variable name.</p>
+<p>If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use <a href="https://r4ds.had.co.nz/iteration.html">purrr’s “lambda formula” style</a>; if you’re not familiar with purrr, for now just know that you can access the value (or error) using <code>.</code> as a variable name.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">promise</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="op">~</span><span class="op">{</span>

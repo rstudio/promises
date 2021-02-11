@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.1.9001</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.2.0.1</span>
       </span>
     </div>
 
@@ -145,7 +145,7 @@
 <p><code>promise_all</code> takes any number of promises as named arguments, and returns a promise of a list containing named elements with the results of those promises.</p>
 <p>Here’s an example using <code>promise_all</code> to combine the results of two async <code>read.csv</code> operations:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises">promises</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
@@ -158,7 +158,7 @@
 <p>In this example, the value of <code>.</code> within the curly braces is a list whose elements <code>a</code> and <code>b</code> are both data frames. We use <code>rbind</code> to combine them.</p>
 <p>The <code>.$</code> prefix is a bit inelegant, so we recommend the use of the base R function <code>with</code>, which lets you skip the prefix. Here’s the same example, with <code>with</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises">promises</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
@@ -178,7 +178,7 @@
 <a href="#nesting" class="anchor"></a>Nesting</h2>
 <p>Gathering is easy and convenient, but sometimes not flexible enough. For example, if you use the result of promise <code>a</code> to decide whether to launch a second async task, whose result you then use in combination with the result of <code>a</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises">promises</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
@@ -197,7 +197,7 @@
 <h2 class="hasAnchor">
 <a href="#racing" class="anchor"></a>Racing</h2>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises">promises</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
@@ -215,7 +215,7 @@
 <p>Use <code>promise_map</code> to run an async operation on each element of a list or vector, and collect the results in a list. It’s very similar to <code>lapply</code> or <code><a href="https://purrr.tidyverse.org/reference/map.html">purrr::map</a></code>, except that the function to apply can return a promise, and the return value is also a promise.</p>
 <p>In the example below, we iterate over a named vector of package names. For each package name, we launch an async task to download the package’s description file from CRAN pick out the last published date.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises">promises</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
@@ -259,7 +259,7 @@ $knitr
 <p>The main difference between <code>promise_reduce</code> and <code>purrr:::reduce</code> is that with <code>promise_reduce</code>, your <code>func</code> can return a promise. If it does, <code>promise_reduce</code> will wait for it to resolve before updating the accumulated value and invoking <code>func</code> on the next element. The result returned from <code>promise_reduce</code> is a promise that resolves to the ultimate accumulated value.</p>
 <p>The following example loops through a partial list of CRAN mirrors, returning the first one that passes whatever check <code>http::http_error</code> performs.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises">promises</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 

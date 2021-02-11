@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.1.9001</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.2.0.1</span>
       </span>
     </div>
 
@@ -161,7 +161,7 @@
 <p><img src="case-study-tab4.png"></p>
 <p>Others behave very differently, like <code>freezing_tapir</code>, who downloaded <code>devtools</code>–and <em>only</em> <code>devtools</code>–for the whole day, racking up 19,180 downloads totalling 7.9 gigabytes for that one package alone!</p>
 <p><img src="case-study-tab5.png"></p>
-<p>Sadly, the app can’t tell us any more than that–it can’t explain <em>why</em> these downloaders are behaving this way, nor can it tell us their street addresses so that we can send ninjas in black RStudio helicoptors to make them stop.</p>
+<p>Sadly, the app can’t tell us any more than that–it can’t explain <em>why</em> these downloaders are behaving this way, nor can it tell us their street addresses so that we can send ninjas in black RStudio helicopters to make them stop.</p>
 </div>
 <div id="the-implementation" class="section level2">
 <h2 class="hasAnchor">
@@ -230,7 +230,7 @@
 <li>Have I used <a href="https://rstudio.github.io/profvis/">profvis</a> to <strong>profile my code</strong> and determine what’s actually taking so long? (Human intuition is a notoriously bad profiler!)</li>
 <li>Can I perform any <strong>calculations, summarizations, and aggregations offline</strong>, when my Shiny app isn’t even running, and save the results to .rds files to be read by the app?</li>
 <li>Are there any opportunities to <strong>cache</strong>–that is, save the results of my calculations and use them if I get the same request later? (See <a href="https://cran.r-project.org/package=memoise">memoise</a>, or roll your own.)</li>
-<li>Am I effectively leveraging <a href="https://resources.rstudio.com/shiny-developer-conference/shinydevcon-reactivity-joecheng-part-1-1080p">reactive programming</a> to make sure my reactives are doing as little work as possible?</li>
+<li>Am I effectively leveraging <a href="https://rstudio.com/resources/shiny-dev-con/reactivity-pt-1-joe-cheng/">reactive programming</a> to make sure my reactives are doing as little work as possible?</li>
 <li>When deploying my app, am I load balancing across multiple R processes and/or multiple servers? (<a href="https://docs.rstudio.com/shiny-server/#utilization-scheduler">Shiny Server Pro</a>, <a href="https://docs.rstudio.com/connect/admin/appendix/configuration/#Scheduler">RStudio Connect</a>, <a href="https://shiny.rstudio.com/articles/scaling-and-tuning.html">ShinyApps.io</a>)</li>
 </ol>
 <p>These options are more generally useful than using async techniques because they can dramatically speed up the performance of an app even if only a single user is using it. While it obviously depends on the particulars of the app itself, a few lines of precomputation or caching logic can often lead to 10X-100X better performance. Async, on the other hand, generally doesn’t help make a single session faster. Instead, it helps a single Shiny process support more concurrent sessions without getting bogged down.</p>
@@ -260,7 +260,7 @@
 </h3>
 <p>The first thing we’ll do is load the basic libraries of async programming.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises">promises</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></code></pre></div>
 <p>I originally used <code>multiprocess</code> but file downloading inside a future seemed to fail on Mac. (I’ve found that it’s usually not worth spending a lot of time trying to figure out why <code>multiprocess</code> doesn’t work for some specific code; instead, just use <code>multisession</code>, since that’s probably going to be the solution anyway.)</p>
@@ -570,7 +570,7 @@
 <div id="load-testing-with-shiny-coming-soon" class="section level3">
 <h3 class="hasAnchor">
 <a href="#load-testing-with-shiny-coming-soon" class="anchor"></a>Load testing with Shiny (coming soon)</h3>
-<p>At the time of this writing, we are working on a suite of load testing tools for Shiny that is not publicly available yet, but was previewed by Sean Lopp during his <a href="https://resources.rstudio.com/shiny-2/scaling-shiny-sean-lopp">epic rstudio::conf 2018 talk</a> about running a Shiny load test with 10,000 simulated concurrent users.</p>
+<p>At the time of this writing, we are working on a suite of load testing tools for Shiny that is not publicly available yet, but was previewed by Sean Lopp during his <a href="https://rstudio.com/resources/">epic rstudio::conf 2018 talk</a> about running a Shiny load test with 10,000 simulated concurrent users.</p>
 <p>You use these tools to easily <strong>record</strong> yourself using your Shiny app, which creates a test script; then <strong>play back</strong> that test script, but multiplied by dozens/hundreds/thousands of simulated concurrent users; and finally, <strong>analyze</strong> the timing data generated during the playback step to see what kind of latency the simulated users experienced.</p>
 <p>To examine the effects of my async refactor, I recorded a simple test script by loading up the app, waiting for the first tab to appear, then clicking through each of the other tabs, pausing for several seconds each time before moving on to the next. When using the app without any other visitors, the homepage fully loads in less than a second, and the initial loading of data and rendering of the plot on the default tab takes about 7 seconds. After that, each tab takes no more than a couple of seconds to load. Overall, the entire test script, including time where the user is thinking, takes about 40 seconds under ideal settings (i.e. only a single concurrent user).</p>
 <p>I then used this test script to generate load against the Shiny app running in my local RStudio. With the settings I chose, the playback tool introduced one new “user” session every 5 seconds, until 50 sessions total had been launched; then it waited until all the sessions were complete. I ran this test on both the sync and async versions in turn, which generated the following results.</p>
@@ -601,7 +601,7 @@
 </p>
 <p>Take a look at the <a href="https://github.com/rstudio/cranwhales/compare/async...async2?diff=split">code diff for async vs. async2</a>. While the code has not changed very dramatically, it has lost a little elegance and maintainability: the code for each of the affected outputs now has one foot in the the render function and one foot in the future. If your app’s total audience is a team of a hundred analysts and execs, you may choose to forgo the extra performance and stick with the original async (or even sync) code. But if you have serious scaling needs, the refactoring is probably a small price to pay.</p>
 <p>Let’s get real for a second, though. If this weren’t an example app written for exposition purposes, but a real production app that was intended to scale to thousands of concurrent users across dozens of R processes, we wouldn’t download and parse CSV files on the fly. Instead, we’d establish a proper <a href="https://solutions.rstudio.com/examples/apps/twitter-etl/">ETL procedure</a> to run every night and put the results into a properly indexed database table, or RDS files with just the data we need. As I said <a href="#improving-performance-and-scalability">earlier</a>, a little precomputation and caching can make a huge difference!</p>
-<p>Much of the remaining latency for the async2 branch is from ggplot2 plotting. <a href="https://resources.rstudio.com/shiny-2/scaling-shiny-sean-lopp">Sean’s talk</a> alluded to some upcoming plot caching features we’re adding to Shiny, and I imagine they will have as dramatic an effect for this test as they did for Sean.</p>
+<p>Much of the remaining latency for the async2 branch is from ggplot2 plotting. <a href="https://rstudio.com/resources/">Sean’s talk</a> alluded to some upcoming plot caching features we’re adding to Shiny, and I imagine they will have as dramatic an effect for this test as they did for Sean.</p>
 </div>
 </div>
 <div id="summing-up" class="section level2">
