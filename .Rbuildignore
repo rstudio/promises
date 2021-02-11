@@ -11,3 +11,4 @@
 
 ^vignettes/future_promise/*.key$
 ^vignettes/future_promise/*.R$
+^CRAN-RELEASE$
