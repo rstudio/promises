@@ -11,7 +11,7 @@ One persistent challenge with developing Shiny apps for live deployment is the R
 
 For many Shiny apps, this isn’t a big problem; because no one processing step takes very long, no client has to wait an undue amount of time before they start seeing results. But for apps that perform long-running operations — either expensive computations that take a while to complete, or waiting on slow network operations like database or web API queries — your users’ experience can suffer dramatically as traffic ramps up.
 
-The traditional approach to scaling web applications is to launch multiple processes and balance traffic between them, and indeed, Shiny Server Pro and RStudio Connect both implement a variant of this strategy. You do some load testing to determine how many concurrent users a single process can support, then [configure Shiny Server Pro](http://docs.rstudio.com/shiny-server/#utilization-scheduler) to launch new processes as those limits are approached.
+The traditional approach to scaling web applications is to launch multiple processes and balance traffic between them, and indeed, Shiny Server Pro and RStudio Connect both implement a variant of this strategy. You do some load testing to determine how many concurrent users a single process can support, then [configure Shiny Server Pro](https://docs.rstudio.com/shiny-server/) to launch new processes as those limits are approached.
 
 But there are some applications that perform truly expensive operations, like simulations, training neural networks, or complex per-row processing, that take *minutes* to complete. Again, while this is happening, any other users that are unfortunate enough to be assigned to the same process are completely blocked from proceeding in any way — even loading static JavaScript/CSS assets must wait until the blocking operation is complete.
 
@@ -88,7 +88,7 @@ then(promise,
   })
 ```
 
-If this code looks ugly to you, don’t worry — you’ll rarely write promise code that looks like this. As we go, we’ll introduce several types of syntactic sugar to make working with promises more pleasant. To start with, we can use the [magrittr pipe operator](http://r4ds.had.co.nz/pipes.html), which gives us a pretty marginal benefit right now but will pay dividends shortly:
+If this code looks ugly to you, don’t worry — you’ll rarely write promise code that looks like this. As we go, we’ll introduce several types of syntactic sugar to make working with promises more pleasant. To start with, we can use the [magrittr pipe operator](https://r4ds.had.co.nz/pipes.html), which gives us a pretty marginal benefit right now but will pay dividends shortly:
 
 ```r
 promise %>%
@@ -104,7 +104,7 @@ Note that the call to `then()` always returns immediately, without invoking the 
 
 You don’t have to use anonymous functions as callbacks; you can use named functions as well. So `promise %>% then(print)` works, if you just want to print a value.
 
-If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use [purrr's "lambda formula" style](http://r4ds.had.co.nz/iteration.html#shortcuts); if you’re not familiar with purrr, for now just know that you can access the value (or error) using `.` as a variable name.
+If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use [purrr's "lambda formula" style](https://r4ds.had.co.nz/iteration.html); if you’re not familiar with purrr, for now just know that you can access the value (or error) using `.` as a variable name.
 
 ```r
 promise %>%

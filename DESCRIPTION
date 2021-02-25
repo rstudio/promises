@@ -1,7 +1,7 @@
 Package: promises
 Type: Package
 Title: Abstractions for Promise-Based Asynchronous Programming
-Version: 1.1.1.9001
+Version: 1.2.0.1
 Authors@R: c(
       person("Joe", "Cheng", email = "joe@rstudio.com", role = c("aut", "cre")),
       person("RStudio", role = c("cph", "fnd"))
@@ -26,7 +26,8 @@ Suggests:
     purrr,
     knitr,
     rmarkdown,
-    vembedr
+    vembedr,
+    spelling
 LinkingTo: later,
     Rcpp
 Roxygen: list(markdown = TRUE)
@@ -34,5 +35,6 @@ RoxygenNote: 7.1.1
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
-URL: https://rstudio.github.io/promises, https://github.com/rstudio/promises
+URL: https://rstudio.github.io/promises/, https://github.com/rstudio/promises
 BugReports: https://github.com/rstudio/promises/issues
+Language: en-US
