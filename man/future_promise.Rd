@@ -42,7 +42,7 @@ to be attached in the \R environment evaluating the future.}
 Unlike [future::future()\verb{], }future_promise()\verb{returns a [promise()] object that will eventually resolve the \pkg{future}}expr`.
 }
 \description{
-\ifelse{html}{\out{<a href='https://www.tidyverse.org/lifecycle/#experimental'><img src='figures/lifecycle-experimental.svg' alt='Experimental lifecycle'></a>}}{\strong{Experimental}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
 \details{
 When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until a worker becomes available.

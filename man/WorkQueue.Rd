@@ -9,7 +9,7 @@ Future promise work queue
 Future promise work queue
 }
 \details{
-#' \ifelse{html}{\out{<a href='https://www.tidyverse.org/lifecycle/#experimental'><img src='figures/lifecycle-experimental.svg' alt='Experimental lifecycle'></a>}}{\strong{Experimental}}
+#' \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 An \pkg{R6} class to help with scheduling work to be completed. \code{WorkQueue} will only execute work if the \code{can_proceed()} returns \code{TRUE}. For the use case of \code{future}, \code{can_proceed()} defaults to \code{future::nbrOfFreeWorkers() > 0} which will not allow for work to be executed if a \pkg{future} worker is not available.
 
