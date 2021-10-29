@@ -261,8 +261,8 @@
 <p>The first thing we’ll do is load the basic libraries of async programming.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org">future</a></span><span class="op">)</span>
+<span class="fu"><a href="https://future.futureverse.org/reference/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></code></pre></div>
 <p>I originally used <code>multiprocess</code> but file downloading inside a future seemed to fail on Mac. (I’ve found that it’s usually not worth spending a lot of time trying to figure out why <code>multiprocess</code> doesn’t work for some specific code; instead, just use <code>multisession</code>, since that’s probably going to be the solution anyway.)</p>
 </div>
 <div id="the-data-reactive-future_promise-all-the-things" class="section level3">

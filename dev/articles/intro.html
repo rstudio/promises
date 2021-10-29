@@ -134,8 +134,8 @@
 <p><strong>Watermelons… sure. So then, how does this all work?</strong></p>
 <p>It all starts with <em>async functions</em>. An async function is one that performs an operation that takes a long time, yet returns control to you immediately. Whereas a normal function like <code>read.csv</code> will not return until its work is done and it has the value you requested, an asynchronous <code>read.csv.async</code> function would kick off the CSV reading operation, but then return immediately, long before the real work has actually completed.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org">future</a></span><span class="op">)</span>
+<span class="fu"><a href="https://future.futureverse.org/reference/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
 <span class="va">read.csv.async</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span>, <span class="va">header</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">stringsAsFactors</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>

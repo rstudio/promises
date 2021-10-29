@@ -162,7 +162,7 @@
     </div>
 
     <div class="ref-description">
-    <p><a href='https://www.tidyverse.org/lifecycle/#experimental'><img src='figures/lifecycle-experimental.svg' alt='Experimental lifecycle'></a></p>
+    <p><a href='https://lifecycle.r-lib.org/articles/stages.html#experimental'><img src='figures/lifecycle-experimental.svg' alt='[Experimental]' /></a></p>
     </div>
 
     <pre class="usage"><span class='fu'>future_promise_queue</span><span class='op'>(</span><span class='op'>)</span>
@@ -182,7 +182,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>expr</th>
-      <td><p>An R expression. While the <code>expr</code> is eventually sent to <code><a href='https://rdrr.io/pkg/future/man/future.html'>future::future()</a></code>, please use the same precautions that you would use with regular <code><a href='promise.html'>promises::promise()</a></code> expressions. <code>future_promise()</code> may have to hold the <code>expr</code> in a <code><a href='promise.html'>promise()</a></code> while waiting for a <span class="pkg">future</span> worker to become available.</p></td>
+      <td><p>An R expression. While the <code>expr</code> is eventually sent to <code><a href='https://future.futureverse.org/reference/future.html'>future::future()</a></code>, please use the same precautions that you would use with regular <code><a href='promise.html'>promises::promise()</a></code> expressions. <code>future_promise()</code> may have to hold the <code>expr</code> in a <code><a href='promise.html'>promise()</a></code> while waiting for a <span class="pkg">future</span> worker to become available.</p></td>
     </tr>
     <tr>
       <th>envir</th>
@@ -199,7 +199,7 @@ identified.</p></td>
       <td><p>(optional) a logical, a character vector, or a named list
 to control how globals are handled.
 For details, see section 'Globals used by future expressions'
-in the help for <code><a href='https://rdrr.io/pkg/future/man/future.html'>future()</a></code>.</p></td>
+in the help for <code><a href='https://future.futureverse.org/reference/future.html'>future()</a></code>.</p></td>
     </tr>
     <tr>
       <th>packages</th>
@@ -208,11 +208,11 @@ to be attached in the <span style="R">R</span> environment evaluating the future
     </tr>
     <tr>
       <th>...</th>
-      <td><p>extra parameters provided to <code><a href='https://rdrr.io/pkg/future/man/future.html'>future::future()</a></code></p></td>
+      <td><p>extra parameters provided to <code><a href='https://future.futureverse.org/reference/future.html'>future::future()</a></code></p></td>
     </tr>
     <tr>
       <th>queue</th>
-      <td><p>A queue that is used to schedule work to be done using <code><a href='https://rdrr.io/pkg/future/man/future.html'>future::future()</a></code>.  This queue defaults to <code>future_promise_queue()</code> and requires that method <code>queue$schedule_work(fn)</code> exist.  This method should take in a function that will execute the promised <span class="pkg">future</span> work.</p></td>
+      <td><p>A queue that is used to schedule work to be done using <code><a href='https://future.futureverse.org/reference/future.html'>future::future()</a></code>.  This queue defaults to <code>future_promise_queue()</code> and requires that method <code>queue$schedule_work(fn)</code> exist.  This method should take in a function that will execute the promised <span class="pkg">future</span> work.</p></td>
     </tr>
     </table>
 
@@ -231,7 +231,7 @@ To counter this situation, we can create a promise to execute work using future 
     
 <ul>
 <li><p><code>future_promise_queue</code>: Default <code>future_promise()</code> work queue to use. This function returns a <a href='WorkQueue.html'>WorkQueue</a> that is cached per R session.</p></li>
-<li><p><code>future_promise</code>: Creates a <code><a href='promise.html'>promise()</a></code> that will execute the <code>expr</code> using <code><a href='https://rdrr.io/pkg/future/man/future.html'>future::future()</a></code>.</p></li>
+<li><p><code>future_promise</code>: Creates a <code><a href='promise.html'>promise()</a></code> that will execute the <code>expr</code> using <code><a href='https://future.futureverse.org/reference/future.html'>future::future()</a></code>.</p></li>
 </ul>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
@@ -242,12 +242,12 @@ To counter this situation, we can create a promise to execute work using future 
 <span class='va'>start</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span><span class='op'>(</span><span class='op'>)</span>
 <span class='co'># Helper to force two `future` workers</span>
 <span class='va'>with_two_workers</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>expr</span><span class='op'>)</span> <span class='op'>{</span>
-  <span class='kw'>if</span> <span class='op'>(</span><span class='op'>!</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='https://github.com/HenrikBengtsson/future'>"future"</a></span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='kw'>if</span> <span class='op'>(</span><span class='op'>!</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='https://future.futureverse.org'>"future"</a></span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
     <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"`future` not installed"</span><span class='op'>)</span>
     <span class='kw'><a href='https://rdrr.io/r/base/function.html'>return</a></span><span class='op'>(</span><span class='op'>)</span>
   <span class='op'>}</span>
-  <span class='va'>old_plan</span> <span class='op'>&lt;-</span> <span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/future/man/plan.html'>plan</a></span><span class='op'>(</span><span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/future/man/multisession.html'>multisession</a></span><span class='op'>(</span>workers <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/on.exit.html'>on.exit</a></span><span class='op'>(</span><span class='op'>{</span><span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/future/man/plan.html'>plan</a></span><span class='op'>(</span><span class='va'>old_plan</span><span class='op'>)</span><span class='op'>}</span>, add <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+  <span class='va'>old_plan</span> <span class='op'>&lt;-</span> <span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/multisession.html'>multisession</a></span><span class='op'>(</span>workers <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+  <span class='fu'><a href='https://rdrr.io/r/base/on.exit.html'>on.exit</a></span><span class='op'>(</span><span class='op'>{</span><span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='va'>old_plan</span><span class='op'>)</span><span class='op'>}</span>, add <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
   <span class='va'>start</span> <span class='op'>&lt;&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span><span class='op'>(</span><span class='op'>)</span>
   <span class='fu'><a href='https://rdrr.io/r/base/force.html'>force</a></span><span class='op'>(</span><span class='va'>expr</span><span class='op'>)</span>
   <span class='kw'>while</span><span class='op'>(</span><span class='op'>!</span><span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/loop_empty.html'>loop_empty</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>0.1</span><span class='op'>)</span>; <span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/run_now.html'>run_now</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span>
@@ -266,7 +266,7 @@ To counter this situation, we can create a promise to execute work using future 
 <span class='co'># The important thing to note is the first four times will be roughly the same</span>
 <span class='fu'>with_two_workers</span><span class='op'>(</span><span class='op'>{</span>
   <span class='fu'><a href='promise_resolve.html'>promise_resolve</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%...&gt;%</span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"promise done"</span><span class='op'>)</span>
-  <span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/future/man/future.html'>future</a></span><span class='op'>(</span><span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>; <span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span><span class='op'>)</span> <span class='op'>%...&gt;%</span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"future done"</span><span class='op'>)</span>
+  <span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/future.html'>future</a></span><span class='op'>(</span><span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>; <span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span><span class='op'>)</span> <span class='op'>%...&gt;%</span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"future done"</span><span class='op'>)</span>
 <span class='op'>}</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>Loading required package: future</span></div><div class='input'><span class='op'>{</span>
 <span class='co'>#&gt; PID: XXX; 2.5s promise done</span>

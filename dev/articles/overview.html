@@ -168,7 +168,7 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">promise</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"http://example.com/data/data.csv"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>While the regular function call returns a data frame, the async call returns a promise, which is most definitely not a data frame. You cannot ask the promise how many rows it has, or the names of its columns. You cannot run dplyr operations on it, or turn it into a data.table.</p>
-<p>You might guess that you could call a function or method on a promise to extract the value, like <code><a href="https://rdrr.io/pkg/future/man/value.html">value(promise)</a></code> or <code>promise$value()</code>. But that isn’t how promises work. Instead, everything is based on a function called <code>then</code>.</p>
+<p>You might guess that you could call a function or method on a promise to extract the value, like <code><a href="https://future.futureverse.org/reference/value.html">value(promise)</a></code> or <code>promise$value()</code>. But that isn’t how promises work. Instead, everything is based on a function called <code>then</code>.</p>
 </div>
 <div id="accessing-results-with-then" class="section level2">
 <h2 class="hasAnchor">

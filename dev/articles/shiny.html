@@ -141,8 +141,8 @@
 <p>We’d convert it to async like this:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HenrikBengtsson/future">future</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org">future</a></span><span class="op">)</span>
+<span class="fu"><a href="https://future.futureverse.org/reference/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
 <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span>
@@ -154,10 +154,10 @@
 <div id="adding-prerequisites" class="section level2">
 <h2 class="hasAnchor">
 <a href="#adding-prerequisites" class="anchor"></a>Adding prerequisites</h2>
-<p>The easiest part is adding <code><a href="https://rstudio.github.io/promises/">library(promises)</a></code>, <code><a href="https://github.com/HenrikBengtsson/future">library(future)</a></code>, and <code><a href="https://rdrr.io/pkg/future/man/plan.html">plan(multisession)</a></code> to the top of the app.</p>
+<p>The easiest part is adding <code><a href="https://rstudio.github.io/promises/">library(promises)</a></code>, <code><a href="https://future.futureverse.org">library(future)</a></code>, and <code><a href="https://future.futureverse.org/reference/plan.html">plan(multisession)</a></code> to the top of the app.</p>
 <p>The <code>promises</code> library is necessary for the <code><a href="../reference/pipes.html">%...&gt;%</a></code> operator. You may also want to use promise utility functions like <code>promise_all</code> and <code>promise_race</code>.</p>
-<p>The <code>future</code> library is needed because the <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code> function call used inside <code><a href="../reference/future_promise_queue.html">future_promise()</a></code> is how you will launch asynchronous tasks.</p>
-<p><code><a href="https://rdrr.io/pkg/future/man/plan.html">plan(multisession)</a></code> is a directive to the <code>future</code> package, telling it how future tasks should actually be executed. See the <a href="futures.html">article on futures</a> for more details.</p>
+<p>The <code>future</code> library is needed because the <code><a href="https://future.futureverse.org/reference/future.html">future()</a></code> function call used inside <code><a href="../reference/future_promise_queue.html">future_promise()</a></code> is how you will launch asynchronous tasks.</p>
+<p><code><a href="https://future.futureverse.org/reference/plan.html">plan(multisession)</a></code> is a directive to the <code>future</code> package, telling it how future tasks should actually be executed. See the <a href="futures.html">article on futures</a> for more details.</p>
 </div>
 <div id="identifying-slow-operations" class="section level2">
 <h2 class="hasAnchor">
@@ -175,7 +175,7 @@
 <p>Now that we’ve found hotspots that we want to make asynchronous, let’s talk about the actual work of converting them to futures.</p>
 <p>Conceptually, futures work like this:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="op">{</span>
+<code class="sourceCode R"><span class="fu"><a href="https://future.futureverse.org/reference/future.html">future</a></span><span class="op">(</span><span class="op">{</span>
   <span class="co"># Expensive code goes here</span>
 <span class="op">}</span><span class="op">)</span> <span class="op">%...&gt;%</span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Code to handle result of expensive code goes here</span>
@@ -183,13 +183,13 @@
 <p>which seems incredibly simple. What’s actually happening is that the future runs in a totally separate child R process, and then the result is collected up and returned to the main R process:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Code here runs in process A</span>
-<span class="fu"><a href="https://rdrr.io/pkg/future/man/future.html">future</a></span><span class="op">(</span><span class="op">{</span>
+<span class="fu"><a href="https://future.futureverse.org/reference/future.html">future</a></span><span class="op">(</span><span class="op">{</span>
   <span class="co"># Code here runs in (child) process B</span>
 <span class="op">}</span><span class="op">)</span> <span class="op">%...&gt;%</span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Code here runs in process A</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues. There are extremely important constraints that futures impose on their code blocks; certain objects cannot be safely used across process boundaries, and some of the default behaviors of the future library may severely impact the performance of your app. Again, see the <a href="futures.html">article on futures</a> for more details.</p>
-<p>The remainder of this document will use <code><a href="../reference/future_promise_queue.html">future_promise()</a></code> in place of <code><a href="https://rdrr.io/pkg/future/man/future.html">future()</a></code>. For more information on the differences, see the <a href="future_promise.html">article on the benefits of <code>future_promise()</code></a>.</p>
+<p>The remainder of this document will use <code><a href="../reference/future_promise_queue.html">future_promise()</a></code> in place of <code><a href="https://future.futureverse.org/reference/future.html">future()</a></code>. For more information on the differences, see the <a href="future_promise.html">article on the benefits of <code>future_promise()</code></a>.</p>
 <div id="shiny-specific-caveats-and-limitations" class="section level3">
 <h3 class="hasAnchor">
 <a href="#shiny-specific-caveats-and-limitations" class="anchor"></a>Shiny-specific caveats and limitations</h3>
