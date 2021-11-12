@@ -1,3 +1,6 @@
+# @staticimports pkg:staticimports
+#  is_installed
+
 #' Combine multiple promise objects
 #'
 #' Use `promise_all` to wait for multiple promise objects to all be successfully
