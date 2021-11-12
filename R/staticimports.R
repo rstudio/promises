@@ -3,40 +3,10 @@
 # Imported from pkg:staticimports
 # ======================================================================
 
-# Since I/O can be expensive, only utils::packageVersion() if the package isn't already loaded
-get_package_version <- function(pkg) {
-  ns <- .getNamespace(pkg)
-  if (is.null(ns)) {
-    utils::packageVersion(pkg)
-  } else {
-    as.package_version(ns$.__NAMESPACE__.$spec[["version"]])
-  }
-}
-
-is_installed <- function(pkg, version = NULL) {
-  installed <- isNamespaceLoaded(pkg) || nzchar(system_file_cached(package = pkg))
+is_installed <- function(package, version = NULL) {
+  installed <- nzchar(system.file(package = package))
   if (is.null(version)) {
     return(installed)
   }
-  installed && isTRUE(get_package_version(pkg) >= version)
+  installed && isTRUE(utils::packageVersion(package) >= version)
 }
-
-system_file_cached <- local({
-  pkg_dir_cache <- character()
-
-  function(..., package = "base") {
-    if (!is.null(names(list(...)))) {
-      stop("All arguments other than `package` must be unnamed.")
-    }
-
-    not_cached <- is.na(match(package, names(pkg_dir_cache)))
-    if (not_cached) {
-      pkg_dir <- system.file(package = package)
-      pkg_dir_cache[[package]] <<- pkg_dir
-    } else {
-      pkg_dir <- pkg_dir_cache[[package]]
-    }
-
-    file.path(pkg_dir, ...)
-  }
-})
