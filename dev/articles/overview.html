@@ -168,7 +168,7 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">promise</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"http://example.com/data/data.csv"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>While the regular function call returns a data frame, the async call returns a promise, which is most definitely not a data frame. You cannot ask the promise how many rows it has, or the names of its columns. You cannot run dplyr operations on it, or turn it into a data.table.</p>
-<p>You might guess that you could call a function or method on a promise to extract the value, like <code><a href="https://future.futureverse.org/reference/value.html">value(promise)</a></code> or <code>promise$value()</code>. But that isn’t how promises work. Instead, everything is based on a function called <code>then</code>.</p>
+<p>You might guess that you could call a function or method on a promise to extract the value, like <code>value(promise)</code> or <code>promise$value()</code>. But that isn’t how promises work. Instead, everything is based on a function called <code>then</code>.</p>
 </div>
 <div id="accessing-results-with-then" class="section level2">
 <h2 class="hasAnchor">
@@ -189,7 +189,7 @@
   <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>If this code looks ugly to you, don’t worry — you’ll rarely write promise code that looks like this. As we go, we’ll introduce several types of syntactic sugar to make working with promises more pleasant. To start with, we can use the <a href="https://r4ds.had.co.nz/pipes.html">magrittr pipe operator</a>, which gives us a pretty marginal benefit right now but will pay dividends shortly:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">{</span>
     <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"The operation completed!\n"</span><span class="op">)</span>
     <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>
@@ -202,7 +202,7 @@
 <p>You don’t have to use anonymous functions as callbacks; you can use named functions as well. So <code>promise %&gt;% then(print)</code> works, if you just want to print a value.</p>
 <p>If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use <a href="https://r4ds.had.co.nz/iteration.html">purrr’s “lambda formula” style</a>; if you’re not familiar with purrr, for now just know that you can access the value (or error) using <code>.</code> as a variable name.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="op">~</span><span class="op">{</span>
     <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"The operation completed!"</span><span class="op">)</span>
     <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>
@@ -212,27 +212,27 @@
 <div id="using-pipes" class="section level2">
 <h2 class="hasAnchor">
 <a href="#using-pipes" class="anchor"></a>Using pipes</h2>
-<p>We can take the syntactic sugar a step further by using the <em>promise pipe</em>, a promise-aware version of <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code> (the magrittr pipe operator). The promise pipe looks like <code><a href="../reference/pipes.html">%...&gt;%</a></code> and performs most of the same tricks as <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code>, but adds the functionality of <code>then</code>.</p>
+<p>We can take the syntactic sugar a step further by using the <em>promise pipe</em>, a promise-aware version of <code>%&gt;%</code> (the magrittr pipe operator). The promise pipe looks like <code>%...&gt;%</code> and performs most of the same tricks as <code>%&gt;%</code>, but adds the functionality of <code>then</code>.</p>
 <p>The following two blocks of code are equivalent:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Without promise pipe</span>
-<span class="va">promise</span> <span class="op">%&gt;%</span>
+<span class="va">promise</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="op">~</span><span class="op">{</span>
     <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">state</span> <span class="op">==</span> <span class="st">"NY"</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 
 <span class="co"># Using promise pipe</span>
-<span class="va">promise</span> <span class="op">%...&gt;%</span>
+<span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">state</span> <span class="op">==</span> <span class="st">"NY"</span><span class="op">)</span></code></pre></div>
-<p>(Note that the <code><a href="../reference/pipes.html">%...&gt;%</a></code> operator only supports the <code>onFulfilled</code> part of <code><a href="../reference/then.html">then()</a></code>, so it’s not useful for handling errors; there’s a separate <code><a href="../reference/pipes.html">%...!%</a></code> operator for that. We’ll cover this below in the section on <a href="#error-handling">Error Handling</a>.)</p>
+<p>(Note that the <code>%...&gt;%</code> operator only supports the <code>onFulfilled</code> part of <code><a href="../reference/then.html">then()</a></code>, so it’s not useful for handling errors; there’s a separate <code>%...!%</code> operator for that. We’ll cover this below in the section on <a href="#error-handling">Error Handling</a>.)</p>
 <p>Like magrittr’s pipe, the promise pipe lets you chain together operations using a variety of syntaxes. You can use code blocks, which can come in handy if you have multiple lines of code to execute that don’t necessarily match the pipe paradigm:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%...&gt;%</span> <span class="op">{</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">state</span> <span class="op">==</span> <span class="st">"NY"</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <p>You can use anonymous functions (which you must wrap in parentheses), which helps if you prefer to give the promise result object an explicit name (in this case, <code>df</code>):</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%...&gt;%</span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">{</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">state</span> <span class="op">==</span> <span class="st">"NY"</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
 </div>
@@ -242,30 +242,30 @@
 <p>The <code>then</code> function has an important function beyond registering callbacks. It also returns a promise—not the promise it takes as an argument, but a new, distinct promise. This new promise gets fulfilled after the input promise has resolved and the callback registered by <code>then</code> has run; the return value of the callback is used to fulfill the new promise.</p>
 <p>For example:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise2</span> <span class="op">&lt;-</span> <span class="va">promise</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">promise2</span> <span class="op">&lt;-</span> <span class="va">promise</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="va">nrow</span><span class="op">)</span></code></pre></div>
 <p>In this case, after <code>promise</code> is fulfilled with a data frame, <code>promise2</code> will be fulfilled with the number of rows of that data frame.</p>
 <p>Because <code>then</code> uses promises for both input and output, you can chain multiple <code>then</code> calls together directly:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Or, equivalently:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%...&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span> <span class="op">%...&gt;%</span>
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">%...&gt;%</span>
-  <span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op">%...&gt;%</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
   <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Or, a third way:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%...&gt;%</span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">df</span> <span class="op">%&gt;%</span>
-    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span> <span class="op">%&gt;%</span>
-    <span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">%&gt;%</span>
-    <span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+    <span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+    <span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
     <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>Evaluating this expression results in a promise that will eventually resolve to the filtered, summarized, and ordered data.</p>
@@ -276,22 +276,22 @@
 <p>When working with promise pipelines, it may sometimes be useful to have a stage that performs an action but does not modify the value presented to downstream stages. For example, you may want to log the number of rows in a data frame for diagnostic purposes:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Incorrect!</span>
-<span class="va">promise</span> <span class="op">%...&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span> <span class="op">%...&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">%...&gt;%</span>
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">%...&gt;%</span>
-  <span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op">%...&gt;%</span>
+<span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
   <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>This is not correct, as the <code><a href="https://rdrr.io/r/base/print.html">print(nrow(.))</a></code> stage will not only print the desired value, but pass the return value of <code><a href="https://rdrr.io/r/base/print.html">print(nrow(.))</a></code>, which is just <code><a href="https://rdrr.io/r/base/invisible.html">invisible(nrow(.))</a></code>, to the next stage.</p>
-<p>For synchronous code, magrittr offers the <code><a href="https://magrittr.tidyverse.org/reference/tee.html">%T&gt;%</a></code> (pronounced “tee”) operator, which operates like a regular <code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code> except that, after executing its right-hand side, it returns its left-hand side value.</p>
-<p>Similarly, for asynchronous code, you can use the <code><a href="../reference/pipes.html">%...T&gt;%</a></code> operator, which is like <code><a href="../reference/pipes.html">%...&gt;%</a></code> except that after execution it resolves using its input promise. The only difference in the corrected code below is the operator immediately preceding <code><a href="https://rdrr.io/r/base/print.html">print(nrow(.))</a></code> has changed from <code><a href="../reference/pipes.html">%...&gt;%</a></code> to <code><a href="../reference/pipes.html">%...T&gt;%</a></code>.</p>
+<p>This is not correct, as the <code>print(nrow(.))</code> stage will not only print the desired value, but pass the return value of <code>print(nrow(.))</code>, which is just <code>invisible(nrow(.))</code>, to the next stage.</p>
+<p>For synchronous code, magrittr offers the <code>%T&gt;%</code> (pronounced “tee”) operator, which operates like a regular <code>%&gt;%</code> except that, after executing its right-hand side, it returns its left-hand side value.</p>
+<p>Similarly, for asynchronous code, you can use the <code>%...T&gt;%</code> operator, which is like <code>%...&gt;%</code> except that after execution it resolves using its input promise. The only difference in the corrected code below is the operator immediately preceding <code>print(nrow(.))</code> has changed from <code>%...&gt;%</code> to <code>%...T&gt;%</code>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Correct.</span>
-<span class="va">promise</span> <span class="op">%...&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span> <span class="op">%...T&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">%...&gt;%</span>
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op">%...&gt;%</span>
-  <span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op">%...&gt;%</span>
+<span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2006</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...T&gt;%</a></span>
+  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">state</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu">summarise</span><span class="op">(</span>pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
   <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="error-handling" class="section level2">
@@ -304,7 +304,7 @@
 </h3>
 <p>The lowest level of error handling is built into the <code>then</code> function. To review, the <code>then</code> function takes an input promise, and up to two callbacks: <code>onFulfilled</code> and <code>onRejected</code>; and it returns a new promise as output. If the operation behind by the input promise succeeds, the <code>onFulfilled</code> callback (if provided) will be invoked. If the input promise’s operation fails, then <code>onRejected</code> (if provided) will be invoked with an error object.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise2</span> <span class="op">&lt;-</span> <span class="va">promise1</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">promise2</span> <span class="op">&lt;-</span> <span class="va">promise1</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span>
     onFulfilled <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">{</span>
       <span class="co"># Getting here means promise1 succeeded</span>
@@ -316,7 +316,7 @@
 <p>In the code above, you can see that the success or failure of <code>promise1</code> is what will determine which of the two callbacks is invoked.</p>
 <p>But what about the output promise, <code>promise2</code>? We know what happens if <code>promise1</code> succeeds and the <code>onFulfilled</code> callback returns normally: <code>promise2</code> is resolved with the return value of <code>onFulfilled</code> (and if that return value is itself a promise, then <code>promise2</code> will do whatever that promise does). What happens if <code>promise1</code> is rejected; does that automatically mean <code>promise2</code> is rejected as well?</p>
 <p>The answer is no, <code>promise2</code> is not automatically rejected if <code>promise1</code> is rejected. The rejection of <code>promise1</code> causes <code>onRejected</code> to be called, but from there on, <code>onFulfilled</code> and <code>onRejected</code> are treated identically. Whichever callback is invoked, if the invocation of the callback succeeds (returns either a regular value, or, a promise that ultimately resolves successfully) then the output promise will be resolved/succeed. But if the invocation of the callback fails (either throws an error, or returns a promise that ultimately rejects) then the output promise will be rejected/fail.</p>
-<p>If you think about it, this behavior makes sense; just like <code>tryCatch</code>, once you’ve caught an error, it doesn’t continue to propagate, unless you go out of your way to do so by re-throwing it using <code><a href="https://rdrr.io/r/base/stop.html">stop(err)</a></code>.</p>
+<p>If you think about it, this behavior makes sense; just like <code>tryCatch</code>, once you’ve caught an error, it doesn’t continue to propagate, unless you go out of your way to do so by re-throwing it using <code>stop(err)</code>.</p>
 <p>So the equivalent to this (synchronous) code:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">value</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html">tryCatch</a></span><span class="op">(</span>
@@ -341,8 +341,8 @@
 <a href="#default-onrejected-behavior" class="anchor"></a>Default onRejected behavior</h3>
 <p>In many of the examples above, we called <code>then</code> with an <code>onFulfilled</code> but no <code>onRejected</code>. What is the behavior of <code>then</code> if its input promise is rejected with an error, but the caller has not provided an explicit <code>onRejected</code> callback?</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise2</span> <span class="op">&lt;-</span> <span class="va">promise1</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="va">head</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">promise2</span> <span class="op">&lt;-</span> <span class="va">promise1</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="va">head</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="va">print</span><span class="op">)</span></code></pre></div>
 <p>Well, <code>then</code> has its own default version of <code>onRejected</code>. It’s <em>not</em> an empty <code>onRejected = function(err) { }</code>, as you might think. Even though this function has no code in its body, it still returns normally, and thus would cause any errors to be caught and swallowed. That’s not the behavior we want; in the code above, we want a failure in <code>promise1</code> to cause <code>promise2</code> to be rejected so we know that something went wrong. So the default callback actually looks like: <code>onRejected = stop</code>, meaning, do nothing but raise the error, pushing the responsibility for error handling downstream.</p>
 <p>(Incidentally, it’s valid to call <code>then</code> with <code>onRejected</code> and not <code>onFulfilled</code>, and the default version of <code>onFulfilled</code> is not an empty function either; instead, it’s <code>onFulfilled = identity</code>, so that the input promise’s return value can be passed through to the output promise.)</p>
@@ -352,41 +352,41 @@
 <a href="#syntactic-sugar-for-onrejected" class="anchor"></a>Syntactic sugar for onRejected</h3>
 <p>The same syntactic sugar that is offered for non-error cases, is available for error handling code as well. You can use formulas in <code>onRejected</code>:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu">operation</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu">operation</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span>onRejected <span class="op">=</span> <span class="op">~</span><span class="kw"><a href="https://rdrr.io/r/base/warning.html">warning</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>There’s an error handling pipe operator <code><a href="../reference/pipes.html">%...!%</a></code>, that works similar to <code><a href="../reference/pipes.html">%...&gt;%</a></code> but it binds to <code><a href="../reference/then.html">then(onRejected)</a></code> instead of <code><a href="../reference/then.html">then(onFulfilled)</a></code>:</p>
+<p>There’s an error handling pipe operator <code>%...!%</code>, that works similar to <code>%...&gt;%</code> but it binds to <code>then(onRejected)</code> instead of <code>then(onFulfilled)</code>:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu">operation</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%...!%</span>
+<code class="sourceCode R"><span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu">operation</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...!%</a></span>
   <span class="kw"><a href="https://rdrr.io/r/base/warning.html">warning</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p>There’s also a <code><a href="../reference/then.html">catch()</a></code> function that is just a shorthand for <code><a href="../reference/then.html">then(onRejected)</a></code>. It saves a little typing, but more importantly, is easier to read:</p>
+<p>There’s also a <code><a href="../reference/then.html">catch()</a></code> function that is just a shorthand for <code>then(onRejected)</code>. It saves a little typing, but more importantly, is easier to read:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu">operation</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu">operation</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">catch</a></span><span class="op">(</span><span class="va">warning</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="error-tee" class="section level3">
 <h3 class="hasAnchor">
 <a href="#error-tee" class="anchor"></a>Error tee</h3>
-<p>Because it’s fairly common to want to do something with an error without stopping it from propagating (such as logging), there are a couple of additional shorthands for doing so without having to explicitly call <code><a href="https://rdrr.io/r/base/stop.html">stop(err)</a></code>. For example:</p>
+<p>Because it’s fairly common to want to do something with an error without stopping it from propagating (such as logging), there are a couple of additional shorthands for doing so without having to explicitly call <code>stop(err)</code>. For example:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%...!%</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...!%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>will print the error, but also eat it. To print the error without eating it, you’d have to do this:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%...!%</span> <span class="kw">function</span><span class="op">(</span><span class="va">err</span><span class="op">)</span> <span class="op">{</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...!%</a></span> <span class="kw">function</span><span class="op">(</span><span class="va">err</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">err</span><span class="op">)</span>
   <span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="va">err</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
-<p>That’s a fair amount of boilerplate. Instead, you can either add <code>tee = TRUE</code> to your <code>catch</code> call, or equivalently, use the <code><a href="../reference/pipes.html">%...T!%</a></code> operator. These two lines are equivalent to each other, and to the previous code chunk:</p>
+<p>That’s a fair amount of boilerplate. Instead, you can either add <code>tee = TRUE</code> to your <code>catch</code> call, or equivalently, use the <code>%...T!%</code> operator. These two lines are equivalent to each other, and to the previous code chunk:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">promise</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/then.html">catch</a></span><span class="op">(</span><span class="va">print</span>, tee <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">promise</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/then.html">catch</a></span><span class="op">(</span><span class="va">print</span>, tee <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
-<span class="va">promise</span> <span class="op">%...T!%</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">promise</span> <span class="op"><a href="../reference/pipes.html">%...T!%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
 <div id="cleaning-up-with-finally" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cleaning-up-with-finally" class="anchor"></a>Cleaning up with <code>finally</code>
 </h2>
-<p>In synchronous programming, you use either<code><a href="https://rdrr.io/r/base/conditions.html">tryCatch(expr, finally = ...)</a></code> or <code><a href="https://rdrr.io/r/base/on.exit.html">on.exit(...)</a></code> to perform tasks (usually relating to freeing resources or reverting temporary changes) regardless of whether the main logic succeeds or fails (throws an error). When programming with promises, you can use the <code>finally</code> function to do the same. The <code>finally</code> function is similar to <code>then</code> but it only takes a single callback that executes on both success and failure, and its return value is ignored.</p>
+<p>In synchronous programming, you use either<code>tryCatch(expr, finally = ...)</code> or <code>on.exit(...)</code> to perform tasks (usually relating to freeing resources or reverting temporary changes) regardless of whether the main logic succeeds or fails (throws an error). When programming with promises, you can use the <code>finally</code> function to do the same. The <code>finally</code> function is similar to <code>then</code> but it only takes a single callback that executes on both success and failure, and its return value is ignored.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">file_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".png"</span><span class="op">)</span>
 <span class="va">png_bytes</span> <span class="op">&lt;-</span>
@@ -395,8 +395,8 @@
     <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span>
     <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html">dev.off</a></span><span class="op">(</span><span class="op">)</span>
     <span class="va">file_path</span>
-  <span class="op">}</span><span class="op">)</span> <span class="op">%...&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/readBin.html">readBin</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/raw.html">raw</a></span><span class="op">(</span><span class="op">)</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.info.html">file.info</a></span><span class="op">(</span><span class="va">file_path</span><span class="op">)</span><span class="op">$</span><span class="va">size</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu"><a href="https://rdrr.io/r/base/readBin.html">readBin</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/raw.html">raw</a></span><span class="op">(</span><span class="op">)</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.info.html">file.info</a></span><span class="op">(</span><span class="va">file_path</span><span class="op">)</span><span class="op">$</span><span class="va">size</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/then.html">finally</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html">unlink</a></span><span class="op">(</span><span class="va">file_path</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>In this example, we need a temp file for the duration of the pipeline. Our <code>finally</code> makes sure the temp file is deleted when the operation is done, regardless of whether it succeeded or failed.</p>
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">

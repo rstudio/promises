@@ -204,17 +204,17 @@ is resolved. If any such promise rejects (errors), then the promise returned
 by <code>promise_map</code> immediately rejects with that err.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># Waits x seconds, then returns x*10</span>
-<span class='va'>wait_this_long</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>{</span>
-  <span class='fu'><a href='promise.html'>promise</a></span><span class='op'>(</span><span class='op'>~</span><span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/later.html'>later</a></span><span class='op'>(</span><span class='op'>~</span><span class='op'>{</span>
-    <span class='fu'><a href='resolve.html'>resolve</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>*</span><span class='fl'>10</span><span class='op'>)</span>
-  <span class='op'>}</span>, delay <span class='op'>=</span> <span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
-<span class='op'>}</span>
-
-<span class='fu'>promise_map</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>A<span class='op'>=</span><span class='fl'>1</span>, B<span class='op'>=</span><span class='fl'>2</span>, C<span class='op'>=</span><span class='fl'>3</span><span class='op'>)</span>, <span class='va'>wait_this_long</span><span class='op'>)</span> <span class='op'>%...&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='op'>)</span>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'># Waits x seconds, then returns x*10</span></span>
+<span class='r-in'><span class='va'>wait_this_long</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='promise.html'>promise</a></span><span class='op'>(</span><span class='op'>~</span><span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/later.html'>later</a></span><span class='op'>(</span><span class='op'>~</span><span class='op'>{</span></span>
+<span class='r-in'>    <span class='fu'><a href='resolve.html'>resolve</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>*</span><span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='op'>}</span>, delay <span class='op'>=</span> <span class='va'>x</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'>promise_map</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>A<span class='op'>=</span><span class='fl'>1</span>, B<span class='op'>=</span><span class='fl'>2</span>, C<span class='op'>=</span><span class='fl'>3</span><span class='op'>)</span>, <span class='va'>wait_this_long</span><span class='op'>)</span> <span class='op'><a href='pipes.html'>%...&gt;%</a></span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

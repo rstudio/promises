@@ -200,7 +200,7 @@ a promise or non-promise value, or throw an error.</p></td>
     <p>A new promise.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The <code>&gt;</code> variants are for handling successful resolution, the <code><a href='https://rdrr.io/r/base/Logic.html'>!</a></code> variants are
+    <p>The <code>&gt;</code> variants are for handling successful resolution, the <code>!</code> variants are
 for handling errors. The <code>T</code> variants of each return the lhs instead of the
 rhs, which is useful for pipeline steps that are used for side effects
 (printing, plotting, saving).</p><ol>
@@ -223,20 +223,20 @@ function instead of an expression.</p>
     <div class='dont-index'><p>https://rstudio.github.io/promises/articles/overview.html#using-pipes</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://future.futureverse.org'>future</a></span><span class='op'>)</span>
-<span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='va'>multisession</span><span class='op'>)</span>
-
-<span class='fu'><a href='future_promise_queue.html'>future_promise</a></span><span class='op'>(</span><span class='va'>cars</span><span class='op'>)</span> <span class='op'>%...&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fl'>5</span><span class='op'>)</span> <span class='op'>%...T&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='op'>)</span>
-
-<span class='co'># If the read.csv fails, resolve to NULL instead</span>
-<span class='fu'><a href='future_promise_queue.html'>future_promise</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span><span class='op'>(</span><span class='st'>"http://example.com/data.csv"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%...!%</span>
-  <span class='op'>{</span> <span class='cn'>NULL</span> <span class='op'>}</span>
-<span class='op'>}</span>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://future.futureverse.org'>future</a></span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='va'>multisession</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='future_promise_queue.html'>future_promise</a></span><span class='op'>(</span><span class='va'>cars</span><span class='op'>)</span> <span class='op'>%...&gt;%</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fl'>5</span><span class='op'>)</span> <span class='op'>%...T&gt;%</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># If the read.csv fails, resolve to NULL instead</span></span>
+<span class='r-in'><span class='fu'><a href='future_promise_queue.html'>future_promise</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span><span class='op'>(</span><span class='st'>"http://example.com/data.csv"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%...!%</span></span>
+<span class='r-in'>  <span class='op'>{</span> <span class='cn'>NULL</span> <span class='op'>}</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

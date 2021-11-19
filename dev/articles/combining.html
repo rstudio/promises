@@ -152,7 +152,7 @@
 <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span>
 
-<span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op">%...&gt;%</span> <span class="op">{</span>
+<span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">a</span>, <span class="va">.</span><span class="op">$</span><span class="va">b</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <p>In this example, the value of <code>.</code> within the curly braces is a list whose elements <code>a</code> and <code>b</code> are both data frames. We use <code>rbind</code> to combine them.</p>
@@ -165,13 +165,13 @@
 <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op">%...&gt;%</span>
+<span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
   <span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span><span class="op">(</span><span class="op">{</span>
     <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>(Note that since the <code>promise_all</code> argument names are the same as the variable names (<code>a = a</code>, <code>b = b</code>), the original variables are masked: inside the <code>with</code> block, <code>a</code> now refers to the <em>result</em> of the promise <code>a</code>, not the promise object itself. If you find this confusing, you can just choose a different argument name, like <code>promise_all(a_result = a, …)</code>.)</p>
 <p>The combination of <code>promise_all</code> and <code>with</code> is a concise and powerful way to gather the results of multiple promises.</p>
-<p><code>promise_all</code> also gives you two other options for passing input promises. First, if you would rather your result list be unnamed, you can pass in promises as unnamed arguments: <code><a href="../reference/promise_all.html">promise_all(a, b)</a></code> would yield <code><a href="https://rdrr.io/r/base/list.html">list(1, 2)</a></code>. Second, if you have a list of promises already in hand, you can pass the list as a single argument using <code><a href="../reference/promise_all.html">promise_all(.list = x)</a></code> (instead of, say, using <code><a href="https://rdrr.io/r/base/do.call.html">do.call(promise_all, x)</a></code>).</p>
+<p><code>promise_all</code> also gives you two other options for passing input promises. First, if you would rather your result list be unnamed, you can pass in promises as unnamed arguments: <code>promise_all(a, b)</code> would yield <code>list(1, 2)</code>. Second, if you have a list of promises already in hand, you can pass the list as a single argument using <code>promise_all(.list = x)</code> (instead of, say, using <code>do.call(promise_all, x)</code>).</p>
 </div>
 <div id="nesting" class="section level2">
 <h2 class="hasAnchor">
@@ -184,9 +184,9 @@
 
 <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
 
-<span class="va">a</span> <span class="op">%...&gt;%</span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span>
+<span class="va">a</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>
-  <span class="va">b</span> <span class="op">%...&gt;%</span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">b</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="op">{</span>
     <span class="va">a</span> <span class="op">+</span> <span class="va">b</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
@@ -222,7 +222,7 @@
 <span class="va">get_pub_date</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pkg</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">desc_url</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"https://cran.r-project.org/web/packages/"</span>, <span class="va">pkg</span>, <span class="st">"/DESCRIPTION"</span><span class="op">)</span>
   <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/dcf.html">read.dcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html">url</a></span><span class="op">(</span><span class="va">desc_url</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="st">"Date/Publication"</span><span class="op">]</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/dcf.html">read.dcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html">url</a></span><span class="op">(</span><span class="va">desc_url</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="st">"Date/Publication"</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span>
 
@@ -230,7 +230,7 @@
 
 <span class="va">pkg_dates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_map.html">promise_map</a></span><span class="op">(</span><span class="va">packages</span>, <span class="va">get_pub_date</span><span class="op">)</span>
 
-<span class="va">pkg_dates</span> <span class="op">%...&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">pkg_dates</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>The resulting output looks like this:</p>
 <pre><code>$ggplot2
 [1] "2016-12-30 22:45:17"
@@ -243,10 +243,10 @@ $knitr
 <p><code>promise_map</code> works serially; each time it calls the given function on an element of the list/vector, it will wait for the returned promise to resolve before proceeding to the next element. Furthermore, any error or rejected promise will cause the entire <code>promise_map</code> operation to reject.</p>
 <p>If you want behavior that’s similar to <code>promise_map</code> but for all the async operations to occur in parallel, you can achieve that with a combination of a regular <code><a href="https://purrr.tidyverse.org/reference/map.html">purrr::map</a></code> and <code>promise_all</code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pkg_dates</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">packages</span>, <span class="va">get_pub_date</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">pkg_dates</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">packages</span>, <span class="va">get_pub_date</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>.list <span class="op">=</span> <span class="va">.</span><span class="op">)</span>
 
-<span class="va">pkg_dates</span> <span class="op">%...&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">pkg_dates</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="reducing" class="section level2">
 <h2 class="hasAnchor">
@@ -279,7 +279,7 @@ $knitr
       <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/http_error.html">http_error</a></span><span class="op">(</span><span class="va">mirror</span><span class="op">)</span><span class="op">)</span> <span class="va">mirror</span>
     <span class="op">}</span><span class="op">)</span>
   <span class="op">}</span>
-<span class="op">}</span>, .init <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">%...&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="op">}</span>, .init <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
   </div>
 

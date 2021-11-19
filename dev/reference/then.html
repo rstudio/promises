@@ -262,10 +262,10 @@ it an error if it doesn't:</p><pre><span class='va'>promise_c</span> <span class
 <p>Now, <code>promise_d</code> will be rejected if <code>promise_c</code> is fulfilled, and vice
 versa.</p>
 <p><strong>Warning:</strong> Be very careful not to accidentally turn failure into success,
-if your error handling code is not the last item in a chain!</p><pre><span class='fu'>some_async_operation</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+if your error handling code is not the last item in a chain!</p><pre><span class='fu'>some_async_operation</span><span class='op'>(</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span>
   <span class='fu'>catch</span><span class='op'>(</span><span class='kw'>function</span><span class='op'>(</span><span class='va'>reason</span><span class='op'>)</span> <span class='op'>{</span>
     <span class='kw'><a href='https://rdrr.io/r/base/warning.html'>warning</a></span><span class='op'>(</span><span class='st'>"An error occurred: "</span>, <span class='va'>reason</span><span class='op'>)</span>
-  <span class='op'>}</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='op'>}</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span>
   <span class='fu'>then</span><span class='op'>(</span><span class='kw'>function</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>{</span>
     <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"I guess we succeeded...?"</span><span class='op'>)</span>  <span class='co'># No!</span>
   <span class='op'>}</span><span class='op'>)</span>

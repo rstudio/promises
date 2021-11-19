@@ -238,62 +238,65 @@ To counter this situation, we can create a promise to execute work using future 
     <div class='dont-index'><p><code><a href='WorkQueue.html'>WorkQueue</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># Relative start time</span>
-<span class='va'>start</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='co'># Helper to force two `future` workers</span>
-<span class='va'>with_two_workers</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>expr</span><span class='op'>)</span> <span class='op'>{</span>
-  <span class='kw'>if</span> <span class='op'>(</span><span class='op'>!</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='https://future.futureverse.org'>"future"</a></span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
-    <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"`future` not installed"</span><span class='op'>)</span>
-    <span class='kw'><a href='https://rdrr.io/r/base/function.html'>return</a></span><span class='op'>(</span><span class='op'>)</span>
-  <span class='op'>}</span>
-  <span class='va'>old_plan</span> <span class='op'>&lt;-</span> <span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/multisession.html'>multisession</a></span><span class='op'>(</span>workers <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/on.exit.html'>on.exit</a></span><span class='op'>(</span><span class='op'>{</span><span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='va'>old_plan</span><span class='op'>)</span><span class='op'>}</span>, add <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-  <span class='va'>start</span> <span class='op'>&lt;&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span><span class='op'>(</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/force.html'>force</a></span><span class='op'>(</span><span class='va'>expr</span><span class='op'>)</span>
-  <span class='kw'>while</span><span class='op'>(</span><span class='op'>!</span><span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/loop_empty.html'>loop_empty</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>0.1</span><span class='op'>)</span>; <span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/run_now.html'>run_now</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/invisible.html'>invisible</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='op'>}</span>
-<span class='co'># Print a status message. Ex: `"PID: XXX; 2.5s promise done"`</span>
-<span class='va'>print_msg</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>pid</span>, <span class='va'>msg</span><span class='op'>)</span> <span class='op'>{</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span>
-    <span class='st'>"PID: "</span>, <span class='va'>pid</span>, <span class='st'>"; "</span>,
-    <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/difftime.html'>difftime</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='va'>start</span>, units <span class='op'>=</span> <span class='st'>"secs"</span><span class='op'>)</span>, digits <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, <span class='st'>"s "</span> ,
-    <span class='va'>msg</span>
-  <span class='op'>)</span>
-<span class='op'>}</span>
-
-<span class='co'># `"promise done"` will appear after four workers are done and the main R session is not blocked</span>
-<span class='co'># The important thing to note is the first four times will be roughly the same</span>
-<span class='fu'>with_two_workers</span><span class='op'>(</span><span class='op'>{</span>
-  <span class='fu'><a href='promise_resolve.html'>promise_resolve</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%...&gt;%</span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"promise done"</span><span class='op'>)</span>
-  <span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/future.html'>future</a></span><span class='op'>(</span><span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>; <span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span><span class='op'>)</span> <span class='op'>%...&gt;%</span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"future done"</span><span class='op'>)</span>
-<span class='op'>}</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Loading required package: future</span></div><div class='input'><span class='op'>{</span>
-<span class='co'>#&gt; PID: XXX; 2.5s promise done</span>
-<span class='co'>#&gt; PID: YYY; 2.6s future done</span>
-<span class='co'>#&gt; PID: ZZZ; 2.6s future done</span>
-<span class='co'>#&gt; PID: YYY; 2.6s future done</span>
-<span class='co'>#&gt; PID: ZZZ; 2.6s future done</span>
-<span class='co'>#&gt; PID: YYY; 3.4s future done</span>
-<span class='co'>#&gt; PID: ZZZ; 3.6s future done</span>
-<span class='op'>}</span>
-</div><div class='output co'>#&gt; NULL</div><div class='input'>
-<span class='co'># `"promise done"` will almost immediately, before any workers have completed</span>
-<span class='co'># The first two `"future done"` comments appear earlier the example above</span>
-<span class='fu'>with_two_workers</span><span class='op'>(</span><span class='op'>{</span>
-  <span class='fu'><a href='promise_resolve.html'>promise_resolve</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%...&gt;%</span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"promise"</span><span class='op'>)</span>
-  <span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='fu'>future_promise</span><span class='op'>(</span><span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>; <span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span><span class='op'>)</span> <span class='op'>%...&gt;%</span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"future done"</span><span class='op'>)</span>
-<span class='op'>}</span><span class='op'>)</span>
-<span class='op'>{</span>
-<span class='co'>#&gt; PID: XXX; 0.2s promise done</span>
-<span class='co'>#&gt; PID: YYY; 1.3s future done</span>
-<span class='co'>#&gt; PID: ZZZ; 1.4s future done</span>
-<span class='co'>#&gt; PID: YYY; 2.5s future done</span>
-<span class='co'>#&gt; PID: ZZZ; 2.6s future done</span>
-<span class='co'>#&gt; PID: YYY; 3.4s future done</span>
-<span class='co'>#&gt; PID: ZZZ; 3.6s future done</span>
-<span class='op'>}</span>
-</div><div class='output co'>#&gt; NULL</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'># Relative start time</span></span>
+<span class='r-in'><span class='va'>start</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'># Helper to force two `future` workers</span></span>
+<span class='r-in'><span class='va'>with_two_workers</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>expr</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'>  <span class='kw'>if</span> <span class='op'>(</span><span class='op'>!</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='https://future.futureverse.org'>"future"</a></span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'>    <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span><span class='st'>"`future` not installed"</span><span class='op'>)</span></span>
+<span class='r-in'>    <span class='kw'><a href='https://rdrr.io/r/base/function.html'>return</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='op'>}</span></span>
+<span class='r-in'>  <span class='va'>old_plan</span> <span class='op'>&lt;-</span> <span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/multisession.html'>multisession</a></span><span class='op'>(</span>workers <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/on.exit.html'>on.exit</a></span><span class='op'>(</span><span class='op'>{</span><span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/plan.html'>plan</a></span><span class='op'>(</span><span class='va'>old_plan</span><span class='op'>)</span><span class='op'>}</span>, add <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='va'>start</span> <span class='op'>&lt;&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/force.html'>force</a></span><span class='op'>(</span><span class='va'>expr</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='kw'>while</span><span class='op'>(</span><span class='op'>!</span><span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/loop_empty.html'>loop_empty</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>0.1</span><span class='op'>)</span>; <span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/run_now.html'>run_now</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/invisible.html'>invisible</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'><span class='co'># Print a status message. Ex: `"PID: XXX; 2.5s promise done"`</span></span>
+<span class='r-in'><span class='va'>print_msg</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>pid</span>, <span class='va'>msg</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/base/message.html'>message</a></span><span class='op'>(</span></span>
+<span class='r-in'>    <span class='st'>"PID: "</span>, <span class='va'>pid</span>, <span class='st'>"; "</span>,</span>
+<span class='r-in'>    <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/difftime.html'>difftime</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='va'>start</span>, units <span class='op'>=</span> <span class='st'>"secs"</span><span class='op'>)</span>, digits <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, <span class='st'>"s "</span> ,</span>
+<span class='r-in'>    <span class='va'>msg</span></span>
+<span class='r-in'>  <span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># `"promise done"` will appear after four workers are done and the main R session is not blocked</span></span>
+<span class='r-in'><span class='co'># The important thing to note is the first four times will be roughly the same</span></span>
+<span class='r-in'><span class='fu'>with_two_workers</span><span class='op'>(</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='promise_resolve.html'>promise_resolve</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='pipes.html'>%...&gt;%</a></span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"promise done"</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='fu'>future</span><span class='fu'>::</span><span class='fu'><a href='https://future.futureverse.org/reference/future.html'>future</a></span><span class='op'>(</span><span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>; <span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span><span class='op'>)</span> <span class='op'><a href='pipes.html'>%...&gt;%</a></span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"future done"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> Loading required package: future</span>
+<span class='r-in'><span class='op'>{</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: XXX; 2.5s promise done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: YYY; 2.6s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: ZZZ; 2.6s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: YYY; 2.6s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: ZZZ; 2.6s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: YYY; 3.4s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: ZZZ; 3.6s future done</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> NULL</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># `"promise done"` will almost immediately, before any workers have completed</span></span>
+<span class='r-in'><span class='co'># The first two `"future done"` comments appear earlier the example above</span></span>
+<span class='r-in'><span class='fu'>with_two_workers</span><span class='op'>(</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='promise_resolve.html'>promise_resolve</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='pipes.html'>%...&gt;%</a></span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"promise"</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='fu'>future_promise</span><span class='op'>(</span><span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>; <span class='fu'><a href='https://rdrr.io/r/base/Sys.getpid.html'>Sys.getpid</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>}</span><span class='op'>)</span> <span class='op'><a href='pipes.html'>%...&gt;%</a></span> <span class='fu'>print_msg</span><span class='op'>(</span><span class='st'>"future done"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>{</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: XXX; 0.2s promise done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: YYY; 1.3s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: ZZZ; 1.4s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: YYY; 2.5s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: ZZZ; 2.6s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: YYY; 3.4s future done</span></span>
+<span class='r-in'><span class='co'>#&gt; PID: ZZZ; 3.6s future done</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> NULL</span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

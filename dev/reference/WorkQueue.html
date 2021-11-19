@@ -183,7 +183,7 @@ Future promise work queue" />
 <p>The global loop is used by default as the internal <code>WorkQueue</code> "delayed check" uses a single delay check for the whole queue, rather than having each item in the queue attempt to process.
 This behavior might change in the future, but we are not exactly sure how at this point.</p>
 <p>If a private <code>later</code> loop wants to become synchronous by running until all jobs are completed but is waiting on a <code><a href='future_promise_queue.html'>future_promise()</a></code>, the private loop will not complete unless the global loop is allowed to move forward.</p>
-<p>However, it is possible to use a private loop inside a user-defined <code>WorkQueue</code> may work which can be provided directly to <code><a href='future_promise_queue.html'>future_promise(queue=custom_queue)</a></code>. Having a concrete example (or need) will help us understand the problem better. If you have an example, please reach out .</p>
+<p>However, it is possible to use a private loop inside a user-defined <code>WorkQueue</code> may work which can be provided directly to <code>future_promise(queue=custom_queue)</code>. Having a concrete example (or need) will help us understand the problem better. If you have an example, please reach out .</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='future_promise_queue.html'>future_promise_queue()</a></code> which returns a <code>WorkQueue</code> which is cached per R session.</p></div>
@@ -202,7 +202,7 @@ This behavior might change in the future, but we are not exactly sure how at thi
 <p>Create a new <code>WorkQueue</code></p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
 <p><div class="r"></p><pre><span class='va'>WorkQueue</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   can_proceed <span class='op'>=</span> <span class='va'>future_worker_is_free</span>,
-  queue <span class='op'>=</span> <span class='fu'>fastmap</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/fastmap/man/fastqueue.html'>fastqueue</a></span><span class='op'>(</span><span class='op'>)</span>,
+  queue <span class='op'>=</span> <span class='fu'>fastmap</span><span class='fu'>::</span><span class='fu'><a href='https://r-lib.github.io/fastmap/reference/fastqueue.html'>fastqueue</a></span><span class='op'>(</span><span class='op'>)</span>,
   loop <span class='op'>=</span> <span class='fu'>later</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/later/man/create_loop.html'>global_loop</a></span><span class='op'>(</span><span class='op'>)</span>
 <span class='op'>)</span></pre><p></div></p>
 
@@ -210,7 +210,7 @@ This behavior might change in the future, but we are not exactly sure how at thi
 <p><div class="arguments"></p><dl>
 <dt><code>can_proceed</code></dt><dd><p>Function that should return a logical value. If <code>TRUE</code> is returned, then the next scheduled work will be executed. By default, this function checks if <code><a href='https://future.futureverse.org/reference/nbrOfWorkers.html'>future::nbrOfFreeWorkers()</a> &gt; 0</code></p></dd>
 
-<dt><code>queue</code></dt><dd><p>Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using <code><a href='https://rdrr.io/pkg/fastmap/man/fastqueue.html'>fastmap::fastqueue()</a></code>. If using your own queue, it should have the methods <code>$add(x)</code>, <code>$remove()</code>, <code>$size()</code>.</p></dd>
+<dt><code>queue</code></dt><dd><p>Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using <code><a href='https://r-lib.github.io/fastmap/reference/fastqueue.html'>fastmap::fastqueue()</a></code>. If using your own queue, it should have the methods <code>$add(x)</code>, <code>$remove()</code>, <code>$size()</code>.</p></dd>
 
 <dt><code>loop</code></dt><dd><p><span class="pkg">later</span> loop to use for calculating the next delayed check. Defaults to <code><a href='https://rdrr.io/pkg/later/man/create_loop.html'>later::global_loop()</a></code>.
 Schedule work</p></dd>
