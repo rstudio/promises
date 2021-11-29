@@ -39,3 +39,4 @@ URL: https://rstudio.github.io/promises/, https://github.com/rstudio/promises
 BugReports: https://github.com/rstudio/promises/issues
 Language: en-US
 Config/Needs/website: rsconnect
+
