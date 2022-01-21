@@ -1,5 +1,5 @@
 pandoc: 2.7.3
-pkgdown: 1.6.1
+pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   casestudy: casestudy.html
@@ -10,8 +10,8 @@ articles:
   motivation: motivation.html
   overview: overview.html
   shiny: shiny.html
-last_built: 2021-11-19T16:38Z
+last_built: 2022-01-21T20:18Z
 urls:
-  reference: https://rstudio.github.io/promises//reference
-  article: https://rstudio.github.io/promises//articles
+  reference: https://rstudio.github.io/promises/reference
+  article: https://rstudio.github.io/promises/articles
 

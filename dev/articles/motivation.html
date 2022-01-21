@@ -22,6 +22,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container">
@@ -82,13 +84,10 @@
     </li>
   </ul>
 </li>
-<li>
-  <a href="../news/index.html">Changelog</a>
-</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/rstudio/promises/">
+  <a href="https://github.com/rstudio/promises/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -115,7 +114,7 @@
       <h1 data-toc-skip>Why use <code>promises</code>?</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/master/vignettes/motivation.Rmd"><code>vignettes/motivation.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/HEAD/vignettes/motivation.Rmd" class="external-link"><code>vignettes/motivation.Rmd</code></a></small>
       <div class="hidden name"><code>motivation.Rmd</code></div>
 
     </div>
@@ -125,16 +124,16 @@
 <p>The <code>promises</code> library is designed to make it possible for R users to integrate <em>asynchronous programming</em> techniques into their code. It is intended to improve the scalability of certain classes of Shiny applications, and can also be used completely separately from Shiny.</p>
 <p>Asynchronous programming means starting an operation without waiting around for its results. Contrast this with standard (synchronous) R programming, where the caller of a function must wait for the function to either return a result or throw an error.</p>
 <p>Asynchronous programming is a particularly important capability for languages that are both 1) single threaded, and 2) need to serve multiple users concurrently. R is single threaded, but until recent years has mostly been restricted to desktop use or batch execution. The rise of Shiny and other web frameworks for R has meant much greater demand for serving multiple users concurrently, and thus a greater need for asynchronous programming.</p>
-<div id="what-are-promises-good-for" class="section level2">
-<h2 class="hasAnchor">
-<a href="#what-are-promises-good-for" class="anchor"></a>What are promises good for?</h2>
+<div class="section level2">
+<h2 id="what-are-promises-good-for">What are promises good for?<a class="anchor" aria-label="anchor" href="#what-are-promises-good-for"></a>
+</h2>
 <p>Promises work well when you have a Shiny application with a particular operation, especially a calculation, that takes a long time (measured in seconds or even minutes). Without promises, such operations not only block the current user’s session from proceeding, but also block <em>all</em> other requests being made to the R process, no matter how trivial. Even loading a small CSS file, which should be nearly instantaneous, can be delayed by many seconds if another user’s Shiny session is busy crunching through hundreds of gigabytes of data or querying a particularly slow backend database.</p>
 <p>With promises, you can convert long-running operations to be asynchronous, which frees up the R process to do other work. For Shiny applications, this has the potential to greatly increase scalability for each R process (depending on how slow the operations are in the first place, and what resources they make use of).</p>
 <p><strong>DO use promises if you have a Shiny app with long-running operations, and want to serve multiple users simultaneously.</strong></p>
 </div>
-<div id="what-arent-promises-good-for" class="section level2">
-<h2 class="hasAnchor">
-<a href="#what-arent-promises-good-for" class="anchor"></a>What <em>aren’t</em> promises good for?</h2>
+<div class="section level2">
+<h2 id="what-arent-promises-good-for">What <em>aren’t</em> promises good for?<a class="anchor" aria-label="anchor" href="#what-arent-promises-good-for"></a>
+</h2>
 <p>While promises can make a huge difference in the scalability of a Shiny app, they make relatively little difference in the latency of a single session. That is to say, if a Shiny application is slow when only a single user is hitting it, converting it to use promises is unlikely to make it perform any faster (and in fact may slightly slow it down). Promises will just help prevent <em>other</em> sessions from being slowed down by one session’s computations.</p>
 <p>(The exception to this is if the Shiny app has several distinct long computations that don’t depend very much on each other—then you could use asynchronous programming to exploit a little parallelism. But I think this will be a less common use of async programming, as R already has other good tools designed specifically for data parallelism.)</p>
 <p><strong>DON’T use promises to improve the performance of Shiny apps for a single user.</strong></p>
@@ -155,11 +154,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Joe Cheng, <a href="https://www.rstudio.com"><img src="https://www.tidyverse.org/rstudio-logo.svg" alt="RStudio" height="24"></a>.</p>
+  <p></p>
+<p>Developed by Joe Cheng, RStudio.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>

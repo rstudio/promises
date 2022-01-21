@@ -22,6 +22,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container">
@@ -82,13 +84,10 @@
     </li>
   </ul>
 </li>
-<li>
-  <a href="../news/index.html">Changelog</a>
-</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/rstudio/promises/">
+  <a href="https://github.com/rstudio/promises/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -115,7 +114,7 @@
       <h1 data-toc-skip>Using <code>promises</code> with Shiny</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/master/vignettes/shiny.Rmd"><code>vignettes/shiny.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/HEAD/vignettes/shiny.Rmd" class="external-link"><code>vignettes/shiny.Rmd</code></a></small>
       <div class="hidden name"><code>shiny.Rmd</code></div>
 
     </div>
@@ -126,7 +125,7 @@
 <p>Async programming with Shiny boils down to following a few steps.</p>
 <ol style="list-style-type: decimal">
 <li><p>Identify slow operations (function calls or blocks of statements) in your app.</p></li>
-<li><p>Convert the slow operation into a future using <code><a href="../reference/future_promise_queue.html">future_promise()</a></code>. (If you haven’t read the <a href="futures.html">article on futures</a> and <a href="future_promise.html"><code>future_promise()</code></a>, definitely do that before proceeding!)</p></li>
+<li><p>Convert the slow operation into a future using <code><a href="../reference/future_promise.html">future_promise()</a></code>. (If you haven’t read the <a href="futures.html">article on futures</a> and <a href="future_promise.html"><code>future_promise()</code></a>, definitely do that before proceeding!)</p></li>
 <li><p>Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the future object.</p></li>
 </ol>
 <p>We’ll get into details for all these steps, but first, an example. Consider the following synchronous server code:</p>
@@ -134,48 +133,48 @@
 <code class="sourceCode R"><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span>
     <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">expensive_operation</span><span class="op">(</span><span class="op">)</span>
-    <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span>
-    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>
+    <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span>
+    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <p>We’d convert it to async like this:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org">future</a></span><span class="op">)</span>
-<span class="fu"><a href="https://future.futureverse.org/reference/plan.html">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span>
+<span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span>
 
 <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">expensive_operation</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="op">)</span>
+    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">expensive_operation</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+      <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
-<div id="adding-prerequisites" class="section level2">
-<h2 class="hasAnchor">
-<a href="#adding-prerequisites" class="anchor"></a>Adding prerequisites</h2>
-<p>The easiest part is adding <code><a href="https://rstudio.github.io/promises/">library(promises)</a></code>, <code><a href="https://future.futureverse.org">library(future)</a></code>, and <code>plan(multisession)</code> to the top of the app.</p>
+<div class="section level2">
+<h2 id="adding-prerequisites">Adding prerequisites<a class="anchor" aria-label="anchor" href="#adding-prerequisites"></a>
+</h2>
+<p>The easiest part is adding <code><a href="https://rstudio.github.io/promises/">library(promises)</a></code>, <code><a href="https://future.futureverse.org" class="external-link">library(future)</a></code>, and <code>plan(multisession)</code> to the top of the app.</p>
 <p>The <code>promises</code> library is necessary for the <code>%...&gt;%</code> operator. You may also want to use promise utility functions like <code>promise_all</code> and <code>promise_race</code>.</p>
-<p>The <code>future</code> library is needed because the <code><a href="https://future.futureverse.org/reference/future.html">future()</a></code> function call used inside <code><a href="../reference/future_promise_queue.html">future_promise()</a></code> is how you will launch asynchronous tasks.</p>
+<p>The <code>future</code> library is needed because the <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future()</a></code> function call used inside <code><a href="../reference/future_promise.html">future_promise()</a></code> is how you will launch asynchronous tasks.</p>
 <p><code>plan(multisession)</code> is a directive to the <code>future</code> package, telling it how future tasks should actually be executed. See the <a href="futures.html">article on futures</a> for more details.</p>
 </div>
-<div id="identifying-slow-operations" class="section level2">
-<h2 class="hasAnchor">
-<a href="#identifying-slow-operations" class="anchor"></a>Identifying slow operations</h2>
+<div class="section level2">
+<h2 id="identifying-slow-operations">Identifying slow operations<a class="anchor" aria-label="anchor" href="#identifying-slow-operations"></a>
+</h2>
 <p>To find areas of your code that are good candidates for the future/promise treatment, let’s start with the obvious: identifying the code that is making your app slow. You may assume it’s your plotting code that’s slow, but it’s actually your database queries; or vice versa. If there’s one thing that veteran programmers can agree on, it’s that human intuition is a surprisingly unreliable tool for spotting performance problems.</p>
-<p>Our recommendation is that you use the <a href="https://rstudio.github.io/profvis/">profvis</a> profiler, which we designed to work with Shiny (see Example 3 in the profvis documentation). You can use profvis to help you focus in on where the time is actually being spent in your app.</p>
+<p>Our recommendation is that you use the <a href="https://rstudio.github.io/profvis/" class="external-link">profvis</a> profiler, which we designed to work with Shiny (see Example 3 in the profvis documentation). You can use profvis to help you focus in on where the time is actually being spent in your app.</p>
 <blockquote>
 <p><strong>Note:</strong> As of this writing, profvis doesn’t work particularly well for diagnosing performance problems in parts of your code that you’ve already made asynchronous. In particular, we haven’t done any work to help it profile code that executes in a future, and the mechanism we use to hide “irrelevant” parts of the stack trace doesn’t work well with promises. These are ripe areas for future development.</p>
 </blockquote>
 <p>Async programming works well when you can identify just a few “hotspots” in your app where lots of time is being spent. It works much less well if your app is too slow because of a generalized, diffuse slowness through every aspect of your app, where no one operation takes too much time but it all adds up to a lot. The more futures you need to introduce into your app, the more fixed communication overhead you incur. So for the most bang-for-the-buck, we want to launch a small number of futures per session but move a lot of the waited-on code into each one.</p>
 </div>
-<div id="converting-a-slow-operation-into-a-future" class="section level2">
-<h2 class="hasAnchor">
-<a href="#converting-a-slow-operation-into-a-future" class="anchor"></a>Converting a slow operation into a future</h2>
+<div class="section level2">
+<h2 id="converting-a-slow-operation-into-a-future">Converting a slow operation into a future<a class="anchor" aria-label="anchor" href="#converting-a-slow-operation-into-a-future"></a>
+</h2>
 <p>Now that we’ve found hotspots that we want to make asynchronous, let’s talk about the actual work of converting them to futures.</p>
 <p>Conceptually, futures work like this:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://future.futureverse.org/reference/future.html">future</a></span><span class="op">(</span><span class="op">{</span>
+<code class="sourceCode R"><span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span>
   <span class="co"># Expensive code goes here</span>
 <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Code to handle result of expensive code goes here</span>
@@ -183,16 +182,16 @@
 <p>which seems incredibly simple. What’s actually happening is that the future runs in a totally separate child R process, and then the result is collected up and returned to the main R process:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Code here runs in process A</span>
-<span class="fu"><a href="https://future.futureverse.org/reference/future.html">future</a></span><span class="op">(</span><span class="op">{</span>
+<span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span>
   <span class="co"># Code here runs in (child) process B</span>
 <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Code here runs in process A</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues. There are extremely important constraints that futures impose on their code blocks; certain objects cannot be safely used across process boundaries, and some of the default behaviors of the future library may severely impact the performance of your app. Again, see the <a href="futures.html">article on futures</a> for more details.</p>
-<p>The remainder of this document will use <code><a href="../reference/future_promise_queue.html">future_promise()</a></code> in place of <code><a href="https://future.futureverse.org/reference/future.html">future()</a></code>. For more information on the differences, see the <a href="future_promise.html">article on the benefits of <code>future_promise()</code></a>.</p>
-<div id="shiny-specific-caveats-and-limitations" class="section level3">
-<h3 class="hasAnchor">
-<a href="#shiny-specific-caveats-and-limitations" class="anchor"></a>Shiny-specific caveats and limitations</h3>
+<p>The remainder of this document will use <code><a href="../reference/future_promise.html">future_promise()</a></code> in place of <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future()</a></code>. For more information on the differences, see the <a href="future_promise.html">article on the benefits of <code>future_promise()</code></a>.</p>
+<div class="section level3">
+<h3 id="shiny-specific-caveats-and-limitations">Shiny-specific caveats and limitations<a class="anchor" aria-label="anchor" href="#shiny-specific-caveats-and-limitations"></a>
+</h3>
 <p>In addition to the constraints that all futures face, there is an additional one for Shiny: reactive values and reactive expressions cannot be read from within a future. Whenever reactive values/expressions are read, side effects are carried out under the hood so that the currently executing observer or reactive expression can be notified when the reactive value/expression becomes invalidated. If a reactive value/expression is created in one process, but read in another process, there will be no way for readers to be notified about invalidation.</p>
 <p>This code, for example, will not work:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -200,7 +199,7 @@
   <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span>
 
   <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
+    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
       <span class="fu">r1</span><span class="op">(</span><span class="op">)</span> <span class="co"># Will error--don't do this!</span>
     <span class="op">}</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
@@ -212,7 +211,7 @@
 
   <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
     <span class="va">val</span> <span class="op">&lt;-</span> <span class="fu">r1</span><span class="op">(</span><span class="op">)</span>
-    <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
+    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
       <span class="va">val</span> <span class="co"># No problem!</span>
     <span class="op">}</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
@@ -223,72 +222,71 @@
   <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span>
 
   <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu">r1</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="co"># OK!</span>
+    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+      <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu">r1</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="co"># OK!</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 </div>
 </div>
-<div id="integrating-promises-with-shiny" class="section level2">
-<h2 class="hasAnchor">
-<a href="#integrating-promises-with-shiny" class="anchor"></a>Integrating promises with Shiny</h2>
+<div class="section level2">
+<h2 id="integrating-promises-with-shiny">Integrating promises with Shiny<a class="anchor" aria-label="anchor" href="#integrating-promises-with-shiny"></a>
+</h2>
 <p>Generally, you’ll be using promises with Shiny from within outputs, reactive expressions, and observers. We’ve tried to integrate promises into these constructs in as natural a way as possible.</p>
-<div id="outputs" class="section level3">
-<h3 class="hasAnchor">
-<a href="#outputs" class="anchor"></a>Outputs</h3>
+<div class="section level3">
+<h3 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
+</h3>
 <p>Most outputs (<code>renderXXX({ ... })</code>) functions expect your code block to return a value; for example, <code>renderText()</code> expects a character vector and <code>renderTable()</code> expects a data frame. All such render functions that are included within the <code>shiny</code> package can now optionally be given a promise for such a value instead.</p>
 <p>So this:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu">renderTable</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>could become:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu">renderTable</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span>
+  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>or, trading elegance for efficiency:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu">renderTable</span><span class="op">(</span><span class="op">{</span>
   <span class="va">input_date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span>
-  <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input_date</span><span class="op">)</span>
+  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input_date</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>The important thing to keep in mind is that the promise (or promise pipeline) must be the final expression in the code block. Shiny only knows about promises you actually return to it when you hand control back.</p>
-<div id="render-functions-with-side-effects-renderprint-and-renderplot" class="section level4">
-<h4 class="hasAnchor">
-<a href="#render-functions-with-side-effects-renderprint-and-renderplot" class="anchor"></a>Render functions with side effects: <code>renderPrint</code> and <code>renderPlot</code>
+<div class="section level4">
+<h4 id="render-functions-with-side-effects-renderprint-and-renderplot">Render functions with side effects: <code>renderPrint</code> and <code>renderPlot</code><a class="anchor" aria-label="anchor" href="#render-functions-with-side-effects-renderprint-and-renderplot"></a>
 </h4>
 <p>The render functions <code>renderPrint()</code> and <code>renderPlot()</code> are slightly different than other render functions, in that they can be affected by side effects in the code block you provide. In <code>renderPrint</code> you can print to the console, and in <code>renderPlot</code> you can plot to the active R graphics device.</p>
 <p>With promises, these render functions can work in a similar way, but with a caveat. As you hopefully understand by now, futures execute their code in a separate R process, and printing/plotting in a separate process won’t have any effect on the Shiny output in the original process. These examples, then, are incorrect:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">output</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu">renderPrint</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span>
+  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+      <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+      <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span>
 
 <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>
+  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
+    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>
     <span class="fu">ggplot</span><span class="op">(</span><span class="va">df</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">length</span>, <span class="va">width</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>Instead, do printing and plotting after control returns back to the original process, via a promise handler:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">output</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu">renderPrint</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="op">)</span>
+  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+    <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+    <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span>
 
 <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
+  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
   <span class="op">{</span>
     <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">length</span>, <span class="va">width</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span>
   <span class="op">}</span>
@@ -296,78 +294,78 @@
 <p>Again, you do need to be careful to make sure that the last expression in your code block is the promise/pipeline; this is the only way the rendering logic can know whether and when your logic has completed, and if any errors occurred (so they can be displayed to the user).</p>
 </div>
 </div>
-<div id="observers" class="section level3">
-<h3 class="hasAnchor">
-<a href="#observers" class="anchor"></a>Observers</h3>
+<div class="section level3">
+<h3 id="observers">Observers<a class="anchor" aria-label="anchor" href="#observers"></a>
+</h3>
 <p>Observers are very similar to outputs: you must make sure that the last expression in your code block is the promise/pipeline. Like outputs, observers need to know whether and when they’re done running, and if any errors occured (so they can log them and terminate the user session). The way to communicate this from your async user code is by returning the promise.</p>
 <p>Here’s a synchronous example that we’ll convert to async. Clicking the <code>refresh_data</code> action button causes data to be downloaded, which is then saved to disk as <code>cached.rds</code> and also used to update the reactive value <code>data</code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">reactiveVal</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"cached.rds"</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">reactiveVal</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"cached.rds"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">refresh_data</span>, <span class="op">{</span>
-    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"cached.rds"</span><span class="op">)</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>
+    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"cached.rds"</span><span class="op">)</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <p>And the async version:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">reactiveVal</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"cached.rds"</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">reactiveVal</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"cached.rds"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">refresh_data</span>, <span class="op">{</span>
-    <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
-      <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"cached.rds"</span><span class="op">)</span>
+    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
+      <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>
+      <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"cached.rds"</span><span class="op">)</span>
       <span class="va">df</span>
     <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="op">)</span>
+      <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <p>Note that in this version, we cannot call <code>data(df)</code> inside the future, as this would cause the update to happen in the wrong process. Instead, we use the <code>%...&gt;%</code> operator to perform the assignment back in the main process once the future resolves.</p>
 </div>
-<div id="reactive-expressions" class="section level3">
-<h3 class="hasAnchor">
-<a href="#reactive-expressions" class="anchor"></a>Reactive expressions</h3>
+<div class="section level3">
+<h3 id="reactive-expressions">Reactive expressions<a class="anchor" aria-label="anchor" href="#reactive-expressions"></a>
+</h3>
 <p>Recall that reactive expressions are used to calculate values, and are cached until they are automatically invalidated by one of their dependencies. Unlike outputs and observers, reactive expressions can be used from other reactive consumers.</p>
 <p>Asynchronous reactive expressions are similar to regular (synchronous) reactive expressions: instead of a “normal” value, they return a promise that will yield the desired value; and a normal reactive will cache a normal value, while an async reactive will cache the promise.</p>
 <p>The upshot is that when defining an async reactive expression, your code block should return a promise or promise pipeline, following the same rules as reactive outputs. And when calling an async reactive expression, call it like a function like you would a regular reactive expression, and treat the value that’s returned like any other promise.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">refresh_data</span>, <span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 
   <span class="va">filteredData</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 
   <span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu">renderTable</span><span class="op">(</span><span class="op">{</span>
-    <span class="fu">filteredData</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>
+    <span class="fu">filteredData</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <p>And now in async:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">refresh_data</span>, <span class="op">{</span>
-    <span class="fu"><a href="../reference/future_promise_queue.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span>
+    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 
   <span class="va">filteredData</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 
   <span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu">renderTable</span><span class="op">(</span><span class="op">{</span>
-    <span class="fu">filteredData</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>
+    <span class="fu">filteredData</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>
   <span class="op">}</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 </div>
 </div>
-<div id="the-flush-cycle" class="section level2">
-<h2 class="hasAnchor">
-<a href="#the-flush-cycle" class="anchor"></a>The flush cycle</h2>
-<p>In the past, Shiny’s reactive programming model has operated using a mostly traditional <a href="https://en.wikipedia.org/wiki/Event_loop">event loop</a> model. Somewhere many levels beneath <code>shiny::runApp()</code> was a piece of code that looked a bit like this:</p>
+<div class="section level2">
+<h2 id="the-flush-cycle">The flush cycle<a class="anchor" aria-label="anchor" href="#the-flush-cycle"></a>
+</h2>
+<p>In the past, Shiny’s reactive programming model has operated using a mostly traditional <a href="https://en.wikipedia.org/wiki/Event_loop" class="external-link">event loop</a> model. Somewhere many levels beneath <code>shiny::runApp()</code> was a piece of code that looked a bit like this:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">while</span> <span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Do nothing until a browser sends some data</span>
@@ -418,11 +416,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Joe Cheng, <a href="https://www.rstudio.com"><img src="https://www.tidyverse.org/rstudio-logo.svg" alt="RStudio" height="24"></a>.</p>
+  <p></p>
+<p>Developed by Joe Cheng, RStudio.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
