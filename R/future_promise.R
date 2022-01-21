@@ -148,6 +148,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
   private = list(
     queue = "fastmap::fastqueue()",
     can_proceed_fn = "future_worker_is_free()",
+    can_proceed_cache_val = NULL,
     # only _really_ used for delay checking
     loop = "later::global_loop()",
     delay = "ExpoDelay$new()",
@@ -176,7 +177,26 @@ WorkQueue <- R6::R6Class("WorkQueue",
 
     # Returns a logical which let's work begin
     can_proceed = function() {
-      isTRUE(private$can_proceed_fn())
+      can_proceed_cache_val <- private$can_proceed_cache_val
+      # Return early if no work can be submitted.
+      if (!is.null(can_proceed_cache_val)) return(can_proceed_cache_val)
+
+      ret <- isTRUE(private$can_proceed_fn())
+
+      # If is `FALSE`, then any other attempts to start work in this tick will also fail.
+      # Prevent `future_promise` from asking `future` any questions until the next tick
+      if (is_false(ret)) {
+        private$can_proceed_cache_val <- FALSE
+        # Reset can proceed functionality on the next tick
+        later::later(
+          loop = private$loop,
+          delay = 0,
+          function() {
+            private$can_proceed_cache_val <- NULL
+          }
+        )
+      }
+      ret
     },
 
     # Function to attempt as much work as possible

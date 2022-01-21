@@ -209,3 +209,8 @@ promise_reduce <- function(.x, .f, ..., .init) {
 function() {
   purrr::reduce
 }
+
+# Determine if `identical(x, FALSE)`
+is_false <- function(x) {
+  is.logical(x) && length(x) == 1L && !is.na(x) && !x
+}
