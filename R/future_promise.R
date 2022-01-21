@@ -183,11 +183,14 @@ WorkQueue <- R6::R6Class("WorkQueue",
 
       ret <- isTRUE(private$can_proceed_fn())
 
-      # If is `FALSE`, then any other attempts to start work in this tick will also fail.
-      # Prevent `future_promise` from asking `future` any questions until the next tick
+      # If we can no longer proceed, then we should avoid asking if the status has changed within the current {later} loop execution
+      # The value will be reset after have giving {future} the possibility to update the number of available workers
+      # While there is a possibility that a fast {future} job could finish in the middle of submitting many `future_promise()` job requests,
+      #   the time saved by not asking the {future} cluster many many status questions is faster overall
+      # https://github.com/rstudio/promises/pull/78
       if (is_false(ret)) {
         private$can_proceed_cache_val <- FALSE
-        # Reset can proceed functionality on the next tick
+        # Reset `$can_proceed()` functionality in the next event loop execution
         later::later(
           loop = private$loop,
           delay = 0,
