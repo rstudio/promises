@@ -253,10 +253,17 @@ WorkQueue <- R6::R6Class("WorkQueue",
       future_job <- work_fn()
 
       # Try to attempt work immediately after the future job has finished
-      finally(future_job, function() {
+      # (whether it succeeds or fails doesn't matter)
+      continue_work <- function() {
         debug_msg("finished work. queue size: ", private$queue$size())
         private$attempt_work()
-      })
+      }
+
+      # We're not using finally() here because we don't want rejections to be
+      # propagated (which would result in a warning). Any warnings will be
+      # handled by the user using a different promise object.
+      # https://github.com/rstudio/promises/issues/86
+      then(future_job, onFulfilled = continue_work, onRejected = continue_work)
 
       return()
     }
