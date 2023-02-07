@@ -165,4 +165,23 @@ local({
     )
   })
 
+  test_that("future_promise reports unhandled errors", {
+    with_test_workers({
+      err <- capture.output(type="message", {
+        future_promise(stop("boom1"))
+        wait_for_it()
+      })
+      expect_match(err, "boom1")
+    })
+  })
+
+  test_that("future_promise doesn't report errors that have been handled", {
+    with_test_workers({
+      err <- capture.output(type="message", {
+        future_promise(stop("boom1")) %>% then(onRejected = ~{})
+        wait_for_it()
+      })
+      expect_equal(err, character(0))
+    })
+  })
 })
