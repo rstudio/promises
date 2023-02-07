@@ -77,11 +77,11 @@ Promise <- R6::R6Class("Promise",
       private$state <- "rejected"
 
       later::later(function() {
-          lapply(private$onRejected, function(f) {
-            private$rejectionHandled <- TRUE
-            f(private$value)
-          })
-          private$onRejected <- list()
+        lapply(private$onRejected, function(f) {
+          private$rejectionHandled <- TRUE
+          f(private$value)
+        })
+        private$onRejected <- list()
 
         later::later(~{
           if (!private$rejectionHandled) {
@@ -217,8 +217,12 @@ Promise <- R6::R6Class("Promise",
 )
 
 normalizeOnFulfilled <- function(onFulfilled) {
-  if (!is.function(onFulfilled))
+  if (!is.function(onFulfilled)) {
+    if (!is.null(onFulfilled)) {
+      warning("`onFulfilled` must be a function or `NULL`")
+    }
     return(NULL)
+  }
 
   args <- formals(onFulfilled)
   arg_count <- length(args)
@@ -241,8 +245,12 @@ normalizeOnFulfilled <- function(onFulfilled) {
 }
 
 normalizeOnRejected <- function(onRejected) {
-  if (!is.function(onRejected))
+  if (!is.function(onRejected)) {
+    if (!is.null(onRejected)) {
+      warning("`onRejected` must be a function or `NULL`")
+    }
     return(NULL)
+  }
 
   args <- formals(onRejected)
   arg_count <- length(args)

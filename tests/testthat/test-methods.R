@@ -31,7 +31,20 @@ describe("then()", {
     expect_identical(result$visible, FALSE)
   })
   it("method ignores non-functions or NULL...", {
-    p1 <- promise(~resolve(1))$then(10)$then(NULL)
+    p1 <- promise(~resolve(1))
+    expect_warning(
+      {
+        p1 <- p1$then(10)
+      },
+      "`onFulfilled` must be a function or `NULL`",
+      fixed = TRUE
+    )
+    expect_warning(
+      {
+        p1 <- p1$then(NULL)
+      },
+      NA
+    )
     expect_identical(extract(p1), 1)
   })
   it("...but function only ignores NULL, not non-functions", {
@@ -72,7 +85,20 @@ describe("catch()", {
     expect_error(extract(p), "^bar$")
   })
   it("method ignores non-functions or NULL...", {
-    p1 <- promise(~resolve(1))$catch(10)$catch(NULL)
+    p1 <- promise(~ resolve(1))
+    expect_warning(
+      {
+        p1 <- p1$catch(10)
+      },
+      "`onRejected` must be a function or `NULL`",
+      fixed = TRUE
+    )
+    expect_warning(
+      {
+        p1 <- p1$catch(NULL)
+      },
+      NA
+    )
     expect_identical(extract(p1), 1)
   })
   it("...but function only ignores NULL, not non-functions", {
