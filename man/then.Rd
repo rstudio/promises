@@ -63,9 +63,11 @@ the return value of \code{then} is also a (newly created) promise. This new
 promise waits for the original promise to be fulfilled or rejected, and for
 \code{onFulfilled} or \code{onRejected} to be called. The result of (or error raised
 by) calling \code{onFulfilled}/\code{onRejected} will be used to fulfill (reject) the
-new promise.\preformatted{promise_a <- get_data_frame_async()
+new promise.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{promise_a <- get_data_frame_async()
 promise_b <- then(promise_a, onFulfilled = head)
-}
+}\if{html}{\out{</div>}}
 
 In this example, assuming \code{get_data_frame_async} returns a promise that
 eventually resolves to a data frame, \code{promise_b} will eventually resolve to
@@ -76,7 +78,9 @@ whether \code{onFulfilled}/\code{onRejected} returns a value or throws an error,
 whether the original promise was fulfilled or rejected. In other words, it's
 possible to turn failure to success and success to failure. Consider this
 example, where we expect \code{some_async_operation} to fail, and want to consider
-it an error if it doesn't:\preformatted{promise_c <- some_async_operation()
+it an error if it doesn't:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{promise_c <- some_async_operation()
 promise_d <- then(promise_c,
   onFulfilled = function(value) \{
     stop("That's strange, the operation didn't fail!")
@@ -86,20 +90,22 @@ promise_d <- then(promise_c,
     NULL
   \}
 )
-}
+}\if{html}{\out{</div>}}
 
 Now, \code{promise_d} will be rejected if \code{promise_c} is fulfilled, and vice
 versa.
 
 \strong{Warning:} Be very careful not to accidentally turn failure into success,
-if your error handling code is not the last item in a chain!\preformatted{some_async_operation() \%>\%
+if your error handling code is not the last item in a chain!
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{some_async_operation() \%>\%
   catch(function(reason) \{
     warning("An error occurred: ", reason)
   \}) \%>\%
   then(function() \{
     message("I guess we succeeded...?")  # No!
   \})
-}
+}\if{html}{\out{</div>}}
 
 In this example, the \code{catch} callback does not itself throw an error, so the
 subsequent \code{then} call will consider its promise fulfilled!

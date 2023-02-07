@@ -35,14 +35,14 @@ However, it is possible to use a private loop inside a user-defined \code{WorkQu
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{WorkQueue$new()}}
-\item \href{#method-schedule_work}{\code{WorkQueue$schedule_work()}}
-\item \href{#method-clone}{\code{WorkQueue$clone()}}
+\item \href{#method-WorkQueue-new}{\code{WorkQueue$new()}}
+\item \href{#method-WorkQueue-schedule_work}{\code{WorkQueue$schedule_work()}}
+\item \href{#method-WorkQueue-clone}{\code{WorkQueue$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-WorkQueue-new"></a>}}
+\if{latex}{\out{\hypertarget{method-WorkQueue-new}{}}}
 \subsection{Method \code{new()}}{
 Create a new \code{WorkQueue}
 \subsection{Usage}{
@@ -67,8 +67,8 @@ Schedule work}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-schedule_work"></a>}}
-\if{latex}{\out{\hypertarget{method-schedule_work}{}}}
+\if{html}{\out{<a id="method-WorkQueue-schedule_work"></a>}}
+\if{latex}{\out{\hypertarget{method-WorkQueue-schedule_work}{}}}
 \subsection{Method \code{schedule_work()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WorkQueue$schedule_work(fn)}\if{html}{\out{</div>}}
@@ -83,8 +83,8 @@ Schedule work}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-WorkQueue-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-WorkQueue-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
