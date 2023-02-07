@@ -3,7 +3,7 @@ promises (development version)
 
 * `future_promise()` received a speed improvement when submitting many requests with a minimal number of `{future}` workers. If `future_promise()` runs out of available `{future}` workers, then `future_promise()` will preemptively return for the remainder of the current `{later}` execution. While it is possible for `{future}` to finish a job before submitting all of the `future_promise()` requests, the time saved by not asking `{future}`'s worker availability will be faster overall than if a few jobs were submitted early. (#78)
 
-* Fixed #86: future_promise() spuriously reports unhandled errors.
+* Fixed #86: `future_promise()` spuriously reports unhandled errors. (#90)
 
 
 promises 1.2.0.1
