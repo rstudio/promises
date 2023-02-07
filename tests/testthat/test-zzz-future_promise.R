@@ -9,6 +9,7 @@ source(test_path("common.R"))
 local({
   ## Setup ##
 
+  n_workers <- 2
   # Set up a plan with 2 future workers
   with_test_workers <- function(code) {
     # (Can not use a variable for workers if in a local({}))
@@ -44,7 +45,7 @@ local({
 
   worker_jobs <- 8
   worker_job_time <- 1
-  expected_total_time <- worker_jobs * worker_job_time / 2 # 2 workers
+  expected_total_time <- worker_jobs * worker_job_time / n_workers
 
   do_future_test <- function(
     prom_fn = future_promise,
@@ -74,11 +75,11 @@ local({
       future_exec_times <- c()
       if (block_mid_session) {
         # Have `future` block the main R session 1 second into execution
-        lapply(1:8, function(i) {
+        lapply(seq_len(worker_jobs), function(i) {
           later::later(
             function() {
               future::future({
-                Sys.sleep(1)
+                Sys.sleep(worker_job_time)
                 time_diff()
               }) %...>% {
                 future_exec_times <<- c(future_exec_times, .)
@@ -88,7 +89,6 @@ local({
           )
         })
       }
-
 
       exec_times <- NA
       lapply(seq_len(worker_jobs), function(i) {
@@ -112,7 +112,7 @@ local({
       expect_equal(all(exec_times_lag < (2 * worker_job_time)), expect_reasonable_exec_lag_time)
 
       # post_lapply_time_diff should be ~ 0s
-      expect_equal(post_lapply_time_diff < worker_job_time, expect_immediate_lapply)
+      expect_equal(post_lapply_time_diff < (worker_job_time * ((worker_jobs - n_workers) / n_workers)), expect_immediate_lapply)
 
       # time_diffs should never grow by more than 1s; (Expected 0.1)
       time_diffs_lag <- time_diffs[-1] - time_diffs[-length(time_diffs)]
