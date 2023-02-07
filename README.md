@@ -1,7 +1,7 @@
 # promises
 
 <!-- badges: start -->
-[![R build status](https://github.com/rstudio/promises/workflows/R-CMD-check/badge.svg)](https://github.com/rstudio/promises/actions)
+[![R build status](https://github.com/rstudio/promises/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rstudio/promises/actions)
 <!-- badges: end -->
 
 A promise library for R. https://rstudio.github.io/promises/

@@ -148,6 +148,7 @@ WorkQueue <- R6::R6Class("WorkQueue",
   private = list(
     queue = "fastmap::fastqueue()",
     can_proceed_fn = "future_worker_is_free()",
+    can_proceed_cache_val = NULL,
     # only _really_ used for delay checking
     loop = "later::global_loop()",
     delay = "ExpoDelay$new()",
@@ -176,7 +177,29 @@ WorkQueue <- R6::R6Class("WorkQueue",
 
     # Returns a logical which let's work begin
     can_proceed = function() {
-      isTRUE(private$can_proceed_fn())
+      can_proceed_cache_val <- private$can_proceed_cache_val
+      # Return early if no work can be submitted.
+      if (!is.null(can_proceed_cache_val)) return(can_proceed_cache_val)
+
+      ret <- isTRUE(private$can_proceed_fn())
+
+      # If we can no longer proceed, then we should avoid asking if the status has changed within the current {later} loop execution
+      # The value will be reset after have giving {future} the possibility to update the number of available workers
+      # While there is a possibility that a fast {future} job could finish in the middle of submitting many `future_promise()` job requests,
+      #   the time saved by not asking the {future} cluster many many status questions is faster overall
+      # https://github.com/rstudio/promises/pull/78
+      if (is_false(ret)) {
+        private$can_proceed_cache_val <- FALSE
+        # Reset `$can_proceed()` functionality in the next event loop execution
+        later::later(
+          loop = private$loop,
+          delay = 0,
+          function() {
+            private$can_proceed_cache_val <- NULL
+          }
+        )
+      }
+      ret
     },
 
     # Function to attempt as much work as possible
@@ -309,15 +332,15 @@ future_promise_queue <- local({
 #' This occurs when there is more submitted \pkg{future} work than there are available \pkg{future} workers.
 #' To counter this situation, we can create a promise to execute work using future (using `future_promise()`) and only begin the work if a \pkg{future} worker is available.
 #'
-#' Using `future_promise()` is recommended when ever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
+#' Using `future_promise()` is recommended whenever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
 #'
-#' For more details and examples, please see the [`vignette("future_promise", "promises")`](https://rstudio.github.io/promises/articles/future_promise.html) vignette().
+#' For more details and examples, please see the [`vignette("future_promise", "promises")`](https://rstudio.github.io/promises/articles/future_promise.html) vignette.
 #' @describeIn future_promise Creates a [promise()] that will execute the `expr` using [future::future()].
 #' @inheritParams future::future
 #' @param expr An R expression. While the `expr` is eventually sent to [`future::future()`], please use the same precautions that you would use with regular `promises::promise()` expressions. `future_promise()` may have to hold the `expr` in a [promise()] while waiting for a \pkg{future} worker to become available.
 #' @param ... extra parameters provided to [`future::future()`]
 #' @param queue A queue that is used to schedule work to be done using [future::future()].  This queue defaults to [future_promise_queue()] and requires that method `queue$schedule_work(fn)` exist.  This method should take in a function that will execute the promised \pkg{future} work.
-#' @return Unlike [future::future()`], `future_promise()` returns a [promise()] object that will eventually resolve the \pkg{future} `expr`.
+#' @return Unlike [`future::future()`], `future_promise()` returns a [promise()] object that will eventually resolve the \pkg{future} `expr`.
 #' @examples
 #' \donttest{# Relative start time
 #' start <- Sys.time()

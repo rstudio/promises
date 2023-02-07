@@ -39,7 +39,7 @@ to be attached in the \R environment evaluating the future.}
 \item{queue}{A queue that is used to schedule work to be done using \code{\link[future:future]{future::future()}}.  This queue defaults to \code{\link[=future_promise_queue]{future_promise_queue()}} and requires that method \code{queue$schedule_work(fn)} exist.  This method should take in a function that will execute the promised \pkg{future} work.}
 }
 \value{
-Unlike [future::future()\verb{], }future_promise()\verb{returns a [promise()] object that will eventually resolve the \pkg{future}}expr`.
+Unlike \code{\link[future:future]{future::future()}}, \code{future_promise()} returns a \code{\link[=promise]{promise()}} object that will eventually resolve the \pkg{future} \code{expr}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -49,17 +49,17 @@ When submitting \pkg{future} work, \pkg{future} (by design) will block the main 
 This occurs when there is more submitted \pkg{future} work than there are available \pkg{future} workers.
 To counter this situation, we can create a promise to execute work using future (using \code{future_promise()}) and only begin the work if a \pkg{future} worker is available.
 
-Using \code{future_promise()} is recommended when ever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
+Using \code{future_promise()} is recommended whenever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
 
-For more details and examples, please see the \href{https://rstudio.github.io/promises/articles/future_promise.html}{\code{vignette("future_promise", "promises")}} vignette().
+For more details and examples, please see the \href{https://rstudio.github.io/promises/articles/future_promise.html}{\code{vignette("future_promise", "promises")}} vignette.
 }
 \section{Functions}{
 \itemize{
-\item \code{future_promise_queue}: Default \code{future_promise()} work queue to use. This function returns a \link{WorkQueue} that is cached per R session.
+\item \code{future_promise_queue()}: Default \code{future_promise()} work queue to use. This function returns a \link{WorkQueue} that is cached per R session.
 
-\item \code{future_promise}: Creates a \code{\link[=promise]{promise()}} that will execute the \code{expr} using \code{\link[future:future]{future::future()}}.
+\item \code{future_promise()}: Creates a \code{\link[=promise]{promise()}} that will execute the \code{expr} using \code{\link[future:future]{future::future()}}.
+
 }}
-
 \examples{
 \donttest{# Relative start time
 start <- Sys.time()

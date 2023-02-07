@@ -15,14 +15,14 @@ License: MIT + file LICENSE
 Imports:
     R6,
     Rcpp,
+    fastmap (>= 1.1.0),
     later,
     rlang,
     stats,
-    magrittr
+    magrittr (>= 1.5)
 Suggests:
     testthat,
     future (>= 1.21.0),
-    fastmap (>= 1.1.0),
     purrr,
     knitr,
     rmarkdown,
@@ -31,7 +31,7 @@ Suggests:
 LinkingTo: later,
     Rcpp
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
