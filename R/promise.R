@@ -218,7 +218,9 @@ Promise <- R6::R6Class("Promise",
 
 normalizeOnFulfilled <- function(onFulfilled) {
   if (!is.function(onFulfilled)) {
-    # TODO: Warn?
+    if (!is.null(onFulfilled)) {
+      warning("`onFulfilled` must be a function or `NULL`")
+    }
     return(NULL)
   }
 
@@ -244,7 +246,9 @@ normalizeOnFulfilled <- function(onFulfilled) {
 
 normalizeOnRejected <- function(onRejected) {
   if (!is.function(onRejected)) {
-    # TODO: Warn?
+    if (!is.null(onRejected)) {
+      warning("`onRejected` must be a function or `NULL`")
+    }
     return(NULL)
   }
 
