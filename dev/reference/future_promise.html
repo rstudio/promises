@@ -145,15 +145,17 @@ to be attached in the <span style="R">R</span> environment evaluating the future
     <h2>Value</h2>
     
 
-<p>Unlike [future::future()<code>], </code>future_promise()<code>returns a [promise()] object that will eventually resolve the \pkg{future}</code>expr`.</p>
+<p>Unlike <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code>, <code>future_promise()</code> returns a <code><a href="promise.html">promise()</a></code> object that will eventually resolve the <span class="pkg">future</span></p>
+<p></p>
+<p><code>expr</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
     <p>When submitting <span class="pkg">future</span> work, <span class="pkg">future</span> (by design) will block the main R session until a worker becomes available.
 This occurs when there is more submitted <span class="pkg">future</span> work than there are available <span class="pkg">future</span> workers.
 To counter this situation, we can create a promise to execute work using future (using <code>future_promise()</code>) and only begin the work if a <span class="pkg">future</span> worker is available.</p>
-<p>Using <code>future_promise()</code> is recommended when ever a continuous runtime is used, such as with <span class="pkg">plumber</span> or <span class="pkg">shiny</span>.</p>
-<p>For more details and examples, please see the <a href="https://rstudio.github.io/promises/articles/future_promise.html"><code><a href="../articles/future_promise.html">vignette("future_promise", "promises")</a></code></a> vignette().</p>
+<p>Using <code>future_promise()</code> is recommended whenever a continuous runtime is used, such as with <span class="pkg">plumber</span> or <span class="pkg">shiny</span>.</p>
+<p>For more details and examples, please see the <a href="https://rstudio.github.io/promises/articles/future_promise.html"><code><a href="../articles/future_promise.html">vignette("future_promise", "promises")</a></code></a> vignette.</p>
     </div>
     <div id="functions">
     <h2>Functions</h2>
