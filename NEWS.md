@@ -5,6 +5,8 @@ promises (development version)
 
 * Fixed #86: `future_promise()` spuriously reports unhandled errors. (#90)
 
+* Move `{fastmap}` from `Suggests` to `Imports` for better `{renv}` discovery. (#87)
+
 
 promises 1.2.0.1
 ==============
