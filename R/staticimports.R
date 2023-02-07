@@ -3,7 +3,6 @@
 # Imported from pkg:staticimports
 # ======================================================================
 
-
 is_installed <- function(package, version = NULL) {
   installed <- nzchar(system.file(package = package))
   if (is.null(version)) {
