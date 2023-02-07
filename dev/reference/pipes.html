@@ -36,7 +36,7 @@ function call."><meta name="robots" content="noindex"><!-- mathjax --><script sr
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Learning
      
     <span class="caret"></span>
@@ -100,26 +100,31 @@ function call.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="va">lhs</span> <span class="op">%...&gt;%</span> <span class="va">rhs</span>
-
-<span class="va">lhs</span> <span class="op">%...T&gt;%</span> <span class="va">rhs</span>
-
-<span class="va">lhs</span> <span class="op">%...!%</span> <span class="va">rhs</span>
-
-<span class="va">lhs</span> <span class="op">%...T!%</span> <span class="va">rhs</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="va">lhs</span> <span class="op">%...&gt;%</span> <span class="va">rhs</span></span>
+<span></span>
+<span><span class="va">lhs</span> <span class="op">%...T&gt;%</span> <span class="va">rhs</span></span>
+<span></span>
+<span><span class="va">lhs</span> <span class="op">%...!%</span> <span class="va">rhs</span></span>
+<span></span>
+<span><span class="va">lhs</span> <span class="op">%...T!%</span> <span class="va">rhs</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>lhs</dt>
 <dd><p>A promise object.</p></dd>
+
+
 <dt>rhs</dt>
 <dd><p>A function call using the magrittr semantics. It can return either
 a promise or non-promise value, or throw an error.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A new promise.</p>
+    
+
+<p>A new promise.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -146,19 +151,19 @@ function instead of an expression.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="future_promise.html">future_promise</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span> <span class="op">%...&gt;%</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span> <span class="op">%...T&gt;%</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># If the read.csv fails, resolve to NULL instead</span></span>
-<span class="r-in"><span class="fu"><a href="future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"http://example.com/data.csv"</span><span class="op">)</span><span class="op">)</span> <span class="op">%...!%</span></span>
-<span class="r-in">  <span class="op">{</span> <span class="cn">NULL</span> <span class="op">}</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="future_promise.html">future_promise</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span> <span class="op">%...&gt;%</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span> <span class="op">%...T&gt;%</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># If the read.csv fails, resolve to NULL instead</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"http://example.com/data.csv"</span><span class="op">)</span><span class="op">)</span> <span class="op">%...!%</span></span></span>
+<span class="r-in"><span>  <span class="op">{</span> <span class="cn">NULL</span> <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -173,7 +178,7 @@ function instead of an expression.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

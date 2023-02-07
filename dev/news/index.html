@@ -32,7 +32,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Learning
      
     <span class="caret"></span>
@@ -88,8 +88,8 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="promises-development-version">promises (development version)<a class="anchor" aria-label="anchor" href="#promises-development-version"></a></h2>
-<ul><li>
-<code><a href="../reference/future_promise.html">future_promise()</a></code> recevied a speed improvement when submitting many requests with a minimal number of <a href="https://future.futureverse.org" class="external-link">future</a> workers. If <code><a href="../reference/future_promise.html">future_promise()</a></code> runs out of available <a href="https://future.futureverse.org" class="external-link">future</a> workers, then <code><a href="../reference/future_promise.html">future_promise()</a></code> will preemptively return for the remainder of the current <a href="https://github.com/r-lib/later" class="external-link">later</a> execution. While it is possible for <a href="https://future.futureverse.org" class="external-link">future</a> to finish a job before submitting all of the <code><a href="../reference/future_promise.html">future_promise()</a></code> requests, the time saved by not asking <a href="https://future.futureverse.org" class="external-link">future</a>’s worker availablity will be faster overall than if a few jobs were submitted early. (<a href="https://github.com/rstudio/promises/issues/78" class="external-link">#78</a>)</li>
+<ul><li><p><code><a href="../reference/future_promise.html">future_promise()</a></code> recevied a speed improvement when submitting many requests with a minimal number of <a href="https://future.futureverse.org" class="external-link">future</a> workers. If <code><a href="../reference/future_promise.html">future_promise()</a></code> runs out of available <a href="https://future.futureverse.org" class="external-link">future</a> workers, then <code><a href="../reference/future_promise.html">future_promise()</a></code> will preemptively return for the remainder of the current <a href="https://github.com/r-lib/later" class="external-link">later</a> execution. While it is possible for <a href="https://future.futureverse.org" class="external-link">future</a> to finish a job before submitting all of the <code><a href="../reference/future_promise.html">future_promise()</a></code> requests, the time saved by not asking <a href="https://future.futureverse.org" class="external-link">future</a>’s worker availablity will be faster overall than if a few jobs were submitted early. (<a href="https://github.com/rstudio/promises/issues/78" class="external-link">#78</a>)</p></li>
+<li><p>Move <a href="https://r-lib.github.io/fastmap/" class="external-link">fastmap</a> from <code>Suggests</code> to <code>Imports</code> for better <a href="https://rstudio.github.io/renv/" class="external-link">renv</a> discovery. (<a href="https://github.com/rstudio/promises/issues/87" class="external-link">#87</a>)</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.0.1" id="promises-1201">promises 1.2.0.1<small>2021-02-11</small><a class="anchor" aria-label="anchor" href="#promises-1201"></a></h2>
@@ -98,8 +98,7 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.1.1" id="promises-111">promises 1.1.1<small>2020-06-09</small><a class="anchor" aria-label="anchor" href="#promises-111"></a></h2>
-<ul><li>Fix handling of FutureErrors during <code><a href="https://future.futureverse.org/reference/resolved.html" class="external-link">future::resolved()</a></code> and <code><a href="https://future.futureverse.org/reference/value.html" class="external-link">future::value()</a></code> by discarding the corrupt future. (<a href="https://github.com/rstudio/promises/issues/37" class="external-link">#37</a>)</li>
-</ul></div>
+<ul><li>Fix handling of FutureErrors during <code><a href="https://future.futureverse.org/reference/resolved.html" class="external-link">future::resolved()</a></code> and <code><a href="https://future.futureverse.org/reference/value.html" class="external-link">future::value()</a></code> by discarding the corrupt future. (<a href="https://github.com/rstudio/promises/issues/37" class="external-link">#37</a>)</li></ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.1.0" id="promises-110">promises 1.1.0<small>2019-10-04</small><a class="anchor" aria-label="anchor" href="#promises-110"></a></h2>
 <ul><li><p>Fixed <a href="https://github.com/rstudio/promises/issues/49" class="external-link">#49</a>: <code><a href="../reference/promise_all.html">promise_all()</a></code> previously did not handle <code>NULL</code> values correctly. (<a href="https://github.com/rstudio/promises/issues/50" class="external-link">#50</a>))</p></li>
@@ -107,8 +106,7 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.0.1" id="promises-101">promises 1.0.1<small>2018-04-13</small><a class="anchor" aria-label="anchor" href="#promises-101"></a></h2>
-<ul><li>Initial CRAN release</li>
-</ul></div>
+<ul><li>Initial CRAN release</li></ul></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -123,7 +121,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

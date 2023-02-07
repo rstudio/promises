@@ -33,7 +33,7 @@ given value (or rejected with the given reason)."><meta name="robots" content="n
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Learning
      
     <span class="caret"></span>
@@ -94,9 +94,9 @@ given value (or rejected with the given reason).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">promise_resolve</span><span class="op">(</span><span class="va">value</span><span class="op">)</span>
-
-<span class="fu">promise_reject</span><span class="op">(</span><span class="va">reason</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">promise_resolve</span><span class="op">(</span><span class="va">value</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">promise_reject</span><span class="op">(</span><span class="va">reason</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -106,19 +106,22 @@ given value (or rejected with the given reason).</p>
 This expression will be lazily evaluated, and if evaluating the expression
 raises an error, then the new promise will be rejected with that error as
 the reason.</p></dd>
+
+
 <dt>reason</dt>
 <dd><p>An error message string, or error object.</p></dd>
+
 </dl></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">promise_resolve</span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">promise_reject</span><span class="op">(</span><span class="st">"Something went wrong"</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...T!%</a></span></span>
-<span class="r-in">  <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">}</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">promise_resolve</span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">promise_reject</span><span class="op">(</span><span class="st">"Something went wrong"</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...T!%</a></span></span></span>
+<span class="r-in"><span>  <span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -133,7 +136,7 @@ the reason.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

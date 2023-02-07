@@ -52,7 +52,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Learning
      
     <span class="caret"></span>
@@ -130,11 +130,11 @@
 </h2>
 <p>The main API that <code>future</code> provides couldn’t be simpler. You call <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future()</a></code> and pass it the code that you want executed asynchronously:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span>
-  <span class="co"># expensive operations go here...</span>
-  <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">download_lots_of_data</span><span class="op">(</span><span class="op">)</span>
-  <span class="fu">fit_model</span><span class="op">(</span><span class="va">df</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="co"># expensive operations go here...</span></span>
+<span>  <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">download_lots_of_data</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu">fit_model</span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The object that’s returned is a future, which for all intents and purposes is a promise object<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, which will eventually resolve to the return value of the code block (i.e. the last expression) or an error if the code does not complete executing successfully. The important thing is that no matter how long the expensive operation takes, these lines will execute almost instantly, while the operation continues in the background.</p>
 <p>But we know that R is single-threaded, so how does <code>future</code> accomplish this? The answer: by utilizing another R process. <code>future</code> delegates the execution of the expensive operation to a totally different R process, so that the original R process can move on.</p>
 </div>
@@ -227,7 +227,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

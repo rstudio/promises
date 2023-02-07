@@ -52,7 +52,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Learning
      
     <span class="caret"></span>
@@ -129,18 +129,18 @@
 <p>In an ideal situation, the number of available <code>future</code> <em>workers</em> (<code><a href="https://future.futureverse.org/reference/nbrOfWorkers.html" class="external-link">future::nbrOfFreeWorkers()</a></code>) is always <strong>more than</strong> the number of <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code> <em>jobs</em>. However, if a <code>future</code> job is attempted when the number of free workers is <code>0</code>, then <code>future</code> will block the current R session until one becomes available.</p>
 <p>For a concrete example, let’s imagine a scenario, where seven <code>plumber</code> requests are received at the same time with only two <code>future</code> workers available. Also, let’s assume the <code>plumber</code> route(s) serving the first 6 requests use <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code> and take ~10s to compute <code>slow_calc()</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">#* @get /slow/&lt;k&gt;</span>
-<span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu">slow_calc</span><span class="op">(</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co">#* @get /slow/&lt;k&gt;</span></span>
+<span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu">slow_calc</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>Let’s also assume the <code>plumber</code> route serving the last request does not use any form of <code>future</code> or <code>promises</code> and takes almost no time to compute.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">#* @get /fast/&lt;k&gt;</span>
-<span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu">fast_calc</span><span class="op">(</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co">#* @get /fast/&lt;k&gt;</span></span>
+<span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">fast_calc</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>The figure below depicts the overall timeline of execution of these 7 requests under the conditions we’ve outlined above. Note that the y-axis is ordered from first request coming in (<code>/slow/1</code>) to the last request (<code>/fast/7</code>).</p>
 <p><img src="future_promise/future.png" width="75%" alt="Early workers take more time than expected. Main R session is blocked"></p>
 <p>Note how R has to wait 20s before processing the 7th request (shown in green). This is a big improvement over not using <code>future</code>+<code>promises</code> at all (in that case, R would have to wait 60s before processing). However, since there are only two <code>future</code> workers available R still has to wait longer than necessary to process that last request because the main R session must wait for a <code>future</code> worker to become available. The video below animates this behavior:</p>
@@ -156,12 +156,12 @@
 <p>The advantage of using <code><a href="../reference/future_promise.html">future_promise()</a></code> over <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code> is that even if there aren’t <code>future</code> workers available, the <code>future</code> is scheduled to be done when workers become available via <code>promises</code>. In other words, <code><a href="../reference/future_promise.html">future_promise()</a></code> ensures the main R thread isn’t blocked when a <code>future</code> job is requested and can’t immediately perform the work (i.e., the number of jobs exceeds the number of workers).</p>
 <p>Continuing with the example above, we can swap out the calls to <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code> with <code><a href="../reference/future_promise.html">future_promise()</a></code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">#* @get /slow/&lt;k&gt;</span>
-<span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu">promises</span><span class="fu">::</span><span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="fu">slow_calc</span><span class="op">(</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co">#* @get /slow/&lt;k&gt;</span></span>
+<span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">promises</span><span class="fu">::</span><span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu">slow_calc</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>With this change to <code><a href="../reference/future_promise.html">future_promise()</a></code>, note how the <code>/fast/7</code> route now does not have to wait on <code>future</code> work to finish processing. Therefore, <code>plumber</code> can complete the last requests almost immediately:</p>
 <p><img src="future_promise/blocked_future_promise.png" width="75%" alt="future_promise() keeps the main R session free"></p>
 <p>The vertical gray bars in the figure above represent timepoints where the main R session is actually busy. Outside of these gray areas, the R session is free to do other things, for example, executing other <code>promises</code> or, more generally, non-<code>future</code> work. The video below animates this behavior:</p>
@@ -193,7 +193,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

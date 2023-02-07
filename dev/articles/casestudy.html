@@ -52,7 +52,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Learning
      
     <span class="caret"></span>
@@ -172,36 +172,36 @@
 <p>The user interface is a pretty typical shinydashboard. It’s important to note that the UI part of the app is entirely agnostic to whether the server is written in the sync or async style; when we port the app to async, we won’t touch the UI at all.</p>
 <p>There are two major pieces of input we need from users: what <strong>date</strong> to examine (this app only lets us look at one day at a time) and <strong>how many</strong> of the most prolific downloaders to look at. We’ll put these two controls in the dashboard sidebar.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">dashboardSidebar</span><span class="op">(</span>
-  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date"</span>, <span class="st">"Date"</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span>,
-  <span class="fu">numericInput</span><span class="op">(</span><span class="st">"count"</span>, <span class="st">"Show top N downloaders:"</span>, <span class="fl">6</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">dashboardSidebar</span><span class="op">(</span></span>
+<span>  <span class="fu">dateInput</span><span class="op">(</span><span class="st">"date"</span>, <span class="st">"Date"</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  <span class="fu">numericInput</span><span class="op">(</span><span class="st">"count"</span>, <span class="st">"Show top N downloaders:"</span>, <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>(We set <code>date</code> to two days ago by default, because there’s some lag between when a day ends and when its logs are published.)</p>
 <p>The rest of the UI code is just typical shinydashboard scaffolding, plus some <code>shinydashboard::valueBoxOutput</code>s and <code>plotOutputs</code>. These are so trivial that they’re hardly worth talking about, but I’ll include the code here for completeness. Finally, there’s <code>detailViewUI</code>, a <a href="https://shiny.rstudio.com/articles/modules.html" class="external-link">Shiny module</a> that just contains more of the same (value boxes and plots).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R">  <span class="fu">dashboardBody</span><span class="op">(</span>
-    <span class="fu">fluidRow</span><span class="op">(</span>
-      <span class="fu">tabBox</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">12</span>,
-        <span class="fu">tabPanel</span><span class="op">(</span><span class="st">"All traffic"</span>,
-          <span class="fu">fluidRow</span><span class="op">(</span>
-            <span class="fu">valueBoxOutput</span><span class="op">(</span><span class="st">"total_size"</span>, width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,
-            <span class="fu">valueBoxOutput</span><span class="op">(</span><span class="st">"total_count"</span>, width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,
-            <span class="fu">valueBoxOutput</span><span class="op">(</span><span class="st">"total_downloaders"</span>, width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
-          <span class="op">)</span>,
-          <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"all_hour"</span><span class="op">)</span>
-        <span class="op">)</span>,
-        <span class="fu">tabPanel</span><span class="op">(</span><span class="st">"Biggest whales"</span>,
-          <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"downloaders"</span>, height <span class="op">=</span> <span class="fl">500</span><span class="op">)</span>
-        <span class="op">)</span>,
-        <span class="fu">tabPanel</span><span class="op">(</span><span class="st">"Whales by hour"</span>,
-          <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"downloaders_hour"</span>, height <span class="op">=</span> <span class="fl">500</span><span class="op">)</span>
-        <span class="op">)</span>,
-        <span class="fu">tabPanel</span><span class="op">(</span><span class="st">"Detail view"</span>,
-          <span class="fu">detailViewUI</span><span class="op">(</span><span class="st">"details"</span><span class="op">)</span>
-        <span class="op">)</span>
-      <span class="op">)</span>
-    <span class="op">)</span>
-  <span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span>  <span class="fu">dashboardBody</span><span class="op">(</span></span>
+<span>    <span class="fu">fluidRow</span><span class="op">(</span></span>
+<span>      <span class="fu">tabBox</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">12</span>,</span>
+<span>        <span class="fu">tabPanel</span><span class="op">(</span><span class="st">"All traffic"</span>,</span>
+<span>          <span class="fu">fluidRow</span><span class="op">(</span></span>
+<span>            <span class="fu">valueBoxOutput</span><span class="op">(</span><span class="st">"total_size"</span>, width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>            <span class="fu">valueBoxOutput</span><span class="op">(</span><span class="st">"total_count"</span>, width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>            <span class="fu">valueBoxOutput</span><span class="op">(</span><span class="st">"total_downloaders"</span>, width <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span>          <span class="op">)</span>,</span>
+<span>          <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"all_hour"</span><span class="op">)</span></span>
+<span>        <span class="op">)</span>,</span>
+<span>        <span class="fu">tabPanel</span><span class="op">(</span><span class="st">"Biggest whales"</span>,</span>
+<span>          <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"downloaders"</span>, height <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
+<span>        <span class="op">)</span>,</span>
+<span>        <span class="fu">tabPanel</span><span class="op">(</span><span class="st">"Whales by hour"</span>,</span>
+<span>          <span class="fu">plotOutput</span><span class="op">(</span><span class="st">"downloaders_hour"</span>, height <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
+<span>        <span class="op">)</span>,</span>
+<span>        <span class="fu">tabPanel</span><span class="op">(</span><span class="st">"Detail view"</span>,</span>
+<span>          <span class="fu">detailViewUI</span><span class="op">(</span><span class="st">"details"</span><span class="op">)</span></span>
+<span>        <span class="op">)</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="server-logic">Server logic<a class="anchor" aria-label="anchor" href="#server-logic"></a>
@@ -258,9 +258,9 @@
 </h3>
 <p>The first thing we’ll do is load the basic libraries of async programming.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span>
-<span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span></code></pre></div>
 <p>I originally used <code>multiprocess</code> but file downloading inside a future seemed to fail on Mac. (I’ve found that it’s usually not worth spending a lot of time trying to figure out why <code>multiprocess</code> doesn’t work for some specific code; instead, just use <code>multisession</code>, since that’s probably going to be the solution anyway.)</p>
 </div>
 <div class="section level3">
@@ -268,46 +268,46 @@
 </h3>
 <p>The next thing we’ll do is convert the <code>data</code> event reactive to use <code>future</code> for the expensive bits. The original code looks lke this:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># SYNCHRONOUS version</span>
-
-<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span>
-  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span>  <span class="co"># Example: 2018-05-28</span>
-  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>  <span class="co"># Example: "2018"</span>
-
-  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span>
-  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span>
-
-  <span class="fu">withProgress</span><span class="op">(</span>value <span class="op">=</span> <span class="cn">NULL</span>, <span class="op">{</span>
-
-    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-      <span class="fu">setProgress</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Downloading data..."</span><span class="op">)</span>
-      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span>
-    <span class="op">}</span>
-
-    <span class="fu">setProgress</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Parsing data..."</span><span class="op">)</span>
-    <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># SYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span></span>
+<span>  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span>  <span class="co"># Example: 2018-05-28</span></span>
+<span>  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>  <span class="co"># Example: "2018"</span></span>
+<span></span>
+<span>  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span></span>
+<span>  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">withProgress</span><span class="op">(</span>value <span class="op">=</span> <span class="cn">NULL</span>, <span class="op">{</span></span>
+<span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu">setProgress</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Downloading data..."</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span></span>
+<span>    <span class="fu">setProgress</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Parsing data..."</span><span class="op">)</span></span>
+<span>    <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>(Earlier, I said we wouldn’t take advantage of precomputation or caching. That wasn’t entirely true; in the code above, we cache the log files we download in a <code>data_cache</code> directory. I couldn’t bring myself to put my internet connection through that level of abuse, as I knew I’d be running this code thousands of times as I load tested it.)</p>
 <p>For now, we’ll lose the <code>withProgress</code>/<code>setProgress</code> reporting, since doing that correctly requires some more advanced techniques that we’ll talk about later. We’ll come back and fix this code later, but for now:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># ASYNCHRONOUS version</span>
-
-<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span>
-  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span>
-  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
-
-  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span>
-  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span>
-
-  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span>
-    <span class="op">}</span>
-    <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># ASYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span></span>
+<span>  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span></span>
+<span>  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span></span>
+<span>  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Pretty straightforward. This reactive now returns a future (which counts as a promise), not a data frame.</p>
 <p>Remember that we <strong>must</strong> read any reactive values (including <code>input</code>) and reactive expressions <a href="https://rstudio.github.io/promises/articles/shiny.html#shiny-specific-caveats-and-limitations">from <strong>outside</strong> the future</a>. (You will get an error if you attempt to read one from inside the future.)</p>
 <p>At this point, since there are no other long-running operations we want to make asynchronous, we’re actually done interacting directly with the <code>future</code> package. The rest of the reactive expressions will deal with the future returned by <code>data</code> using general async functions and operators from <code>promises</code>.</p>
@@ -317,26 +317,26 @@
 </h3>
 <p>The <code>whales</code> reactive takes the data frame from <code>data</code>, and uses dplyr to find the top <code>input$count</code> most prolific downloaders.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># SYNCHRONOUS version</span>
-
-<span class="va">whales</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">count</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">count</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># SYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">whales</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">count</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">count</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Since <code><a href="https://rdrr.io/r/utils/data.html" class="external-link">data()</a></code> now returns a promise, the whole function needs to be modified to deal with promises.</p>
 <p>This is basically a best-case scenario for working with <code>promises</code>. The whole expression consists of a single magrittr pipeline. There’s only one object (<code><a href="https://rdrr.io/r/utils/data.html" class="external-link">data()</a></code>) that’s been converted to a promise. The promise object only appears once, at the head of the pipeline.</p>
 <p>When the stars align like this, converting this code to async is literally as easy as replacing each <code>%&gt;%</code> with <code>%...&gt;%</code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># ASYNCHRONOUS version</span>
-
-<span class="va">whales</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu">count</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">count</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># ASYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">whales</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu">count</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">count</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The input (<code><a href="https://rdrr.io/r/utils/data.html" class="external-link">data()</a></code>) is a promise, the resulting output object is a promise, each stage of the pipeline returns a promise; but we can read and write this code almost as easily as the synchronous version!</p>
 <p>An example this simple may seem reductive, but this best-case scenario happens surprisingly often, if your coding style is influenced by the tidyverse. In this example app, <strong>59%</strong> of the reactives, observers, and outputs were converted using nothing more than replacing <code>%&gt;%</code> with <code>%...&gt;%</code>.</p>
 <p>One last thing before we move on. In the last section, I emphasized that reactive values cannot be read from inside a future. Here, we’re using <code>head(input$count)</code> inside a promise-pipeline; since <code><a href="https://rdrr.io/r/utils/data.html" class="external-link">data()</a></code> is written using a future, doesn’t that mean… well… isn’t this wrong?</p>
@@ -347,36 +347,36 @@
 </h3>
 <p>The <code>whale_downloads</code> reactive is a bit more complicated case.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># SYNCHRONOUS version</span>
-
-<span class="va">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">inner_join</span><span class="op">(</span><span class="fu">whales</span><span class="op">(</span><span class="op">)</span>, <span class="st">"ip_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">n</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># SYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">inner_join</span><span class="op">(</span><span class="fu">whales</span><span class="op">(</span><span class="op">)</span>, <span class="st">"ip_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">n</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Looks simple, but we can’t just do a simple replacement this time. Can you see why?</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># BAD VERSION DOESN'T WORK</span>
-
-<span class="va">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu">inner_join</span><span class="op">(</span><span class="fu">whales</span><span class="op">(</span><span class="op">)</span>, <span class="st">"ip_id"</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">n</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># BAD VERSION DOESN'T WORK</span></span>
+<span></span>
+<span><span class="va">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu">inner_join</span><span class="op">(</span><span class="fu">whales</span><span class="op">(</span><span class="op">)</span>, <span class="st">"ip_id"</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">n</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Remember, both <code><a href="https://rdrr.io/r/utils/data.html" class="external-link">data()</a></code> and <code>whales()</code> now return a promise object, not a data frame. None of the dplyr verbs know how to deal with promises natively (and the same is true for almost every other R function, anywhere in the R universe).</p>
 <p>We’re able to use <code>%...&gt;%</code> with promises on the left-hand side and regular dplyr calls on the right-hand side, only because the <code>%...&gt;%</code> operator “unwraps” the promise object for us, yielding a regular object (data frame or whatever) to be passed to dplyr. But in this case, we’re passing <code>whales()</code>, which a promise object, directly to <code>inner_join</code>, and <code>inner_join</code> has no idea what to do with it.</p>
 <p>The fundamental thing to pattern-match on here, is that <strong>we have a block of code that relies on more than one promise object</strong>, and that means <code>%...&gt;%</code> won’t be enough. This is a pretty common situation as well, and occurs in <strong>12%</strong> of reactives and outputs in this example app.</p>
 <p>Here’s what the real solution looks like:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># ASYNCHRONOUS version</span>
-
-<span class="va">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>data_df <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span>, whales_df <span class="op">=</span> <span class="fu">whales</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="va">data_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-      <span class="fu">inner_join</span><span class="op">(</span><span class="va">whales_df</span>, <span class="st">"ip_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-      <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">n</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># ASYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">whale_downloads</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>data_df <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span>, whales_df <span class="op">=</span> <span class="fu">whales</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">data_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu">inner_join</span><span class="op">(</span><span class="va">whales_df</span>, <span class="st">"ip_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">n</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="promises-the-gathering">Promises: the Gathering<a class="anchor" aria-label="anchor" href="#promises-the-gathering"></a>
 </h4>
@@ -415,43 +415,43 @@
 <p><img src="case-study-downloaders.png"></p>
 <p>All of the value boxes in this app ended up looking a lot like this:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># SYNCHRONOUS version</span>
-
-<span class="va">output</span><span class="op">$</span><span class="va">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">pull</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span>big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">valueBox</span><span class="op">(</span><span class="st">"unique downloaders"</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># SYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">output</span><span class="op">$</span><span class="va">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">pull</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span>big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">valueBox</span><span class="op">(</span><span class="st">"unique downloaders"</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>This is structurally no different than the <code>whales</code> best-case scenario reactive. One thing worth pointing out is that an async <code>renderValueBox</code> means you return a promise that returns a <code>valueBox</code>; you <em>don’t</em> return a <code>valueBox</code> to whom you have passed a promise.</p>
 <p>Meaning, you <em>don’t</em> do this:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># BAD VERSION DOESN'T WORK</span>
-
-<span class="va">output</span><span class="op">$</span><span class="va">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu">valueBox</span><span class="op">(</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-      <span class="fu">pull</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-      <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span>big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span>,
-    <span class="st">"unique downloaders"</span>
-  <span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># BAD VERSION DOESN'T WORK</span></span>
+<span></span>
+<span><span class="va">output</span><span class="op">$</span><span class="va">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu">valueBox</span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>      <span class="fu">pull</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span>big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span>,</span>
+<span>    <span class="st">"unique downloaders"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Instead, you do this:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># ASYNCHRONOUS version</span>
-
-<span class="va">output</span><span class="op">$</span><span class="va">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu">pull</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span>big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="fu">valueBox</span><span class="op">(</span><span class="st">"unique downloaders"</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># ASYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">output</span><span class="op">$</span><span class="va">total_downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderValueBox</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu">pull</span><span class="op">(</span><span class="va">ip_id</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span>big.mark <span class="op">=</span> <span class="st">","</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu">valueBox</span><span class="op">(</span><span class="st">"unique downloaders"</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The other trick worth nothing is the <code>pull</code> verb, which is used to retrieve a specific column of a data frame as a vector (similar to <code>$</code> or <code>[[</code>). In this case, <code>pull(data, ip_id)</code> is equivalent to <code>data[["ip_id"]]</code>. Note that <code>pull</code> is part of dplyr and isn’t specific to promises.</p>
 </div>
 <div class="section level3">
@@ -459,39 +459,39 @@
 </h3>
 <p>In a cruel twist of API design fate, one of the cornerstone packages of the tidyverse lacks a tidy API. I’m referring, of course, to <code>ggplot2</code>:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># SYNCHRONOUS version</span>
-
-<span class="va">output</span><span class="op">$</span><span class="va">downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu">whales</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">ip_name</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-    <span class="fu">geom_bar</span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span>
-    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Downloads on this day"</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># SYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">output</span><span class="op">$</span><span class="va">downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu">whales</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">ip_name</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_bar</span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Downloads on this day"</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>While <code>dplyr</code> and other tidyverse packages are designed to link calls together with <code>%&gt;%</code>, the older <code>ggplot2</code> package uses the <code>+</code> operator. This is mostly a small aesthetic wart when synchronous code, but it’s a real problem with async, because the <code>promises</code> package doesn’t currently have a promise-aware replacement for <code>+</code> like it does for <code>%&gt;%</code>.</p>
 <p>Fortunately, there’s a pretty good escape hatch for <code>%&gt;%</code>, and <code>%...&gt;%</code> inherited it too. Instead of a pipeline stage being a simple function call, you can put a <code>{</code> and <code>}</code> delimited code block, and inside of that code block, you can access the “it” value using a period (<code>.</code>).</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># ASYNCHRONOUS version</span>
-
-<span class="va">output</span><span class="op">$</span><span class="va">downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span>
-  <span class="fu">whales</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span>
-    <span class="va">whale_df</span> <span class="op">&lt;-</span> <span class="va">.</span>
-    <span class="fu">ggplot</span><span class="op">(</span><span class="va">whale_df</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">ip_name</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-      <span class="fu">geom_bar</span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span>
-      <span class="fu">ylab</span><span class="op">(</span><span class="st">"Downloads on this day"</span><span class="op">)</span>
-  <span class="op">}</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># ASYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">output</span><span class="op">$</span><span class="va">downloaders</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu">whales</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span></span>
+<span>    <span class="va">whale_df</span> <span class="op">&lt;-</span> <span class="va">.</span></span>
+<span>    <span class="fu">ggplot</span><span class="op">(</span><span class="va">whale_df</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">ip_name</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu">geom_bar</span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu">ylab</span><span class="op">(</span><span class="st">"Downloads on this day"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p><strong>The importance of this pattern cannot be overstated!</strong> Using <code>%...&gt;%</code> and simple calls alone, you’re restricted to doing pipeline-compatible operations. But <code>%...&gt;%</code> together with a curly-brace code block means your handler code can be any shape or size. Once inside that code block, you have a regular, non-promise value in <code>.</code> (if you even want to use it—sometimes you don’t, as we’ll see later). You can have zero, one, or more statements. You can use the <code>.</code> multiple times, in nested expressions, whatever.</p>
 <p>Tip: if you have extensive or complex code to put in a code block, start the block by creating a properly named variable to store the value of <code>.</code>. The reason for this is that <code>.</code> may acquire a different meaning than you intend as you add code to the code block. For example, if a magrittr pipeline starts with <code>.</code>, instead of evaluating the pipeline and returning a value, it creates a function that takes a single argument. So the following code wouldn’t filter the resolved value of <code>whales()</code>, but instead, create an anonymous function that calls <code>filter(n &gt; 1000)</code> on whatever you pass it.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">whales</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span>
-  <span class="va">.</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;</span> <span class="fl">1000</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">whales</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span></span>
+<span>  <span class="va">.</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>This fixes it:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">whales</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span>
-  <span class="va">whales_df</span> <span class="op">&lt;-</span> <span class="va">.</span>
-  <span class="va">whales_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;</span> <span class="fl">1000</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">whales</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span></span>
+<span>  <span class="va">whales_df</span> <span class="op">&lt;-</span> <span class="va">.</span></span>
+<span>  <span class="va">whales_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>There are other ways to work around the above problem as well, but I like this fix because it doesn’t require any thought or care. Just give the <code>.</code> value a new name, and forget the <code>.</code> exists.</p>
 <p>For untidy code with a single promise object, just remember: pair a single <code>%...&gt;%</code> with a code block and you should be able to do almost anything.</p>
 </div>
@@ -501,27 +501,27 @@
 <p>Now that we have discussed a few techniques for writing async code, let’s come back to our original <code>data</code> event reactive, and this time do a more faithful async conversion that preserves the progress reporting functionality of the original.</p>
 <p>Again, here’s the original sync code:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># SYNCHRONOUS version</span>
-
-<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span>
-  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span>  <span class="co"># Example: 2018-05-28</span>
-  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>  <span class="co"># Example: "2018"</span>
-
-  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span>
-  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span>
-
-  <span class="fu">withProgress</span><span class="op">(</span>value <span class="op">=</span> <span class="cn">NULL</span>, <span class="op">{</span>
-
-    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-      <span class="fu">setProgress</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Downloading data..."</span><span class="op">)</span>
-      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span>
-    <span class="op">}</span>
-
-    <span class="fu">setProgress</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Parsing data..."</span><span class="op">)</span>
-    <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># SYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span></span>
+<span>  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span>  <span class="co"># Example: 2018-05-28</span></span>
+<span>  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>  <span class="co"># Example: "2018"</span></span>
+<span></span>
+<span>  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span></span>
+<span>  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">withProgress</span><span class="op">(</span>value <span class="op">=</span> <span class="cn">NULL</span>, <span class="op">{</span></span>
+<span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu">setProgress</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Downloading data..."</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span></span>
+<span>    <span class="fu">setProgress</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Parsing data..."</span><span class="op">)</span></span>
+<span>    <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Progress reporting currently presents two challenges for future.</p>
 <p>First, the <code>withProgress({...})</code> function cannot be used with async. <code>withProgress</code> is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to <code><a href="../reference/future_promise.html">future_promise()</a></code> will return immediately even though the actual task is far from done, using <code>withProgress</code> won’t work; the progress dialog would be dismissed before the download even got going.</p>
 <p>It’s conceivable that <code>withProgress</code> could gain promise compatibility someday, but it’s not in Shiny v1.1.0. In the meantime, we can work around this by using the alternative, <a href="https://shiny.rstudio.com/reference/shiny/1.1.0/Progress.html" class="external-link">object-oriented progress API</a> that Shiny offers. It’s a bit more verbose and fiddly than <code>withProgress</code>/<code>setProgress</code>, but it is flexible enough to work with futures/promises.</p>
@@ -529,26 +529,26 @@
 <p>It’s conceivable that <code>future</code> could gain the ability for child processes to communicate back to their parents, but no good solution exists at the time of this writing. In the meantime, we can work around this by taking the one future that does both downloading and parsing, and splitting it into two separate futures. After the download future has completed, we can send a progress message that parsing is beginning, and then start the parsing future.</p>
 <p>The regrettably complicated solution is below.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># ASYNCHRONOUS version</span>
-
-<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span>
-  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span>
-  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
-
-  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span>
-  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span>
-
-  <span class="va">p</span> <span class="op">&lt;-</span> <span class="va">Progress</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span>
-  <span class="va">p</span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>value <span class="op">=</span> <span class="cn">NULL</span>, message <span class="op">=</span> <span class="st">"Downloading data..."</span><span class="op">)</span>
-  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span>
-    <span class="op">}</span>
-  <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="op">{</span> <span class="va">p</span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Parsing data..."</span><span class="op">)</span> <span class="op">}</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span>
-    <span class="op">{</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">}</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu"><a href="../reference/then.html">finally</a></span><span class="op">(</span><span class="op">~</span><span class="va">p</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># ASYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span></span>
+<span>  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span></span>
+<span>  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span></span>
+<span>  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="va">Progress</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">p</span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>value <span class="op">=</span> <span class="cn">NULL</span>, message <span class="op">=</span> <span class="st">"Downloading data..."</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="op">{</span> <span class="va">p</span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Parsing data..."</span><span class="op">)</span> <span class="op">}</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="op">{</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">}</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="../reference/then.html">finally</a></span><span class="op">(</span><span class="op">~</span><span class="va">p</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The single future we wrote earlier has now become a pipeline of promises:</p>
 <ol style="list-style-type: decimal">
 <li>future (download)</li>
@@ -626,7 +626,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
