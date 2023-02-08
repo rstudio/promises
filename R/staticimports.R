@@ -22,8 +22,9 @@ is_installed <- function(pkg, version = NULL) {
   installed && isTRUE(get_package_version(pkg) >= version)
 }
 
-# A wrapper for `system.file()`, which caches the package file path.
-# Note, only non-empty paths are cached.
+# A wrapper for `system.file()`, which caches the package path because
+# `system.file()` can be slow. If a package is not installed, the result won't
+# be cached.
 system_file_cached <- local({
   pkg_dir_cache <- character()
 
