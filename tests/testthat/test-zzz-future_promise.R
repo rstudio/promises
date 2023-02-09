@@ -43,8 +43,10 @@ local({
     later::later(function() { run_every(i + 1, max = max, delay = delay) }, delay = delay)
   }
 
+
   worker_jobs <- 8
-  worker_job_time <- 1
+  # allow for more time on CI (4s on CI vs 1s locally)
+  worker_job_time <- if (on_ci) 4 else 1
   expected_total_time <- worker_jobs * worker_job_time / n_workers
 
   do_future_test <- function(
