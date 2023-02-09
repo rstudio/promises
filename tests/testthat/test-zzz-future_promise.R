@@ -43,10 +43,9 @@ local({
     later::later(function() { run_every(i + 1, max = max, delay = delay) }, delay = delay)
   }
 
-  on_ci <- isTRUE(as.logical(Sys.getenv("CI")))
 
   worker_jobs <- 8
-  # allow for more time on CI (4s on CI vs 1s locally )
+  # allow for more time on CI (4s on CI vs 1s locally)
   worker_job_time <- if (on_ci) 4 else 1
   expected_total_time <- worker_jobs * worker_job_time / n_workers
 

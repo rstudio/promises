@@ -1,5 +1,7 @@
 library(later)
 
+on_ci <- isTRUE(as.logical(Sys.getenv("CI")))
+
 # Create a promise that can be EXTernally resolved/rejected/inspected
 ext_promise <- function() {
   res <- NULL
@@ -16,7 +18,8 @@ ext_promise <- function() {
 }
 
 # Block until all pending later tasks have executed
-wait_for_it <- function(timeout = 30) {
+# wait_for_it <- function(timeout = if (on_ci) 60 else 30) {
+wait_for_it <- function(timeout = if (on_ci) 60 else 30) {
   start <- Sys.time()
   while (!loop_empty()) {
     if (difftime(Sys.time(), start, units = "secs") > timeout) {
