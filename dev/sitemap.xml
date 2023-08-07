@@ -4,31 +4,31 @@
     <loc>https://rstudio.github.io/promises/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://rstudio.github.io/promises/articles/casestudy.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/promises/articles/combining.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/promises/articles/future_promise.html</loc>
-  </url>
-  <url>
-    <loc>https://rstudio.github.io/promises/articles/futures.html</loc>
-  </url>
-  <url>
     <loc>https://rstudio.github.io/promises/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://rstudio.github.io/promises/articles/intro.html</loc>
+    <loc>https://rstudio.github.io/promises/articles/promises_01_motivation.html</loc>
   </url>
   <url>
-    <loc>https://rstudio.github.io/promises/articles/motivation.html</loc>
+    <loc>https://rstudio.github.io/promises/articles/promises_02_intro.html</loc>
   </url>
   <url>
-    <loc>https://rstudio.github.io/promises/articles/overview.html</loc>
+    <loc>https://rstudio.github.io/promises/articles/promises_03_overview.html</loc>
   </url>
   <url>
-    <loc>https://rstudio.github.io/promises/articles/shiny.html</loc>
+    <loc>https://rstudio.github.io/promises/articles/promises_04_futures.html</loc>
+  </url>
+  <url>
+    <loc>https://rstudio.github.io/promises/articles/promises_05_future_promise.html</loc>
+  </url>
+  <url>
+    <loc>https://rstudio.github.io/promises/articles/promises_06_shiny.html</loc>
+  </url>
+  <url>
+    <loc>https://rstudio.github.io/promises/articles/promises_07_combining.html</loc>
+  </url>
+  <url>
+    <loc>https://rstudio.github.io/promises/articles/promises_08_casestudy.html</loc>
   </url>
   <url>
     <loc>https://rstudio.github.io/promises/authors.html</loc>

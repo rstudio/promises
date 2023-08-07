@@ -42,28 +42,28 @@ functions that return promises."><meta name="robots" content="noindex"><!-- math
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/motivation.html">1. Why use promises?</a>
+      <a href="../articles/promises_01_motivation.html">1. Why use promises?</a>
     </li>
     <li>
-      <a href="../articles/intro.html">2. An informal intro to async programming</a>
+      <a href="../articles/promises_02_intro.html">2. An informal intro to async programming</a>
     </li>
     <li>
-      <a href="../articles/overview.html">3. Working with promises</a>
+      <a href="../articles/promises_03_overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks with future</a>
+      <a href="../articles/promises_04_futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/future_promise.html">5. Advanced future and promises usage</a>
+      <a href="../articles/promises_05_future_promise.html">5. Advanced future and promises usage</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
+      <a href="../articles/promises_06_shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/combining.html">7. Combining promises</a>
+      <a href="../articles/promises_07_combining.html">7. Combining promises</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/promises_08_casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -136,7 +136,7 @@ equivalent of a function call that never returns, i.e. hangs).</p>
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a promise that resolves to a random value after 2 secs</span></span></span>
 <span class="r-in"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu">promise</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">resolve</span>, <span class="va">reject</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/later/man/later.html" class="external-link">later</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span>, delay <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/later/reference/later.html" class="external-link">later</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span>, delay <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">p1</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></span>

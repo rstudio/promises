@@ -38,28 +38,28 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/motivation.html">1. Why use promises?</a>
+      <a href="../articles/promises_01_motivation.html">1. Why use promises?</a>
     </li>
     <li>
-      <a href="../articles/intro.html">2. An informal intro to async programming</a>
+      <a href="../articles/promises_02_intro.html">2. An informal intro to async programming</a>
     </li>
     <li>
-      <a href="../articles/overview.html">3. Working with promises</a>
+      <a href="../articles/promises_03_overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks with future</a>
+      <a href="../articles/promises_04_futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/future_promise.html">5. Advanced future and promises usage</a>
+      <a href="../articles/promises_05_future_promise.html">5. Advanced future and promises usage</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
+      <a href="../articles/promises_06_shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/combining.html">7. Combining promises</a>
+      <a href="../articles/promises_07_combining.html">7. Combining promises</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/promises_08_casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -155,7 +155,7 @@ to be attached in the <span style="R">R</span> environment evaluating the future
 This occurs when there is more submitted <span class="pkg">future</span> work than there are available <span class="pkg">future</span> workers.
 To counter this situation, we can create a promise to execute work using future (using <code>future_promise()</code>) and only begin the work if a <span class="pkg">future</span> worker is available.</p>
 <p>Using <code>future_promise()</code> is recommended whenever a continuous runtime is used, such as with <span class="pkg">plumber</span> or <span class="pkg">shiny</span>.</p>
-<p>For more details and examples, please see the <a href="https://rstudio.github.io/promises/articles/future_promise.html"><code><a href="../articles/future_promise.html">vignette("future_promise", "promises")</a></code></a> vignette.</p>
+<p>For more details and examples, please see the <a href="https://rstudio.github.io/promises/articles/future_promise.html"><code><a href="https://rstudio.github.io/promises//articles/future_promise.html">vignette("future_promise", "promises")</a></code></a> vignette.</p>
     </div>
     <div id="functions">
     <h2>Functions</h2>
@@ -182,7 +182,7 @@ To counter this situation, we can create a promise to execute work using future 
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit</a></span><span class="op">(</span><span class="op">{</span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">old_plan</span><span class="op">)</span><span class="op">}</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">start</span> <span class="op">&lt;&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/force.html" class="external-link">force</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="kw">while</span><span class="op">(</span><span class="op">!</span><span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/later/man/loop_empty.html" class="external-link">loop_empty</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.1</span><span class="op">)</span>; <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/later/man/run_now.html" class="external-link">run_now</a></span><span class="op">(</span><span class="op">)</span><span class="op">}</span></span></span>
+<span class="r-in"><span>  <span class="kw">while</span><span class="op">(</span><span class="op">!</span><span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/later/reference/loop_empty.html" class="external-link">loop_empty</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.1</span><span class="op">)</span>; <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/later/reference/run_now.html" class="external-link">run_now</a></span><span class="op">(</span><span class="op">)</span><span class="op">}</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="co"># Print a status message. Ex: `"PID: XXX; 2.5s promise done"`</span></span></span>

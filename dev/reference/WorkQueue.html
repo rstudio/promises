@@ -39,28 +39,28 @@ Future promise work queue"><meta name="robots" content="noindex"><!-- mathjax --
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/motivation.html">1. Why use promises?</a>
+      <a href="../articles/promises_01_motivation.html">1. Why use promises?</a>
     </li>
     <li>
-      <a href="../articles/intro.html">2. An informal intro to async programming</a>
+      <a href="../articles/promises_02_intro.html">2. An informal intro to async programming</a>
     </li>
     <li>
-      <a href="../articles/overview.html">3. Working with promises</a>
+      <a href="../articles/promises_03_overview.html">3. Working with promises</a>
     </li>
     <li>
-      <a href="../articles/futures.html">4. Launching tasks with future</a>
+      <a href="../articles/promises_04_futures.html">4. Launching tasks with future</a>
     </li>
     <li>
-      <a href="../articles/future_promise.html">5. Advanced future and promises usage</a>
+      <a href="../articles/promises_05_future_promise.html">5. Advanced future and promises usage</a>
     </li>
     <li>
-      <a href="../articles/shiny.html">6. Using promises with Shiny</a>
+      <a href="../articles/promises_06_shiny.html">6. Using promises with Shiny</a>
     </li>
     <li>
-      <a href="../articles/combining.html">7. Combining promises</a>
+      <a href="../articles/promises_07_combining.html">7. Combining promises</a>
     </li>
     <li>
-      <a href="../articles/casestudy.html">8. Case study: Converting a Shiny app to async</a>
+      <a href="../articles/promises_08_casestudy.html">8. Case study: Converting a Shiny app to async</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -131,7 +131,7 @@ This behavior might change in the future, but we are not exactly sure how at thi
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/WorkQueue.html">WorkQueue</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  can_proceed <span class="op">=</span> <span class="va">future_worker_is_free</span>,</span>
 <span>  queue <span class="op">=</span> <span class="fu">fastmap</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/fastmap/reference/fastqueue.html" class="external-link">fastqueue</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  loop <span class="op">=</span> <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/later/man/create_loop.html" class="external-link">global_loop</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  loop <span class="op">=</span> <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/later/reference/create_loop.html" class="external-link">global_loop</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -146,7 +146,7 @@ This behavior might change in the future, but we are not exactly sure how at thi
 
 
 <dt><code>loop</code></dt>
-<dd><p><span class="pkg">later</span> loop to use for calculating the next delayed check. Defaults to <code><a href="https://rdrr.io/pkg/later/man/create_loop.html" class="external-link">later::global_loop()</a></code>.
+<dd><p><span class="pkg">later</span> loop to use for calculating the next delayed check. Defaults to <code><a href="https://r-lib.github.io/later/reference/create_loop.html" class="external-link">later::global_loop()</a></code>.
 Schedule work</p></dd>
 
 
