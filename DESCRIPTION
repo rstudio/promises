@@ -1,40 +1,44 @@
-Package: promises
 Type: Package
+Package: promises
 Title: Abstractions for Promise-Based Asynchronous Programming
 Version: 1.2.0.9000
 Authors@R: c(
-      person("Joe", "Cheng", email = "joe@rstudio.com", role = c("aut", "cre")),
-      person("RStudio", role = c("cph", "fnd"))
-    )
-Description: Provides fundamental abstractions for doing asynchronous programming
-    in R using promises. Asynchronous programming is useful for allowing a single
-    R process to orchestrate multiple tasks in the background while also attending
-    to something else. Semantics are similar to 'JavaScript' promises, but with a
-    syntax that is idiomatic R.
+    person("Joe", "Cheng", , "joe@rstudio.com", role = c("aut", "cre")),
+    person("RStudio", role = c("cph", "fnd"))
+  )
+Description: Provides fundamental abstractions for doing asynchronous
+    programming in R using promises. Asynchronous programming is useful
+    for allowing a single R process to orchestrate multiple tasks in the
+    background while also attending to something else. Semantics are
+    similar to 'JavaScript' promises, but with a syntax that is idiomatic
+    R.
 License: MIT + file LICENSE
+URL: https://rstudio.github.io/promises/,
+    https://github.com/rstudio/promises
+BugReports: https://github.com/rstudio/promises/issues
 Imports:
-    R6,
-    Rcpp,
     fastmap (>= 1.1.0),
     later,
+    magrittr (>= 1.5),
+    R6,
+    Rcpp,
     rlang,
-    stats,
-    magrittr (>= 1.5)
+    stats
 Suggests:
-    testthat,
     future (>= 1.21.0),
-    purrr,
     knitr,
+    purrr,
     rmarkdown,
-    vembedr,
-    spelling
-LinkingTo: later,
+    spelling,
+    testthat,
+    vembedr
+LinkingTo: 
+    later,
     Rcpp
+VignetteBuilder: 
+    knitr
+Config/Needs/website: rsconnect
+Encoding: UTF-8
+Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Encoding: UTF-8
-VignetteBuilder: knitr
-URL: https://rstudio.github.io/promises/, https://github.com/rstudio/promises
-BugReports: https://github.com/rstudio/promises/issues
-Language: en-US
-Config/Needs/website: rsconnect
