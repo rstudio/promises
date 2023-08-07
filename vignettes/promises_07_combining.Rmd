@@ -1,9 +1,9 @@
 ---
-title: "Combining `promises`"
+title: "Combining promises"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{7. Combining promises}
+  %\VignetteIndexEntry{Combining promises}
   %\VignetteEncoding{UTF-8}
 ---
 

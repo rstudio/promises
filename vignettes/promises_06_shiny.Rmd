@@ -1,9 +1,9 @@
 ---
-title: "Using `promises` with Shiny"
+title: "Using promises with Shiny"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{6. Using promises with Shiny}
+  %\VignetteIndexEntry{Using promises with Shiny}
   %\VignetteEncoding{UTF-8}
 ---
 

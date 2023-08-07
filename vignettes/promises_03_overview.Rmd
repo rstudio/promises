@@ -1,9 +1,9 @@
 ---
-title: "Working with `promises` in R"
+title: "Working with promises in R"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{3. Working with promises in R}
+  %\VignetteIndexEntry{Working with promises in R}
   %\VignetteEncoding{UTF-8}
 ---
 

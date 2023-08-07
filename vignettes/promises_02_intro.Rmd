@@ -3,7 +3,7 @@ title: "An informal introduction to async programming"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{2. An informal introduction to async programming}
+  %\VignetteIndexEntry{An informal introduction to async programming}
   %\VignetteEncoding{UTF-8}
 ---
 
