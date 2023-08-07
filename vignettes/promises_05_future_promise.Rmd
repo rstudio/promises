@@ -1,9 +1,9 @@
 ---
-title: "Advanced `future` and `promises` usage"
+title: "Advanced future and promises usage"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{5. Advanced future and promises usage}
+  %\VignetteIndexEntry{Advanced future and promises usage}
   %\VignetteEncoding{UTF-8}
 resource_files:
   - future_promise/future.png

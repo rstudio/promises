@@ -50,18 +50,28 @@ navbar:
       text: Learning
       menu:
       - text: 1. Why use promises?
-        href: articles/motivation.html
+        href: articles/promises_01_motivation.html
       - text: 2. An informal intro to async programming
-        href: articles/intro.html
+        href: articles/promises_02_intro.html
       - text: 3. Working with promises
-        href: articles/overview.html
+        href: articles/promises_03_overview.html
       - text: 4. Launching tasks with future
-        href: articles/futures.html
+        href: articles/promises_04_futures.html
       - text: 5. Advanced future and promises usage
-        href: articles/future_promise.html
+        href: articles/promises_05_future_promise.html
       - text: 6. Using promises with Shiny
-        href: articles/shiny.html
+        href: articles/promises_06_shiny.html
       - text: 7. Combining promises
-        href: articles/combining.html
+        href: articles/promises_07_combining.html
       - text: "8. Case study: Converting a Shiny app to async"
-        href: articles/casestudy.html
+        href: articles/promises_08_casestudy.html
+
+redirects:
+  - ["articles/motivation.html", "articles/promises_01_motivation.html"]
+  - ["articles/intro.html", "articles/promises_02_intro.html"]
+  - ["articles/overview.html", "articles/promises_03_overview.html"]
+  - ["articles/futures.html", "articles/promises_04_futures.html"]
+  - ["articles/future_promise.html", "articles/promises_05_future_promise.html"]
+  - ["articles/shiny.html", "articles/promises_06_shiny.html"]
+  - ["articles/combining.html", "articles/promises_07_combining.html"]
+  - ["articles/casestudy.html", "articles/promises_08_casestudy.html"]

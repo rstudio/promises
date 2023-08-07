@@ -1,9 +1,9 @@
 ---
-title: "Launching tasks with `future`"
+title: "Launching tasks with future"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{4. Launching tasks with future}
+  %\VignetteIndexEntry{Launching tasks with future}
   %\VignetteEncoding{UTF-8}
 ---
 
