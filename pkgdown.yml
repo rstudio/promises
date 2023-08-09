@@ -1,17 +1,17 @@
-pandoc: 2.7.3
-pkgdown: 1.6.1
+pandoc: 3.1.2
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  casestudy: casestudy.html
-  combining: combining.html
-  future_promise: future_promise.html
-  futures: futures.html
-  intro: intro.html
-  motivation: motivation.html
-  overview: overview.html
-  shiny: shiny.html
-last_built: 2021-02-11T17:27Z
+  promises_01_motivation: promises_01_motivation.html
+  promises_02_intro: promises_02_intro.html
+  promises_03_overview: promises_03_overview.html
+  promises_04_futures: promises_04_futures.html
+  promises_05_future_promise: promises_05_future_promise.html
+  promises_06_shiny: promises_06_shiny.html
+  promises_07_combining: promises_07_combining.html
+  promises_08_casestudy: promises_08_casestudy.html
+last_built: 2023-08-09T18:00Z
 urls:
-  reference: https://rstudio.github.io/promises//reference
-  article: https://rstudio.github.io/promises//articles
+  reference: https://rstudio.github.io/promises/reference
+  article: https://rstudio.github.io/promises/articles
 

@@ -2,21 +2,21 @@
   "index_name": "rstudio",
   "start_urls": [
     {
-      "url": "https://rstudio.github.io/promises//index.html",
+      "url": "https://rstudio.github.io/promises/index.html",
       "selectors_key": "homepage",
       "tags": [
         "homepage"
       ]
     },
     {
-      "url": "https://rstudio.github.io/promises//reference",
+      "url": "https://rstudio.github.io/promises/reference",
       "selectors_key": "reference",
       "tags": [
         "reference"
       ]
     },
     {
-      "url": "https://rstudio.github.io/promises//articles",
+      "url": "https://rstudio.github.io/promises/articles",
       "selectors_key": "articles",
       "tags": [
         "articles"
@@ -30,7 +30,7 @@
     "/articles/index.html"
   ],
   "sitemap_urls": [
-    "https://rstudio.github.io/promises//sitemap.xml"
+    "https://rstudio.github.io/promises/sitemap.xml"
   ],
   "selectors": {
     "homepage": {
