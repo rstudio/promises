@@ -130,8 +130,8 @@ of server code.</p>
 <li><p>Identify slow operations (function calls or blocks of statements)
 in your app.</p></li>
 <li><p>Convert the slow operation into a future using
-<code><a href="../reference/future_promise.html">future_promise()</a></code>. (If you haven’t read the <a href="futures.html">article on futures</a> and <a href="future_promise.html"><code>future_promise()</code></a>, definitely
-do that before proceeding!)</p></li>
+<code><a href="../reference/future_promise.html">future_promise()</a></code>. (If you haven’t read the <a href="promises_04_futures.html">article on futures</a> and <a href="promises_05_future_promise.html"><code>future_promise()</code></a>,
+definitely do that before proceeding!)</p></li>
 <li><p>Any code that relies on the result of that operation (if any),
 whether directly or indirectly, now must be converted to promise
 handlers that operate on the future object.</p></li>
@@ -175,8 +175,8 @@ utility functions like <code>promise_all</code> and
 tasks.</p>
 <p><code>plan(multisession)</code> is a directive to the
 <code>future</code> package, telling it how future tasks should actually
-be executed. See the <a href="futures.html">article on futures</a> for
-more details.</p>
+be executed. See the <a href="promises_04_futures.html">article on
+futures</a> for more details.</p>
 </div>
 <div class="section level2">
 <h2 id="identifying-slow-operations">Identifying slow operations<a class="anchor" aria-label="anchor" href="#identifying-slow-operations"></a>
@@ -238,11 +238,12 @@ means we have to take special care to deal with a number of practical
 issues. There are extremely important constraints that futures impose on
 their code blocks; certain objects cannot be safely used across process
 boundaries, and some of the default behaviors of the future library may
-severely impact the performance of your app. Again, see the <a href="futures.html">article on futures</a> for more details.</p>
+severely impact the performance of your app. Again, see the <a href="promises_04_futures.html">article on futures</a> for more
+details.</p>
 <p>The remainder of this document will use <code><a href="../reference/future_promise.html">future_promise()</a></code>
 in place of <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future()</a></code>. For more information on the
-differences, see the <a href="future_promise.html">article on the
-benefits of <code>future_promise()</code></a>.</p>
+differences, see the <a href="promises_05_future_promise.html">article
+on the benefits of <code>future_promise()</code></a>.</p>
 <div class="section level3">
 <h3 id="shiny-specific-caveats-and-limitations">Shiny-specific caveats and limitations<a class="anchor" aria-label="anchor" href="#shiny-specific-caveats-and-limitations"></a>
 </h3>

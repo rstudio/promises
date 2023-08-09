@@ -221,9 +221,8 @@ That promise is what lets you know:</p>
 this:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">value</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"http://example.com/data/data.csv"</span><span class="op">)</span></span></code></pre></div>
-<p>An asynchronous function call (which uses <a href="futures.html">the
-future package</a> via <a href="future_promise.html"><code>future_promise()</code></a>) will look
-instead like:</p>
+<p>An asynchronous function call (which uses <a href="promises_04_futures.html">the future package</a> via <a href="promises_05_future_promise.html"><code>future_promise()</code></a>)
+will look instead like:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">promise</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"http://example.com/data/data.csv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>While the regular function call returns a data frame, the async call
@@ -612,7 +611,7 @@ pipeline. Our <code>finally</code> makes sure the temp file is deleted
 when the operation is done, regardless of whether it succeeded or
 failed.</p>
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
-<p>Next: <a href="futures.html">Launching tasks</a></p>
+<p>Next: <a href="promises_04_futures.html">Launching tasks</a></p>
 </div>
 </div>
   </div>

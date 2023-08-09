@@ -165,9 +165,8 @@ before the real work has actually completed.</p>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>(Don’t worry about what this definition means for now. You’ll learn
-more about defining async functions in <a href="futures.html">Launching
-tasks</a> and <a href="future_promise.html">Advanced <code>future</code>
-and <code>promises</code> usage</a>.)</p>
+more about defining async functions in <a href="promises_04_futures.html">Launching tasks</a> and <a href="promises_05_future_promise.html">Advanced <code>future</code> and
+<code>promises</code> usage</a>.)</p>
 <p><strong>So instead of “read this CSV file” it’s more like “begin
 reading this CSV file”?</strong></p>
 <p>Yes! That’s what async functions do: they start things, and give you
@@ -380,18 +379,18 @@ the return value of <code><a href="https://rdrr.io/r/base/cat.html" class="exter
 useful for logging, or other “side effecty” operations.</p>
 <p>There’s also <code>%...!%</code>, and its tee version,
 <code>%...T!%</code>, which are used for error handling. I won’t confuse
-you with more about that now, but you can read more <a href="overview.html#error-handling">here</a>.</p>
+you with more about that now, but you can read more <a href="promises_03_overview.html#error-handling">here</a>.</p>
 <p>The <code>promises</code> package is where all of these operators
 live, and it also comes with some additional functions for working with
 promises.</p>
 <p>So far, the only actual async function we’ve talked about has been
 <code>read.csv.async</code>, which doesn’t actually exist. To learn
-where actual async functions come from, read <a href="futures.html">this
-guide to the <code>future</code> package</a>.</p>
+where actual async functions come from, read <a href="promises_04_futures.html">this guide to the <code>future</code>
+package</a>.</p>
 <p>There are the lower-level functions <code>then</code>,
 <code>catch</code>, and <code>finally</code>, which are the non-pipe,
 non-operator equivalents of the promise operators we’ve been discussing.
-See <a href="overview.html#accessing-results-with-then">reference</a>.</p>
+See <a href="promises_03_overview.html#accessing-results-with-then">reference</a>.</p>
 <p>And finally, there are <code>promise_all</code>,
 <code>promise_race</code>, and <code>promise_lapply</code>, used to
 combine multiple promises into a single promise. Learn more about them
@@ -402,7 +401,8 @@ sinks in.</strong></p>
 <p>Sorry. I told you it was complicated. If you make it through the rest
 of the guide, you’ll be 95% of the way there.</p>
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
-<p>Next: <a href="overview.html">Working with promises</a></p>
+<p>Next: <a href="promises_03_overview.html">Working with
+promises</a></p>
 </div>
   </div>
 
