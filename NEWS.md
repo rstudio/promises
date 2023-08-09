@@ -1,3 +1,5 @@
+# promises 1.2.1
+
 promises (development version)
 ==============
 
