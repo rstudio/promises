@@ -30,5 +30,5 @@ While promises can make a huge difference in the scalability of a Shiny app, the
 **DON'T use promises to improve the performance of Shiny apps for a single user.**
 
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
-Next: [An informal intro to async programming](intro.html)
+Next: [An informal intro to async programming](promises_01_intro.html)
 </div>

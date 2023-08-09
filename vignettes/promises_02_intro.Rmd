@@ -333,5 +333,5 @@ reread this conversation a few times before it fully sinks in.**
 Sorry. I told you it was complicated. If you make it through the rest of the guide, you’ll be 95% of the way there.
 
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
-Next: [Working with promises](overview.html)
+Next: [Working with promises](promises_03_overview.html)
 </div>

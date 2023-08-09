@@ -86,8 +86,8 @@ Second, objects that refer to native resources are unlikely to work in this dire
 
 Next:
 
-* [Advanced `future` and `promises` usage](future_promise.html)
-* [Using `promises` with Shiny](shiny.html)
+* [Advanced `future` and `promises` usage](promises_05_future_promise.html)
+* [Using `promises` with Shiny](promises_06_shiny.html)
 
   </div>
 </div>

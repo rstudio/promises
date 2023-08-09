@@ -80,5 +80,5 @@ embed_vimeo("505286442") %>%
 ```
 
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
-Next: [Using `promises` with Shiny](shiny.html)
+Next: [Using `promises` with Shiny](promises_06_shiny.html)
 </div>
