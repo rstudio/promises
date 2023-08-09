@@ -60,7 +60,7 @@ read.csv.async <- function(file, header = TRUE, stringsAsFactors = FALSE) {
 }
 ```
 
-(Don't worry about what this definition means for now. You'll learn more about defining async functions in [Launching tasks](futures.html) and [Advanced `future` and `promises` usage](future_promise.html).)
+(Don't worry about what this definition means for now. You'll learn more about defining async functions in [Launching tasks](promises_04_futures.html) and [Advanced `future` and `promises` usage](promises_05_future_promise.html).)
 
 **So instead of “read this CSV file” it’s more like “begin reading this CSV
 file”?**
@@ -311,18 +311,18 @@ This is useful for logging, or other “side effecty” operations.
 
 There’s also `%...!%`, and its tee version, `%...T!%`, which are used for error
 handling. I won’t confuse you with more about that now, but you can read more
-[here](overview.html#error-handling).
+[here](promises_03_overview.html#error-handling).
 
 The `promises` package is where all of these operators live, and it also comes
 with some additional functions for working with promises.
 
 So far, the only actual async function we’ve talked about has been
 `read.csv.async`, which doesn’t actually exist. To learn where actual async
-functions come from, read [this guide to the `future` package](futures.html).
+functions come from, read [this guide to the `future` package](promises_04_futures.html).
 
 There are the lower-level functions `then`, `catch`, and `finally`, which are
 the non-pipe, non-operator equivalents of the promise operators we’ve been
-discussing. See [reference](overview.html#accessing-results-with-then).
+discussing. See [reference](promises_03_overview.html#accessing-results-with-then).
 
 And finally, there are `promise_all`, `promise_race`, and `promise_lapply`, used to combine
 multiple promises into a single promise. Learn more about them [here](../reference/promise_all.html).

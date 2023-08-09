@@ -54,7 +54,7 @@ So if a regular, synchronous function call generally looks like this:
 value <- read.csv("http://example.com/data/data.csv")
 ```
 
-An asynchronous function call (which uses [the future package](futures.html) via [`future_promise()`](future_promise.html)) will look instead like:
+An asynchronous function call (which uses [the future package](promises_04_futures.html) via [`future_promise()`](promises_05_future_promise.html)) will look instead like:
 
 ```r
 promise <- future_promise(read.csv("http://example.com/data/data.csv"))

@@ -10,7 +10,7 @@ resource_files:
   - future_promise/blocked_future_promise.png
 ---
 
-This article discusses the benefits of using `promises::future_promise()` over a combination of `future::future()` + `promises::promise()` to better take advantage of computing resources available to your main R session. To demonstrate these benefits, we'll walk-through a use-case with the `plumber` package. ([See here](https://www.rplumber.io/) to learn more about `plumber` and [the previous article](futures.html) to learn more about `future`.)
+This article discusses the benefits of using `promises::future_promise()` over a combination of `future::future()` + `promises::promise()` to better take advantage of computing resources available to your main R session. To demonstrate these benefits, we'll walk-through a use-case with the `plumber` package. ([See here](https://www.rplumber.io/) to learn more about `plumber` and [the previous article](promises_04_futures.html) to learn more about `future`.)
 
 ## The problem with `future()`+`promise()`
 
