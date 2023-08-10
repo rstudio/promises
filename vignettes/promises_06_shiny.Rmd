@@ -13,7 +13,7 @@ Async programming with Shiny boils down to following a few steps.
 
 1. Identify slow operations (function calls or blocks of statements) in your app.
 
-2. Convert the slow operation into a future using `future_promise()`. (If you haven't read the [article on futures](futures.html) and [`future_promise()`](future_promise.html), definitely do that before proceeding!)
+2. Convert the slow operation into a future using `future_promise()`. (If you haven't read the [article on futures](promises_04_futures.html) and [`future_promise()`](promises_05_future_promise.html), definitely do that before proceeding!)
 
 3. Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the future object.
 
@@ -53,7 +53,7 @@ The `promises` library is necessary for the `%...>%` operator. You may also want
 
 The `future` library is needed because the `future()` function call used inside `future_promise()` is how you will launch asynchronous tasks.
 
-`plan(multisession)` is a directive to the `future` package, telling it how future tasks should actually be executed. See the [article on futures](futures.html) for more details.
+`plan(multisession)` is a directive to the `future` package, telling it how future tasks should actually be executed. See the [article on futures](promises_04_futures.html) for more details.
 
 ## Identifying slow operations
 
@@ -90,9 +90,9 @@ future({
 })
 ```
 
-The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues. There are extremely important constraints that futures impose on their code blocks; certain objects cannot be safely used across process boundaries, and some of the default behaviors of the future library may severely impact the performance of your app. Again, see the [article on futures](futures.html) for more details.
+The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues. There are extremely important constraints that futures impose on their code blocks; certain objects cannot be safely used across process boundaries, and some of the default behaviors of the future library may severely impact the performance of your app. Again, see the [article on futures](promises_04_futures.html) for more details.
 
-The remainder of this document will use `future_promise()` in place of `future()`. For more information on the differences, see the [article on the benefits of `future_promise()`](future_promise.html).
+The remainder of this document will use `future_promise()` in place of `future()`. For more information on the differences, see the [article on the benefits of `future_promise()`](promises_05_future_promise.html).
 
 ### Shiny-specific caveats and limitations
 

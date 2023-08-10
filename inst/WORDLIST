@@ -10,7 +10,9 @@ Lopp
 Multisession
 NSE
 OpenCPU
+PBC
 RServe
+RStudio
 Shiny's
 ShinyApps
 UI
@@ -26,6 +28,7 @@ downloaders
 dplyr
 effecty
 expr
+funder
 ggplot
 github
 globals
