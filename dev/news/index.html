@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.2.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.2.1.9000</span>
       </span>
     </div>
 
@@ -88,6 +88,9 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="promises-development-version">promises (development version)<a class="anchor" aria-label="anchor" href="#promises-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="1.2.1" id="promises-121">promises 1.2.1<small>2023-08-10</small><a class="anchor" aria-label="anchor" href="#promises-121"></a></h2>
 <ul><li><p><code><a href="../reference/future_promise.html">future_promise()</a></code> received a speed improvement when submitting many requests with a minimal number of <a href="https://future.futureverse.org" class="external-link">future</a> workers. If <code><a href="../reference/future_promise.html">future_promise()</a></code> runs out of available <a href="https://future.futureverse.org" class="external-link">future</a> workers, then <code><a href="../reference/future_promise.html">future_promise()</a></code> will preemptively return for the remainder of the current <a href="https://r-lib.github.io/later/" class="external-link">later</a> execution. While it is possible for <a href="https://future.futureverse.org" class="external-link">future</a> to finish a job before submitting all of the <code><a href="../reference/future_promise.html">future_promise()</a></code> requests, the time saved by not asking <a href="https://future.futureverse.org" class="external-link">future</a>’s worker availability will be faster overall than if a few jobs were submitted early. (<a href="https://github.com/rstudio/promises/issues/78" class="external-link">#78</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/promises/issues/86" class="external-link">#86</a>: <code><a href="../reference/future_promise.html">future_promise()</a></code> spuriously reports unhandled errors. (<a href="https://github.com/rstudio/promises/issues/90" class="external-link">#90</a>)</p></li>
 <li><p>Move <a href="https://r-lib.github.io/fastmap/" class="external-link">fastmap</a> from <code>Suggests</code> to <code>Imports</code> for better <a href="https://rstudio.github.io/renv/" class="external-link">renv</a> discovery. (<a href="https://github.com/rstudio/promises/issues/87" class="external-link">#87</a>)</p></li>

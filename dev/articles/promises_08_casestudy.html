@@ -36,7 +36,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">promises</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.2.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.2.1.9000</span>
       </span>
     </div>
 
@@ -324,7 +324,7 @@ save the results to .rds files to be read by the app?</li>
 the results of my calculations and use them if I get the same request
 later? (See <a href="https://cran.r-project.org/package=memoise" class="external-link">memoise</a>, or roll
 your own.)</li>
-<li>Am I effectively leveraging <a href="https://posit.co/resources/shiny-dev-con/reactivity-pt-1-joe-cheng/" class="external-link">reactive
+<li>Am I effectively leveraging <a href="https://posit.co/resources/videos/reactivity-pt-1-joe-cheng/" class="external-link">reactive
 programming</a> to make sure my reactives are doing as little work as
 possible?</li>
 <li>When deploying my app, am I load balancing across multiple R
@@ -1013,11 +1013,10 @@ price to pay.</p>
 written for exposition purposes, but a real production app that was
 intended to scale to thousands of concurrent users across dozens of R
 processes, we wouldn’t download and parse CSV files on the fly. Instead,
-we’d establish a proper <a href="https://solutions.posit.co/examples/apps/twitter-etl/" class="external-link">ETL
-procedure</a> to run every night and put the results into a properly
-indexed database table, or RDS files with just the data we need. As I
-said <a href="#improving-performance-and-scalability">earlier</a>, a
-little precomputation and caching can make a huge difference!</p>
+we’d establish a proper <a href="https://solutions.posit.co/gallery/twitter-etl/" class="external-link">ETL procedure</a>
+to run every night and put the results into a properly indexed database
+table, or RDS files with just the data we need. As I said <a href="#improving-performance-and-scalability">earlier</a>, a little
+precomputation and caching can make a huge difference!</p>
 <p>Much of the remaining latency for the async2 branch is from ggplot2
 plotting. <a href="https://posit.co/resources/" class="external-link">Sean’s talk</a> alluded
 to some upcoming plot caching features we’re adding to Shiny, and I
