@@ -7,6 +7,16 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<style>
+.alert-success a {
+  color: white;
+  text-decoration: underline;
+}
+</style>
+<div class="alert alert-success">
+As of Shiny 1.8.1, there is a new feature called **Extended Tasks** that has several advantages over the approach in this article. We highly recommend that you read [the Extended Task documentation](https://shiny.posit.co/r/articles/improve/nonblocking/) first.
+</div>
+
 Taking advantage of async programming from Shiny is not as simple as turning on an option or flipping a switch. If you have already written a Shiny application and are looking to improve its scalability, expect the changes required for async operation to ripple through multiple layers of server code.
 
 Async programming with Shiny boils down to following a few steps.
