@@ -421,6 +421,11 @@ is.promising <- function(x) {
 
 #' @export
 is.promising.default <- function(x) {
+  for (cls in class(x)) {
+    if (!is.null(getS3method("as.promise", cls, optional = TRUE))) {
+      return(TRUE)
+    }
+  }
   FALSE
 }
 
