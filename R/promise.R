@@ -416,7 +416,22 @@ is.promise <- function(x) {
 #' @rdname is.promise
 #' @export
 is.promising <- function(x) {
-  inherits(x, "promise") || inherits(x, "Future")
+  UseMethod("is.promising")
+}
+
+#' @export
+is.promising.default <- function(x) {
+  FALSE
+}
+
+#' @export
+is.promising.promise <- function(x) {
+  TRUE
+}
+
+#' @export
+is.promising.Future <- function(x) {
+  TRUE
 }
 
 #' @rdname is.promise
