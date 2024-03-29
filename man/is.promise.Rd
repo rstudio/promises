@@ -29,6 +29,7 @@ otherwise.
 \description{
 Use \code{is.promise} to determine whether an R object is a promise. Use
 \code{as.promise} (an S3 generic method) to attempt to coerce an R object to a
-promise. This package includes support for converting \link[future:Future-class]{future::Future}
-objects into promises.
+promise, and \code{is.promising} (another S3 generic method) to test whether
+\code{as.promise} is supported. This package includes support for converting
+\link[future:Future-class]{future::Future} objects into promises.
 }

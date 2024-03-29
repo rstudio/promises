@@ -393,8 +393,9 @@ promise_reject <- function(reason) {
 #'
 #' Use `is.promise` to determine whether an R object is a promise. Use
 #' `as.promise` (an S3 generic method) to attempt to coerce an R object to a
-#' promise. This package includes support for converting [future::Future]
-#' objects into promises.
+#' promise, and `is.promising` (another S3 generic method) to test whether
+#' `as.promise` is supported. This package includes support for converting
+#' [future::Future] objects into promises.
 #'
 #' @param x An R object to test or coerce.
 #'
@@ -421,11 +422,6 @@ is.promising <- function(x) {
 
 #' @export
 is.promising.default <- function(x) {
-  for (cls in class(x)) {
-    if (!is.null(getS3method("as.promise", cls, optional = TRUE))) {
-      return(TRUE)
-    }
-  }
   FALSE
 }
 
