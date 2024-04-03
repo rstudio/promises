@@ -4,25 +4,11 @@ The promises package brings asynchronous programming capabilities to R. Asynchro
 
 This website provides a multi-step guide that will help familiarize you with several related concepts that are required for effective async programming. It is highly recommended that you go through the topics in order.
 
----
-
 ## Installation
 
-You can install both the promises package and an async-compatible version of Shiny (requires v1.1+) just by installing Shiny from CRAN:
-
 ```r
-install.packages("shiny")
+install.packages("promises")
 ```
-
-There are also some supporting packages that have experimental async-compatible branches:
-
-```r
-devtools::install_github("ramnathv/htmlwidgets")
-devtools::install_github("ropensci/plotly@async")
-devtools::install_github("rstudio/DT")
-```
-
----
 
 <style>
 .contents a.anchor { display: none; }
