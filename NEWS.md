@@ -1,4 +1,4 @@
-# promises (development version)
+# promises 1.3.0
 
 * `is.promising` is now an S3 method. (#104)
 
