@@ -37,9 +37,12 @@ There are several different methods we could use for launching R processes or at
 
 * `multisession`: Launches up to *n* background R processes on the same machine (where *n* is the number of processor cores on the system, minus 1). These background processes will be used/recycled for the life of the originating R process. If a future is launched while all the background R processes are busy executing, then the new future will be queued until one of the background processes free up.
 * `multicore`: Each new task executes in its own forked child process. Forking is generally much faster than launching a new process from scratch, and most of the state of the original process is available to the child process without having to go through any extra effort (see the section about Globals below). The biggest limitation of forking is that it doesn't work at all on Windows operating systems, which is what the majority of R users use. There are also some dangerous edge cases with this style of execution (Google "fork without exec" for more information), though popular frameworks like RServe and OpenCPU rely heavily on this and don't seem to suffer for it.
-* `multiprocess`: This is a meta-method that uses `multicore` on platforms where it's available, and `multisession` on Windows. In theory this means that you get the best performance available for each platform. In practice, since the two implementations are so different, it's very important that you test your app on all of the platforms you intend your app to be used on (or, if your development machine is non-Windows, test with both `multicore` (or `multiprocess`) and `multisession`).
 
-The `future` package includes several other methods. Two of them, `sequential` and `transparent`, execute synchronously and are therefore not relevant for our purposes. There are also `cluster` and `remote` methods, as well as a separate `future.batchtools` package, for doing distributed execution; those may work with promises, but have not been tested by our team and are not described further in this document.
+The `future` package also includes a `sequential` method, which executes synchronously and is therefore not relevant for our purposes. Unfortunately, `sequential` is the default, hence explicitly calling `plan()` with a different method is a must.
+
+There is also a `cluster` method, as well as a separate `future.batchtools` package, for doing distributed execution; those may work with promises, but have not been tested by our team and are not described further in this document.
+
+To learn more, see the [`future::plan()` reference docs](https://future.futureverse.org/reference/plan.html) as well as the [`future` overview](https://future.futureverse.org/articles/future-1-overview.html#controlling-how-futures-are-resolved).
 
 ## Caveats and limitations
 
