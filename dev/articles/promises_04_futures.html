@@ -196,24 +196,19 @@ which is what the majority of R users use. There are also some dangerous
 edge cases with this style of execution (Google “fork without exec” for
 more information), though popular frameworks like RServe and OpenCPU
 rely heavily on this and don’t seem to suffer for it.</li>
-<li>
-<code>multiprocess</code>: This is a meta-method that uses
-<code>multicore</code> on platforms where it’s available, and
-<code>multisession</code> on Windows. In theory this means that you get
-the best performance available for each platform. In practice, since the
-two implementations are so different, it’s very important that you test
-your app on all of the platforms you intend your app to be used on (or,
-if your development machine is non-Windows, test with both
-<code>multicore</code> (or <code>multiprocess</code>) and
-<code>multisession</code>).</li>
 </ul>
-<p>The <code>future</code> package includes several other methods. Two
-of them, <code>sequential</code> and <code>transparent</code>, execute
-synchronously and are therefore not relevant for our purposes. There are
-also <code>cluster</code> and <code>remote</code> methods, as well as a
-separate <code>future.batchtools</code> package, for doing distributed
-execution; those may work with promises, but have not been tested by our
-team and are not described further in this document.</p>
+<p>The <code>future</code> package also includes a
+<code>sequential</code> method, which executes synchronously and is
+therefore not relevant for our purposes. Unfortunately,
+<code>sequential</code> is the default, hence explicitly calling
+<code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan()</a></code> with a different method is a must.</p>
+<p>There is also a <code>cluster</code> method, as well as a separate
+<code>future.batchtools</code> package, for doing distributed execution;
+those may work with promises, but have not been tested by our team and
+are not described further in this document.</p>
+<p>To learn more, see the <a href="https://future.futureverse.org/reference/plan.html" class="external-link"><code>future::plan()</code>
+reference docs</a> as well as the <a href="https://future.futureverse.org/articles/future-1-overview.html#controlling-how-futures-are-resolved" class="external-link"><code>future</code>
+overview</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="caveats-and-limitations">Caveats and limitations<a class="anchor" aria-label="anchor" href="#caveats-and-limitations"></a>
