@@ -1,7 +1,7 @@
 # promises (development version)
 
 * `is.promising` is now an S3 method. (#104)
-* Refactored to use the "cpp11" package for C++ code instead of "Rcpp". (#109)
+* Refactored to use the "cpp11" package for C++ code instead of "Rcpp". (@pachadotdev, #109)
 
 # promises 1.2.1
 
