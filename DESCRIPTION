@@ -33,12 +33,12 @@ Suggests:
     testthat,
     vembedr
 LinkingTo: 
-    later,
-    Rcpp
+    cpp11,
+    later
 VignetteBuilder: 
     knitr
 Config/Needs/website: rsconnect
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
