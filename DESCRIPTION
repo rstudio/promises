@@ -23,7 +23,6 @@ Imports:
     later,
     magrittr (>= 1.5),
     R6,
-    Rcpp,
     rlang,
     stats
 Suggests:
