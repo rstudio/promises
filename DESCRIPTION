@@ -19,6 +19,7 @@ URL: https://rstudio.github.io/promises/,
     https://github.com/rstudio/promises
 BugReports: https://github.com/rstudio/promises/issues
 Imports:
+    cpp11,
     fastmap (>= 1.1.0),
     later,
     magrittr (>= 1.5),
