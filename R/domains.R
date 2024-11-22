@@ -48,11 +48,6 @@ promiseDomain <- list(
       stop("A single `then` call cannot combine `onFinally` with `onFulfilled`/`onRejected`")
     }
 
-    # TODO: All wrapped functions should also be rewritten to reenter the domain
-    # jcheng 2019-07-26: Actually, this seems not to be necessary--the domain
-    # is getting reentered during callbacks. But I can't figure out now how it's
-    # happening.
-
     domain <- current_promise_domain()
 
     shouldWrapFinally <- !is.null(onFinally) && !is.null(domain) && !is.null(domain$wrapOnFinally)
@@ -76,7 +71,21 @@ promiseDomain <- list(
       onFulfilled = if (shouldWrapFulfilled) domain$wrapOnFulfilled(onFulfilled) else onFulfilled,
       onRejected = if (shouldWrapRejected) domain$wrapOnRejected(onRejected) else onRejected
     )
-    results[!vapply(results, is.null, logical(1))]
+    results <- results[!vapply(results, is.null, logical(1))]
+    if (!is.null(domain)) {
+      # If there's a domain, ensure that before any callback is invoked, we
+      # reenter the domain. This is important for this kind of code:
+      #
+      #     with_promise_domain(domain, {
+      #       async_sleep(0.1) %...>% {
+      #         async_sleep(0.1) %...>% {
+      #           # Without re-entry, this would be outside the domain!
+      #         }
+      #       }
+      #     })
+      results <- lapply(results, wrap_callback_reenter, domain = domain)
+    }
+    results
   },
   onError = function(error) {
     domain <- current_promise_domain()
@@ -85,6 +94,33 @@ promiseDomain <- list(
     domain$onError(error)
   }
 )
+
+wrap_callback_reenter <- function(callback, domain) {
+  force(callback)
+
+  # We can't simply take `...` as arguments and call `callback(...)`. There are
+  # parts of this package that will inspect formals() to see if there's a
+  # `.visible` parameter in the callback. Using `match.call()` here ensures that
+  # the callback is called with the same arguments as it would have been if it
+  # were called directly.
+  #
+  # IMPORTANT NOTE: This technique changes callback arguments from lazy eval to
+  # eager eval--make sure you're OK with that before using!
+  wrapper <- function() {
+    # Evaluate the arguments in the caller's environment
+    call <- match.call()
+    # The `[-1]` is to drop the function name from the call--we just want the
+    # arguments
+    args <- lapply(call[-1], eval, parent.frame())
+    # Create and evaluate the callback call in our environment, wrapped in reenter_promise_domain
+    reenter_promise_domain(domain, do.call(callback, args))
+  }
+  # Copy the formals from the original callback to the wrapper, so that the
+  # wrapper can be called with the same arguments as the original callback.
+  formals(wrapper) <- formals(callback)
+
+  wrapper
+}
 
 globals <- new.env(parent = emptyenv())
 
