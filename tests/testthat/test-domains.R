@@ -2,12 +2,16 @@ context("Promise domains")
 
 source("common.R")
 
+async_true <- function() {
+  promise_resolve(TRUE)
+}
+
 describe("Promise domains", {
 
   it("are reentered during handlers", {
     cd <- create_counting_domain(trackFinally = TRUE)
     p <- with_promise_domain(cd, {
-      promise_resolve(TRUE) %...>% {
+      async_true() %...>% {
         expect_identical(cd$counts$onFulfilledCalled, 1L)
         expect_identical(cd$counts$onFulfilledActive, 1L)
         10 # sync result
@@ -20,15 +24,16 @@ describe("Promise domains", {
 
     expect_identical(cd$counts$onFulfilledBound, 2L)
 
-    p <- p %...>% {
+    p %...>% {
       expect_identical(cd$counts$onFulfilledCalled, 2L)
       expect_identical(cd$counts$onFulfilledActive, 0L)
     }
 
     expect_identical(cd$counts$onFulfilledBound, 2L)
+    wait_for_it()
 
     with_promise_domain(cd, {
-      p <- p %>% finally(~{
+      async_true() %>% finally(~{
         expect_identical(cd$counts$onFinallyCalled, 1L)
         expect_identical(cd$counts$onFinallyActive, 1L)
       })
@@ -43,11 +48,11 @@ describe("Promise domains", {
     expect_identical(cd$counts$onFulfilledBound, 2L)
 
     with_promise_domain(cd, {
-      p <- p %...>% {
+      async_true() %...>% {
         expect_identical(cd$counts$onFulfilledCalled, 3L)
         # This tests if promise domain membership infects subscriptions made
         # in handlers.
-        p %...>% {
+        async_true() %...>% {
           expect_true(!is.null(current_promise_domain()))
           expect_identical(cd$counts$onFulfilledCalled, 4L)
         }
@@ -62,7 +67,7 @@ describe("Promise domains", {
     cd1 <- create_counting_domain(trackFinally = FALSE)
 
     with_promise_domain(cd1, {
-      p1 <- promise_resolve(TRUE) %>%
+      p1 <- async_true() %>%
         finally(~{
           expect_identical(cd1$counts$onFulfilledActive, 1L)
           expect_identical(cd1$counts$onRejectedActive, 0L)
@@ -96,7 +101,7 @@ describe("Promise domains", {
     cd1 <- create_counting_domain(trackFinally = TRUE)
 
     with_promise_domain(cd1, {
-      p1 <- promise_resolve(TRUE) %>%
+      p1 <- async_true() %>%
         finally(~{
           expect_identical(cd1$counts$onFinallyActive, 1L)
           expect_identical(cd1$counts$onFulfilledActive, 0L)
