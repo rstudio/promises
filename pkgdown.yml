@@ -1,5 +1,5 @@
-pandoc: 3.1.2
-pkgdown: 2.0.7
+pandoc: 3.1.11
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   promises_01_motivation: promises_01_motivation.html
@@ -10,8 +10,7 @@ articles:
   promises_06_shiny: promises_06_shiny.html
   promises_07_combining: promises_07_combining.html
   promises_08_casestudy: promises_08_casestudy.html
-last_built: 2023-08-10T20:07Z
+last_built: 2024-11-22T21:12Z
 urls:
   reference: https://rstudio.github.io/promises/reference
   article: https://rstudio.github.io/promises/articles
-
