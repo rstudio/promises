@@ -48,11 +48,6 @@ promiseDomain <- list(
       stop("A single `then` call cannot combine `onFinally` with `onFulfilled`/`onRejected`")
     }
 
-    # TODO: All wrapped functions should also be rewritten to reenter the domain
-    # jcheng 2019-07-26: Actually, this seems not to be necessary--the domain
-    # is getting reentered during callbacks. But I can't figure out now how it's
-    # happening.
-
     domain <- current_promise_domain()
 
     shouldWrapFinally <- !is.null(onFinally) && !is.null(domain) && !is.null(domain$wrapOnFinally)
@@ -76,7 +71,21 @@ promiseDomain <- list(
       onFulfilled = if (shouldWrapFulfilled) domain$wrapOnFulfilled(onFulfilled) else onFulfilled,
       onRejected = if (shouldWrapRejected) domain$wrapOnRejected(onRejected) else onRejected
     )
-    results[!vapply(results, is.null, logical(1))]
+    results <- results[!vapply(results, is.null, logical(1))]
+    if (!is.null(domain)) {
+      # If there's a domain, ensure that before any callback is invoked, we
+      # reenter the domain. This is important for this kind of code:
+      #
+      #     with_promise_domain(domain, {
+      #       async_sleep(0.1) %...>% {
+      #         async_sleep(0.1) %...>% {
+      #           # Without re-entry, this would be outside the domain!
+      #         }
+      #       }
+      #     })
+      results <- lapply(results, wrap_callback_reenter, domain = domain)
+    }
+    results
   },
   onError = function(error) {
     domain <- current_promise_domain()
@@ -85,6 +94,30 @@ promiseDomain <- list(
     domain$onError(error)
   }
 )
+
+wrap_callback_reenter <- function(callback, domain) {
+  force(callback)
+  force(domain)
+
+  wrapper <- function(...) {
+    reenter_promise_domain(domain, callback(...))
+  }
+
+  # There are parts of this package that will inspect formals() to see if
+  # there's a `.visible` parameter in the callback. So it's important to have
+  # the returned wrapper have the same formals as the original callback.
+  wrap_with_signature(wrapper, formals(callback))
+}
+
+wrap_with_signature <- function(func, formal_args) {
+  # func must have a `...` signature
+  stopifnot("..." %in% names(formals(func)))
+
+  args <- names(formal_args)
+  recall <- rlang::call2(func, !!!rlang::set_names(lapply(args, as.symbol), args))
+
+  rlang::new_function(formal_args, recall)
+}
 
 globals <- new.env(parent = emptyenv())
 

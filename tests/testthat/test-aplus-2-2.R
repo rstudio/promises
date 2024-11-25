@@ -27,12 +27,10 @@ describe("2.2. The `then` Method", {
       x <- NULL
       p <- ext_promise()
 
-      p$promise %>% then(function(value) { x <<- value })
-      wait_for_it()
+      p$promise %>% then(function(value) { x <<- value }) %>% wait_for_it()
       expect_identical(x, NULL)
 
-      p$resolve(10)
-      wait_for_it()
+      p$resolve(10) %>% wait_for_it()
       expect_identical(x, 10)
     })
     it("2.2.2.2. it must not be called before promise is fulfilled.", {
@@ -47,8 +45,8 @@ describe("2.2. The `then` Method", {
       x <- NULL
       p <- ext_promise()
 
-      p$promise %>% then(onRejected = function(reason) { x <<- reason })
-      wait_for_it()
+      p$promise %>% then(onRejected = function(reason) { x <<- reason }) %>%
+        wait_for_it()
       expect_identical(x, NULL)
 
       p$reject(simpleError("boom"))
@@ -59,9 +57,9 @@ describe("2.2. The `then` Method", {
   describe("2.2.4. onFulfilled or onRejected must not be called until the execution context stack contains only platform code. [3.1].", {
     it(" ", {
       x <- NULL
-      promise(~resolve(TRUE)) %>% then(function(value) {x <<- value})
+      p <- promise(~resolve(TRUE)) %>% then(function(value) {x <<- value})
       expect_identical(x, NULL)
-      wait_for_it()
+      p %>% wait_for_it()
       expect_identical(x, TRUE)
     })
   })
@@ -74,7 +72,7 @@ describe("2.2. The `then` Method", {
       callbacks_called <- 0L
       results <- new.env(parent = emptyenv())
 
-      lapply(1:10, function(i) {
+      all_promises <- lapply(1:10, function(i) {
         results[[as.character(i)]] <- p$promise %>%
           then(function(value) {
             callbacks_called <<- callbacks_called + 1L
@@ -84,7 +82,7 @@ describe("2.2. The `then` Method", {
       })
 
       p$resolve(cars)
-      wait_for_it()
+      promise_all(.list = all_promises) %>% wait_for_it()
 
       lapply(as.list(results), function(x) {
         expect_identical(extract(x), cars)
@@ -97,7 +95,7 @@ describe("2.2. The `then` Method", {
     callbacks_called <- 0L
     results <- new.env(parent = emptyenv())
 
-    lapply(1:10, function(i) {
+    all_promises <- lapply(1:10, function(i) {
       results[[as.character(i)]] <- p$promise %>%
         catch(function(err) {
           callbacks_called <<- callbacks_called + 1L
@@ -107,7 +105,7 @@ describe("2.2. The `then` Method", {
     })
 
     p$reject(simpleError("an error"))
-    wait_for_it()
+    promise_all(.list = all_promises) %>% wait_for_it()
 
     lapply(as.list(results), function(x) {
       expect_identical(extract(x), simpleError("an error"))
