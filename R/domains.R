@@ -113,7 +113,7 @@ wrap_callback_reenter <- function(callback, domain) {
     # arguments
     args <- lapply(call[-1], eval, parent.frame())
     # Create and evaluate the callback call in our environment, wrapped in reenter_promise_domain
-    reenter_promise_domain(domain, do.call(callback, args))
+    reenter_promise_domain(domain, rlang::exec(callback, !!!args))
   }
   # Copy the formals from the original callback to the wrapper, so that the
   # wrapper can be called with the same arguments as the original callback.

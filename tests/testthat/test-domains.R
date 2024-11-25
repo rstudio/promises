@@ -138,4 +138,31 @@ describe("Promise domains", {
     expect_identical(cd2$counts$onRejectedCalled, 0L)
   })
 
+  it("handles weird edge case relating to symbols", {
+    # This test resulted from a bug in wrap_callback_reenter() where do.call()'s
+    # default behavior of quote=FALSE would cause a resolved value that happens
+    # to be a symbol, to be evaluated. This would only happen when a promise
+    # domain was in effect, and the symbol was passed to an onFulfilled. Fixed
+    # by using rlang::exec() instead of do.call().
+    cd <- create_counting_domain()
+    with_promise_domain(cd, {
+      promise_resolve(as.symbol("foo")) %...>%
+        { expect_identical(., as.symbol("foo")) } %>%
+        wait_for_it()
+    })
+  })
+
+  it("executes wrap_callback_reenter handlers in the right lexical environment", {
+    # No reason this shouldn't work, I haven't seen it fail, just making sure.
+    cd <- create_counting_domain()
+    x <- NULL
+    with_promise_domain(cd, {
+      promise_resolve(NULL) %...>%
+        { x <<- 1L } %...>%
+        { x <<- x + 1L } %>%
+        wait_for_it()
+    })
+    expect_identical(x, 2L)
+
+  })
 })
