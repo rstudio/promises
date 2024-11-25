@@ -7,6 +7,27 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{css echo=FALSE}
+.alert-success a, .alert-success a:visited {
+  color: inherit;
+  text-decoration: underline;
+}
+.alert code {
+  color: inherit;
+  background-color: inherit;
+}
+```
+
+<div class="alert alert-success">
+While this article and others on this site focus on the `future` package, there's an up and coming package called [`mirai`](https://shikokuchuo.net/mirai/) that you may want to consider instead.
+Here are some factors to consider as you choose between the two.
+
+1. The `future` package tries hard to automatically infer what variables and packages you need from the main R package, and makes those available to the child process. `mirai` doesn't try to do this for you; you need to pass in whatever data you need explicitly, and make `library()` calls explicitly inside of your inner code.
+2. `mirai` is very fast; it's much faster than `future` at starting up and has less per-task overhead.
+3. `future` is designed to be a general API for managing distributed programming across many types of computing backends. `mirai` is more narrowly scoped: it does support both local and distributed execution, but in the latter case, it only supports `mirai` workers.
+4. `future` puts a big emphasis on complicated scenarios where futures launch other futures ("evaluation topologies"); mirai doesn't care about this.
+</div>
+
 The `future` package provides a lightweight way to launch R tasks that don't block the current R session. It was created by Henrik Bengtsson long before the `promises` package existed—the first CRAN release of `future` predates development of `promises` by almost two years.
 
 The `promises` package provides the API for working with the results of async tasks, but it totally abdicates responsibility for actually launching/creating async tasks. The idea is that any number of different packages could be capable of launching async tasks, using whatever techniques they want, but all of them would either return promise objects (or objects that can be converted to promise objects, as is the case for `future`). However, for now, `future` is likely to be the primary or even exclusive way that async tasks are created.
