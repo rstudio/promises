@@ -93,7 +93,7 @@ local({
       }
 
       exec_times <- NA
-      lapply(seq_len(worker_jobs), function(i) {
+      p <- lapply(seq_len(worker_jobs), function(i) {
         prom_fn({
           Sys.sleep(worker_job_time)
           time_diff()
@@ -104,7 +104,7 @@ local({
         }
       post_lapply_time_diff <- time_diff()
 
-      wait_for_it()
+      p %>% wait_for_it()
 
       # expect that the average time is less than the expected total time
       expect_equal(median(exec_times) < expected_total_time, !block_mid_session)
@@ -180,8 +180,9 @@ local({
   test_that("future_promise doesn't report errors that have been handled", {
     with_test_workers({
       err <- capture.output(type="message", {
-        future_promise(stop("boom1")) %>% then(onRejected = ~{})
-        wait_for_it()
+        future_promise(stop("boom1")) %>%
+          then(onRejected = ~{}) %>%
+          wait_for_it()
       })
       expect_equal(err, character(0))
     })
