@@ -49,13 +49,17 @@ describe("Promise domains", {
 
     with_promise_domain(cd, {
       p <- async_true() %...>% {
+        expect_identical(., TRUE)
         expect_identical(cd$counts$onFulfilledCalled, 3L)
+        ten <- 10
         # This tests if promise domain membership infects subscriptions made
         # in handlers.
-        async_true() %...>% {
+        promise_resolve(invisible(ten)) %...>% (function(value, .visible) {
+          expect_identical(value, 10)
+          expect_false(.visible)
           expect_true(!is.null(current_promise_domain()))
           expect_identical(cd$counts$onFulfilledCalled, 4L)
-        }
+        })
       }
     })
 
