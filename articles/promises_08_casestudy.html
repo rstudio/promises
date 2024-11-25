@@ -243,8 +243,9 @@ some lag between when a day ends and when its logs are published.)</p>
 plus some <code>shinydashboard::valueBoxOutput</code>s and
 <code>plotOutputs</code>. These are so trivial that they’re hardly worth
 talking about, but I’ll include the code here for completeness. Finally,
-there’s <code>detailViewUI</code>, a <a href="https://shiny.rstudio.com/articles/modules.html" class="external-link">Shiny module</a>
-that just contains more of the same (value boxes and plots).</p>
+there’s <code>detailViewUI</code>, a <a href="https://shiny.posit.co/r/articles/improve/modules/" class="external-link">Shiny
+module</a> that just contains more of the same (value boxes and
+plots).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>  <span class="fu">dashboardBody</span><span class="op">(</span></span>
 <span>    <span class="fu">fluidRow</span><span class="op">(</span></span>
@@ -312,9 +313,9 @@ to remind you that there are lots of ways to improve the performance of
 a Shiny app. Async is just one tool in the toolbox, and before reaching
 for that hammer, take a moment to consider your other options:</p>
 <ol style="list-style-type: decimal">
-<li>Have I used <a href="https://rstudio.github.io/profvis/" class="external-link">profvis</a>
-to <strong>profile my code</strong> and determine what’s actually taking
-so long? (Human intuition is a notoriously bad profiler!)</li>
+<li>Have I used <a href="https://profvis.r-lib.org/" class="external-link">profvis</a> to
+<strong>profile my code</strong> and determine what’s actually taking so
+long? (Human intuition is a notoriously bad profiler!)</li>
 <li>Can I perform any <strong>calculations, summarizations, and
 aggregations offline</strong>, when my Shiny app isn’t even running, and
 save the results to .rds files to be read by the app?</li>
@@ -327,7 +328,7 @@ programming</a> to make sure my reactives are doing as little work as
 possible?</li>
 <li>When deploying my app, am I load balancing across multiple R
 processes and/or multiple servers? (<a href="https://docs.posit.co/shiny-server/" class="external-link">Shiny Server Pro</a>, <a href="https://docs.posit.co/connect/admin/appendix/configuration/" class="external-link">RStudio
-Connect</a>, <a href="https://shiny.rstudio.com/articles/scaling-and-tuning.html" class="external-link">ShinyApps.io</a>)</li>
+Connect</a>, <a href="https://shiny.posit.co/r/articles/improve/scaling-and-tuning/" class="external-link">ShinyApps.io</a>)</li>
 </ol>
 <p>These options are more generally useful than using async techniques
 because they can dramatically speed up the performance of an app even if
@@ -809,7 +810,7 @@ work; the progress dialog would be dismissed before the download even
 got going.</p>
 <p>It’s conceivable that <code>withProgress</code> could gain promise
 compatibility someday, but it’s not in Shiny v1.1.0. In the meantime, we
-can work around this by using the alternative, <a href="https://shiny.rstudio.com/reference/shiny/1.1.0/Progress.html" class="external-link">object-oriented
+can work around this by using the alternative, <a href="https://shiny.posit.co/r/reference/shiny/latest/progress.html" class="external-link">object-oriented
 progress API</a> that Shiny offers. It’s a bit more verbose and fiddly
 than <code>withProgress</code>/<code>setProgress</code>, but it is
 flexible enough to work with futures/promises.</p>
