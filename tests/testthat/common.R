@@ -19,8 +19,14 @@ ext_promise <- function() {
 
 # Block until all pending later tasks have executed
 # wait_for_it <- function(timeout = if (on_ci) 60 else 30) {
-wait_for_it <- function(timeout = if (on_ci) 60 else 30) {
+wait_for_it <- function(p = NULL, timeout = if (on_ci) 60 else 30) {
   start <- Sys.time()
+
+  err <- NULL
+  if (!is.null(p)) {
+    p %...!% (function(reason) err <<- reason)
+  }
+
   while (!loop_empty()) {
     if (difftime(Sys.time(), start, units = "secs") > timeout) {
       stop("Waited too long")
@@ -28,22 +34,25 @@ wait_for_it <- function(timeout = if (on_ci) 60 else 30) {
     run_now()
     Sys.sleep(0.01)
   }
+
+  if (!is.null(err)) {
+    withRestarts(
+      stop(err),
+      continue_test = function(e) NULL
+    )
+  }
 }
 
 # Block until the promise is resolved/rejected. If resolved, return the value.
 # If rejected, throw (yes throw, not return) the error.
 extract <- function(promise) {
   promise_value <- NULL
-  error <- NULL
-  promise %...>%
-    (function(value) promise_value <<- value) %...!%
-    (function(reason) error <<- reason)
 
-  wait_for_it()
-  if (!is.null(error))
-    stop(error)
-  else
-    promise_value
+  promise %...>%
+    (function(value) promise_value <<- value) %>%
+    wait_for_it()
+
+  promise_value
 }
 
 resolve_later <- function(value, delaySecs) {
@@ -54,7 +63,12 @@ resolve_later <- function(value, delaySecs) {
 # Prevent "Unhandled promise error" warning that happens if you don't handle the
 # rejection of a promise
 squelch_unhandled_promise_error <- function(promise) {
-  promise %...!% {}
+  promise %...!% (function(reason) {
+    if (inherits(reason, "failure")) {
+      # Don't squelch test failures
+      stop(reason)
+    }
+  })
 }
 
 .GlobalEnv$.Last <- function() {

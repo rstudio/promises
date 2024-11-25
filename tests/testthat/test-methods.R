@@ -8,14 +8,14 @@ describe("then()", {
     p <- promise(~resolve(invisible(1))) %>% then(function(value, .visible) {
       result <<- list(value = value, visible = .visible)
     })
-    wait_for_it()
+    p %>% wait_for_it()
     expect_identical(result$value, 1)
     expect_identical(result$visible, FALSE)
 
     p <- promise(~resolve(1)) %>% then(function(value, .visible) {
       result <<- list(value = value, visible = .visible)
     })
-    wait_for_it()
+    p %>% wait_for_it()
     expect_identical(result$value, 1)
     expect_identical(result$visible, TRUE)
 
@@ -26,7 +26,7 @@ describe("then()", {
       then(function(value, .visible) {
         result <<- list(value = value, visible = .visible)
       })
-    wait_for_it()
+    p %>% wait_for_it()
     expect_identical(result$value, 1)
     expect_identical(result$visible, FALSE)
   })
@@ -58,7 +58,7 @@ describe("then()", {
       then(function(value) {
         result <<- withVisible(value)
       })
-    wait_for_it()
+    p %>% wait_for_it()
     expect_identical(result$value, 1)
     expect_identical(result$visible, FALSE)
 
@@ -67,7 +67,7 @@ describe("then()", {
       then(function(value) {
         result <<- withVisible(value)
       })
-    wait_for_it()
+    p %>% wait_for_it()
     expect_identical(result$value, 2)
     expect_identical(result$visible, TRUE)
   })
@@ -114,18 +114,18 @@ describe("finally()", {
       finally(~{
         called <<- TRUE
       })
-    wait_for_it()
+    p %>% wait_for_it()
     expect_identical(called, TRUE)
     expect_identical(extract(p), 10)
   })
   it("calls back when a promise is rejected", {
     called <- FALSE
-    p <- promise(~reject("foobar")) %>%
+    (p <- promise(~reject("foobar")) %>%
       finally(~{
         called <<- TRUE
-      })
-    squelch_unhandled_promise_error(p)
-    wait_for_it()
+      })) %>%
+      squelch_unhandled_promise_error() %>%
+      wait_for_it()
     expect_identical(called, TRUE)
     expect_error(extract(p), "^foobar$")
   })
