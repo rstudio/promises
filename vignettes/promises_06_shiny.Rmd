@@ -69,7 +69,7 @@ The `future` library is needed because the `future()` function call used inside 
 
 To find areas of your code that are good candidates for the future/promise treatment, let's start with the obvious: identifying the code that is making your app slow. You may assume it's your plotting code that's slow, but it's actually your database queries; or vice versa. If there's one thing that veteran programmers can agree on, it's that human intuition is a surprisingly unreliable tool for spotting performance problems.
 
-Our recommendation is that you use the [profvis](https://rstudio.github.io/profvis/) profiler, which we designed to work with Shiny (see Example 3 in the profvis documentation). You can use profvis to help you focus in on where the time is actually being spent in your app.
+Our recommendation is that you use the [profvis](https://profvis.r-lib.org/) profiler, which we designed to work with Shiny (see Example 3 in the profvis documentation). You can use profvis to help you focus in on where the time is actually being spent in your app.
 
 >  **Note:** As of this writing, profvis doesn't work particularly well for diagnosing performance problems in parts of your code that you've already made asynchronous. In particular, we haven't done any work to help it profile code that executes in a future, and the mechanism we use to hide "irrelevant" parts of the stack trace doesn't work well with promises. These are ripe areas for future development.
 

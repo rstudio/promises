@@ -1,3 +1,8 @@
+# promises 1.3.1
+
+* Fixed bug where promise domains were forgotten when handlers were registered from within other handlers. (#110)
+
+
 # promises 1.3.0
 
 * `is.promising` is now an S3 method. (#104)

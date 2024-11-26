@@ -83,7 +83,7 @@ dashboardSidebar(
 
 (We set `date` to two days ago by default, because there's some lag between when a day ends and when its logs are published.)
 
-The rest of the UI code is just typical shinydashboard scaffolding, plus some `shinydashboard::valueBoxOutput`s and `plotOutputs`. These are so trivial that they're hardly worth talking about, but I'll include the code here for completeness. Finally, there's `detailViewUI`, a [Shiny module](https://shiny.rstudio.com/articles/modules.html) that just contains more of the same (value boxes and plots).
+The rest of the UI code is just typical shinydashboard scaffolding, plus some `shinydashboard::valueBoxOutput`s and `plotOutputs`. These are so trivial that they're hardly worth talking about, but I'll include the code here for completeness. Finally, there's `detailViewUI`, a [Shiny module](https://shiny.posit.co/r/articles/improve/modules/) that just contains more of the same (value boxes and plots).
 
 ```r
   dashboardBody(
@@ -131,11 +131,11 @@ The outputs in this app are mostly either `renderPlot`s that we populate with `g
 
 While this article is specifically about async, this is a good time to remind you that there are lots of ways to improve the performance of a Shiny app. Async is just one tool in the toolbox, and before reaching for that hammer, take a moment to consider your other options:
 
-1. Have I used [profvis](https://rstudio.github.io/profvis/) to **profile my code** and determine what's actually taking so long? (Human intuition is a notoriously bad profiler!)
+1. Have I used [profvis](https://profvis.r-lib.org/) to **profile my code** and determine what's actually taking so long? (Human intuition is a notoriously bad profiler!)
 2. Can I perform any **calculations, summarizations, and aggregations offline**, when my Shiny app isn't even running, and save the results to .rds files to be read by the app?
 3. Are there any opportunities to **cache**--that is, save the results of my calculations and use them if I get the same request later? (See [memoise](https://cran.r-project.org/package=memoise), or roll your own.)
 4. Am I effectively leveraging [reactive programming](https://posit.co/resources/videos/reactivity-pt-1-joe-cheng/) to make sure my reactives are doing as little work as possible?
-5. When deploying my app, am I load balancing across multiple R processes and/or multiple servers? ([Shiny Server Pro](https://docs.posit.co/shiny-server/), [RStudio Connect](https://docs.posit.co/connect/admin/appendix/configuration/), [ShinyApps.io](https://shiny.rstudio.com/articles/scaling-and-tuning.html))
+5. When deploying my app, am I load balancing across multiple R processes and/or multiple servers? ([Shiny Server Pro](https://docs.posit.co/shiny-server/), [RStudio Connect](https://docs.posit.co/connect/admin/appendix/configuration/), [ShinyApps.io](https://shiny.posit.co/r/articles/improve/scaling-and-tuning/))
 
 These options are more generally useful than using async techniques because they can dramatically speed up the performance of an app even if only a single user is using it. While it obviously depends on the particulars of the app itself, a few lines of precomputation or caching logic can often lead to 10X-100X better performance. Async, on the other hand, generally doesn't help make a single session faster. Instead, it helps a single Shiny process support more concurrent sessions without getting bogged down.
 
@@ -505,7 +505,7 @@ Progress reporting currently presents two challenges for future.
 
 First, the `withProgress({...})` function cannot be used with async. `withProgress` is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to `future_promise()` will return immediately even though the actual task is far from done, using `withProgress` won't work; the progress dialog would be dismissed before the download even got going.
 
-It's conceivable that `withProgress` could gain promise compatibility someday, but it's not in Shiny v1.1.0. In the meantime, we can work around this by using the alternative, [object-oriented progress API](https://shiny.rstudio.com/reference/shiny/1.1.0/Progress.html) that Shiny offers. It's a bit more verbose and fiddly than `withProgress`/`setProgress`, but it is flexible enough to work with futures/promises.
+It's conceivable that `withProgress` could gain promise compatibility someday, but it's not in Shiny v1.1.0. In the meantime, we can work around this by using the alternative, [object-oriented progress API](https://shiny.posit.co/r/reference/shiny/latest/progress.html) that Shiny offers. It's a bit more verbose and fiddly than `withProgress`/`setProgress`, but it is flexible enough to work with futures/promises.
 
 Second, progress messages can't be sent from futures. This is simply because futures are executed in child processes, which don't have direct access to the browser like the main Shiny process does.
 
