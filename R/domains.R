@@ -72,19 +72,20 @@ promiseDomain <- list(
       onRejected = if (shouldWrapRejected) domain$wrapOnRejected(onRejected) else onRejected
     )
     results <- results[!vapply(results, is.null, logical(1))]
-    if (!is.null(domain)) {
-      # If there's a domain, ensure that before any callback is invoked, we
-      # reenter the domain. This is important for this kind of code:
-      #
-      #     with_promise_domain(domain, {
-      #       async_sleep(0.1) %...>% {
-      #         async_sleep(0.1) %...>% {
-      #           # Without re-entry, this would be outside the domain!
-      #         }
-      #       }
-      #     })
-      results <- lapply(results, wrap_callback_reenter, domain = domain)
-    }
+    # If there's a domain, ensure that before any callback is invoked, we
+    # reenter the domain. This is important for this kind of code:
+    #
+    #     with_promise_domain(domain, {
+    #       async_sleep(0.1) %...>% {
+    #         async_sleep(0.1) %...>% {
+    #           # Without re-entry, this would be outside the domain!
+    #         }
+    #       }
+    #     })
+    #
+    # It's important to reenter even if domain is NULL. In that case, we need to
+    # ensure that the current domain is set to NULL while the callback executes.
+    results <- lapply(results, wrap_callback_reenter, domain = domain)
     results
   },
   onError = function(error) {
@@ -100,7 +101,10 @@ wrap_callback_reenter <- function(callback, domain) {
   force(domain)
 
   wrapper <- function(...) {
-    reenter_promise_domain(domain, callback(...))
+    # replace = TRUE because we don't care what the current domain is; we're
+    # (temporarily) putting the world back to the way it was when the callback
+    # was bound to a promise.
+    reenter_promise_domain(domain, callback(...), replace = TRUE)
   }
 
   # There are parts of this package that will inspect formals() to see if
@@ -171,7 +175,7 @@ with_promise_domain <- function(domain, expr, replace = FALSE) {
 }
 
 # Like with_promise_domain, but doesn't include the wrapSync call.
-reenter_promise_domain <- function(domain, expr, replace = FALSE) {
+reenter_promise_domain <- function(domain, expr, replace) {
   oldval <- current_promise_domain()
   if (replace)
     globals$domain <- domain

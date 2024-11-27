@@ -17,9 +17,10 @@ describe("C++ interface", {
       }) %...>%
         {
           expect_identical(., 2)
+          expect_identical(cd$counts$onFulfilledCalled, 1L)
           promise_resolve(TRUE) %...>% {
             expect_true(!is.null(current_promise_domain()))
-            expect_identical(cd$counts$onFulfilledCalled, 3L)
+            expect_identical(cd$counts$onFulfilledCalled, 2L)
           }
         } %>%
         wait_for_it()
