@@ -150,7 +150,10 @@ Promise <- R6::R6Class("Promise",
   private = list(
     ppstate = NULL,
     publicResolveRejectCalled = FALSE,
-    rejectionHandled = FALSE,
+    # If FALSE, then either then() has been called on this specific object, or
+    # this object has been used to resolve() another promise. We use this to
+    # determine whether to print a warning if rejection is not handled.
+    isTerminal = TRUE,
 
     pstate = function() {
       private$ppstate$state
@@ -164,12 +167,7 @@ Promise <- R6::R6Class("Promise",
       stopifnot(private$pstate()$status() == "pending")
 
       if (is.promising(value)) {
-        value <- as.promise(value)
-        p <- attr(value, "promise_impl", exact = TRUE)
-        if (identical(p, self)) {
-          stop("Chaining cycle detected for promise")
-        }
-        private$ppstate <- p$.subsume(private$pstate())
+        private$doChain(value)
       } else {
         private$ppstate$state <- private$pstate()$resolve(value, visible)
       }
@@ -180,20 +178,50 @@ Promise <- R6::R6Class("Promise",
 
       stopifnot(private$pstate()$status() == "pending")
 
-      private$ppstate$state <- private$pstate()$reject(reason)
-      # cat(file=stderr(), "Unhandled promise error: ", reason$message, "\n", sep = "")
+      if (is.promising(reason)) {
+        private$doChain(reason)
+      } else {
+        private$ppstate$state <- private$pstate()$reject(reason)
+      }
       invisible()
+    },
+    # We were resolved or rejected with a promise. Chain ourselves onto that
+    # promise.
+    doChain = function(obj) {
+      p <- attr(as.promise(obj), "promise_impl", exact = TRUE)
+      if (identical(p, self)) {
+        stop("Chaining cycle detected for promise")
+      }
+      private$ppstate <- p$.subsume(private$pstate())
+    },
+    # Call at rejection time. If the rejection is not handled by the end of the
+    # current tick, print a helpful warning.
+    checkForUnhandledPromiseError = function(reason) {
+      force(reason)
+
+      if (private$isTerminal) {
+        # The rejection wasn't handled, but maybe it will be by the end of this
+        # tick (i.e. `promise_reject("boom") %...!% {}` is perfectly valid).
+        later::later(~{
+          if (private$isTerminal) {
+            # Nobody has shown up to handle it. Print a warning.
+            cat(file=stderr(), "Unhandled promise error: ", conditionMessage(reason), "\n", sep = "")
+          }
+        })
+      }
     }
   ),
   public = list(
     initialize = function() {
       private$ppstate <- PromiseStatePointer$new(PromiseStatePending$new())
+      private$pstate()$register(onRejected = list(private$checkForUnhandledPromiseError))
     },
     # "pending", "fulfilled", "rejected"
     status = function() {
       private$pstate()$status()
     },
     .subsume = function(other_pstate) {
+      private$isTerminal <- FALSE
       other_pstate$chain(private$pstate())
       private$ppstate
     },
@@ -240,6 +268,8 @@ Promise <- R6::R6Class("Promise",
       invisible()
     },
     then = function(onFulfilled = NULL, onRejected = NULL, onFinally = NULL) {
+      private$isTerminal <- FALSE
+
       onFulfilled <- normalizeOnFulfilled(onFulfilled)
       onRejected <- normalizeOnRejected(onRejected)
       if (!is.function(onFinally)) {
