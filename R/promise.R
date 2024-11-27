@@ -3,99 +3,199 @@
 #' @import later
 NULL
 
+PromiseStateResolved <- R6::R6Class("PromiseStateResolved",
+  private = list(
+    value = NULL,
+    visible = TRUE
+  ),
+  public = list(
+    initialize = function(value, visible) {
+      private$value <- value
+      private$visible <- visible
+    },
+    status = function() {
+      "fulfilled"
+    },
+    format = function() {
+      classname <- class(private$value)[[1]]
+      if (length(classname) == 0) classname <- ""
+      sprintf("<Promise [%s: %s]>", self$status(), classname)
+    },
+    register = function(onFulfilled = NULL, onRejected = NULL) {
+      force(onFulfilled)
+      force(onRejected)
+
+      if (!is.null(onFulfilled)) {
+        later::later(function() {
+          lapply(onFulfilled, function(f) {
+            f(private$value, private$visible)
+          })
+        })
+      }
+    }
+  )
+)
+
+PromiseStateRejected <- R6::R6Class("PromiseStateRejected",
+  private = list(
+    reason = NULL
+  ),
+  public = list(
+    initialize = function(reason) {
+      private$reason <- reason
+    },
+    status = function() {
+      "rejected"
+    },
+    format = function() {
+      classname <- class(private$reason)[[1]]
+      if (length(classname) == 0) classname <- ""
+      sprintf("<Promise [%s: %s]>", self$status(), classname)
+    },
+    register = function(onFulfilled = NULL, onRejected = NULL) {
+      force(onFulfilled)
+      force(onRejected)
+
+      if (!is.null(onRejected)) {
+        later::later(function() {
+          lapply(onRejected, function(f) {
+            f(private$reason)
+          })
+        })
+      }
+    }
+  )
+)
+
+PromiseStatePending <- R6::R6Class("PromiseStatePending",
+  private = list(
+    onFulfilled = list(),
+    onRejected = list()
+  ),
+  public = list(
+    initialize = function() {
+      private$onFulfilled <- list()
+      private$onRejected <- list()
+    },
+    status = function() {
+      "pending"
+    },
+    format = function() {
+      "<Promise [pending]>"
+    },
+    register = function(onFulfilled = NULL, onRejected = NULL) {
+      force(onFulfilled)
+      force(onRejected)
+
+      if (!is.null(onFulfilled)) {
+        stopifnot(is.list(onFulfilled))
+        private$onFulfilled <- c(private$onFulfilled, onFulfilled)
+      }
+      if (!is.null(onRejected)) {
+        stopifnot(is.list(onRejected))
+        private$onRejected <- c(private$onRejected, onRejected)
+      }
+      invisible(NULL)
+    },
+    resolve = function(value, visible) {
+      force(value)
+      force(visible)
+
+      # Resolving to promise should've been handled at a higher level
+      stopifnot(!is.promising(value))
+
+      new_state <- PromiseStateResolved$new(value, visible)
+      new_state$register(private$onFulfilled, private$onRejected)
+      private$onFulfilled <- list()
+      private$onRejected <- list()
+      new_state
+    },
+    reject = function(reason) {
+      force(reason)
+
+      new_state <- PromiseStateRejected$new(reason)
+      new_state$register(private$onFulfilled, private$onRejected)
+      private$onFulfilled <- list()
+      private$onRejected <- list()
+      new_state
+    },
+    chain = function(new_state) {
+      force(new_state)
+
+      if (identical(self, new_state)) {
+        new_new_state <- self$reject(simpleError("Chaining cycle detected for promise"))
+        return(new_new_state)
+      }
+
+      new_state$register(private$onFulfilled, private$onRejected)
+      private$onFulfilled <- list()
+      private$onRejected <- list()
+      new_state
+    }
+  )
+)
+
+
+PromiseStatePointer <- R6::R6Class("PromiseStatePointer",
+  public = list(
+    state = NULL,
+    initialize = function(state) {
+      self$state <- state
+    }
+  )
+)
+
 #' @import R6
 Promise <- R6::R6Class("Promise",
   private = list(
-    state = "pending",
-    value = NULL,
-    visible = TRUE,
+    ppstate = NULL,
     publicResolveRejectCalled = FALSE,
-    onFulfilled = list(),
-    onRejected = list(),
-    onFinally = list(),
     rejectionHandled = FALSE,
 
-    # Private resolve/reject differs from public resolve/reject
-    # in that the private versions are allowed to be called
-    # more than once, whereas public ones no-op after the first
-    # time they are invoked.
+    pstate = function() {
+      private$ppstate$state
+    },
+
     doResolve = function(value) {
       val <- withVisible(value)
       value <- val$value
       visible <- val$visible
 
+      stopifnot(private$pstate()$status() == "pending")
+
       if (is.promising(value)) {
         value <- as.promise(value)
-        if (identical(self, attr(value, "promise_impl", exact = TRUE))) {
-          return(private$doReject(simpleError("Chaining cycle detected for promise")))
+        p <- attr(value, "promise_impl", exact = TRUE)
+        if (identical(p, self)) {
+          stop("Chaining cycle detected for promise")
         }
-        # This then() call doesn't need promise domains; semantically, it doesn't
-        # really exist, as it's just a convenient way to implement the new promise
-        # inhabiting the old promise's corpse.
-        without_promise_domain({
-          value$then(
-            private$doResolve,
-            private$doReject
-          )
-        })
+        private$ppstate <- p$.subsume(private$pstate())
       } else {
-        private$doResolveFinalValue(value, visible)
+        private$ppstate$state <- private$pstate()$resolve(value, visible)
       }
+      invisible()
     },
     doReject = function(reason) {
-      if (is.promising(reason)) {
-        reason <- as.promise(reason)
-        # This then() call doesn't need promise domains; semantically, it doesn't
-        # really exist, as it's just a convenient way to implement the new promise
-        # inhabiting the old promise's corpse.
-        without_promise_domain({
-          reason$then(
-            private$doResolve,
-            private$doReject
-          )
-        })
-      } else {
-        private$doRejectFinalReason(reason)
-      }
-    },
-    # These "final" versions of resolve/reject are for when we've
-    # established that the value/reason is not itself a promise.
-    doResolveFinalValue = function(value, visible) {
-      private$value <- value
-      private$visible <- visible
-      private$state <- "fulfilled"
+      force(reason)
 
-      later::later(function() {
-          lapply(private$onFulfilled, function(f) {
-            f(private$value, private$visible)
-          })
-          private$onFulfilled <- list()
-        })
-    },
-    doRejectFinalReason = function(reason) {
-      private$value <- reason
-      private$state <- "rejected"
+      stopifnot(private$pstate()$status() == "pending")
 
-      later::later(function() {
-        lapply(private$onRejected, function(f) {
-          private$rejectionHandled <- TRUE
-          f(private$value)
-        })
-        private$onRejected <- list()
-
-        later::later(~{
-          if (!private$rejectionHandled) {
-            # warning() was unreliable here
-            cat(file=stderr(), "Unhandled promise error: ", reason$message, "\n", sep = "")
-          }
-        })
-      })
+      private$ppstate$state <- private$pstate()$reject(reason)
+      # cat(file=stderr(), "Unhandled promise error: ", reason$message, "\n", sep = "")
+      invisible()
     }
   ),
   public = list(
+    initialize = function() {
+      private$ppstate <- PromiseStatePointer$new(PromiseStatePending$new())
+    },
     # "pending", "fulfilled", "rejected"
     status = function() {
-      private$state
+      private$pstate()$status()
+    },
+    .subsume = function(other_pstate) {
+      other_pstate$chain(private$pstate())
+      private$ppstate
     },
     resolve = function(value) {
       # Only allow this to be called once, then no-op.
@@ -147,51 +247,33 @@ Promise <- R6::R6Class("Promise",
       }
 
       promise2 <- promise(function(resolve, reject) {
-          res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
+        res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
 
-          if (!is.null(res)) {
-            onFulfilled <- res$onFulfilled
-            onRejected <- res$onRejected
-          }
+        if (!is.null(res)) {
+          onFulfilled <- res$onFulfilled
+          onRejected <- res$onRejected
+        }
 
-          handleFulfill <- function(value, visible) {
-            if (is.function(onFulfilled)) {
-              resolve(onFulfilled(value, visible))
-            } else {
-              resolve(if (visible) value else invisible(value))
-            }
-          }
-
-          handleReject <- function(reason) {
-            if (is.function(onRejected)) {
-              # Yes, resolve, not reject.
-              resolve(onRejected(reason))
-            } else {
-              # Yes, reject, not resolve.
-              reject(reason)
-            }
-          }
-
-          if (private$state == "pending") {
-            private$onFulfilled <- c(private$onFulfilled, list(
-              handleFulfill
-            ))
-            private$onRejected <- c(private$onRejected, list(
-              handleReject
-            ))
-          } else if (private$state == "fulfilled") {
-            later::later(function() {
-              handleFulfill(private$value, private$visible)
-            })
-          } else if (private$state == "rejected") {
-            later::later(function() {
-              private$rejectionHandled <- TRUE
-              handleReject(private$value)
-            })
+        handleFulfill <- function(value, visible) {
+          if (is.function(onFulfilled)) {
+            resolve(onFulfilled(value, visible))
           } else {
-            stop("Unexpected state ", private$state)
+            resolve(if (visible) value else invisible(value))
           }
-        })
+        }
+
+        handleReject <- function(reason) {
+          if (is.function(onRejected)) {
+            # Yes, resolve, not reject.
+            resolve(onRejected(reason))
+          } else {
+            # Yes, reject, not resolve.
+            reject(reason)
+          }
+        }
+
+        private$pstate()$register(list(handleFulfill), list(handleReject))
+      })
 
       invisible(promise2)
     },
@@ -204,14 +286,7 @@ Promise <- R6::R6Class("Promise",
       ))
     },
     format = function() {
-      if (private$state == "pending") {
-        "<Promise [pending]>"
-      } else {
-        classname <- class(private$value)[[1]]
-        if (length(classname) == 0) classname <- ""
-
-        sprintf("<Promise [%s: %s]>", private$state, classname)
-      }
+      private$pstate()$format()
     }
   )
 )
@@ -219,7 +294,7 @@ Promise <- R6::R6Class("Promise",
 normalizeOnFulfilled <- function(onFulfilled) {
   if (!is.function(onFulfilled)) {
     if (!is.null(onFulfilled)) {
-      warning("`onFulfilled` must be a function or `NULL`")
+      stop("`onFulfilled` must be a function or `NULL`")
     }
     return(NULL)
   }
@@ -247,7 +322,7 @@ normalizeOnFulfilled <- function(onFulfilled) {
 normalizeOnRejected <- function(onRejected) {
   if (!is.function(onRejected)) {
     if (!is.null(onRejected)) {
-      warning("`onRejected` must be a function or `NULL`")
+      stop("`onRejected` must be a function or `NULL`")
     }
     return(NULL)
   }
