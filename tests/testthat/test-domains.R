@@ -125,7 +125,7 @@ describe("Promise domains", {
     cd2 <- create_counting_domain(trackFinally = TRUE)
 
     p2 <- with_promise_domain(cd2, {
-      promise_reject(TRUE) %>%
+      promise_reject("bad") %>%
         finally(~{
           expect_identical(cd2$counts$onFinallyActive, 1L)
           expect_identical(cd2$counts$onFulfilledActive, 0L)

@@ -72,19 +72,17 @@ promiseDomain <- list(
       onRejected = if (shouldWrapRejected) domain$wrapOnRejected(onRejected) else onRejected
     )
     results <- results[!vapply(results, is.null, logical(1))]
-    if (!is.null(domain)) {
-      # If there's a domain, ensure that before any callback is invoked, we
-      # reenter the domain. This is important for this kind of code:
-      #
-      #     with_promise_domain(domain, {
-      #       async_sleep(0.1) %...>% {
-      #         async_sleep(0.1) %...>% {
-      #           # Without re-entry, this would be outside the domain!
-      #         }
-      #       }
-      #     })
-      results <- lapply(results, wrap_callback_reenter, domain = domain)
-    }
+    # If there's a domain, ensure that before any callback is invoked, we
+    # reenter the domain. This is important for this kind of code:
+    #
+    #     with_promise_domain(domain, {
+    #       async_sleep(0.1) %...>% {
+    #         async_sleep(0.1) %...>% {
+    #           # Without re-entry, this would be outside the domain!
+    #         }
+    #       }
+    #     })
+    results <- lapply(results, wrap_callback_reenter, domain = domain)
     results
   },
   onError = function(error) {
@@ -99,24 +97,28 @@ wrap_callback_reenter <- function(callback, domain) {
   force(callback)
   force(domain)
 
-  wrapper <- function(...) {
-    reenter_promise_domain(domain, callback(...))
+  # We can't simply take `...` as arguments and call `callback(...)`. There are
+  # parts of this package that will inspect formals() to see if there's a
+  # `.visible` parameter in the callback. Using `match.call()` here ensures that
+  # the callback is called with the same arguments as it would have been if it
+  # were called directly.
+  #
+  # IMPORTANT NOTE: This technique changes callback arguments from lazy eval to
+  # eager eval--make sure you're OK with that before using!
+  wrapper <- function() {
+    # Evaluate the arguments in the caller's environment
+    call <- match.call()
+    # The `[-1]` is to drop the function name from the call--we just want the
+    # arguments
+    args <- lapply(call[-1], eval, parent.frame())
+    # Create and evaluate the callback call in our environment, wrapped in reenter_promise_domain
+    reenter_promise_domain(domain, rlang::exec(callback, !!!args), replace = TRUE)
   }
+  # Copy the formals from the original callback to the wrapper, so that the
+  # wrapper can be called with the same arguments as the original callback.
+  formals(wrapper) <- formals(callback)
 
-  # There are parts of this package that will inspect formals() to see if
-  # there's a `.visible` parameter in the callback. So it's important to have
-  # the returned wrapper have the same formals as the original callback.
-  wrap_with_signature(wrapper, formals(callback))
-}
-
-wrap_with_signature <- function(func, formal_args) {
-  # func must have a `...` signature
-  stopifnot("..." %in% names(formals(func)))
-
-  args <- names(formal_args)
-  recall <- rlang::call2(func, !!!rlang::set_names(lapply(args, as.symbol), args))
-
-  rlang::new_function(formal_args, recall)
+  wrapper
 }
 
 globals <- new.env(parent = emptyenv())
@@ -171,7 +173,7 @@ with_promise_domain <- function(domain, expr, replace = FALSE) {
 }
 
 # Like with_promise_domain, but doesn't include the wrapSync call.
-reenter_promise_domain <- function(domain, expr, replace = FALSE) {
+reenter_promise_domain <- function(domain, expr, replace) {
   oldval <- current_promise_domain()
   if (replace)
     globals$domain <- domain
