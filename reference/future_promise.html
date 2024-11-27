@@ -199,13 +199,13 @@ To counter this situation, we can create a promise to execute work using future 
 <span class="r-in"><span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span> <span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/Sys.getpid.html" class="external-link">Sys.getpid</a></span><span class="op">(</span><span class="op">)</span><span class="op">}</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span> <span class="fu">print_msg</span><span class="op">(</span><span class="st">"future done"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: future</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 5854; 2.2s promise done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6101; 2.3s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6100; 2.3s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6101; 2.3s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6100; 2.3s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6101; 3.2s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6100; 3.3s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 5765; 2.3s promise done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6011; 2.4s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6010; 2.4s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6011; 2.4s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6010; 2.4s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6011; 3.2s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6010; 3.3s future done</span>
 <span class="r-in"><span><span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">#&gt; PID: XXX; 2.5s promise done</span></span></span>
 <span class="r-in"><span><span class="co">#&gt; PID: YYY; 2.6s future done</span></span></span>
@@ -223,13 +223,13 @@ To counter this situation, we can create a promise to execute work using future 
 <span class="r-in"><span>  <span class="fu"><a href="promise_resolve.html">promise_resolve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getpid.html" class="external-link">Sys.getpid</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span> <span class="fu">print_msg</span><span class="op">(</span><span class="st">"promise"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span> <span class="fu">future_promise</span><span class="op">(</span><span class="op">{</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/Sys.getpid.html" class="external-link">Sys.getpid</a></span><span class="op">(</span><span class="op">)</span><span class="op">}</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span> <span class="fu">print_msg</span><span class="op">(</span><span class="st">"future done"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 5854; 0.3s promise</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6191; 1.4s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6192; 1.5s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6191; 2.5s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6192; 2.7s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6191; 3.7s future done</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6192; 3.8s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 5765; 0.3s promise</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6101; 1.4s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6100; 1.5s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6101; 2.5s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6100; 2.7s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6101; 3.7s future done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> PID: 6100; 3.8s future done</span>
 <span class="r-in"><span><span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">#&gt; PID: XXX; 0.2s promise done</span></span></span>
 <span class="r-in"><span><span class="co">#&gt; PID: YYY; 1.3s future done</span></span></span>
