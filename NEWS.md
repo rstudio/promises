@@ -1,4 +1,4 @@
-# promises (under development)
+# promises 1.3.2
 
 * Fixed bug introduced in 1.3.1, where promise domains that are active at promise resolution time stay active during handler callback, even if they weren't active when the handler was registered. This was causing stack overflow for long promise chains with many active promise domains. (#115)
 
