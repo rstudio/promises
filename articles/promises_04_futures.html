@@ -112,13 +112,59 @@
       <h1 data-toc-skip>Launching tasks with future</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/rc-v1.3.2/vignettes/promises_04_futures.Rmd" class="external-link"><code>vignettes/promises_04_futures.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/vignettes/promises_04_futures.Rmd" class="external-link"><code>vignettes/promises_04_futures.Rmd</code></a></small>
       <div class="hidden name"><code>promises_04_futures.Rmd</code></div>
 
     </div>
 
     
     
+<style type="text/css">
+.alert-success a, .alert-success a:visited {
+  color: inherit;
+  text-decoration: underline;
+}
+.alert code {
+  color: inherit;
+  background-color: inherit;
+}
+</style>
+<div class="alert alert-success">
+<p>While this article and others on this site focus on the
+<code>future</code> package, there’s a much newer package called <a href="https://shikokuchuo.net/mirai/" class="external-link"><code>mirai</code></a> that you
+may want to consider instead. Here are some factors to consider as you
+choose between the two.</p>
+<ol style="list-style-type: decimal">
+<li>The <code>future</code> package tries hard to automatically infer
+what variables and packages you need from the main R package, and makes
+those available to the child process. <code>mirai</code> doesn’t try to
+do this for you; you need to pass in whatever data you need explicitly,
+and make package-namespaced calls explicitly inside of your inner
+code.</li>
+<li>
+<code>mirai</code> is very fast; it’s much faster than
+<code>future</code> at starting up and has less per-task overhead.
+<code>mirai</code> creates event-driven promises, whereas promises using
+<code>future</code> time-poll every 0.1 seconds. This makes
+<code>mirai</code> ideal where response times and latency are
+critical.</li>
+<li>
+<code>future</code> is designed to be a general API supporting many
+types of distributed computing backends, and potentially offers more
+options. <code>mirai</code> on the other hand is its own system, whilst
+it does support both local and distributed execution.</li>
+<li>
+<code>mirai</code> is inherently queued, meaning it readily accepts
+more tasks than workers. This means you don’t need an equivalent of
+<code><a href="../reference/future_promise.html">future_promise()</a></code>. With <code>future</code> you need to
+manage cases where futures launch other futures (“evaluation
+topologies”) upfront, whereas with <code>mirai</code> they will just
+work.</li>
+<li>
+<code>mirai</code> supports task cancellation and the ability to
+interrupt ongoing tasks on the worker.</li>
+</ol>
+</div>
 <p>The <code>future</code> package provides a lightweight way to launch
 R tasks that don’t block the current R session. It was created by Henrik
 Bengtsson long before the <code>promises</code> package existed—the
