@@ -439,10 +439,9 @@ future_promise <- function(
       ## The current implementation has `$can_proceed()` method of `WorkQueue` be plan agnostic.
       ## Therefore, it will always ask the current plan if a worker is available.
       ## If so, then the _current_ plan should be used. Not a plan that existed at initialization time.
-      exec_future <- future::plan()
 
       # execute the future and return a promise so the schedule knows exactly when it is done
-      future_job <- exec_future(
+      future_job <- future::future(
         gp$expr,
         envir = envir,
         substitute = FALSE,
