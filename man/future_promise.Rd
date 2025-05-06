@@ -10,10 +10,8 @@ future_promise_queue()
 future_promise(
   expr = NULL,
   envir = parent.frame(),
-  substitute = TRUE,
-  globals = TRUE,
-  packages = NULL,
   ...,
+  substitute = TRUE,
   queue = future_promise_queue()
 )
 }
@@ -23,18 +21,10 @@ future_promise(
 \item{envir}{The \link{environment} from where global objects should be
 identified.}
 
+\item{...}{extra parameters provided to \code{\link[future:future]{future::future()}}}
+
 \item{substitute}{If TRUE, argument \code{expr} is
 \code{\link[base]{substitute}()}:ed, otherwise not.}
-
-\item{globals}{(optional) a logical, a character vector, or a named list
-to control how globals are handled.
-For details, see section 'Globals used by future expressions'
-in the help for \code{\link[future:future]{future()}}.}
-
-\item{packages}{(optional) a character vector specifying packages
-to be attached in the \R environment evaluating the future.}
-
-\item{...}{extra parameters provided to \code{\link[future:future]{future::future()}}}
 
 \item{queue}{A queue that is used to schedule work to be done using \code{\link[future:future]{future::future()}}.  This queue defaults to \code{\link[=future_promise_queue]{future_promise_queue()}} and requires that method \code{queue$schedule_work(fn)} exist.  This method should take in a function that will execute the promised \pkg{future} work.}
 }

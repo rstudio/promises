@@ -420,10 +420,8 @@ future_promise_queue <- local({
 future_promise <- function(
   expr = NULL,
   envir = parent.frame(),
-  substitute = TRUE,
-  globals = TRUE,
-  packages = NULL,
   ...,
+  substitute = TRUE,
   queue = future_promise_queue()
 ) {
   # make sure queue is the right structure
@@ -438,13 +436,16 @@ future_promise <- function(
   # Does NOT fix R environment values changing
   force(envir)
   force(substitute)
-  force(globals)
-  force(packages)
   force(list(...))
 
-  ## Record globals
-  gp <- future::getGlobalsAndPackages(expr, envir = envir, globals = globals)
-  force(gp)
+  ## Record future object (but do not start it yet; lazy = TRUE)
+  future_job <- future::future(
+    expr,
+    envir = envir,
+    substitute = FALSE,
+    ...,
+    lazy = TRUE
+  )
 
   promise(function(resolve, reject) {
     # add to queue
@@ -454,17 +455,8 @@ future_promise <- function(
       ## Therefore, it will always ask the current plan if a worker is available.
       ## If so, then the _current_ plan should be used. Not a plan that existed at initialization time.
 
-      # execute the future and return a promise so the schedule knows exactly when it is done
-      future_job <- future::future(
-        gp$expr,
-        envir = envir,
-        substitute = FALSE,
-        globals = gp$globals,
-        packages = unique(c(packages, gp$packages)),
-        ...
-      )
-
       # Resolve the outer promising job value
+      # Kick off the future job
       resolve(future_job)
       # Return a promising object that can be chained by the `queue` after executing this _work_
       future_job
