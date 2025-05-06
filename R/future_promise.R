@@ -450,11 +450,6 @@ future_promise <- function(
   promise(function(resolve, reject) {
     # add to queue
     queue$schedule_work(function() {
-      ### Should the worker function be taken at creation time or submission time?
-      ## The current implementation has `$can_proceed()` method of `WorkQueue` be plan agnostic.
-      ## Therefore, it will always ask the current plan if a worker is available.
-      ## If so, then the _current_ plan should be used. Not a plan that existed at initialization time.
-
       # Resolve the outer promising job value
       # Kick off the future job
       resolve(future_job)
