@@ -1,4 +1,3 @@
-
 debug_msg_can_print <- FALSE
 debug_msg <- function(...) {
   if (debug_msg_can_print) {
@@ -15,7 +14,13 @@ assert_work_queue_pkgs <- local({
       list(name = "fastmap", version = "1.1.0")
     )) {
       if (!is_installed(pkg$name, pkg$version)) {
-        stop("Package `", pkg$name, "` (", pkg$version, ") needs to be installed")
+        stop(
+          "Package `",
+          pkg$name,
+          "` (",
+          pkg$version,
+          ") needs to be installed"
+        )
       }
     }
     val <<- TRUE
@@ -27,7 +32,8 @@ future_worker_is_free <- function() {
 }
 
 
-Delay <- R6::R6Class("Delay",
+Delay <- R6::R6Class(
+  "Delay",
   private = list(
     delay_count = 0
   ),
@@ -46,14 +52,16 @@ Delay <- R6::R6Class("Delay",
     delay = function() {
       stop("$delay() not implemented")
     }
-  ), active = list(
+  ),
+  active = list(
     count = function() {
       private$delay_count
     }
   )
 )
 
-ExpoDelay <- R6::R6Class("ExpoDelay",
+ExpoDelay <- R6::R6Class(
+  "ExpoDelay",
   inherit = Delay,
   private = list(
     base = 1 / 100,
@@ -67,8 +75,12 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
       max_seconds = 2
     ) {
       stopifnot(length(base) == 1 && is.numeric(base) && base >= 0)
-      stopifnot(length(min_seconds) == 1 && is.numeric(min_seconds) && min_seconds >= 0)
-      stopifnot(length(max_seconds) == 1 && is.numeric(max_seconds) && max_seconds >= 0)
+      stopifnot(
+        length(min_seconds) == 1 && is.numeric(min_seconds) && min_seconds >= 0
+      )
+      stopifnot(
+        length(max_seconds) == 1 && is.numeric(max_seconds) && max_seconds >= 0
+      )
 
       private$base <- base
       private$max_seconds <- max_seconds
@@ -81,7 +93,7 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
     # will randomly backoff to avoid extra work on long poll times
     delay = function() {
       # calculate expo backoff value
-      expo_val <- private$base * ((2 ^ private$delay_count) - 1)
+      expo_val <- private$base * ((2^private$delay_count) - 1)
       # find random value
       random_val <- runif(n = 1, max = min(private$max_seconds, expo_val))
       # perform `min()` on second step to avoid `runif(1, min = 5, max = 4)` which produces `NaN`
@@ -121,7 +133,8 @@ ExpoDelay <- R6::R6Class("ExpoDelay",
 #'
 #' @seealso [future_promise_queue()] which returns a `WorkQueue` which is cached per R session.
 #' @keywords internal
-WorkQueue <- R6::R6Class("WorkQueue",
+WorkQueue <- R6::R6Class(
+  "WorkQueue",
 
   # TODO - private loop proposal:
   # The queued data would actually be a list of queues whose _key_ matches
@@ -219,10 +232,9 @@ WorkQueue <- R6::R6Class("WorkQueue",
       }
 
       # If there are still items to be processed, but we can not proceed...
-      if (private$queue$size() > 0 && ! private$can_proceed()) {
+      if (private$queue$size() > 0 && !private$can_proceed()) {
         # If we are allowed to delay (default FALSE), or nothing is currently delaying
         if (can_delay || is.null(private$cancel_delayed_attempt_work)) {
-
           # Try again later
           private$increase_delay()
           private$cancel_delayed_attempt_work <-
@@ -282,8 +294,8 @@ WorkQueue <- R6::R6Class("WorkQueue",
       stopifnot(is.function(can_proceed))
       stopifnot(
         is.function(queue$add) &&
-        is.function(queue$remove) &&
-        is.function(queue$size)
+          is.function(queue$remove) &&
+          is.function(queue$size)
       )
       stopifnot(inherits(loop, "event_loop"))
       delay <- ExpoDelay$new()
@@ -408,15 +420,15 @@ future_promise_queue <- local({
 future_promise <- function(
   expr = NULL,
   envir = parent.frame(),
-  substitute = TRUE,
-  globals = TRUE,
-  packages = NULL,
   ...,
+  substitute = TRUE,
   queue = future_promise_queue()
 ) {
-
   # make sure queue is the right structure
-  stopifnot(is.function(queue$schedule_work) && length(formals(queue$schedule_work)) >= 1)
+  stopifnot(
+    is.function(queue$schedule_work) &&
+      length(formals(queue$schedule_work)) >= 1
+  )
 
   if (substitute) expr <- substitute(expr)
 
@@ -424,33 +436,22 @@ future_promise <- function(
   # Does NOT fix R environment values changing
   force(envir)
   force(substitute)
-  force(globals)
-  force(packages)
   force(list(...))
 
-  ## Record globals
-  gp <- future::getGlobalsAndPackages(expr, envir = envir, globals = globals)
-  force(gp)
+  ## Record future object (but do not start it yet; lazy = TRUE)
+  future_job <- future::future(
+    expr,
+    envir = envir,
+    substitute = FALSE,
+    ...,
+    lazy = TRUE
+  )
 
   promise(function(resolve, reject) {
     # add to queue
     queue$schedule_work(function() {
-      ### Should the worker function be taken at creation time or submission time?
-      ## The current implementation has `$can_proceed()` method of `WorkQueue` be plan agnostic.
-      ## Therefore, it will always ask the current plan if a worker is available.
-      ## If so, then the _current_ plan should be used. Not a plan that existed at initialization time.
-
-      # execute the future and return a promise so the schedule knows exactly when it is done
-      future_job <- future::future(
-        gp$expr,
-        envir = envir,
-        substitute = FALSE,
-        globals = gp$globals,
-        packages = unique(c(packages, gp$packages)),
-        ...
-      )
-
       # Resolve the outer promising job value
+      # Kick off the future job
       resolve(future_job)
       # Return a promising object that can be chained by the `queue` after executing this _work_
       future_job
@@ -459,9 +460,7 @@ future_promise <- function(
 }
 
 
-
 if (FALSE) {
-
   # ConstDelay <- R6::R6Class("ConstDelay",
   #   inherit = Delay,
   #   private = list(
@@ -511,7 +510,6 @@ if (FALSE) {
   #   )
   # )
 
-
   # dev_load <- pkgload::load_all
 
   # ## test
@@ -523,7 +521,6 @@ if (FALSE) {
   # ## block main worker mid job
   # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:4, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i/4) }) -> ignore;
 
-
   # ## block workers pre job
   # dev_load(); print_i(); lapply(1:2, function(i) { message("*************** adding blockage", i); future::future({ Sys.sleep(4); message("*************** blockage done", i); i}) }) -> future_jobs; lapply(future_jobs, function(fj) { as.promise(fj) %...>% { print(.) } }); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) };
 
@@ -534,7 +531,17 @@ if (FALSE) {
 
   debug_msg_can_print <- TRUE
 
-  print_i <- function(i = 0) { if (i <= 50) { print(i); later::later(function() { print_i(i + 1) }, delay = 0.1) } }
+  print_i <- function(i = 0) {
+    if (i <= 50) {
+      print(i)
+      later::later(
+        function() {
+          print_i(i + 1)
+        },
+        delay = 0.1
+      )
+    }
+  }
 
   slow_calc <- function(n) {
     Sys.sleep(n)
@@ -562,9 +569,20 @@ if (FALSE) {
 
   print("done assignement!")
 
-  a1 %...>% { message("end 1 - ", format(Sys.time())) }
-  a2 %...>% { message("end 2 - ", format(Sys.time())) }
-  a3 %...>% { message("end 3 - ", format(Sys.time())) }
-  a4 %...>% { message("end 4 - ", format(Sys.time())) }
-
+  a1 %...>%
+    {
+      message("end 1 - ", format(Sys.time()))
+    }
+  a2 %...>%
+    {
+      message("end 2 - ", format(Sys.time()))
+    }
+  a3 %...>%
+    {
+      message("end 3 - ", format(Sys.time()))
+    }
+  a4 %...>%
+    {
+      message("end 4 - ", format(Sys.time()))
+    }
 }
