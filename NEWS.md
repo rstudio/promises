@@ -4,6 +4,8 @@
 
 * Fixed #122: Use `future::future(..., lazy = TRUE)` to avoid manual capturing of state within `future_promise` (Thank you, @HenrikBengtsson! #123)
 
+* Fixed bug where a `{future}` promise calculation would continue to run even after calling `reject(err)`. (#125)
+
 # promises 1.3.2
 
 * Fixed bug introduced in 1.3.1, where promise domains that are active at promise resolution time stay active during handler callback, even if they weren't active when the handler was registered. This was causing stack overflow for long promise chains with many active promise domains. (#115)
