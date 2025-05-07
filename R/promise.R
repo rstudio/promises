@@ -465,8 +465,10 @@ as.promise.Future <- function(x) {
         future::resolved(x, timeout = 0)
       }, FutureError = function(e) {
          reject(e)
-         TRUE
+         NULL
       })
+      if (is.null(is_resolved)) return()
+      
       if (is_resolved) {
         tryCatch(
           {
@@ -474,7 +476,6 @@ as.promise.Future <- function(x) {
             resolve(result)
           }, FutureError = function(e) {
             reject(e)
-            TRUE
           }, error = function(e) {
             reject(e)
           }
