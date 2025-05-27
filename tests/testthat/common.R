@@ -57,18 +57,19 @@ extract <- function(promise) {
 
 resolve_later <- function(value, delaySecs) {
   force(value)
-  promise(~later::later(~resolve(value), delaySecs))
+  promise(~ later::later(~ resolve(value), delaySecs))
 }
 
 # Prevent "Unhandled promise error" warning that happens if you don't handle the
 # rejection of a promise
 squelch_unhandled_promise_error <- function(promise) {
-  promise %...!% (function(reason) {
-    if (inherits(reason, "failure")) {
-      # Don't squelch test failures
-      stop(reason)
-    }
-  })
+  promise %...!%
+    (function(reason) {
+      if (inherits(reason, "failure")) {
+        # Don't squelch test failures
+        stop(reason)
+      }
+    })
 }
 
 .GlobalEnv$.Last <- function() {
@@ -77,14 +78,17 @@ squelch_unhandled_promise_error <- function(promise) {
 }
 
 create_counting_domain <- function(trackFinally = FALSE) {
-  counts <- list2env(parent = emptyenv(), list(
-    onFulfilledBound = 0L,
-    onFulfilledCalled = 0L,
-    onFulfilledActive = 0L,
-    onRejectedBound = 0L,
-    onRejectedCalled = 0L,
-    onRejectedActive = 0L
-  ))
+  counts <- list2env(
+    parent = emptyenv(),
+    list(
+      onFulfilledBound = 0L,
+      onFulfilledCalled = 0L,
+      onFulfilledActive = 0L,
+      onRejectedBound = 0L,
+      onRejectedCalled = 0L,
+      onRejectedActive = 0L
+    )
+  )
 
   incr <- function(field) {
     field <- as.character(substitute(field))
