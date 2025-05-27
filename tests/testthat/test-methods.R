@@ -34,14 +34,14 @@ describe("then()", {
   })
   it("method ignores non-functions or NULL...", {
     p1 <- promise(~ resolve(1))
-    expect_warning(
+    expect_error(
       {
         p1 <- p1$then(10)
       },
       "`onFulfilled` must be a function or `NULL`",
       fixed = TRUE
     )
-    expect_warning(
+    expect_error(
       {
         p1 <- p1$then(NULL)
       },
@@ -86,14 +86,14 @@ describe("catch()", {
   })
   it("method ignores non-functions or NULL...", {
     p1 <- promise(~ resolve(1))
-    expect_warning(
+    expect_error(
       {
         p1 <- p1$catch(10)
       },
       "`onRejected` must be a function or `NULL`",
       fixed = TRUE
     )
-    expect_warning(
+    expect_error(
       {
         p1 <- p1$catch(NULL)
       },
