@@ -14,11 +14,15 @@ local({
   with_test_workers <- function(code) {
     # (Can not use a variable for workers if in a local({}))
     old_plan <- future::plan(future::multisession(workers = 2))
-    on.exit({future::plan(old_plan)}, add = TRUE)
+    on.exit(
+      {
+        future::plan(old_plan)
+      },
+      add = TRUE
+    )
 
     force(code)
   }
-
 
   start <- Sys.time()
   time_diffs <- c()
@@ -40,9 +44,13 @@ local({
     if (i > max) return()
     time_diffs <<- c(time_diffs, time_diff())
     # Do it again, later
-    later::later(function() { run_every(i + 1, max = max, delay = delay) }, delay = delay)
+    later::later(
+      function() {
+        run_every(i + 1, max = max, delay = delay)
+      },
+      delay = delay
+    )
   }
-
 
   worker_jobs <- 8
   # allow for more time on CI (4s on CI vs 1s locally)
@@ -60,11 +68,14 @@ local({
     # expect `run_every()` delay to be < 1s (Expected 0.1s)
     expect_no_main_blocking = TRUE
   ) {
-
     with_test_workers({
       # prep future sessions
-      f1 <- future::future({1})
-      f2 <- future::future({2})
+      f1 <- future::future({
+        1
+      })
+      f2 <- future::future({
+        2
+      })
       c(future::value(future::resolve(f1)), future::value(future::resolve(f2)))
 
       expect_true(future_worker_is_free())
@@ -83,9 +94,10 @@ local({
               future::future({
                 Sys.sleep(worker_job_time)
                 time_diff()
-              }) %...>% {
-                future_exec_times <<- c(future_exec_times, .)
-              }
+              }) %...>%
+                {
+                  future_exec_times <<- c(future_exec_times, .)
+                }
             },
             delay = 1
           )
@@ -99,7 +111,8 @@ local({
           time_diff()
         })
       }) %>%
-        promise_all(.list = .) %...>% {
+        promise_all(.list = .) %...>%
+        {
           exec_times <<- unlist(.)
         }
       post_lapply_time_diff <- time_diff()
@@ -111,21 +124,28 @@ local({
 
       # expect prom_fn to take a reasonable amount of time to finish
       exec_times_lag <- exec_times[-1] - exec_times[-length(exec_times)]
-      expect_equal(all(exec_times_lag < (2 * worker_job_time)), expect_reasonable_exec_lag_time)
+      expect_equal(
+        all(exec_times_lag < (2 * worker_job_time)),
+        expect_reasonable_exec_lag_time
+      )
 
       # post_lapply_time_diff should be ~ 0s
-      expect_equal(post_lapply_time_diff < (worker_job_time * ((worker_jobs - n_workers) / n_workers)), expect_immediate_lapply)
+      expect_equal(
+        post_lapply_time_diff <
+          (worker_job_time * ((worker_jobs - n_workers) / n_workers)),
+        expect_immediate_lapply
+      )
 
       # time_diffs should never grow by more than 1s; (Expected 0.1)
       time_diffs_lag <- time_diffs[-1] - time_diffs[-length(time_diffs)]
-      expect_equal(all(time_diffs_lag < worker_job_time), expect_no_main_blocking)
+      expect_equal(
+        all(time_diffs_lag < worker_job_time),
+        expect_no_main_blocking
+      )
     })
-
   }
 
-
   test_that("future_promise() allows the main thread to keep the main R process open", {
-
     do_future_test(
       prom_fn = future_promise,
       # expect that the average finish lag time is less than 2 * n_time
@@ -136,7 +156,6 @@ local({
       expect_no_main_blocking = TRUE
     )
   })
-
 
   test_that("future::future() does not keep the main process open when all workers are busy", {
     do_future_test(
@@ -150,9 +169,7 @@ local({
     )
   })
 
-
   test_that("future_promise() recovers from losing all future workers", {
-
     do_future_test(
       prom_fn = future_promise,
       block_mid_session = TRUE,
@@ -169,7 +186,7 @@ local({
 
   test_that("future_promise reports unhandled errors", {
     with_test_workers({
-      err <- capture.output(type="message", {
+      err <- capture.output(type = "message", {
         future_promise(stop("boom1"))
         wait_for_it()
       })
@@ -179,9 +196,12 @@ local({
 
   test_that("future_promise doesn't report errors that have been handled", {
     with_test_workers({
-      err <- capture.output(type="message", {
+      err <- capture.output(type = "message", {
         future_promise(stop("boom1")) %>%
-          then(onRejected = ~{}) %>%
+          then(
+            onRejected = ~ {
+            }
+          ) %>%
           wait_for_it()
       })
       expect_equal(err, character(0))

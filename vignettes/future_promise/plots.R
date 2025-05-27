@@ -46,7 +46,7 @@ waiting_line <- function(x, y, group = y) {
 }
 
 save_image <- function(p, file, height = 4, width = 6, ...) {
-  p <- p + theme(aspect.ratio = 100/150)
+  p <- p + theme(aspect.ratio = 100 / 150)
   ggsave(file, p, height = height, width = NA, ...)
 }
 
@@ -92,7 +92,8 @@ status_guide <- function(waiting = TRUE, promise = FALSE) {
       working = "solid"
     ),
     breaks = c(if (waiting) "waiting", "working"),
-    labels = if (promise) c("Waiting in promise", "Working in future") else c(if (waiting) "Waiting", "Working"),
+    labels = if (promise) c("Waiting in promise", "Working in future") else
+      c(if (waiting) "Waiting", "Working"),
     guide = guide_legend(
       order = 3,
       override.aes = list(
@@ -153,8 +154,8 @@ p <-
     y = c("b", "b", "c", "c")
   ) +
   waiting_line(
-      x = c(0, 10, 0, 20),
-      y = c("c", "c", "d", "d")
+    x = c(0, 10, 0, 20),
+    y = c("c", "c", "d", "d")
   ) +
   route_type_guide(NULL, letters[1:4]) +
   scale_y_discrete(
@@ -193,14 +194,12 @@ p <-
 save_image(p, "images/timing-plumber-future.png")
 
 
-
-
 p <-
   ggplot(mapping = aes(x = x, y = y, color = y)) +
   receive_point(letters[2:6]) +
   return_point(
-      x = c(10, 10, 20, 20, 0),
-      y = letters[2:6]
+    x = c(10, 10, 20, 20, 0),
+    y = letters[2:6]
   ) +
   working_line(
     x = c(0, 10, 0, 10, 10, 20, 10, 20),
@@ -221,14 +220,18 @@ p <-
 save_image(p, "images/timing-plumber-limitation.png")
 
 
-
-
-
-
 future_constants <- list(
   scale_y_discrete(
     limits = rev(letters[1:7]),
-    labels = c("/fast/7", "/slow/6", "/slow/5", "/slow/4", "/slow/3", "/slow/2", "/slow/1")
+    labels = c(
+      "/fast/7",
+      "/slow/6",
+      "/slow/5",
+      "/slow/4",
+      "/slow/3",
+      "/slow/2",
+      "/slow/1"
+    )
   ),
   constants[c(-2)],
   theme(
@@ -246,23 +249,37 @@ p <-
   ) +
   waiting_line(
     x = c(
-      10, 20,
-      10, 20,
-      0, 10,# 20, 30,
-      0, 10,# 20, 30,
-      0, 20,
-      0, 20,
-      0, 20
+      10,
+      20,
+      10,
+      20,
+      0,
+      10, # 20, 30,
+      0,
+      10, # 20, 30,
+      0,
+      20,
+      0,
+      20,
+      0,
+      20
     ),
     y = rep(letters[1:7], c(2, 2, 2, 2, 2, 2, 2)),
     group = c(
-      "a2", "a2",
-      "b2", "b2",
-      "c1", "c1", #"c2", "c2",
-      "d1", "d1", #"d2", "d2",
-      "e1", "e1",
-      "f1", "f1",
-      "g1", "g1"
+      "a2",
+      "a2",
+      "b2",
+      "b2",
+      "c1",
+      "c1", #"c2", "c2",
+      "d1",
+      "d1", #"d2", "d2",
+      "e1",
+      "e1",
+      "f1",
+      "f1",
+      "g1",
+      "g1"
     )
   ) +
   working_line(
@@ -298,17 +315,25 @@ p <-
     mapping = aes(group = group, linetype = linetype),
     data = data.frame(
       x = c(
-        0, 10,
-        0, 10,
-        0, 20,
-        0, 20
+        0,
+        10,
+        0,
+        10,
+        0,
+        20,
+        0,
+        20
       ),
       y = rep(c("c", "d", "e", "f"), each = 2),
       group = c(
-        "c1", "c1",
-        "d1", "d1",
-        "e1", "e1",
-        "f1", "f1"
+        "c1",
+        "c1",
+        "d1",
+        "d1",
+        "e1",
+        "e1",
+        "f1",
+        "f1"
       ),
       linetype = "waiting"
     )

@@ -3,7 +3,8 @@
 #' @import later
 NULL
 
-PromiseStateResolved <- R6::R6Class("PromiseStateResolved",
+PromiseStateResolved <- R6::R6Class(
+  "PromiseStateResolved",
   private = list(
     value = NULL,
     visible = TRUE
@@ -36,7 +37,8 @@ PromiseStateResolved <- R6::R6Class("PromiseStateResolved",
   )
 )
 
-PromiseStateRejected <- R6::R6Class("PromiseStateRejected",
+PromiseStateRejected <- R6::R6Class(
+  "PromiseStateRejected",
   private = list(
     reason = NULL
   ),
@@ -67,7 +69,8 @@ PromiseStateRejected <- R6::R6Class("PromiseStateRejected",
   )
 )
 
-PromiseStatePending <- R6::R6Class("PromiseStatePending",
+PromiseStatePending <- R6::R6Class(
+  "PromiseStatePending",
   private = list(
     onFulfilled = list(),
     onRejected = list()
@@ -123,7 +126,9 @@ PromiseStatePending <- R6::R6Class("PromiseStatePending",
       force(new_state)
 
       if (identical(self, new_state)) {
-        new_new_state <- self$reject(simpleError("Chaining cycle detected for promise"))
+        new_new_state <- self$reject(simpleError(
+          "Chaining cycle detected for promise"
+        ))
         return(new_new_state)
       }
 
@@ -136,7 +141,8 @@ PromiseStatePending <- R6::R6Class("PromiseStatePending",
 )
 
 
-PromiseStatePointer <- R6::R6Class("PromiseStatePointer",
+PromiseStatePointer <- R6::R6Class(
+  "PromiseStatePointer",
   public = list(
     state = NULL,
     initialize = function(state) {
@@ -146,7 +152,8 @@ PromiseStatePointer <- R6::R6Class("PromiseStatePointer",
 )
 
 #' @import R6
-Promise <- R6::R6Class("Promise",
+Promise <- R6::R6Class(
+  "Promise",
   private = list(
     ppstate = NULL,
     publicResolveRejectCalled = FALSE,
@@ -202,19 +209,29 @@ Promise <- R6::R6Class("Promise",
       if (private$isTerminal) {
         # The rejection wasn't handled, but maybe it will be by the end of this
         # tick (i.e. `promise_reject("boom") %...!% {}` is perfectly valid).
-        later::later(~{
-          if (private$isTerminal) {
-            # Nobody has shown up to handle it. Print a warning.
-            cat(file=stderr(), "Unhandled promise error: ", conditionMessage(reason), "\n", sep = "")
+        later::later(
+          ~ {
+            if (private$isTerminal) {
+              # Nobody has shown up to handle it. Print a warning.
+              cat(
+                file = stderr(),
+                "Unhandled promise error: ",
+                conditionMessage(reason),
+                "\n",
+                sep = ""
+              )
+            }
           }
-        })
+        )
       }
     }
   ),
   public = list(
     initialize = function() {
       private$ppstate <- PromiseStatePointer$new(PromiseStatePending$new())
-      private$pstate()$register(onRejected = list(private$checkForUnhandledPromiseError))
+      private$pstate()$register(
+        onRejected = list(private$checkForUnhandledPromiseError)
+      )
     },
     # "pending", "fulfilled", "rejected"
     status = function() {
@@ -227,8 +244,7 @@ Promise <- R6::R6Class("Promise",
     },
     resolve = function(value) {
       # Only allow this to be called once, then no-op.
-      if (private$publicResolveRejectCalled)
-        return(invisible())
+      if (private$publicResolveRejectCalled) return(invisible())
       private$publicResolveRejectCalled <- TRUE
 
       tryCatch(
@@ -248,8 +264,7 @@ Promise <- R6::R6Class("Promise",
     },
     reject = function(reason) {
       # Only allow this to be called once, then no-op.
-      if (private$publicResolveRejectCalled)
-        return(invisible())
+      if (private$publicResolveRejectCalled) return(invisible())
       private$publicResolveRejectCalled <- TRUE
 
       tryCatch(
@@ -435,13 +450,17 @@ promise <- function(action) {
       if (is.function(action)) {
         action(p$resolve, p$reject)
       } else if (inherits(action, "formula")) {
-        eval(action[[2]], list(
-          resolve = p$resolve,
-          reject = p$reject,
-          return = function(value) {
-            warning("Can't return a value from a promise, use resolve/reject")
-          }
-        ), environment(action))
+        eval(
+          action[[2]],
+          list(
+            resolve = p$resolve,
+            reject = p$reject,
+            return = function(value) {
+              warning("Can't return a value from a promise, use resolve/reject")
+            }
+          ),
+          environment(action)
+        )
       }
     },
     error = function(e) {
@@ -485,13 +504,13 @@ promise <- function(action) {
 #'
 #' @export
 promise_resolve <- function(value) {
-  promise(~resolve(value))
+  promise(~ resolve(value))
 }
 
 #' @rdname promise_resolve
 #' @export
 promise_reject <- function(reason) {
-  promise(~reject(reason))
+  promise(~ reject(reason))
 }
 
 #' Coerce to a promise
@@ -566,21 +585,26 @@ as.promise.Future <- function(x) {
     poll_interval <- 0.1
     check <- function() {
       # timeout = 0 is important, the default waits for 200ms
-      is_resolved <- tryCatch({
-        future::resolved(x, timeout = 0)
-      }, FutureError = function(e) {
-         reject(e)
-         TRUE
-      })
+      is_resolved <- tryCatch(
+        {
+          future::resolved(x, timeout = 0)
+        },
+        FutureError = function(e) {
+          reject(e)
+          TRUE
+        }
+      )
       if (is_resolved) {
         tryCatch(
           {
             result <- future::value(x, signal = TRUE)
             resolve(result)
-          }, FutureError = function(e) {
+          },
+          FutureError = function(e) {
             reject(e)
             TRUE
-          }, error = function(e) {
+          },
+          error = function(e) {
             reject(e)
           }
         )
@@ -599,7 +623,11 @@ as.promise.Future <- function(x) {
 #' @export
 as.promise.default <- function(x) {
   # TODO: If x is an error or try-error, should this return a rejected promise?
-  stop("Don't know how to convert object of class ", class(x)[[1L]], " into a promise")
+  stop(
+    "Don't know how to convert object of class ",
+    class(x)[[1L]],
+    " into a promise"
+  )
 }
 
 #' Fulfill a promise

@@ -27,17 +27,19 @@ describe("2.2. The `then` Method", {
       x <- NULL
       p <- ext_promise()
 
-      p$promise %>% then(function(value) { x <<- value }) %>% wait_for_it()
+      p$promise %>%
+        then(function(value) {
+          x <<- value
+        }) %>%
+        wait_for_it()
       expect_identical(x, NULL)
 
       p$resolve(10) %>% wait_for_it()
       expect_identical(x, 10)
     })
     it("2.2.2.2. it must not be called before promise is fulfilled.", {
-
     })
     it("2.2.2.3. it must not be called more than once.", {
-
     })
   })
   describe("2.2.3. If onRejected is a function,", {
@@ -45,7 +47,10 @@ describe("2.2. The `then` Method", {
       x <- NULL
       p <- ext_promise()
 
-      p$promise %>% then(onRejected = function(reason) { x <<- reason }) %>%
+      p$promise %>%
+        then(onRejected = function(reason) {
+          x <<- reason
+        }) %>%
         wait_for_it()
       expect_identical(x, NULL)
 
@@ -57,7 +62,10 @@ describe("2.2. The `then` Method", {
   describe("2.2.4. onFulfilled or onRejected must not be called until the execution context stack contains only platform code. [3.1].", {
     it(" ", {
       x <- NULL
-      p <- promise(~resolve(TRUE)) %>% then(function(value) {x <<- value})
+      p <- promise(~ resolve(TRUE)) %>%
+        then(function(value) {
+          x <<- value
+        })
       expect_identical(x, NULL)
       p %>% wait_for_it()
       expect_identical(x, TRUE)
@@ -114,32 +122,38 @@ describe("2.2. The `then` Method", {
 
   describe("2.2.7. `then` must return a promise [3.3].", {
     it(" ", {
-      promise(~{}) %>% then() %>% is.promise() %>% expect_true()
+      promise(
+        ~ {
+        }
+      ) %>%
+        then() %>%
+        is.promise() %>%
+        expect_true()
     })
 
     it("2.2.7.1. If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x).", {
-      p1 <- promise(~resolve(TRUE)) %>% then(~"foo")
+      p1 <- promise(~ resolve(TRUE)) %>% then(~"foo")
       expect_identical(extract(p1), "foo")
 
-      p2 <- promise(~reject("boom")) %>% catch(~"bar")
+      p2 <- promise(~ reject("boom")) %>% catch(~"bar")
       expect_identical(extract(p2), "bar")
     })
 
     it("2.2.7.2. If either onFulfilled or onRejected throws an exception e, promise2 must be rejected with e as the reason.", {
-      p1 <- promise(~resolve(TRUE)) %>% then(~stop("foo"))
+      p1 <- promise(~ resolve(TRUE)) %>% then(~ stop("foo"))
       expect_error(extract(p1), "^foo$")
 
-      p2 <- promise(~reject("boom")) %>% catch(~stop("bar"))
+      p2 <- promise(~ reject("boom")) %>% catch(~ stop("bar"))
       expect_error(extract(p2), "^bar$")
     })
 
     it("2.2.7.3. If onFulfilled is not a function and promise1 is fulfilled, promise2 must be fulfilled with the same value as promise1.", {
-      p <- promise(~resolve("baz")) %>% then()
+      p <- promise(~ resolve("baz")) %>% then()
       expect_identical(extract(p), "baz")
     })
 
     it("2.2.7.4. If onRejected is not a function and promise1 is rejected, promise2 must be rejected with the same reason as promise1.", {
-      p <- promise(~reject("qux")) %>% then()
+      p <- promise(~ reject("qux")) %>% then()
       expect_error(extract(p), "^qux$")
     })
   })

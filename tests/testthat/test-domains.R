@@ -7,36 +7,41 @@ async_true <- function() {
 }
 
 describe("Promise domains", {
-
   it("are reentered during handlers", {
     cd <- create_counting_domain(trackFinally = TRUE)
     p <- with_promise_domain(cd, {
-      async_true() %...>% {
-        expect_identical(cd$counts$onFulfilledCalled, 1L)
-        expect_identical(cd$counts$onFulfilledActive, 1L)
-        10 # sync result
-      } %...>% {
-        expect_identical(cd$counts$onFulfilledCalled, 2L)
-        expect_identical(cd$counts$onFulfilledActive, 1L)
-        promise_resolve(20) # async result
-      }
+      async_true() %...>%
+        {
+          expect_identical(cd$counts$onFulfilledCalled, 1L)
+          expect_identical(cd$counts$onFulfilledActive, 1L)
+          10 # sync result
+        } %...>%
+        {
+          expect_identical(cd$counts$onFulfilledCalled, 2L)
+          expect_identical(cd$counts$onFulfilledActive, 1L)
+          promise_resolve(20) # async result
+        }
     })
 
     expect_identical(cd$counts$onFulfilledBound, 2L)
 
-    p <- p %...>% {
-      expect_identical(cd$counts$onFulfilledCalled, 2L)
-      expect_identical(cd$counts$onFulfilledActive, 0L)
-    }
+    p <- p %...>%
+      {
+        expect_identical(cd$counts$onFulfilledCalled, 2L)
+        expect_identical(cd$counts$onFulfilledActive, 0L)
+      }
 
     expect_identical(cd$counts$onFulfilledBound, 2L)
     p %>% wait_for_it()
 
     with_promise_domain(cd, {
-      p <- async_true() %>% finally(~{
-        expect_identical(cd$counts$onFinallyCalled, 1L)
-        expect_identical(cd$counts$onFinallyActive, 1L)
-      })
+      p <- async_true() %>%
+        finally(
+          ~ {
+            expect_identical(cd$counts$onFinallyCalled, 1L)
+            expect_identical(cd$counts$onFinallyActive, 1L)
+          }
+        )
       expect_identical(cd$counts$onFinallyBound, 1L)
 
       expect_identical(cd$counts$onFulfilledBound, 2L)
@@ -48,19 +53,21 @@ describe("Promise domains", {
     expect_identical(cd$counts$onFulfilledBound, 2L)
 
     with_promise_domain(cd, {
-      p <- async_true() %...>% {
-        expect_identical(., TRUE)
-        expect_identical(cd$counts$onFulfilledCalled, 3L)
-        ten <- 10
-        # This tests if promise domain membership infects subscriptions made
-        # in handlers.
-        promise_resolve(invisible(ten)) %...>% (function(value, .visible) {
-          expect_identical(value, 10)
-          expect_false(.visible)
-          expect_true(!is.null(current_promise_domain()))
-          expect_identical(cd$counts$onFulfilledCalled, 4L)
-        })
-      }
+      p <- async_true() %...>%
+        {
+          expect_identical(., TRUE)
+          expect_identical(cd$counts$onFulfilledCalled, 3L)
+          ten <- 10
+          # This tests if promise domain membership infects subscriptions made
+          # in handlers.
+          promise_resolve(invisible(ten)) %...>%
+            (function(value, .visible) {
+              expect_identical(value, 10)
+              expect_false(.visible)
+              expect_true(!is.null(current_promise_domain()))
+              expect_identical(cd$counts$onFulfilledCalled, 4L)
+            })
+        }
     })
 
     expect_true(is.null(current_promise_domain()))
@@ -74,10 +81,12 @@ describe("Promise domains", {
 
     with_promise_domain(cd1, {
       p1 <- async_true() %>%
-        finally(~{
-          expect_identical(cd1$counts$onFulfilledActive, 1L)
-          expect_identical(cd1$counts$onRejectedActive, 0L)
-        })
+        finally(
+          ~ {
+            expect_identical(cd1$counts$onFulfilledActive, 1L)
+            expect_identical(cd1$counts$onRejectedActive, 0L)
+          }
+        )
       expect_identical(cd1$counts$onFulfilledBound, 1L)
       expect_identical(cd1$counts$onRejectedBound, 1L)
       p1 %>% wait_for_it()
@@ -89,10 +98,12 @@ describe("Promise domains", {
 
     p2 <- with_promise_domain(cd2, {
       promise_reject("a problem") %>%
-        finally(~{
-          expect_identical(cd2$counts$onFulfilledActive, 0L)
-          expect_identical(cd2$counts$onRejectedActive, 1L)
-        })
+        finally(
+          ~ {
+            expect_identical(cd2$counts$onFulfilledActive, 0L)
+            expect_identical(cd2$counts$onRejectedActive, 1L)
+          }
+        )
     }) %>%
       squelch_unhandled_promise_error()
 
@@ -108,11 +119,13 @@ describe("Promise domains", {
 
     with_promise_domain(cd1, {
       p1 <- async_true() %>%
-        finally(~{
-          expect_identical(cd1$counts$onFinallyActive, 1L)
-          expect_identical(cd1$counts$onFulfilledActive, 0L)
-          expect_identical(cd1$counts$onRejectedActive, 0L)
-        })
+        finally(
+          ~ {
+            expect_identical(cd1$counts$onFinallyActive, 1L)
+            expect_identical(cd1$counts$onFulfilledActive, 0L)
+            expect_identical(cd1$counts$onRejectedActive, 0L)
+          }
+        )
       expect_identical(cd1$counts$onFinallyBound, 1L)
       expect_identical(cd1$counts$onFulfilledBound, 0L)
       expect_identical(cd1$counts$onRejectedBound, 0L)
@@ -126,12 +139,15 @@ describe("Promise domains", {
 
     p2 <- with_promise_domain(cd2, {
       promise_reject("bad") %>%
-        finally(~{
-          expect_identical(cd2$counts$onFinallyActive, 1L)
-          expect_identical(cd2$counts$onFulfilledActive, 0L)
-          expect_identical(cd2$counts$onRejectedActive, 0L)
-        })
-    }) %>% squelch_unhandled_promise_error()
+        finally(
+          ~ {
+            expect_identical(cd2$counts$onFinallyActive, 1L)
+            expect_identical(cd2$counts$onFulfilledActive, 0L)
+            expect_identical(cd2$counts$onRejectedActive, 0L)
+          }
+        )
+    }) %>%
+      squelch_unhandled_promise_error()
 
     expect_identical(cd2$counts$onFinallyBound, 1L)
     expect_identical(cd2$counts$onFulfilledBound, 0L)
@@ -151,7 +167,9 @@ describe("Promise domains", {
     cd <- create_counting_domain()
     with_promise_domain(cd, {
       promise_resolve(as.symbol("foo")) %...>%
-        { expect_identical(., as.symbol("foo")) } %>%
+        {
+          expect_identical(., as.symbol("foo"))
+        } %>%
         wait_for_it()
     })
   })
@@ -162,11 +180,14 @@ describe("Promise domains", {
     x <- NULL
     with_promise_domain(cd, {
       promise_resolve(NULL) %...>%
-        { x <<- 1L } %...>%
-        { x <<- x + 1L } %>%
+        {
+          x <<- 1L
+        } %...>%
+        {
+          x <<- x + 1L
+        } %>%
         wait_for_it()
     })
     expect_identical(x, 2L)
-
   })
 })

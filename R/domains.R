@@ -22,10 +22,7 @@ finallyToFulfilled <- function(onFinally) {
   force(onFinally)
   function(value, .visible) {
     onFinally()
-    if (.visible)
-      value
-    else
-      invisible(value)
+    if (.visible) value else invisible(value)
   }
 }
 
@@ -44,13 +41,19 @@ promiseDomain <- list(
     force(onFinally)
 
     # Verify that if onFinally is non-NULL, onFulfilled and onRejected are NULL
-    if (!is.null(onFinally) && (!is.null(onFulfilled) || !is.null(onRejected))) {
-      stop("A single `then` call cannot combine `onFinally` with `onFulfilled`/`onRejected`")
+    if (
+      !is.null(onFinally) && (!is.null(onFulfilled) || !is.null(onRejected))
+    ) {
+      stop(
+        "A single `then` call cannot combine `onFinally` with `onFulfilled`/`onRejected`"
+      )
     }
 
     domain <- current_promise_domain()
 
-    shouldWrapFinally <- !is.null(onFinally) && !is.null(domain) && !is.null(domain$wrapOnFinally)
+    shouldWrapFinally <- !is.null(onFinally) &&
+      !is.null(domain) &&
+      !is.null(domain$wrapOnFinally)
 
     newOnFinally <- if (shouldWrapFinally) {
       domain$wrapOnFinally(onFinally)
@@ -64,12 +67,18 @@ promiseDomain <- list(
       onRejected <- spliced$onRejected
     }
 
-    shouldWrapFulfilled <- !is.null(onFulfilled) && !is.null(domain) && !shouldWrapFinally
-    shouldWrapRejected <- !is.null(onRejected) && !is.null(domain) && !shouldWrapFinally
+    shouldWrapFulfilled <- !is.null(onFulfilled) &&
+      !is.null(domain) &&
+      !shouldWrapFinally
+    shouldWrapRejected <- !is.null(onRejected) &&
+      !is.null(domain) &&
+      !shouldWrapFinally
 
     results <- list(
-      onFulfilled = if (shouldWrapFulfilled) domain$wrapOnFulfilled(onFulfilled) else onFulfilled,
-      onRejected = if (shouldWrapRejected) domain$wrapOnRejected(onRejected) else onRejected
+      onFulfilled = if (shouldWrapFulfilled)
+        domain$wrapOnFulfilled(onFulfilled) else onFulfilled,
+      onRejected = if (shouldWrapRejected)
+        domain$wrapOnRejected(onRejected) else onRejected
     )
     results <- results[!vapply(results, is.null, logical(1))]
     # If there's a domain, ensure that before any callback is invoked, we
@@ -87,8 +96,7 @@ promiseDomain <- list(
   },
   onError = function(error) {
     domain <- current_promise_domain()
-    if (is.null(domain))
-      return()
+    if (is.null(domain)) return()
     domain$onError(error)
   }
 )
@@ -112,7 +120,11 @@ wrap_callback_reenter <- function(callback, domain) {
     # arguments
     args <- lapply(call[-1], eval, parent.frame())
     # Create and evaluate the callback call in our environment, wrapped in reenter_promise_domain
-    reenter_promise_domain(domain, rlang::exec(callback, !!!args), replace = TRUE)
+    reenter_promise_domain(
+      domain,
+      rlang::exec(callback, !!!args),
+      replace = TRUE
+    )
   }
   # Copy the formals from the original callback to the wrapper, so that the
   # wrapper can be called with the same arguments as the original callback.
@@ -160,24 +172,17 @@ current_promise_domain <- function() {
 #' @export
 with_promise_domain <- function(domain, expr, replace = FALSE) {
   oldval <- current_promise_domain()
-  if (replace)
-    globals$domain <- domain
-  else
+  if (replace) globals$domain <- domain else
     globals$domain <- compose_domains(oldval, domain)
   on.exit(globals$domain <- oldval)
 
-  if (!is.null(domain))
-    domain$wrapSync(expr)
-  else
-    force(expr)
+  if (!is.null(domain)) domain$wrapSync(expr) else force(expr)
 }
 
 # Like with_promise_domain, but doesn't include the wrapSync call.
 reenter_promise_domain <- function(domain, expr, replace) {
   oldval <- current_promise_domain()
-  if (replace)
-    globals$domain <- domain
-  else
+  if (replace) globals$domain <- domain else
     globals$domain <- compose_domains(oldval, domain)
   on.exit(globals$domain <- oldval)
 
@@ -222,14 +227,17 @@ new_promise_domain <- function(
   ...,
   wrapOnFinally = NULL
 ) {
-  list2env(list(
-    wrapOnFulfilled = wrapOnFulfilled,
-    wrapOnRejected = wrapOnRejected,
-    wrapOnFinally = wrapOnFinally,
-    wrapSync = wrapSync,
-    onError = onError,
-    ...
-  ), parent = emptyenv())
+  list2env(
+    list(
+      wrapOnFulfilled = wrapOnFulfilled,
+      wrapOnRejected = wrapOnRejected,
+      wrapOnFinally = wrapOnFinally,
+      wrapSync = wrapSync,
+      onError = onError,
+      ...
+    ),
+    parent = emptyenv()
+  )
 }
 
 
