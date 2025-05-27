@@ -19,7 +19,7 @@ vignette: >
 ```
 
 <div class="alert alert-success">
-While this article and others on this site focus on the `future` package, there's a much newer package called [`mirai`](https://shikokuchuo.net/mirai/) that you may want to consider instead.
+While this article and others on this site focus on the `future` package, there's a much newer package called [`mirai`](https://mirai.r-lib.org/) that you may want to consider instead.
 Here are some factors to consider as you choose between the two.
 
 1. The `future` package tries hard to automatically infer what variables and packages you need from the main R package, and makes those available to the child process. `mirai` doesn't try to do this for you; you need to pass in whatever data you need explicitly, and make package-namespaced calls explicitly inside of your inner code.
