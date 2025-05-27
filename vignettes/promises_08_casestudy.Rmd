@@ -44,23 +44,23 @@ The app I built to explore this data, **cranwhales**, let us examine the behavio
 
 When the app starts, the "All traffic" tab shows you the number of package downloads per hour for all users vs. whales. In this screenshot, you can see the proportion of files downloaded by the top six downloaders on May 28, 2018. It may not look like a huge fraction at first, but keep in mind, we are only talking about six downloaders out of 52,815 total!
 
-![](case-study-tab1.png)
+!["All traffic" app tab displaying histogram of top six downloaders.](case-study-tab1.png)
 
 The "Biggest whales" tab simply shows the most prolific downloaders, with their number of downloads performed. Each anonymized IP address has been assigned an easier-to-remember name, and you can also see the country code of the original IP address.
 
-![](case-study-tab2.png)
+!["Biggest whales" app tab displays excessive download counts for top 6 downloaders.](case-study-tab2.png)
 
 The "Whales by hour" tab shows the hourly download counts for each whale individually. In this screenshot, you can see that the Netherlands' `relieved_snake` downloaded at an extremely consistent rate during the whole day, while the American `curly_capabara` was active only during business hours in Eastern Standard Time. Still others, like `colossal_chicken` out of Hong Kong, was busy all day but at varying rates.
 
-![](case-study-tab3.png)
+!["Whales by hour" app tab shows hourly pattern of each _whale_.](case-study-tab3.png)
 
 The "Detail View" has perhaps the most illuminating information. It lets you view every download made by a given whale on the day in question. The x dimension is time and the y dimension is what package they downloaded, so you can see at a glance exactly how many packages were downloaded, and how their various package downloads relate to each other. In this case, `relieved_snake` downloaded 104 different packages, in the same order, continuously, for the entire day.
 
-![](case-study-tab4.png)
+!["Detail View" showing how `relieved_snake` downloads 104 packages continuously all day long.](case-study-tab4.png)
 
 Others behave very differently, like `freezing_tapir`, who downloaded `devtools`--and _only_ `devtools`--for the whole day, racking up 19,180 downloads totalling 7.9 gigabytes for that one package alone!
 
-![](case-study-tab5.png)
+!["Detail View" showing how `freezing_tapir` only downloads devtools continuously all day long.](case-study-tab5.png)
 
 Sadly, the app can't tell us any more than that--it can't explain _why_ these downloaders are behaving this way, nor can it tell us their street addresses so that we can send ninjas in black RStudio helicopters to make them stop.
 
@@ -123,7 +123,7 @@ The reactive expressions:
 
 The `whales` reactive expression depends on `data`, and `whale_downloads` depends on `data` and `whales`.
 
-![](case-study-react.png)
+![Reactive dependencies of an application.](case-study-react.png)
 
 The outputs in this app are mostly either `renderPlot`s that we populate with `ggplot2`, or `shinydashboard::renderValueBox`es. They all rely on one or more of the reactive expressions we just described. We won't catalog them all here, as they're not individually interesting, but we will look at some archetypes below.
 
@@ -363,7 +363,7 @@ You can make use of this pattern without remembering exactly how these pieces co
 
 ### The `total_downloaders` value box: simple pipelines are for output, too
 
-![](case-study-downloaders.png)
+![Over 52 thousand unique downloaders](case-study-downloaders.png)
 
 All of the value boxes in this app ended up looking a lot like this:
 
@@ -565,7 +565,7 @@ I then used this test script to generate load against the Shiny app running in m
 
 ### Sync vs. async performance
 
-![](case-study-gantt-async.png)
+![Slower response time of sync served home pages](case-study-gantt-async.png)
 
 In this plot, each row represents a single session, and the x dimension represents time. Each of the rectangles represents a single "step" in the test script, be it downloading the HTML for the homepage, fetching one of the two dozen JavaScript/CSS files, or waiting for the server to update outputs. So the wider a rectangle is, the longer the user had to wait. (The empty gaps between rectangles represents time the app is waiting for the user to click an input; their widths are hard-coded into the test script.)
 
@@ -583,13 +583,13 @@ We can make our code significantly faster by doing more summarizing, aggregation
 
 Compare all three runs in the image below (the newly optimized version is labelled "async2"). The homepage load times have dropped further, and the calculation times are now dramatically faster than the sync code.
 
-![](case-study-gantt-async2.png)
+![Faster response times using asynch served static assets](case-study-gantt-async2.png)
 
 Looking at the "async2" graph, the leading (bottom-left) edge has the same shape as before, as that's simply the rate at which the load testing tool launches new sessions. But notice how much more closely the trailing (upper-right) edge matches the leading edge! It means that even as the number of active sessions ramped up, the amount of latency didn't get dramatically worse, unlike with the "sync" and "async" versions. And each of the individual blue rectangles in the "async2" are comparatively tiny, meaning that users never have to wait more than a dozen seconds at the most for plots to update.
 
 This last plot shows the same data as above, but with the sessions aligned by start time. You can clearly see how the sessions are both shorter and less variable in "async2" compared to the others. I've added a yellow vertical line at the 10 second mark; if the page load (red/pink) has not completed at this point, it's likely that your visitor has left in disgust. While "async" does better than "sync", they both break through the 10 second mark early and often. In contrast, the "async2" version just barely peeks over the line three times.
 
-![](case-study-gantt-aligned.png)
+![Gantt chart aligned by start time displaying async2 is much better.](case-study-gantt-aligned.png)
 
 To get a visceral sense for what it feels like to use the app under load, here's a video that shows what it's like to browse the app while the load test is running at its peak. The left side of the screen shows "sync", the right shows "async2". In both cases, I navigated to the app when session #40 was started.
 
