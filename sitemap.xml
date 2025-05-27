@@ -1,6 +1,8 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://rstudio.github.io/promises/404.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/CODE_OF_CONDUCT.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/LICENSE-text.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/LICENSE.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/articles/index.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/articles/promises_01_motivation.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/articles/promises_02_intro.html</loc></url>
