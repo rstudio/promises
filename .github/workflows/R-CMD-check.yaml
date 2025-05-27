@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 8 * * 1' # every monday
+    - cron: "0 8 * * 1" # every monday
 
 name: Package checks
 
@@ -19,6 +19,8 @@ jobs:
       check-title: false
   routine:
     uses: rstudio/shiny-workflows/.github/workflows/routine.yaml@v1
+    with:
+      format-r-code: true
   R-CMD-check:
     uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1
   R-CMD-check-with-dont-test:
