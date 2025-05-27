@@ -30,7 +30,7 @@ Suggests:
     purrr,
     rmarkdown,
     spelling,
-    testthat,
+    testthat (>= 3.0.0),
     vembedr
 LinkingTo: 
     later,
@@ -43,3 +43,4 @@ Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Config/usethis/last-upkeep: 2025-05-27
+Config/testthat/edition: 3

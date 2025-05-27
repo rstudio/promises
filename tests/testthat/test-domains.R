@@ -1,5 +1,3 @@
-context("Promise domains")
-
 source("common.R")
 
 async_true <- function() {
