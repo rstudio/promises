@@ -2,7 +2,9 @@
 
 0 errors | 0 warnings | 1 note
 
-I'm sorry to submit so soon after the last promises submission. v1.3.1 had
-an issue that we didn't discover until it was accepted to CRAN, where it
-causes certain kinds of Shiny apps that make heavy use of async to grind to
-a halt.
+* checking DESCRIPTION meta-information ... NOTE
+Author field differs from that derived from Authors@R
+  Author:    'Joe Cheng [aut, cre], Posit Software, PBC [cph, fnd] (03wc8by49)'
+  Authors@R: 'Joe Cheng [aut, cre], Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)'
+
+Added a ROR for `Posit`. The ID has not changed.
