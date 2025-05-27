@@ -13,3 +13,4 @@
 ^vignettes/future_promise/.*\.R$
 ^CRAN-RELEASE$
 ^LICENSE\.md$
+^CRAN-SUBMISSION$
