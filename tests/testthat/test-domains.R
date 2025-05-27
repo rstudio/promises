@@ -1,5 +1,3 @@
-context("Promise domains")
-
 source("common.R")
 
 async_true <- function() {
@@ -189,5 +187,52 @@ describe("Promise domains", {
         wait_for_it()
     })
     expect_identical(x, 2L)
+  })
+
+  it("doesn't grow the call stack", {
+    # See https://github.com/rstudio/promises/issues/114
+    # and also https://github.com/jcheng5/shinychat/issues/16
+
+    recursive_promise <- function(n, .last_callstack_depth = NULL) {
+      if (n == 0) {
+        return(0)
+      } else {
+        promise_resolve(TRUE) %...>%
+          {
+            current_callstack_depth <- length(sys.calls())
+            if (!is.null(.last_callstack_depth)) {
+              expect_identical(current_callstack_depth, .last_callstack_depth)
+            }
+
+            recursive_promise(
+              n - 1,
+              .last_callstack_depth = current_callstack_depth
+            )
+          }
+      }
+    }
+
+    cd <- create_counting_domain()
+    with_promise_domain(cd, {
+      recursive_promise(5) %...>%
+        {
+          # 5 (from inside recursive_promise) + 1 (for the current handler)
+          expect_identical(cd$counts$onFulfilledCalled, 6L)
+        } %>%
+        wait_for_it()
+    })
+
+    cd2 <- create_counting_domain()
+    p <- recursive_promise(5)
+    with_promise_domain(cd2, {
+      p %...>%
+        {
+          # This time, none of the ones inside recursive_promise count, since
+          # they were bound outside of the influence of cd2 (even though they
+          # are resolved within the influence of cd2, thanks to wait_for_it()).
+          expect_identical(cd2$counts$onFulfilledCalled, 1L)
+        } %>%
+        wait_for_it()
+    })
   })
 })

@@ -7,6 +7,28 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{css echo=FALSE}
+.alert-success a, .alert-success a:visited {
+  color: inherit;
+  text-decoration: underline;
+}
+.alert code {
+  color: inherit;
+  background-color: inherit;
+}
+```
+
+<div class="alert alert-success">
+While this article and others on this site focus on the `future` package, there's a much newer package called [`mirai`](https://mirai.r-lib.org/) that you may want to consider instead.
+Here are some factors to consider as you choose between the two.
+
+1. The `future` package tries hard to automatically infer what variables and packages you need from the main R package, and makes those available to the child process. `mirai` doesn't try to do this for you; you need to pass in whatever data you need explicitly, and make package-namespaced calls explicitly inside of your inner code.
+2. `mirai` is very fast; it's much faster than `future` at starting up and has less per-task overhead. `mirai` creates event-driven promises, whereas promises using `future` time-poll every 0.1 seconds. This makes `mirai` ideal where response times and latency are critical.
+3. `future` is designed to be a general API supporting many types of distributed computing backends, and potentially offers more options. `mirai` on the other hand is its own system, whilst it does support both local and distributed execution.
+4. `mirai` is inherently queued, meaning it readily accepts more tasks than workers. This means you don’t need an equivalent of `future_promise()`. With `future` you need to manage cases where futures launch other futures ("evaluation topologies") upfront, whereas with `mirai` they will just work.
+5. `mirai` supports task cancellation and the ability to interrupt ongoing tasks on the worker.
+</div>
+
 The `future` package provides a lightweight way to launch R tasks that don't block the current R session. It was created by Henrik Bengtsson long before the `promises` package existed—the first CRAN release of `future` predates development of `promises` by almost two years.
 
 The `promises` package provides the API for working with the results of async tasks, but it totally abdicates responsibility for actually launching/creating async tasks. The idea is that any number of different packages could be capable of launching async tasks, using whatever techniques they want, but all of them would either return promise objects (or objects that can be converted to promise objects, as is the case for `future`). However, for now, `future` is likely to be the primary or even exclusive way that async tasks are created.

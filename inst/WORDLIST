@@ -1,5 +1,6 @@
 Async
 Bengtsson
+CMD
 Cheng's
 ETL
 FutureErrors
@@ -27,7 +28,6 @@ deserialized
 downloaders
 dplyr
 effecty
-expr
 funder
 ggplot
 github
@@ -43,6 +43,7 @@ magrittr
 magrittr's
 memoise
 multisession
+namespaced
 natively
 occured
 onRejected
@@ -67,6 +68,7 @@ syntaxes
 th
 this’ll
 tidyverse
+topologies
 totalling
 unevaluated
 unhandled

@@ -91,6 +91,9 @@ promiseDomain <- list(
     #         }
     #       }
     #     })
+    #
+    # It's important to reenter even if domain is NULL. In that case, we need to
+    # ensure that the current domain is set to NULL while the callback executes.
     results <- lapply(results, wrap_callback_reenter, domain = domain)
     results
   },
@@ -123,6 +126,9 @@ wrap_callback_reenter <- function(callback, domain) {
     reenter_promise_domain(
       domain,
       rlang::exec(callback, !!!args),
+      # replace = TRUE because we don't care what the current domain is; we're
+      # (temporarily) putting the world back to the way it was when the callback
+      # was bound to a promise.
       replace = TRUE
     )
   }

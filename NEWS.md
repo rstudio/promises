@@ -1,3 +1,14 @@
+# promises (development version)
+
+* Changed the way we create future objects to stay compatible with new versions of `{future}`. Apparently the way we were doing it was never idiomatic and only worked by accident. (#121)
+
+* Fixed #122: Use `future::future(..., lazy = TRUE)` to avoid manual capturing of state within `future_promise` (Thank you, @HenrikBengtsson! #123)
+
+# promises 1.3.2
+
+* Fixed bug introduced in 1.3.1, where promise domains that are active at promise resolution time stay active during handler callback, even if they weren't active when the handler was registered. This was causing stack overflow for long promise chains with many active promise domains. (#115)
+
+
 # promises 1.3.1
 
 * Fixed bug where promise domains were forgotten when handlers were registered from within other handlers. (#110)

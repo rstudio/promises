@@ -7,12 +7,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-<style>
-.alert-success a {
-  color: white;
+```{css echo=FALSE}
+.alert-success a, .alert-success a:visited {
+  color: inherit;
   text-decoration: underline;
 }
-</style>
+```
+
 <div class="alert alert-success">
 As of Shiny 1.8.1, there is a new feature called **Extended Tasks** that has several advantages over the approach in this article. We highly recommend that you read [the Extended Task documentation](https://shiny.posit.co/r/articles/improve/nonblocking/) first.
 </div>
