@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{css echo=FALSE}
-.alert-success a, .alert-success a:visited {
+.alert-secondary a, .alert-secondary a:visited {
   color: inherit;
   text-decoration: underline;
 }
@@ -18,7 +18,7 @@ vignette: >
 }
 ```
 
-<div class="alert alert-success">
+<div class="alert alert-secondary">
 While this article and others on this site focus on the `future` package, there's a much newer package called [`mirai`](https://mirai.r-lib.org/) that you may want to consider instead.
 Here are some factors to consider as you choose between the two.
 
