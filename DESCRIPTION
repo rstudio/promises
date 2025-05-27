@@ -32,12 +32,12 @@ Suggests:
     spelling,
     testthat (>= 3.0.0),
     vembedr
-LinkingTo: 
+LinkingTo:
     later,
     Rcpp
-VignetteBuilder: 
+VignetteBuilder:
     knitr
-Config/Needs/website: rsconnect
+Config/Needs/website: rsconnect, tidyverse/tidytemplate
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)

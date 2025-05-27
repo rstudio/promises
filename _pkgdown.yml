@@ -5,11 +5,12 @@ development:
   mode: auto
 
 template:
-  params:
-    docsearch:
-      api_key: e02966c036b2b44dfdb6dede68b3b31b
-      index_name: rstudio
-    bootswatch: cosmo
+  package: tidytemplate
+  bootstrap: 5
+  bslib:
+    primary: "#0088DA" # Shiny blue
+    # https://github.com/rstudio/bslib/issues/1190
+    navbar-bg: "#e8f6ff !important" # Shiny blue @ 92% ; https://mdigi.tools/lighten-color/#0088da
 
 reference:
   - title: Handling promises
@@ -34,18 +35,7 @@ reference:
       - with_promise_domain
 
 navbar:
-  type: inverse
-  structure:
-    left:
-    - home
-    - reference
-    - articles
-    - changelog
-    right: github
   components:
-    home:
-      icon: fas fa-home fa-lg
-      href: index.html
     articles:
       text: Learning
       menu:
