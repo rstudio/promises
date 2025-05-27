@@ -2,20 +2,18 @@
 #
 # @param pipe A quoted symbol
 # @return logical - TRUE if a valid magrittr pipe, FALSE otherwise.
-is_pipe <- function(pipe)
-{
-  identical(pipe, quote(`%>%`))   ||
-  identical(pipe, quote(`%T>%`))  ||
-  identical(pipe, quote(`%<>%`))  ||
-  identical(pipe, quote(`%$%`))
+is_pipe <- function(pipe) {
+  identical(pipe, quote(`%>%`)) ||
+    identical(pipe, quote(`%T>%`)) ||
+    identical(pipe, quote(`%<>%`)) ||
+    identical(pipe, quote(`%$%`))
 }
 
 # Determine whether an non-evaluated call is parenthesized
 #
 # @param a non-evaluated expression
 # @retun logical - TRUE if expression is parenthesized, FALSE otherwise.
-is_parenthesized <- function(expr)
-{
+is_parenthesized <- function(expr) {
   is.call(expr) && identical(expr[[1L]], quote(`(`))
 }
 
@@ -23,8 +21,7 @@ is_parenthesized <- function(expr)
 #
 # @param pipe A (quoted) pipe
 # @return logical - TRUE if pipe is a tee, FALSE otherwise.
-is_tee <- function(pipe)
-{
+is_tee <- function(pipe) {
   identical(pipe, quote(`%T>%`))
 }
 
@@ -32,8 +29,7 @@ is_tee <- function(pipe)
 #
 # @param pipe A (quoted) pipe
 # @return logical - TRUE if pipe is the dollar pipe, FALSE otherwise.
-is_dollar <- function(pipe)
-{
+is_dollar <- function(pipe) {
   identical(pipe, quote(`%$%`))
 }
 
@@ -42,8 +38,7 @@ is_dollar <- function(pipe)
 # @param pipe A (quoted) pipe
 # @return logical - TRUE if pipe is the compound assignment pipe,
 #   otherwise FALSE.
-is_compound_pipe <- function(pipe)
-{
+is_compound_pipe <- function(pipe) {
   identical(pipe, quote(`%<>%`))
 }
 
@@ -51,8 +46,7 @@ is_compound_pipe <- function(pipe)
 #
 # @param  expr An expression to be tested.
 # @return logical - TRUE if expr is enclosed in `{`, FALSE otherwise.
-is_funexpr <- function(expr)
-{
+is_funexpr <- function(expr) {
   is.call(expr) && identical(expr[[1L]], quote(`{`))
 }
 
@@ -60,8 +54,7 @@ is_funexpr <- function(expr)
 #
 # @param  expr An expression to be tested.
 # @return logical - TRUE if expr contains `::` or `:::`, FALSE otherwise.
-is_colexpr <- function(expr)
-{
+is_colexpr <- function(expr) {
   is.call(expr) &&
     (identical(expr[[1L]], quote(`::`)) || identical(expr[[1L]], quote(`:::`)))
 }
@@ -70,7 +63,6 @@ is_colexpr <- function(expr)
 #
 # @param  symbol A (quoted) symbol
 # @return logical - TRUE if symbol is the magrittr placeholder, FALSE otherwise.
-is_placeholder <- function(symbol)
-{
+is_placeholder <- function(symbol) {
   identical(symbol, quote(.))
 }

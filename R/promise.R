@@ -4,7 +4,8 @@
 NULL
 
 #' @import R6
-Promise <- R6::R6Class("Promise",
+Promise <- R6::R6Class(
+  "Promise",
   private = list(
     state = "pending",
     value = NULL,
@@ -27,7 +28,9 @@ Promise <- R6::R6Class("Promise",
       if (is.promising(value)) {
         value <- as.promise(value)
         if (identical(self, attr(value, "promise_impl", exact = TRUE))) {
-          return(private$doReject(simpleError("Chaining cycle detected for promise")))
+          return(private$doReject(simpleError(
+            "Chaining cycle detected for promise"
+          )))
         }
         # This then() call doesn't need promise domains; semantically, it doesn't
         # really exist, as it's just a convenient way to implement the new promise
@@ -66,11 +69,11 @@ Promise <- R6::R6Class("Promise",
       private$state <- "fulfilled"
 
       later::later(function() {
-          lapply(private$onFulfilled, function(f) {
-            f(private$value, private$visible)
-          })
-          private$onFulfilled <- list()
+        lapply(private$onFulfilled, function(f) {
+          f(private$value, private$visible)
         })
+        private$onFulfilled <- list()
+      })
     },
     doRejectFinalReason = function(reason) {
       private$value <- reason
@@ -83,12 +86,20 @@ Promise <- R6::R6Class("Promise",
         })
         private$onRejected <- list()
 
-        later::later(~{
-          if (!private$rejectionHandled) {
-            # warning() was unreliable here
-            cat(file=stderr(), "Unhandled promise error: ", reason$message, "\n", sep = "")
+        later::later(
+          ~ {
+            if (!private$rejectionHandled) {
+              # warning() was unreliable here
+              cat(
+                file = stderr(),
+                "Unhandled promise error: ",
+                reason$message,
+                "\n",
+                sep = ""
+              )
+            }
           }
-        })
+        )
       })
     }
   ),
@@ -99,8 +110,7 @@ Promise <- R6::R6Class("Promise",
     },
     resolve = function(value) {
       # Only allow this to be called once, then no-op.
-      if (private$publicResolveRejectCalled)
-        return(invisible())
+      if (private$publicResolveRejectCalled) return(invisible())
       private$publicResolveRejectCalled <- TRUE
 
       tryCatch(
@@ -120,8 +130,7 @@ Promise <- R6::R6Class("Promise",
     },
     reject = function(reason) {
       # Only allow this to be called once, then no-op.
-      if (private$publicResolveRejectCalled)
-        return(invisible())
+      if (private$publicResolveRejectCalled) return(invisible())
       private$publicResolveRejectCalled <- TRUE
 
       tryCatch(
@@ -147,51 +156,57 @@ Promise <- R6::R6Class("Promise",
       }
 
       promise2 <- promise(function(resolve, reject) {
-          res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
+        res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
 
-          if (!is.null(res)) {
-            onFulfilled <- res$onFulfilled
-            onRejected <- res$onRejected
-          }
+        if (!is.null(res)) {
+          onFulfilled <- res$onFulfilled
+          onRejected <- res$onRejected
+        }
 
-          handleFulfill <- function(value, visible) {
-            if (is.function(onFulfilled)) {
-              resolve(onFulfilled(value, visible))
-            } else {
-              resolve(if (visible) value else invisible(value))
-            }
-          }
-
-          handleReject <- function(reason) {
-            if (is.function(onRejected)) {
-              # Yes, resolve, not reject.
-              resolve(onRejected(reason))
-            } else {
-              # Yes, reject, not resolve.
-              reject(reason)
-            }
-          }
-
-          if (private$state == "pending") {
-            private$onFulfilled <- c(private$onFulfilled, list(
-              handleFulfill
-            ))
-            private$onRejected <- c(private$onRejected, list(
-              handleReject
-            ))
-          } else if (private$state == "fulfilled") {
-            later::later(function() {
-              handleFulfill(private$value, private$visible)
-            })
-          } else if (private$state == "rejected") {
-            later::later(function() {
-              private$rejectionHandled <- TRUE
-              handleReject(private$value)
-            })
+        handleFulfill <- function(value, visible) {
+          if (is.function(onFulfilled)) {
+            resolve(onFulfilled(value, visible))
           } else {
-            stop("Unexpected state ", private$state)
+            resolve(if (visible) value else invisible(value))
           }
-        })
+        }
+
+        handleReject <- function(reason) {
+          if (is.function(onRejected)) {
+            # Yes, resolve, not reject.
+            resolve(onRejected(reason))
+          } else {
+            # Yes, reject, not resolve.
+            reject(reason)
+          }
+        }
+
+        if (private$state == "pending") {
+          private$onFulfilled <- c(
+            private$onFulfilled,
+            list(
+              handleFulfill
+            )
+          )
+          private$onRejected <- c(
+            private$onRejected,
+            list(
+              handleReject
+            )
+          )
+        } else if (private$state == "fulfilled") {
+          later::later(function() {
+            handleFulfill(private$value, private$visible)
+          })
+        } else if (private$state == "rejected") {
+          later::later(function() {
+            private$rejectionHandled <- TRUE
+            handleReject(private$value)
+          })
+        } else {
+          stop("Unexpected state ", private$state)
+        }
+      })
 
       invisible(promise2)
     },
@@ -330,13 +345,17 @@ promise <- function(action) {
       if (is.function(action)) {
         action(p$resolve, p$reject)
       } else if (inherits(action, "formula")) {
-        eval(action[[2]], list(
-          resolve = p$resolve,
-          reject = p$reject,
-          return = function(value) {
-            warning("Can't return a value from a promise, use resolve/reject")
-          }
-        ), environment(action))
+        eval(
+          action[[2]],
+          list(
+            resolve = p$resolve,
+            reject = p$reject,
+            return = function(value) {
+              warning("Can't return a value from a promise, use resolve/reject")
+            }
+          ),
+          environment(action)
+        )
       }
     },
     error = function(e) {
@@ -380,13 +399,13 @@ promise <- function(action) {
 #'
 #' @export
 promise_resolve <- function(value) {
-  promise(~resolve(value))
+  promise(~ resolve(value))
 }
 
 #' @rdname promise_resolve
 #' @export
 promise_reject <- function(reason) {
-  promise(~reject(reason))
+  promise(~ reject(reason))
 }
 
 #' Coerce to a promise
@@ -461,21 +480,26 @@ as.promise.Future <- function(x) {
     poll_interval <- 0.1
     check <- function() {
       # timeout = 0 is important, the default waits for 200ms
-      is_resolved <- tryCatch({
-        future::resolved(x, timeout = 0)
-      }, FutureError = function(e) {
-         reject(e)
-         TRUE
-      })
+      is_resolved <- tryCatch(
+        {
+          future::resolved(x, timeout = 0)
+        },
+        FutureError = function(e) {
+          reject(e)
+          TRUE
+        }
+      )
       if (is_resolved) {
         tryCatch(
           {
             result <- future::value(x, signal = TRUE)
             resolve(result)
-          }, FutureError = function(e) {
+          },
+          FutureError = function(e) {
             reject(e)
             TRUE
-          }, error = function(e) {
+          },
+          error = function(e) {
             reject(e)
           }
         )
@@ -494,7 +518,11 @@ as.promise.Future <- function(x) {
 #' @export
 as.promise.default <- function(x) {
   # TODO: If x is an error or try-error, should this return a rejected promise?
-  stop("Don't know how to convert object of class ", class(x)[[1L]], " into a promise")
+  stop(
+    "Don't know how to convert object of class ",
+    class(x)[[1L]],
+    " into a promise"
+  )
 }
 
 #' Fulfill a promise

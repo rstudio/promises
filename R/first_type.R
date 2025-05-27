@@ -2,8 +2,7 @@
 #
 # @param a non-evaluated expression.
 # @return logical - TRUE if expr is of "first-argument" type, FALSE otherwise.
-is_first <- function(expr)
-{
+is_first <- function(expr) {
   !any(vapply(expr[-1L], identical, logical(1L), quote(.)))
 }
 
@@ -11,7 +10,6 @@ is_first <- function(expr)
 #
 # @param a an expression which passes `is_first`
 # @return an expression prepared for functional sequence construction.
-prepare_first <- function(expr)
-{
+prepare_first <- function(expr) {
   as.call(c(expr[[1L]], quote(.), as.list(expr[-1L])))
 }

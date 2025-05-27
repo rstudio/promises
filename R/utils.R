@@ -45,13 +45,15 @@ promise_all <- function(..., .list = NULL) {
   }
 
   if (length(.list) == 0) {
-    return(promise(~resolve(list())))
+    return(promise(~ resolve(list())))
   }
 
   # Verify that .list members are either all named or all unnamed
   nameCount <- sum(nzchar(names(.list)))
   if (nameCount != 0 && nameCount != length(.list)) {
-    stop("promise_all expects promise arguments (or list) to be either all named or all unnamed")
+    stop(
+      "promise_all expects promise arguments (or list) to be either all named or all unnamed"
+    )
   }
 
   done <- list()
@@ -69,7 +71,8 @@ promise_all <- function(..., .list = NULL) {
       # Forces correct/deterministic ordering of the result list's elements
       results[[key]] <<- NA
 
-      then(.list[[key]],
+      then(
+        .list[[key]],
         onFulfilled = function(value) {
           # Save the result so we can return it to the user.
           # This weird assignment is similar to `results[[key]] <- value`, except
@@ -140,8 +143,7 @@ promise_race <- function(..., .list = NULL) {
 #' @export
 promise_map <- function(.x, .f, ...) {
   .f <- match.fun(.f)
-  if (!is.vector(.x) || is.object(.x))
-    .x <- as.list(.x)
+  if (!is.vector(.x) || is.object(.x)) .x <- as.list(.x)
   x_names <- names(.x)
   results <- vector("list", length(.x))
 

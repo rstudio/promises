@@ -152,5 +152,5 @@ pipeify_rhs <- function(rhs, env) {
     rhs
   }
 
-  eval(call("function", as.pairlist(alist(.=, .visible=)), rhs), env, env)
+  eval(call("function", as.pairlist(alist(. = , .visible = )), rhs), env, env)
 }

@@ -110,10 +110,8 @@
 then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
   promise <- as.promise(promise)
 
-  if (!is.null(onFulfilled))
-    onFulfilled <- rlang::as_function(onFulfilled)
-  if (!is.null(onRejected))
-    onRejected <- rlang::as_function(onRejected)
+  if (!is.null(onFulfilled)) onFulfilled <- rlang::as_function(onFulfilled)
+  if (!is.null(onRejected)) onRejected <- rlang::as_function(onRejected)
   invisible(promise$then(onFulfilled = onFulfilled, onRejected = onRejected))
 }
 
@@ -128,8 +126,7 @@ then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
 catch <- function(promise, onRejected, tee = FALSE) {
   promise <- as.promise(promise)
 
-  if (!is.null(onRejected))
-    onRejected <- rlang::as_function(onRejected)
+  if (!is.null(onRejected)) onRejected <- rlang::as_function(onRejected)
 
   if (!tee) {
     return(promise$catch(onRejected))
@@ -151,7 +148,6 @@ catch <- function(promise, onRejected, tee = FALSE) {
 finally <- function(promise, onFinally) {
   promise <- as.promise(promise)
 
-  if (!is.null(onFinally))
-    onFinally <- rlang::as_function(onFinally)
+  if (!is.null(onFinally)) onFinally <- rlang::as_function(onFinally)
   promise$finally(onFinally)
 }
