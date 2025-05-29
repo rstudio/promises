@@ -1,4 +1,4 @@
-# promises (development version)
+# promises 1.3.3
 
 * Changed the way we create future objects to stay compatible with new versions of `{future}`. Apparently the way we were doing it was never idiomatic and only worked by accident. (#121)
 
