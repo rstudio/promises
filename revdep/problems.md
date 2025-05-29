@@ -1,32 +1,3 @@
-# aifeducation
-
-<details>
-
-* Version: 1.0.2
-* GitHub: https://github.com/cran/aifeducation
-* Source code: https://github.com/cran/aifeducation
-* Date/Publication: 2025-02-05 13:00:02 UTC
-* Number of recursive dependencies: 141
-
-Run `revdepcheck::revdep_details(, "aifeducation")` for more info
-
-</details>
-
-## In both
-
-*   checking installed package size ... NOTE
-    ```
-      installed size is  5.2Mb
-      sub-directories of 1Mb or more:
-        R      2.0Mb
-        data   1.6Mb
-    ```
-
-*   checking data for non-ASCII characters ... NOTE
-    ```
-      Note: found 33 marked UTF-8 strings
-    ```
-
 # chromote
 
 <details>
@@ -68,27 +39,32 @@ Run `revdepcheck::revdep_details(, "chromote")` for more info
     Execution halted
     ```
 
-# DT
+# dipsaus
 
 <details>
 
-* Version: 0.33
-* GitHub: https://github.com/rstudio/DT
-* Source code: https://github.com/cran/DT
-* Date/Publication: 2024-04-04 05:03:17 UTC
-* Number of recursive dependencies: 52
+* Version: 0.3.1
+* GitHub: https://github.com/dipterix/dipsaus
+* Source code: https://github.com/cran/dipsaus
+* Date/Publication: 2025-04-03 16:50:02 UTC
+* Number of recursive dependencies: 62
 
-Run `revdepcheck::revdep_details(, "DT")` for more info
+Run `revdepcheck::revdep_details(, "dipsaus")` for more info
 
 </details>
 
 ## In both
 
-*   checking installed package size ... NOTE
+*   checking compiled code ... NOTE
     ```
-      installed size is  6.3Mb
-      sub-directories of 1Mb or more:
-        htmlwidgets   5.5Mb
+    File ‘dipsaus/libs/dipsaus.so’:
+      Found non-API calls to R: ‘CLOENV’, ‘ENCLOS’
+    
+    Compiled code should not call non-API entry points in R.
+    
+    See ‘Writing portable packages’ in the ‘Writing R Extensions’ manual,
+    and section ‘Moving into C API compliance’ for issues with the use of
+    non-API entry points.
     ```
 
 # ellmer
@@ -130,81 +106,6 @@ Run `revdepcheck::revdep_details(, "ellmer")` for more info
       When sourcing ‘tool-calling.R’:
     Error: Can't find env var `OPENAI_API_KEY`.
     Execution halted
-    ```
-
-# GSVA
-
-<details>
-
-* Version: 1.50.5
-* GitHub: https://github.com/rcastelo/GSVA
-* Source code: https://github.com/cran/GSVA
-* Date/Publication: 2024-04-15
-* Number of recursive dependencies: 146
-
-Run `revdepcheck::revdep_details(, "GSVA")` for more info
-
-</details>
-
-## In both
-
-*   checking package dependencies ... ERROR
-    ```
-    Packages required but not available:
-      'S4Vectors', 'IRanges', 'SummarizedExperiment', 'GSEABase',
-      'BiocParallel', 'SingleCellExperiment', 'sparseMatrixStats',
-      'DelayedArray', 'DelayedMatrixStats', 'HDF5Array', 'BiocSingular'
-    
-    Packages suggested but not available for checking:
-      'limma', 'org.Hs.eg.db', 'genefilter', 'edgeR', 'GSVAdata'
-    
-    See section ‘The DESCRIPTION file’ in the ‘Writing R Extensions’
-    manual.
-    ```
-
-# httpuv
-
-<details>
-
-* Version: 1.6.16
-* GitHub: https://github.com/rstudio/httpuv
-* Source code: https://github.com/cran/httpuv
-* Date/Publication: 2025-04-16 08:00:06 UTC
-* Number of recursive dependencies: 32
-
-Run `revdepcheck::revdep_details(, "httpuv")` for more info
-
-</details>
-
-## In both
-
-*   checking for GNU extensions in Makefiles ... NOTE
-    ```
-    GNU make is a SystemRequirements.
-    ```
-
-# plotly
-
-<details>
-
-* Version: 4.10.4
-* GitHub: https://github.com/plotly/plotly.R
-* Source code: https://github.com/cran/plotly
-* Date/Publication: 2024-01-13 22:40:02 UTC
-* Number of recursive dependencies: 135
-
-Run `revdepcheck::revdep_details(, "plotly")` for more info
-
-</details>
-
-## In both
-
-*   checking installed package size ... NOTE
-    ```
-      installed size is  7.0Mb
-      sub-directories of 1Mb or more:
-        R             1.0Mb
-        htmlwidgets   4.0Mb
     ```
 
 # plumbertableau
@@ -252,11 +153,11 @@ Run `revdepcheck::revdep_details(, "plumbertableau")` for more info
 
 <details>
 
-* Version: 1.34.6
-* GitHub: https://github.com/prostarproteomics/Prostar
+* Version: 1.40.0
+* GitHub: https://github.com/edyp-lab/Prostar
 * Source code: https://github.com/cran/Prostar
-* Date/Publication: 2024-02-15
-* Number of recursive dependencies: 336
+* Date/Publication: 2025-04-15
+* Number of recursive dependencies: 189
 
 Run `revdepcheck::revdep_details(, "Prostar")` for more info
 
@@ -266,55 +167,34 @@ Run `revdepcheck::revdep_details(, "Prostar")` for more info
 
 *   checking package dependencies ... ERROR
     ```
-    Packages required but not available: 'DAPAR', 'DAPARdata'
+    Package required but not available: ‘DAPARdata’
     
     See section ‘The DESCRIPTION file’ in the ‘Writing R Extensions’
     manual.
     ```
 
-# shiny
-
-<details>
-
-* Version: 1.10.0
-* GitHub: https://github.com/rstudio/shiny
-* Source code: https://github.com/cran/shiny
-* Date/Publication: 2024-12-14 00:10:02 UTC
-* Number of recursive dependencies: 92
-
-Run `revdepcheck::revdep_details(, "shiny")` for more info
-
-</details>
-
-## In both
-
-*   checking installed package size ... NOTE
-    ```
-      installed size is 14.2Mb
-      sub-directories of 1Mb or more:
-        R     2.0Mb
-        www  10.3Mb
-    ```
-
-# tall
+# tapLock
 
 <details>
 
 * Version: 0.2.0
-* GitHub: https://github.com/massimoaria/tall
-* Source code: https://github.com/cran/tall
-* Date/Publication: 2025-04-16 14:20:02 UTC
-* Number of recursive dependencies: 159
+* GitHub: https://github.com/ixpantia/tapLock
+* Source code: https://github.com/cran/tapLock
+* Date/Publication: 2024-10-28 11:50:08 UTC
+* Number of recursive dependencies: 64
 
-Run `revdepcheck::revdep_details(, "tall")` for more info
+Run `revdepcheck::revdep_details(, "tapLock")` for more info
 
 </details>
 
 ## In both
 
-*   checking data for non-ASCII characters ... NOTE
+*   checking DESCRIPTION meta-information ... NOTE
     ```
-      Note: found 29947 marked UTF-8 strings
+      Missing dependency on R >= 4.1.0 because package code uses the pipe
+      |> or function shorthand \(...) syntax added in R 4.1.0.
+      File(s) using such syntax:
+        ‘auth0.R’ ‘config.R’ ‘entra_id.R’ ‘google.R’ ‘utils.R’
     ```
 
 # telegram.bot
