@@ -1,7 +1,7 @@
 Type: Package
 Package: promises
 Title: Abstractions for Promise-Based Asynchronous Programming
-Version: 1.3.2.9000
+Version: 1.3.3
 Authors@R: c(
     person("Joe", "Cheng", , "joe@posit.co", role = c("aut", "cre")),
     person("Posit Software, PBC", role = c("cph", "fnd"), comment = c(ROR = "03wc8by49"))
@@ -27,6 +27,7 @@ Imports:
 Suggests:
     future (>= 1.21.0),
     knitr,
+    mirai,
     purrr,
     rmarkdown,
     spelling,
