@@ -41,7 +41,9 @@ local({
   # We should expect to see `run_every()` statements interleaved with `future_promise()` calls
   # We should NOT expect to see `run_every()` statements while `future::future()` is blocking the main R session
   run_every <- function(i = 0, max = 2 / delay, delay = 0.1) {
-    if (i > max) return()
+    if (i > max) {
+      return()
+    }
     time_diffs <<- c(time_diffs, time_diff())
     # Do it again, later
     later::later(
@@ -199,8 +201,7 @@ local({
       err <- capture.output(type = "message", {
         future_promise(stop("boom1")) %>%
           then(
-            onRejected = ~ {
-            }
+            onRejected = ~ {}
           ) %>%
           wait_for_it()
       })

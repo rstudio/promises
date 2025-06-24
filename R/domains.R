@@ -75,10 +75,16 @@ promiseDomain <- list(
       !shouldWrapFinally
 
     results <- list(
-      onFulfilled = if (shouldWrapFulfilled)
-        domain$wrapOnFulfilled(onFulfilled) else onFulfilled,
-      onRejected = if (shouldWrapRejected)
-        domain$wrapOnRejected(onRejected) else onRejected
+      onFulfilled = if (shouldWrapFulfilled) {
+        domain$wrapOnFulfilled(onFulfilled)
+      } else {
+        onFulfilled
+      },
+      onRejected = if (shouldWrapRejected) {
+        domain$wrapOnRejected(onRejected)
+      } else {
+        onRejected
+      }
     )
     results <- results[!vapply(results, is.null, logical(1))]
     # If there's a domain, ensure that before any callback is invoked, we
@@ -99,7 +105,9 @@ promiseDomain <- list(
   },
   onError = function(error) {
     domain <- current_promise_domain()
-    if (is.null(domain)) return()
+    if (is.null(domain)) {
+      return()
+    }
     domain$onError(error)
   }
 )
@@ -173,8 +181,11 @@ current_promise_domain <- function() {
 #' @export
 with_promise_domain <- function(domain, expr, replace = FALSE) {
   oldval <- current_promise_domain()
-  if (replace) globals$domain <- domain else
+  if (replace) {
+    globals$domain <- domain
+  } else {
     globals$domain <- compose_domains(oldval, domain)
+  }
   on.exit(globals$domain <- oldval)
 
   if (!is.null(domain)) domain$wrapSync(expr) else force(expr)
@@ -183,8 +194,11 @@ with_promise_domain <- function(domain, expr, replace = FALSE) {
 # Like with_promise_domain, but doesn't include the wrapSync call.
 reenter_promise_domain <- function(domain, expr, replace) {
   oldval <- current_promise_domain()
-  if (replace) globals$domain <- domain else
+  if (replace) {
+    globals$domain <- domain
+  } else {
     globals$domain <- compose_domains(oldval, domain)
+  }
   on.exit(globals$domain <- oldval)
 
   force(expr)
