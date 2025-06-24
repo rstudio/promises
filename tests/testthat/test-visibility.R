@@ -61,8 +61,7 @@ describe("visibility", {
                 "double" = p %>% catch(double_fn),
                 "expr" = p %>%
                   catch(
-                    ~ {
-                    }
+                    ~ {}
                   )
               )
 

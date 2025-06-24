@@ -37,10 +37,8 @@ describe("2.2. The `then` Method", {
       p$resolve(10) %>% wait_for_it()
       expect_identical(x, 10)
     })
-    it("2.2.2.2. it must not be called before promise is fulfilled.", {
-    })
-    it("2.2.2.3. it must not be called more than once.", {
-    })
+    it("2.2.2.2. it must not be called before promise is fulfilled.", {})
+    it("2.2.2.3. it must not be called more than once.", {})
   })
   describe("2.2.3. If onRejected is a function,", {
     it("2.2.3.1. it must be called after promise is rejected, with promise’s reason as its first argument.", {
@@ -123,8 +121,7 @@ describe("2.2. The `then` Method", {
   describe("2.2.7. `then` must return a promise [3.3].", {
     it(" ", {
       promise(
-        ~ {
-        }
+        ~ {}
       ) %>%
         then() %>%
         is.promise() %>%

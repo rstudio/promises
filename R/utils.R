@@ -143,7 +143,9 @@ promise_race <- function(..., .list = NULL) {
 #' @export
 promise_map <- function(.x, .f, ...) {
   .f <- match.fun(.f)
-  if (!is.vector(.x) || is.object(.x)) .x <- as.list(.x)
+  if (!is.vector(.x) || is.object(.x)) {
+    .x <- as.list(.x)
+  }
   x_names <- names(.x)
   results <- vector("list", length(.x))
 

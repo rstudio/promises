@@ -110,7 +110,9 @@ Promise <- R6::R6Class(
     },
     resolve = function(value) {
       # Only allow this to be called once, then no-op.
-      if (private$publicResolveRejectCalled) return(invisible())
+      if (private$publicResolveRejectCalled) {
+        return(invisible())
+      }
       private$publicResolveRejectCalled <- TRUE
 
       tryCatch(
@@ -130,7 +132,9 @@ Promise <- R6::R6Class(
     },
     reject = function(reason) {
       # Only allow this to be called once, then no-op.
-      if (private$publicResolveRejectCalled) return(invisible())
+      if (private$publicResolveRejectCalled) {
+        return(invisible())
+      }
       private$publicResolveRejectCalled <- TRUE
 
       tryCatch(
@@ -223,7 +227,9 @@ Promise <- R6::R6Class(
         "<Promise [pending]>"
       } else {
         classname <- class(private$value)[[1]]
-        if (length(classname) == 0) classname <- ""
+        if (length(classname) == 0) {
+          classname <- ""
+        }
 
         sprintf("<Promise [%s: %s]>", private$state, classname)
       }

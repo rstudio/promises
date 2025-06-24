@@ -8,7 +8,9 @@ debug_msg <- function(...) {
 assert_work_queue_pkgs <- local({
   val <- NULL
   function() {
-    if (!is.null(val)) return()
+    if (!is.null(val)) {
+      return()
+    }
     for (pkg in list(
       list(name = "future", version = "1.21.0"),
       list(name = "fastmap", version = "1.1.0")
@@ -192,7 +194,9 @@ WorkQueue <- R6::R6Class(
     can_proceed = function() {
       can_proceed_cache_val <- private$can_proceed_cache_val
       # Return early if no work can be submitted.
-      if (!is.null(can_proceed_cache_val)) return(can_proceed_cache_val)
+      if (!is.null(can_proceed_cache_val)) {
+        return(can_proceed_cache_val)
+      }
 
       ret <- isTRUE(private$can_proceed_fn())
 
@@ -222,7 +226,9 @@ WorkQueue <- R6::R6Class(
     attempt_work = function(can_delay = FALSE) {
       debug_msg('attempt_work()')
       # If nothing to start, return early
-      if (private$queue$size() == 0) return()
+      if (private$queue$size() == 0) {
+        return()
+      }
 
       # If we are not waiting on someone else, we can do work now
       while ((private$queue$size() > 0) && private$can_proceed()) {
@@ -258,7 +264,9 @@ WorkQueue <- R6::R6Class(
 
       # Safety check...
       # If nothing is returned, no work to be done. Return early
-      if (!is.function(work_fn)) return()
+      if (!is.function(work_fn)) {
+        return()
+      }
 
       # Do scheduled work
       debug_msg("execute work")
@@ -430,7 +438,9 @@ future_promise <- function(
       length(formals(queue$schedule_work)) >= 1
   )
 
-  if (substitute) expr <- substitute(expr)
+  if (substitute) {
+    expr <- substitute(expr)
+  }
 
   # Force all variables to curb values changing before execution
   # Does NOT fix R environment values changing
