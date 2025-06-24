@@ -27,6 +27,7 @@ Imports:
 Suggests:
     future (>= 1.21.0),
     knitr,
+    mirai,
     purrr,
     rmarkdown,
     spelling,
