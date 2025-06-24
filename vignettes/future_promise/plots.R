@@ -92,8 +92,11 @@ status_guide <- function(waiting = TRUE, promise = FALSE) {
       working = "solid"
     ),
     breaks = c(if (waiting) "waiting", "working"),
-    labels = if (promise) c("Waiting in promise", "Working in future") else
-      c(if (waiting) "Waiting", "Working"),
+    labels = if (promise) {
+      c("Waiting in promise", "Working in future")
+    } else {
+      c(if (waiting) "Waiting", "Working")
+    },
     guide = guide_legend(
       order = 3,
       override.aes = list(
