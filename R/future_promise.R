@@ -380,9 +380,9 @@ future_promise_queue <- local({
 #'   }
 #'   old_plan <- future::plan(future::multisession, workers = 2)
 #'   on.exit({
-#'     sessioninfo::session_info()
+#'     print(sessioninfo::session_info())
 #'     future::futureSessionInfo()
-#'     future::plan(old_plan)
+#'     # future::plan(old_plan)
 #'   }, add = TRUE)
 #'   start <<- Sys.time()
 #'   force(expr)
