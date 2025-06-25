@@ -371,13 +371,14 @@ future_promise_queue <- local({
 #' @examples
 #' \donttest{# Relative start time
 #' start <- Sys.time()
+#' options(future.debug = TRUE)
 #' # Helper to force two `future` workers
 #' with_two_workers <- function(expr) {
 #'   if (!require("future")) {
 #'     message("`future` not installed")
 #'     return()
 #'   }
-#'   old_plan <- future::plan(future::cluster, workers = 2)
+#'   old_plan <- future::plan(future::multisession, workers = 2)
 #'   on.exit({future::plan(old_plan)}, add = TRUE)
 #'   start <<- Sys.time()
 #'   force(expr)
