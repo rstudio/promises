@@ -22,7 +22,11 @@ jobs:
       format-r-code: true
   R-CMD-check:
     uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1
+    with:
+      cache-version: "regular"
+
   R-CMD-check-with-dont-test:
     uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1
     with:
       extra-check-args: '"--run-donttest"'
+      cache-version: "donttest"
