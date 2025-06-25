@@ -23,6 +23,7 @@ Imports:
     R6,
     Rcpp,
     rlang,
+    sessioninfo,
     stats
 Suggests:
     future (>= 1.21.0),
