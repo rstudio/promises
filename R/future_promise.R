@@ -377,7 +377,7 @@ future_promise_queue <- local({
 #'     message("`future` not installed")
 #'     return()
 #'   }
-#'   old_plan <- future::plan(future::multisession, workers = 2)
+#'   old_plan <- future::plan(future::cluster, workers = 2)
 #'   on.exit({future::plan(old_plan)}, add = TRUE)
 #'   start <<- Sys.time()
 #'   force(expr)
