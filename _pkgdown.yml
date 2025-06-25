@@ -45,9 +45,11 @@ navbar:
         href: articles/promises_02_intro.html
       - text: 3. Working with promises
         href: articles/promises_03_overview.html
-      - text: 4. Launching tasks with future
+      - text: 4. Launching tasks with mirai
+        href: articles/promises_04__mirai.html
+      - text: 5a. Launching tasks with future
         href: articles/promises_04_futures.html
-      - text: 5. Advanced future and promises usage
+      - text: 5b. Advanced future and promises usage
         href: articles/promises_05_future_promise.html
       - text: 6. Using promises with Shiny
         href: articles/promises_06_shiny.html
@@ -60,6 +62,7 @@ redirects:
   - ["articles/motivation.html", "articles/promises_01_motivation.html"]
   - ["articles/intro.html", "articles/promises_02_intro.html"]
   - ["articles/overview.html", "articles/promises_03_overview.html"]
+  - ["articles/mirai.html", "articles/promises_04__mirai.html"]
   - ["articles/futures.html", "articles/promises_04_futures.html"]
   - ["articles/future_promise.html", "articles/promises_05_future_promise.html"]
   - ["articles/shiny.html", "articles/promises_06_shiny.html"]

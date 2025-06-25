@@ -28,22 +28,25 @@ Async programming can require a serious mental shift, even for veteran programme
 
 A more thorough exploration of the concepts behind `promises`, and the API provided by the `promises` package.
 
-#### [4. Launching tasks](articles/futures.html)
+#### [4. Launching tasks](articles/mirai.html)
 
-A guide to the `future` package, the place where we expect most async programming in R to begin.
+A guide to the `mirai` package, the place where we expect most async programming in R to begin.
 
-#### [5. Advance `future` and `promises` usage](articles/future_promise.html)
+#### [5a. Launching tasks with `future`](articles/futures.html)
+#### [5b. Advance `future` and `promises` usage](articles/future_promise.html)
+
+A guide to the `future` package, an alternative that pre-dates `mirai` and used to be the main method for async programming.
 
 Leverage `promises` to make sure that `future` execution does not block the main R process.
 
-#### [5. Using promises with Shiny](articles/shiny.html)
+#### [6. Using promises with Shiny](articles/shiny.html)
 
 Learn how to integrate `promises` into your Shiny applications.
 
-#### [6. Combining `promises`](articles/combining.html)
+#### [7. Combining `promises`](articles/combining.html)
 
 Functions and techniques for working with multiple `promises` simultaneously.
 
-#### [7. Case study: converting a Shiny app to async](articles/casestudy.html)
+#### [8. Case study: converting a Shiny app to async](articles/casestudy.html)
 
 Walk through the conversion of a realistic Shiny example app to async.

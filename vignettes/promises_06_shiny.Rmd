@@ -24,9 +24,9 @@ Async programming with Shiny boils down to following a few steps.
 
 1. Identify slow operations (function calls or blocks of statements) in your app.
 
-2. Convert the slow operation into a future using `future_promise()`. (If you haven't read the [article on futures](promises_04_futures.html) and [`future_promise()`](promises_05_future_promise.html), definitely do that before proceeding!)
+2. Convert the slow operation into a 'mirai' using `mirai()`. (If you haven't read the [article on mirai](promises_04__mirai.html), definitely do that before proceeding!)
 
-3. Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the future object.
+3. Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the mirai object.
 
 We'll get into details for all these steps, but first, an example. Consider the following synchronous server code:
 
@@ -44,12 +44,12 @@ We'd convert it to async like this:
 
 ```R
 library(promises)
-library(future)
-plan(multisession)
+library(mirai)
+daemons(6)
 
 function(input, output, session) {
   output$plot <- renderPlot({
-    future_promise({ expensive_operation() }) %...>%
+    mirai({ expensive_operation() }) %...>%
       head(input$n) %...>%
       plot()
   })
@@ -58,56 +58,54 @@ function(input, output, session) {
 
 ## Adding prerequisites
 
-The easiest part is adding `library(promises)`, `library(future)`, and `plan(multisession)` to the top of the app.
+The easiest part is adding `library(promises)`, `library(mirai)`, and `daemons(6)` to the top of the app.
 
 The `promises` library is necessary for the `%...>%` operator. You may also want to use promise utility functions like `promise_all` and `promise_race`.
 
-The `future` library is needed because the `future()` function call used inside `future_promise()` is how you will launch asynchronous tasks.
+The `mirai` library is needed because the `mirai()` function call is how you will launch asynchronous tasks.
 
-`plan(multisession)` is a directive to the `future` package, telling it how future tasks should actually be executed. See the [article on futures](promises_04_futures.html) for more details.
+`daemons(6)` is a directive to the `mirai` package, telling it how mirai tasks should actually be executed. See the [article on mirai](promises_04__mirai.html) for more details.
 
 ## Identifying slow operations
 
-To find areas of your code that are good candidates for the future/promise treatment, let's start with the obvious: identifying the code that is making your app slow. You may assume it's your plotting code that's slow, but it's actually your database queries; or vice versa. If there's one thing that veteran programmers can agree on, it's that human intuition is a surprisingly unreliable tool for spotting performance problems.
+To find areas of your code that are good candidates for the mirai/promise treatment, let's start with the obvious: identifying the code that is making your app slow. You may assume it's your plotting code that's slow, but it's actually your database queries; or vice versa. If there's one thing that veteran programmers can agree on, it's that human intuition is a surprisingly unreliable tool for spotting performance problems.
 
 Our recommendation is that you use the [profvis](https://profvis.r-lib.org/) profiler, which we designed to work with Shiny (see Example 3 in the profvis documentation). You can use profvis to help you focus in on where the time is actually being spent in your app.
 
->  **Note:** As of this writing, profvis doesn't work particularly well for diagnosing performance problems in parts of your code that you've already made asynchronous. In particular, we haven't done any work to help it profile code that executes in a future, and the mechanism we use to hide "irrelevant" parts of the stack trace doesn't work well with promises. These are ripe areas for future development.
+>  **Note:** As of this writing, profvis doesn't work particularly well for diagnosing performance problems in parts of your code that you've already made asynchronous. In particular, we haven't done any work to help it profile code that executes in a mirai, and the mechanism we use to hide "irrelevant" parts of the stack trace doesn't work well with promises. These are ripe areas for future development.
 
-Async programming works well when you can identify just a few "hotspots" in your app where lots of time is being spent. It works much less well if your app is too slow because of a generalized, diffuse slowness through every aspect of your app, where no one operation takes too much time but it all adds up to a lot. The more futures you need to introduce into your app, the more fixed communication overhead you incur. So for the most bang-for-the-buck, we want to launch a small number of futures per session but move a lot of the waited-on code into each one.
+Async programming works well when you can identify just a few "hotspots" in your app where lots of time is being spent. It works much less well if your app is too slow because of a generalized, diffuse slowness through every aspect of your app, where no one operation takes too much time but it all adds up to a lot. The more mirai you need to introduce into your app, the more fixed communication overhead you incur. So for the most bang-for-the-buck, we want to launch a small number of mirai per session but move a lot of the waited-on code into each one.
 
-## Converting a slow operation into a future
+## Converting a slow operation into a mirai
 
-Now that we've found hotspots that we want to make asynchronous, let's talk about the actual work of converting them to futures.
+Now that we've found hotspots that we want to make asynchronous, let's talk about the actual work of converting them to mirai.
 
-Conceptually, futures work like this:
+Conceptually, mirai works like this:
 
 ```R
-future({
+mirai({
   # Expensive code goes here
 }) %...>% (function(result) {
   # Code to handle result of expensive code goes here
 })
 ```
 
-which seems incredibly simple. What's actually happening is that the future runs in a totally separate child R process, and then the result is collected up and returned to the main R process:
+which seems incredibly simple. What's actually happening is that the mirai runs in a totally separate child R process, and then the result is collected up and returned to the main R process:
 
 ```R
 # Code here runs in process A
-future({
+mirai({
   # Code here runs in (child) process B
 }) %...>% (function(result) {
   # Code here runs in process A
 })
 ```
 
-The fact that the future code block executes in a separate process means we have to take special care to deal with a number of practical issues. There are extremely important constraints that futures impose on their code blocks; certain objects cannot be safely used across process boundaries, and some of the default behaviors of the future library may severely impact the performance of your app. Again, see the [article on futures](promises_04_futures.html) for more details.
-
-The remainder of this document will use `future_promise()` in place of `future()`. For more information on the differences, see the [article on the benefits of `future_promise()`](promises_05_future_promise.html).
+The fact that the mirai code block executes in a separate process means we have to take special care to deal with a number of practical issues. All the objects required by the code block must be passed along as part of the `mirai()` function call; certain objects may require custom serialization to be set up, and other objects cannot be safely used across process boundaries. Again, see the [article on mirai](promises_04__mirai.html) for more details.
 
 ### Shiny-specific caveats and limitations
 
-In addition to the constraints that all futures face, there is an additional one for Shiny: reactive values and reactive expressions cannot be read from within a future. Whenever reactive values/expressions are read, side effects are carried out under the hood so that the currently executing observer or reactive expression can be notified when the reactive value/expression becomes invalidated. If a reactive value/expression is created in one process, but read in another process, there will be no way for readers to be notified about invalidation.
+In addition to the constraints that all mirai face, there is an additional one for Shiny: reactive values and reactive expressions cannot be read from within a mirai. Whenever reactive values/expressions are read, side effects are carried out under the hood so that the currently executing observer or reactive expression can be notified when the reactive value/expression becomes invalidated. If a reactive value/expression is created in one process, but read in another process, there will be no way for readers to be notified about invalidation.
 
 This code, for example, will not work:
 
@@ -116,14 +114,14 @@ function(input, output, session) {
   r1 <- reactive({ ... })
 
   r2 <- reactive({
-    future_promise({
+    mirai({
       r1() # Will error--don't do this!
-    })
+    }, r1 = r1)
   })
 }
 ```
 
-Even though `r1()` is called from inside the `r2` reactive expression, the fact that it's also in a future means the call will fail. Instead, you must read any reactive values/expressions you need in advance of launching the future:
+Even though `r1()` is called from inside the `r2` reactive expression, the fact that it's also in a mirai means the call will fail. Instead, you must read any reactive values/expressions you need in advance of launching the mirai:
 
 ```R
 function(input, output, session) {
@@ -131,9 +129,9 @@ function(input, output, session) {
 
   r2 <- reactive({
     val <- r1()
-    future_promise({
+    mirai({
       val # No problem!
-    })
+    }, val = val)
   })
 }
 ```
@@ -145,7 +143,7 @@ function(input, output, session) {
   r1 <- reactive({ ... })
 
   r2 <- reactive({
-    future_promise({ ... }) %...>%
+    mirai({ ... }) %...>%
       rbind(r1()) # OK!
   })
 }
@@ -172,7 +170,7 @@ could become:
 
 ```R
 output$table <- renderTable({
-  future_promise({ read.csv(url) }) %...>%
+  mirai(read.csv(url), url = url) %...>%
     filter(date == input$date)
 })
 ```
@@ -182,9 +180,9 @@ or, trading elegance for efficiency:
 ```R
 output$table <- renderTable({
   input_date <- input$date
-  future_promise({
+  mirai({
     read.csv(url) %>% filter(date == input_date)
-  })
+  }, url = url, input_date = input_date)
 })
 ```
 
@@ -194,22 +192,22 @@ The important thing to keep in mind is that the promise (or promise pipeline) mu
 
 The render functions `renderPrint()` and `renderPlot()` are slightly different than other render functions, in that they can be affected by side effects in the code block you provide. In `renderPrint` you can print to the console, and in `renderPlot` you can plot to the active R graphics device.
 
-With promises, these render functions can work in a similar way, but with a caveat. As you hopefully understand by now, futures execute their code in a separate R process, and printing/plotting in a separate process won't have any effect on the Shiny output in the original process. These examples, then, are incorrect:
+With promises, these render functions can work in a similar way, but with a caveat. As you hopefully understand by now, mirai execute their code in a separate R process, and printing/plotting in a separate process won't have any effect on the Shiny output in the original process. These examples, then, are incorrect:
 
 ```R
 output$summary <- renderPrint({
-  future_promise({
+  mirai({
     read.csv(url) %>%
       summary() %>%
       print()
-  })
+  }, environment())
 })
 
 output$plot <- renderPlot({
-  future_promise({
+  mirai({
     df <- read.csv(url)
     ggplot(df, aes(length, width)) + geom_point()
-  })
+  }, environment())
 })
 ```
 
@@ -217,13 +215,13 @@ Instead, do printing and plotting after control returns back to the original pro
 
 ```R
 output$summary <- renderPrint({
-  future_promise({ read.csv(url) }) %...>%
+  mirai(read.csv(url), url = url) %...>%
     summary() %...>%
     print()
 })
 
 output$plot <- renderPlot({
-  future_promise({ read.csv(url) }) %...>%
+  mirai(read.csv(url), url = url) %...>%
   {
     ggplot(., aes(length, width)) + geom_point()
   }
@@ -257,17 +255,17 @@ data <- reactiveVal(readRDS("cached.rds"))
 
 function(input, output, session) {
   observeEvent(input$refresh_data, {
-    future_promise({
+    mirai({
       df <- read.csv(url)
       saveRDS(df, "cached.rds")
       df
-    }) %...>%
+    }, url = url) %...>%
       data()
   })
 }
 ```
 
-Note that in this version, we cannot call `data(df)` inside the future, as this would cause the update to happen in the wrong process. Instead, we use the `%...>%` operator to perform the assignment back in the main process once the future resolves.
+Note that in this version, we cannot call `data(df)` inside the mirai, as this would cause the update to happen in the wrong process. Instead, we use the `%...>%` operator to perform the assignment back in the main process once the mirai resolves.
 
 ### Reactive expressions
 
@@ -298,7 +296,7 @@ And now in async:
 ```R
 function(input, output, session) {
   data <- eventReactive(input$refresh_data, {
-    future_promise({ read.csv(url) })
+    mirai(read.csv(url), url = url)
   })
 
   filteredData <- reactive({
