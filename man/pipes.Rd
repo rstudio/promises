@@ -56,15 +56,14 @@ function instead of an expression.
 }
 \examples{
 \dontrun{
-library(future)
-plan(multisession)
+library(mirai)
 
-future_promise(cars) \%...>\%
+mirai(cars) \%...>\%
   head(5) \%...T>\%
   print()
 
 # If the read.csv fails, resolve to NULL instead
-future_promise(read.csv("http://example.com/data.csv")) \%...!\%
+mirai(read.csv("http://example.com/data.csv")) \%...!\%
   { NULL }
 }
 
