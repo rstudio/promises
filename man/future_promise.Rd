@@ -79,7 +79,10 @@ print_msg <- function(pid, msg) {
 # The important thing to note is the first four times will be roughly the same
 with_two_workers({
   promise_resolve(Sys.getpid()) \%...>\% print_msg("promise done")
-  for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+  for (i in 1:6) {
+    message("Starting future ", i)
+    future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+  }
 })
 {
 #> PID: XXX; 2.5s promise done
