@@ -51,7 +51,7 @@ For more details and examples, please see the \href{https://rstudio.github.io/pr
 
 }}
 \examples{
-\donttest{# Relative start time
+\dontrun{# Relative start time
 start <- Sys.time()
 options(future.debug = TRUE)
 # Helper to force two `future` workers

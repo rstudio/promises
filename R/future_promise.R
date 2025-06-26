@@ -369,7 +369,7 @@ future_promise_queue <- local({
 #' @param queue A queue that is used to schedule work to be done using [future::future()].  This queue defaults to [future_promise_queue()] and requires that method `queue$schedule_work(fn)` exist.  This method should take in a function that will execute the promised \pkg{future} work.
 #' @return Unlike [`future::future()`], `future_promise()` returns a [promise()] object that will eventually resolve the \pkg{future} `expr`.
 #' @examples
-#' \donttest{# Relative start time
+#' \dontrun{# Relative start time
 #' start <- Sys.time()
 #' options(future.debug = TRUE)
 #' # Helper to force two `future` workers
