@@ -351,8 +351,8 @@ In synchronous programming, you use either`tryCatch(expr, finally = ...)` or `on
 
 ```r
 file_path <- tempfile(fileext = ".png")
-png_bytes <-
-  as.promise(mirai(
+png_bytes_promise <-
+  mirai(
     {
       png(file_path)
       plot(cars)
@@ -360,8 +360,8 @@ png_bytes <-
       file_path
     },
     file_path = file_path
-  )) %...>%
-  readBin(raw(), size = file.info(file_path)$size) %>%
+  ) %...>%
+  brio::read_file_raw() %>%
   finally(~unlink(file_path))
 ```
 
