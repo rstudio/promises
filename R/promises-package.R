@@ -11,6 +11,8 @@ ignore_unused_imports <- function() {
 
 release_bullets <- function() {
   c(
-    "Update staticimports: `staticimports::import()`"
+    "Update staticimports: `staticimports::import()`",
+    "Revert `future_promise()` example to use `\\donttest{}`, not `\\dontrun{}`",
+    "Revert `skip_on_os(\"mac\")` in `future_promise()` test"
   )
 }

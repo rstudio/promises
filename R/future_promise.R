@@ -369,7 +369,7 @@ future_promise_queue <- local({
 #' @param queue A queue that is used to schedule work to be done using [future::future()].  This queue defaults to [future_promise_queue()] and requires that method `queue$schedule_work(fn)` exist.  This method should take in a function that will execute the promised \pkg{future} work.
 #' @return Unlike [`future::future()`], `future_promise()` returns a [promise()] object that will eventually resolve the \pkg{future} `expr`.
 #' @examples
-#' \donttest{# Relative start time
+#' \dontrun{# Relative start time
 #' start <- Sys.time()
 #' # Helper to force two `future` workers
 #' with_two_workers <- function(expr) {
@@ -377,7 +377,7 @@ future_promise_queue <- local({
 #'     message("`future` not installed")
 #'     return()
 #'   }
-#'   old_plan <- future::plan(future::multisession(workers = 2))
+#'   old_plan <- future::plan(future::multisession, workers = 2)
 #'   on.exit({future::plan(old_plan)}, add = TRUE)
 #'   start <<- Sys.time()
 #'   force(expr)
@@ -537,7 +537,7 @@ if (FALSE) {
   # ## block main worker workers pre job
   # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:4, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i/4) }) -> ignore;
 
-  future::plan(future::multisession(workers = 2))
+  future::plan(future::multisession, workers = 2)
 
   debug_msg_can_print <- TRUE
 
