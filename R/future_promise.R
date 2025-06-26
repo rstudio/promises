@@ -371,7 +371,6 @@ future_promise_queue <- local({
 #' @examples
 #' \dontrun{# Relative start time
 #' start <- Sys.time()
-#' options(future.debug = TRUE)
 #' # Helper to force two `future` workers
 #' with_two_workers <- function(expr) {
 #'   if (!require("future")) {

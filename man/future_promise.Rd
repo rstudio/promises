@@ -53,7 +53,6 @@ For more details and examples, please see the \href{https://rstudio.github.io/pr
 \examples{
 \dontrun{# Relative start time
 start <- Sys.time()
-options(future.debug = TRUE)
 # Helper to force two `future` workers
 with_two_workers <- function(expr) {
   if (!require("future")) {
