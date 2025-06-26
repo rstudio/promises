@@ -34,13 +34,19 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-learning" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Learning</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-learning">
-<li><a class="dropdown-item" href="../articles/promises_01_motivation.html">1. Why use promises?</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><h6 class="dropdown-header" data-toc-skip>Overview</h6></li>
+    <li><a class="dropdown-item" href="../articles/promises_01_motivation.html">1. Why use promises?</a></li>
     <li><a class="dropdown-item" href="../articles/promises_02_intro.html">2. An informal intro to async programming</a></li>
     <li><a class="dropdown-item" href="../articles/promises_03_overview.html">3. Working with promises</a></li>
-    <li><a class="dropdown-item" href="../articles/promises_04_futures.html">4. Launching tasks with future</a></li>
-    <li><a class="dropdown-item" href="../articles/promises_05_future_promise.html">5. Advanced future and promises usage</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Integration</h6></li>
+    <li><a class="dropdown-item" href="../articles/promises_04_mirai.html">4. Launching tasks with mirai</a></li>
+    <li><a class="dropdown-item" href="../articles/promises_05a_futures.html">5a. Launching tasks with future</a></li>
+    <li><a class="dropdown-item" href="../articles/promises_05b_future_promise.html">5b. Advanced future and promises usage</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Usage</h6></li>
     <li><a class="dropdown-item" href="../articles/promises_06_shiny.html">6. Using promises with Shiny</a></li>
     <li><a class="dropdown-item" href="../articles/promises_07_combining.html">7. Combining promises</a></li>
     <li><a class="dropdown-item" href="../articles/promises_08_casestudy.html">8. Case study: Converting a Shiny app to async</a></li>
@@ -110,17 +116,16 @@ requested, an asynchronous <code>read.csv.async</code> function would
 kick off the CSV reading operation, but then return immediately, long
 before the real work has actually completed.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">read.csv.async</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span>, <span class="va">header</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">stringsAsFactors</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">file</span>, header <span class="op">=</span> <span class="va">header</span>, stringsAsFactors <span class="op">=</span> <span class="va">stringsAsFactors</span><span class="op">)</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">file</span>, header <span class="op">=</span> <span class="va">header</span>, stringsAsFactors <span class="op">=</span> <span class="va">stringsAsFactors</span><span class="op">)</span>,</span>
+<span>    .args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/environment.html" class="external-link">environment</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>(Don’t worry about what this definition means for now. You’ll learn
-more about defining async functions in <a href="promises_04_futures.html">Launching tasks</a> and <a href="promises_05_future_promise.html">Advanced <code>future</code> and
-<code>promises</code> usage</a>.)</p>
+more about defining async functions in <a href="promises_04_mirai.html">Launching tasks</a>.)</p>
 <p><strong>So instead of “read this CSV file” it’s more like “begin
 reading this CSV file”?</strong></p>
 <p>Yes! That’s what async functions do: they start things, and give you
@@ -339,8 +344,7 @@ live, and it also comes with some additional functions for working with
 promises.</p>
 <p>So far, the only actual async function we’ve talked about has been
 <code>read.csv.async</code>, which doesn’t actually exist. To learn
-where actual async functions come from, read <a href="promises_04_futures.html">this guide to the <code>future</code>
-package</a>.</p>
+where actual async functions come from, read this guide to the <a href="promises_04_mirai.html"><code>mirai</code> package</a>.</p>
 <p>There are the lower-level functions <code>then</code>,
 <code>catch</code>, and <code>finally</code>, which are the non-pipe,
 non-operator equivalents of the promise operators we’ve been discussing.

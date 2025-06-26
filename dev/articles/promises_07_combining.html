@@ -34,13 +34,19 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-learning" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Learning</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-learning">
-<li><a class="dropdown-item" href="../articles/promises_01_motivation.html">1. Why use promises?</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><h6 class="dropdown-header" data-toc-skip>Overview</h6></li>
+    <li><a class="dropdown-item" href="../articles/promises_01_motivation.html">1. Why use promises?</a></li>
     <li><a class="dropdown-item" href="../articles/promises_02_intro.html">2. An informal intro to async programming</a></li>
     <li><a class="dropdown-item" href="../articles/promises_03_overview.html">3. Working with promises</a></li>
-    <li><a class="dropdown-item" href="../articles/promises_04_futures.html">4. Launching tasks with future</a></li>
-    <li><a class="dropdown-item" href="../articles/promises_05_future_promise.html">5. Advanced future and promises usage</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Integration</h6></li>
+    <li><a class="dropdown-item" href="../articles/promises_04_mirai.html">4. Launching tasks with mirai</a></li>
+    <li><a class="dropdown-item" href="../articles/promises_05a_futures.html">5a. Launching tasks with future</a></li>
+    <li><a class="dropdown-item" href="../articles/promises_05b_future_promise.html">5b. Advanced future and promises usage</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Usage</h6></li>
     <li><a class="dropdown-item" href="../articles/promises_06_shiny.html">6. Using promises with Shiny</a></li>
     <li><a class="dropdown-item" href="../articles/promises_07_combining.html">7. Combining promises</a></li>
     <li><a class="dropdown-item" href="../articles/promises_08_casestudy.html">8. Case study: Converting a Shiny app to async</a></li>
@@ -113,11 +119,10 @@ with the results of those promises.</p>
 results of two async <code>read.csv</code> operations:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">a</span>, <span class="va">.</span><span class="op">$</span><span class="va">b</span><span class="op">)</span></span>
@@ -130,11 +135,10 @@ use of the base R function <code>with</code>, which lets you skip the
 prefix. Here’s the same example, with <code>with</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="op">{</span></span>
@@ -167,13 +171,12 @@ whether to launch a second async task, whose result you then use in
 combination with the result of <code>a</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">a</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
+<span>  <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span>  <span class="va">b</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">a</span> <span class="op">+</span> <span class="va">b</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
@@ -193,11 +196,10 @@ doom”).</p>
 </h2>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="fl">1</span> <span class="op">}</span><span class="op">)</span></span>
-<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>; <span class="fl">2</span> <span class="op">}</span><span class="op">)</span></span>
+<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="fl">1</span> <span class="op">}</span><span class="op">)</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span>; <span class="fl">2</span> <span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">first</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_all.html">promise_race</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span></code></pre></div>
 <p><code>promise_race</code> takes multiple promises and returns a new
@@ -223,14 +225,14 @@ package’s description file from CRAN pick out the last published
 date.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">get_pub_date</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pkg</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">desc_url</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"https://cran.r-project.org/web/packages/"</span>, <span class="va">pkg</span>, <span class="st">"/DESCRIPTION"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/dcf.html" class="external-link">read.dcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html" class="external-link">url</a></span><span class="op">(</span><span class="va">desc_url</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="st">"Date/Publication"</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dcf.html" class="external-link">read.dcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html" class="external-link">url</a></span><span class="op">(</span><span class="va">desc_url</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="st">"Date/Publication"</span><span class="op">]</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, desc_url <span class="op">=</span> <span class="va">desc_url</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">packages</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, <span class="st">"dplyr"</span>, <span class="st">"knitr"</span><span class="op">)</span><span class="op">)</span></span>
@@ -240,13 +242,13 @@ date.</p>
 <span><span class="va">pkg_dates</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The resulting output looks like this:</p>
 <pre><code>$ggplot2
-[1] "2016-12-30 22:45:17"
+[1] "2025-04-09 09:40:10 UTC"
 
 $dplyr
-[1] "2017-09-28 20:43:29 UTC"
+[1] "2023-11-17 16:50:02 UTC"
 
 $knitr
-[1] "2018-01-29 11:01:22 UTC"</code></pre>
+[1] "2025-03-16 09:20:02 UTC"</code></pre>
 <p><code>promise_map</code> works serially; each time it calls the given
 function on an element of the list/vector, it will wait for the returned
 promise to resolve before proceeding to the next element. Furthermore,
@@ -290,8 +292,7 @@ returning the first one that passes whatever check
 <code>http::http_error</code> performs.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cran_mirrors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"https://cloud.r-project.org"</span>,</span>
@@ -300,16 +301,21 @@ returning the first one that passes whatever check
 <span>  <span class="st">"https://cran.wu.ac.at"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/promise_reduce.html">promise_reduce</a></span><span class="op">(</span><span class="va">cran_mirrors</span>, <span class="kw">function</span><span class="op">(</span><span class="va">result</span>, <span class="va">mirror</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">result</span></span>
-<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>      <span class="co"># Test the URL; return the URL on success, or NULL on failure</span></span>
-<span>      <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/http_error.html" class="external-link">http_error</a></span><span class="op">(</span><span class="va">mirror</span><span class="op">)</span><span class="op">)</span> <span class="va">mirror</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span><span class="op">}</span>, .init <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/promise_reduce.html">promise_reduce</a></span><span class="op">(</span></span>
+<span>  <span class="va">cran_mirrors</span>,</span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">result</span>, <span class="va">mirror</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">result</span></span>
+<span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>        <span class="co"># Test the URL; return the URL on success, or NULL on failure</span></span>
+<span>        <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/http_error.html" class="external-link">http_error</a></span><span class="op">(</span><span class="va">mirror</span><span class="op">)</span><span class="op">)</span> <span class="va">mirror</span></span>
+<span>      <span class="op">}</span>, mirror <span class="op">=</span> <span class="va">mirror</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span>,</span>
+<span>  .init <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

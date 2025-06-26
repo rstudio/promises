@@ -34,13 +34,19 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-learning" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Learning</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-learning">
-<li><a class="dropdown-item" href="../articles/promises_01_motivation.html">1. Why use promises?</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><h6 class="dropdown-header" data-toc-skip>Overview</h6></li>
+    <li><a class="dropdown-item" href="../articles/promises_01_motivation.html">1. Why use promises?</a></li>
     <li><a class="dropdown-item" href="../articles/promises_02_intro.html">2. An informal intro to async programming</a></li>
     <li><a class="dropdown-item" href="../articles/promises_03_overview.html">3. Working with promises</a></li>
-    <li><a class="dropdown-item" href="../articles/promises_04_futures.html">4. Launching tasks with future</a></li>
-    <li><a class="dropdown-item" href="../articles/promises_05_future_promise.html">5. Advanced future and promises usage</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Integration</h6></li>
+    <li><a class="dropdown-item" href="../articles/promises_04_mirai.html">4. Launching tasks with mirai</a></li>
+    <li><a class="dropdown-item" href="../articles/promises_05a_futures.html">5a. Launching tasks with future</a></li>
+    <li><a class="dropdown-item" href="../articles/promises_05b_future_promise.html">5b. Advanced future and promises usage</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Usage</h6></li>
     <li><a class="dropdown-item" href="../articles/promises_06_shiny.html">6. Using promises with Shiny</a></li>
     <li><a class="dropdown-item" href="../articles/promises_07_combining.html">7. Combining promises</a></li>
     <li><a class="dropdown-item" href="../articles/promises_08_casestudy.html">8. Case study: Converting a Shiny app to async</a></li>
@@ -96,12 +102,12 @@ of server code.</p>
 <ol style="list-style-type: decimal">
 <li><p>Identify slow operations (function calls or blocks of statements)
 in your app.</p></li>
-<li><p>Convert the slow operation into a future using
-<code><a href="../reference/future_promise.html">future_promise()</a></code>. (If you haven’t read the <a href="promises_04_futures.html">article on futures</a> and <a href="promises_05_future_promise.html"><code>future_promise()</code></a>,
-definitely do that before proceeding!)</p></li>
+<li><p>Convert the slow operation into a ‘mirai’ using
+<code><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai()</a></code>. (If you haven’t read the <a href="promises_04_mirai.html">article on mirai</a>, definitely do that
+before proceeding!)</p></li>
 <li><p>Any code that relies on the result of that operation (if any),
 whether directly or indirectly, now must be converted to promise
-handlers that operate on the future object.</p></li>
+handlers that operate on the mirai object.</p></li>
 </ol>
 <p>We’ll get into details for all these steps, but first, an example.
 Consider the following synchronous server code:</p>
@@ -116,12 +122,12 @@ Consider the following synchronous server code:</p>
 <p>We’d convert it to async like this:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">expensive_operation</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span> <span class="fu">expensive_operation</span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
@@ -130,26 +136,25 @@ Consider the following synchronous server code:</p>
 <h2 id="adding-prerequisites">Adding prerequisites<a class="anchor" aria-label="anchor" href="#adding-prerequisites"></a>
 </h2>
 <p>The easiest part is adding <code><a href="https://rstudio.github.io/promises/">library(promises)</a></code>,
-<code><a href="https://future.futureverse.org" class="external-link">library(future)</a></code>, and <code>plan(multisession)</code> to the
-top of the app.</p>
+<code><a href="https://mirai.r-lib.org" class="external-link">library(mirai)</a></code>, and <code>daemons(6)</code> to the top of
+the app.</p>
 <p>The <code>promises</code> library is necessary for the
 <code>%...&gt;%</code> operator. You may also want to use promise
 utility functions like <code>promise_all</code> and
 <code>promise_race</code>.</p>
-<p>The <code>future</code> library is needed because the
-<code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future()</a></code> function call used inside
-<code><a href="../reference/future_promise.html">future_promise()</a></code> is how you will launch asynchronous
+<p>The <code>mirai</code> library is needed because the
+<code><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai()</a></code> function call is how you will launch asynchronous
 tasks.</p>
-<p><code>plan(multisession)</code> is a directive to the
-<code>future</code> package, telling it how future tasks should actually
-be executed. See the <a href="promises_04_futures.html">article on
-futures</a> for more details.</p>
+<p><code>daemons(6)</code> is a directive to the <code>mirai</code>
+package, telling it how mirai tasks should actually be executed. See the
+<a href="promises_04_mirai.html">article on mirai</a> for more
+details.</p>
 </div>
 <div class="section level2">
 <h2 id="identifying-slow-operations">Identifying slow operations<a class="anchor" aria-label="anchor" href="#identifying-slow-operations"></a>
 </h2>
 <p>To find areas of your code that are good candidates for the
-future/promise treatment, let’s start with the obvious: identifying the
+mirai/promise treatment, let’s start with the obvious: identifying the
 code that is making your app slow. You may assume it’s your plotting
 code that’s slow, but it’s actually your database queries; or vice
 versa. If there’s one thing that veteran programmers can agree on, it’s
@@ -163,7 +168,7 @@ time is actually being spent in your app.</p>
 <p><strong>Note:</strong> As of this writing, profvis doesn’t work
 particularly well for diagnosing performance problems in parts of your
 code that you’ve already made asynchronous. In particular, we haven’t
-done any work to help it profile code that executes in a future, and the
+done any work to help it profile code that executes in a mirai, and the
 mechanism we use to hide “irrelevant” parts of the stack trace doesn’t
 work well with promises. These are ripe areas for future
 development.</p>
@@ -172,81 +177,75 @@ development.</p>
 “hotspots” in your app where lots of time is being spent. It works much
 less well if your app is too slow because of a generalized, diffuse
 slowness through every aspect of your app, where no one operation takes
-too much time but it all adds up to a lot. The more futures you need to
+too much time but it all adds up to a lot. The more mirai you need to
 introduce into your app, the more fixed communication overhead you
 incur. So for the most bang-for-the-buck, we want to launch a small
-number of futures per session but move a lot of the waited-on code into
+number of mirai per session but move a lot of the waited-on code into
 each one.</p>
 </div>
 <div class="section level2">
-<h2 id="converting-a-slow-operation-into-a-future">Converting a slow operation into a future<a class="anchor" aria-label="anchor" href="#converting-a-slow-operation-into-a-future"></a>
+<h2 id="converting-a-slow-operation-into-a-mirai">Converting a slow operation into a mirai<a class="anchor" aria-label="anchor" href="#converting-a-slow-operation-into-a-mirai"></a>
 </h2>
 <p>Now that we’ve found hotspots that we want to make asynchronous,
-let’s talk about the actual work of converting them to futures.</p>
-<p>Conceptually, futures work like this:</p>
+let’s talk about the actual work of converting them to mirai.</p>
+<p>Conceptually, mirai works like this:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="co"># Expensive code goes here</span></span>
 <span><span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># Code to handle result of expensive code goes here</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>which seems incredibly simple. What’s actually happening is that the
-future runs in a totally separate child R process, and then the result
-is collected up and returned to the main R process:</p>
+mirai runs in a totally separate child R process, and then the result is
+collected up and returned to the main R process:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Code here runs in process A</span></span>
-<span><span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span></span>
+<span><span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="co"># Code here runs in (child) process B</span></span>
 <span><span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># Code here runs in process A</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>The fact that the future code block executes in a separate process
+<p>The fact that the mirai code block executes in a separate process
 means we have to take special care to deal with a number of practical
-issues. There are extremely important constraints that futures impose on
-their code blocks; certain objects cannot be safely used across process
-boundaries, and some of the default behaviors of the future library may
-severely impact the performance of your app. Again, see the <a href="promises_04_futures.html">article on futures</a> for more
-details.</p>
-<p>The remainder of this document will use <code><a href="../reference/future_promise.html">future_promise()</a></code>
-in place of <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future()</a></code>. For more information on the
-differences, see the <a href="promises_05_future_promise.html">article
-on the benefits of <code>future_promise()</code></a>.</p>
+issues. All the objects required by the code block must be passed along
+as part of the <code><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai()</a></code> function call; certain objects may
+require custom serialization to be set up, and other objects cannot be
+safely used across process boundaries. Again, see the <a href="promises_04_mirai.html">article on mirai</a> for more details.</p>
 <div class="section level3">
 <h3 id="shiny-specific-caveats-and-limitations">Shiny-specific caveats and limitations<a class="anchor" aria-label="anchor" href="#shiny-specific-caveats-and-limitations"></a>
 </h3>
-<p>In addition to the constraints that all futures face, there is an
+<p>In addition to the constraints that mirai faces, there is an
 additional one for Shiny: reactive values and reactive expressions
-cannot be read from within a future. Whenever reactive
-values/expressions are read, side effects are carried out under the hood
-so that the currently executing observer or reactive expression can be
-notified when the reactive value/expression becomes invalidated. If a
-reactive value/expression is created in one process, but read in another
-process, there will be no way for readers to be notified about
-invalidation.</p>
+cannot be read from within a mirai. Whenever reactive values/expressions
+are read, side effects are carried out under the hood so that the
+currently executing observer or reactive expression can be notified when
+the reactive value/expression becomes invalidated. If a reactive
+value/expression is created in one process, but read in another process,
+there will be no way for readers to be notified about invalidation.</p>
 <p>This code, for example, will not work:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>      <span class="fu">r1</span><span class="op">(</span><span class="op">)</span> <span class="co"># Will error--don't do this!</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>, r1 <span class="op">=</span> <span class="va">r1</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Even though <code>r1()</code> is called from inside the
-<code>r2</code> reactive expression, the fact that it’s also in a future
+<code>r2</code> reactive expression, the fact that it’s also in a mirai
 means the call will fail. Instead, you must read any reactive
-values/expressions you need in advance of launching the future:</p>
+values/expressions you need in advance of launching the mirai:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="va">val</span> <span class="op">&lt;-</span> <span class="fu">r1</span><span class="op">(</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>      <span class="va">val</span> <span class="co"># No problem!</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>, val <span class="op">=</span> <span class="va">val</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>However, it’s perfectly fine to read reactive values/expressions from
@@ -257,7 +256,7 @@ not a child process, so reactive operations are allowed.</p>
 <span>  <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu">r1</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="co"># OK!</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -287,16 +286,16 @@ such a value instead.</p>
 <p>could become:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu">renderTable</span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>or, trading elegance for efficiency:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu">renderTable</span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">input_date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span></span>
-<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input_date</span><span class="op">)</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, url <span class="op">=</span> <span class="va">url</span>, input_date <span class="op">=</span> <span class="va">input_date</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The important thing to keep in mind is that the promise (or promise
 pipeline) must be the final expression in the code block. Shiny only
@@ -313,36 +312,36 @@ block you provide. In <code>renderPrint</code> you can print to the
 console, and in <code>renderPlot</code> you can plot to the active R
 graphics device.</p>
 <p>With promises, these render functions can work in a similar way, but
-with a caveat. As you hopefully understand by now, futures execute their
+with a caveat. As you hopefully understand by now, mirai executes its
 code in a separate R process, and printing/plotting in a separate
 process won’t have any effect on the Shiny output in the original
 process. These examples, then, are incorrect:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu">renderPrint</span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
 <span>    <span class="fu">ggplot</span><span class="op">(</span><span class="va">df</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">length</span>, <span class="va">width</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Instead, do printing and plotting after control returns back to the
 original process, via a promise handler:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu">renderPrint</span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>  <span class="op">{</span></span>
 <span>    <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">length</span>, <span class="va">width</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
@@ -383,18 +382,18 @@ also used to update the reactive value <code>data</code>.</p>
 <span></span>
 <span><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">refresh_data</span>, <span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>      <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"cached.rds"</span><span class="op">)</span></span>
 <span>      <span class="va">df</span></span>
-<span>    <span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="op">}</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Note that in this version, we cannot call <code>data(df)</code>
-inside the future, as this would cause the update to happen in the wrong
+inside the mirai, as this would cause the update to happen in the wrong
 process. Instead, we use the <code>%...&gt;%</code> operator to perform
-the assignment back in the main process once the future resolves.</p>
+the assignment back in the main process once the mirai resolves.</p>
 </div>
 <div class="section level3">
 <h3 id="reactive-expressions">Reactive expressions<a class="anchor" aria-label="anchor" href="#reactive-expressions"></a>
@@ -432,7 +431,7 @@ promise.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">refresh_data</span>, <span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">filteredData</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>

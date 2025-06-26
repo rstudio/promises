@@ -36,13 +36,19 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-learning" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Learning</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-learning">
-<li><a class="dropdown-item" href="articles/promises_01_motivation.html">1. Why use promises?</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><h6 class="dropdown-header" data-toc-skip>Overview</h6></li>
+    <li><a class="dropdown-item" href="articles/promises_01_motivation.html">1. Why use promises?</a></li>
     <li><a class="dropdown-item" href="articles/promises_02_intro.html">2. An informal intro to async programming</a></li>
     <li><a class="dropdown-item" href="articles/promises_03_overview.html">3. Working with promises</a></li>
-    <li><a class="dropdown-item" href="articles/promises_04_futures.html">4. Launching tasks with future</a></li>
-    <li><a class="dropdown-item" href="articles/promises_05_future_promise.html">5. Advanced future and promises usage</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Integration</h6></li>
+    <li><a class="dropdown-item" href="articles/promises_04_mirai.html">4. Launching tasks with mirai</a></li>
+    <li><a class="dropdown-item" href="articles/promises_05a_futures.html">5a. Launching tasks with future</a></li>
+    <li><a class="dropdown-item" href="articles/promises_05b_future_promise.html">5b. Advanced future and promises usage</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Usage</h6></li>
     <li><a class="dropdown-item" href="articles/promises_06_shiny.html">6. Using promises with Shiny</a></li>
     <li><a class="dropdown-item" href="articles/promises_07_combining.html">7. Combining promises</a></li>
     <li><a class="dropdown-item" href="articles/promises_08_casestudy.html">8. Case study: Converting a Shiny app to async</a></li>
@@ -79,53 +85,71 @@
 <div class="section level2">
 <h2 id="contents">Contents<a class="anchor" aria-label="anchor" href="#contents"></a>
 </h2>
+<div class="section level3">
+<h3 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h3>
 <div class="section level4">
 <h4 id="id_1-why-use-promises">
-<a href="articles/motivation.html">1. Why use <code>promises</code>?</a><a class="anchor" aria-label="anchor" href="#id_1-why-use-promises"></a>
+<a href="articles/promises_01_motivation.html">1. Why use <code>promises</code>?</a><a class="anchor" aria-label="anchor" href="#id_1-why-use-promises"></a>
 </h4>
 <p>Why do we need async programming? What is it good for, and not good for?</p>
 </div>
 <div class="section level4">
 <h4 id="id_2-an-informal-intro-to-async-programming">
-<a href="articles/intro.html">2. An informal intro to async programming</a><a class="anchor" aria-label="anchor" href="#id_2-an-informal-intro-to-async-programming"></a>
+<a href="articles/promises_02_intro.html">2. An informal intro to async programming</a><a class="anchor" aria-label="anchor" href="#id_2-an-informal-intro-to-async-programming"></a>
 </h4>
 <p>Async programming can require a serious mental shift, even for veteran programmers. This document attempts to introduce the “average” R user to the topic, as gently as possible.</p>
 </div>
 <div class="section level4">
 <h4 id="id_3-working-with-promises">
-<a href="articles/overview.html">3. Working with <code>promises</code></a><a class="anchor" aria-label="anchor" href="#id_3-working-with-promises"></a>
+<a href="articles/promises_03_overview.html">3. Working with <code>promises</code></a><a class="anchor" aria-label="anchor" href="#id_3-working-with-promises"></a>
 </h4>
 <p>A more thorough exploration of the concepts behind <code>promises</code>, and the API provided by the <code>promises</code> package.</p>
 </div>
+</div>
+<div class="section level3">
+<h3 id="integration">Integration<a class="anchor" aria-label="anchor" href="#integration"></a>
+</h3>
 <div class="section level4">
 <h4 id="id_4-launching-tasks">
-<a href="articles/futures.html">4. Launching tasks</a><a class="anchor" aria-label="anchor" href="#id_4-launching-tasks"></a>
+<a href="articles/promises_04_mirai.html">4. Launching tasks</a><a class="anchor" aria-label="anchor" href="#id_4-launching-tasks"></a>
 </h4>
-<p>A guide to the <code>future</code> package, the place where we expect most async programming in R to begin.</p>
+<p>A guide to the <code>mirai</code> package, the place where we expect most async programming in R to begin.</p>
 </div>
 <div class="section level4">
-<h4 id="id_5-advance-future-and-promises-usage">
-<a href="articles/future_promise.html">5. Advance <code>future</code> and <code>promises</code> usage</a><a class="anchor" aria-label="anchor" href="#id_5-advance-future-and-promises-usage"></a>
+<h4 id="id_5a-launching-tasks-with-future">
+<a href="articles/promises_05a_futures.html">5a. Launching tasks with <code>future</code></a><a class="anchor" aria-label="anchor" href="#id_5a-launching-tasks-with-future"></a>
+</h4>
+<p>A guide to the <code>future</code> package, an alternative async programming R package that pre-dates <code>mirai</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="id_5b-advance-future-and-promises-usage">
+<a href="articles/promises_05b_future_promise.html">5b. Advance <code>future</code> and <code>promises</code> usage</a><a class="anchor" aria-label="anchor" href="#id_5b-advance-future-and-promises-usage"></a>
 </h4>
 <p>Leverage <code>promises</code> to make sure that <code>future</code> execution does not block the main R process.</p>
 </div>
+</div>
+<div class="section level3">
+<h3 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h3>
 <div class="section level4">
-<h4 id="id_5-using-promises-with-shiny">
-<a href="articles/shiny.html">5. Using promises with Shiny</a><a class="anchor" aria-label="anchor" href="#id_5-using-promises-with-shiny"></a>
+<h4 id="id_6-using-promises-with-shiny">
+<a href="articles/promises_06_shiny.html">6. Using promises with Shiny</a><a class="anchor" aria-label="anchor" href="#id_6-using-promises-with-shiny"></a>
 </h4>
 <p>Learn how to integrate <code>promises</code> into your Shiny applications.</p>
 </div>
 <div class="section level4">
-<h4 id="id_6-combining-promises">
-<a href="articles/combining.html">6. Combining <code>promises</code></a><a class="anchor" aria-label="anchor" href="#id_6-combining-promises"></a>
+<h4 id="id_7-combining-promises">
+<a href="articles/promises_07_combining.html">7. Combining <code>promises</code></a><a class="anchor" aria-label="anchor" href="#id_7-combining-promises"></a>
 </h4>
 <p>Functions and techniques for working with multiple <code>promises</code> simultaneously.</p>
 </div>
 <div class="section level4">
-<h4 id="id_7-case-study-converting-a-shiny-app-to-async">
-<a href="articles/casestudy.html">7. Case study: converting a Shiny app to async</a><a class="anchor" aria-label="anchor" href="#id_7-case-study-converting-a-shiny-app-to-async"></a>
+<h4 id="id_8-case-study-converting-a-shiny-app-to-async">
+<a href="articles/promises_08_casestudy.html">8. Case study: converting a Shiny app to async</a><a class="anchor" aria-label="anchor" href="#id_8-case-study-converting-a-shiny-app-to-async"></a>
 </h4>
 <p>Walk through the conversion of a realistic Shiny example app to async.</p>
+</div>
 </div>
 </div>
 </div>

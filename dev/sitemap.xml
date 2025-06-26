@@ -6,8 +6,9 @@
 <url><loc>https://rstudio.github.io/promises/dev/articles/promises_01_motivation.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/dev/articles/promises_02_intro.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/dev/articles/promises_03_overview.html</loc></url>
-<url><loc>https://rstudio.github.io/promises/dev/articles/promises_04_futures.html</loc></url>
-<url><loc>https://rstudio.github.io/promises/dev/articles/promises_05_future_promise.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/dev/articles/promises_04_mirai.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/dev/articles/promises_05a_futures.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/dev/articles/promises_05b_future_promise.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/dev/articles/promises_06_shiny.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/dev/articles/promises_07_combining.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/dev/articles/promises_08_casestudy.html</loc></url>
