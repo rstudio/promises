@@ -37,9 +37,10 @@ A more thorough exploration of the concepts behind `promises`, and the API provi
 A guide to the `mirai` package, the place where we expect most async programming in R to begin.
 
 #### [5a. Launching tasks with `future`](articles/promises_05a_futures.html)
-#### [5b. Advance `future` and `promises` usage](articles/promises_05b_future_promise.html)
 
-A guide to the `future` package, an alternative that pre-dates `mirai` and used to be the main method for async programming.
+A guide to the `future` package, an alternative async programming R package that pre-dates `mirai`.
+
+#### [5b. Advance `future` and `promises` usage](articles/promises_05b_future_promise.html)
 
 Leverage `promises` to make sure that `future` execution does not block the main R process.
 

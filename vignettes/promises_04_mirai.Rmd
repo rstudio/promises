@@ -20,9 +20,9 @@ vignette: >
 
 The `mirai` package provides a lightweight way to launch R tasks that don't block the current R session.
 
-The `promises` package provides the API for working with the results of async tasks, but it totally abdicates responsibility for actually launching/creating async tasks. The idea is that any number of different packages could be capable of launching async tasks, using whatever techniques they want, but all of them would either return promise objects (or objects that can be converted to promise objects, as is the case for `mirai`).
+The `promises` package provides the API for working with the results of async tasks, but it totally abdicates responsibility for actually launching/creating async tasks. The idea is that any number of different packages could be capable of launching async tasks, using whatever techniques they want, but all of them would either return promise objects or objects that can be converted to promise objects, as is the case for `mirai`.
 
-This document will give an introduction to the parts of `mirai` that are most relevant to promises. For more information, please consult the documentation and vignettes that come with (`mirai`)[https://mirai.r-lib.org].
+This document will give an introduction to the parts of `mirai` that are most relevant to promises. For more information, please consult the documentation and vignettes that come with [`mirai`](https://mirai.r-lib.org).
 
 ## How mirai works
 
@@ -48,7 +48,7 @@ In mirai, the `daemons()` function is used to set and launch background R proces
 
 These background processes will be used/recycled for the life of the originating R process. If a mirai is launched while all the background R processes are busy executing, then the new mirai is queued until one of the background processes frees up.
 
-To launch `n` processes locally, you just need to call `daemons(n)`, supplying the value of `n`. 
+To launch `n` processes locally, you just need to call `daemons(n)`, supplying the value of `n`.
 
 You need to determine `n` yourself, and typically this should be at most one less than the number of processor cores on your machine, to leave one for the main R process. The reason we don't automatically detect this for you is that you may also be running other tasks on your machine, and you should take this into account when supplying a value for `n`.
 
@@ -124,7 +124,7 @@ Instead, make sure you create, use, and destroy such resources entirely within t
 
 ### Mutation
 
-Reference class objects (including R6 objects and data.table objects) and environments are among the few "native" R object types that are mutable, that is, can be modified in-place. Unless they contain native resources (see previous section), there's nothing wrong with using mutable objects from within mirai code blocks, even objects created in the parent process. However, note that any changes you make to these objects will not be visible from the parent process; the mirai code is operating on a copy of the object, not the original.
+Reference class objects (including R6 objects, S7 objects, and data.table objects) and environments are among the few "native" R object types that are mutable, that is, can be modified in-place. Unless they contain native resources (see previous section), there's nothing wrong with using mutable objects from within mirai code blocks, even objects created in the parent process. However, note that any changes you make to these objects will not be visible from the parent process; the mirai code is operating on a copy of the object, not the original.
 
 ### Returning values
 
@@ -137,9 +137,5 @@ First, if the return value is very large, the copying process can take some time
 Second, objects that refer to native resources are unlikely to work in this direction either; just as you can't use the parent's database connections in the child process, you also cannot have the child process return a database connection for the parent to use.
 
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
-
-Next:
-
-* [Using `promises` with Shiny](promises_06_shiny.html)
-
+Next: [Using `promises` with Shiny](promises_06_shiny.html)
 </div>

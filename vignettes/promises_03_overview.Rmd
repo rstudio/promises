@@ -261,7 +261,7 @@ So the equivalent to this (synchronous) code:
 
 ```r
 value <- tryCatch(
-  pkg::operation(),
+  somepkg::operation(),
   error = function(err) {
     warning("An error occurred: ", err)
     warning("Using default value of 0 instead")
@@ -273,7 +273,7 @@ value <- tryCatch(
 would be this, when the operation is performed asynchronously:
 
 ```r
-promise <- mirai(pkg::operation()) %>%
+promise <- mirai(somepkg::operation()) %>%
   then(onRejected = function(err) {
     warning("An error occurred: ", err)
     warning("Using default value of 0 instead")
@@ -302,21 +302,21 @@ Well, `then` has its own default version of `onRejected`. It’s *not* an empty 
 The same syntactic sugar that is offered for non-error cases, is available for error handling code as well. You can use formulas in `onRejected`:
 
 ```r
-mirai(pkg::operation()) %>%
+mirai(somepkg::operation()) %>%
   then(onRejected = ~warning(.))
 ```
 
 There’s an error handling pipe operator `%...!%`, that works similar to `%...>%` but it binds to `then(onRejected)` instead of `then(onFulfilled)`:
 
 ```r
-mirai(pkg::operation()) %...!%
+mirai(somepkg::operation()) %...!%
   warning()
 ```
 
 There’s also a `catch()` function that is just a shorthand for `then(onRejected)`. It saves a little typing, but more importantly, is easier to read:
 
 ```r
-mirai(pkg::operation()) %>%
+mirai(somepkg::operation()) %>%
   catch(warning)
 ```
 
