@@ -105,7 +105,7 @@ The fact that the mirai code block executes in a separate process means we have 
 
 ### Shiny-specific caveats and limitations
 
-In addition to the constraints that all mirai face, there is an additional one for Shiny: reactive values and reactive expressions cannot be read from within a mirai. Whenever reactive values/expressions are read, side effects are carried out under the hood so that the currently executing observer or reactive expression can be notified when the reactive value/expression becomes invalidated. If a reactive value/expression is created in one process, but read in another process, there will be no way for readers to be notified about invalidation.
+In addition to the constraints that mirai faces, there is an additional one for Shiny: reactive values and reactive expressions cannot be read from within a mirai. Whenever reactive values/expressions are read, side effects are carried out under the hood so that the currently executing observer or reactive expression can be notified when the reactive value/expression becomes invalidated. If a reactive value/expression is created in one process, but read in another process, there will be no way for readers to be notified about invalidation.
 
 This code, for example, will not work:
 
@@ -192,7 +192,7 @@ The important thing to keep in mind is that the promise (or promise pipeline) mu
 
 The render functions `renderPrint()` and `renderPlot()` are slightly different than other render functions, in that they can be affected by side effects in the code block you provide. In `renderPrint` you can print to the console, and in `renderPlot` you can plot to the active R graphics device.
 
-With promises, these render functions can work in a similar way, but with a caveat. As you hopefully understand by now, mirai execute their code in a separate R process, and printing/plotting in a separate process won't have any effect on the Shiny output in the original process. These examples, then, are incorrect:
+With promises, these render functions can work in a similar way, but with a caveat. As you hopefully understand by now, mirai executes its code in a separate R process, and printing/plotting in a separate process won't have any effect on the Shiny output in the original process. These examples, then, are incorrect:
 
 ```R
 output$summary <- renderPrint({
