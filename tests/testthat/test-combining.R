@@ -1,7 +1,5 @@
 library(testthat)
 
-source("common.R")
-
 describe("promise_all", {
   it("preserves element ordering", {
     a <- resolve_later(1, 0.5)

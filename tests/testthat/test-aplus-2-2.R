@@ -1,7 +1,5 @@
 library(testthat)
 
-source("common.R")
-
 describe("2.2. The `then` Method", {
   # A promise must provide a `then` method to access its current or eventual
   # value or reason.

@@ -1,7 +1,5 @@
 library(testthat)
 
-source("common.R")
-
 describe("visibility", {
   single_fn <- function(value) {
     info <- withVisible(value)

@@ -1,7 +1,5 @@
 library(testthat)
 
-source("common.R")
-
 describe("2.1. Promise States", {
   describe("2.1.1. When pending, a promise:", {
     it("2.1.1.1. may transition to either the fulfilled or rejected state.", {

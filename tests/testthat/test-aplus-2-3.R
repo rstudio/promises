@@ -1,7 +1,5 @@
 library(testthat)
 
-source("common.R")
-
 # 2.3. The Promise Resolution Procedure
 
 describe("2.3.1. If promise and x refer to the same object, reject promise with a TypeError as the reason.", {
