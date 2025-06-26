@@ -1,5 +1,3 @@
-source("common.R")
-
 async_true <- function() {
   promise_resolve(TRUE)
 }

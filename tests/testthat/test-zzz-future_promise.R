@@ -5,8 +5,6 @@ skip_on_os("windows") # timing is not consistent on Windows GHA
 skip_if_not_installed("future", "1.21.0")
 skip_if_not_installed("fastmap", "1.1.0")
 
-source(test_path("common.R"))
-
 local({
   ## Setup ##
 

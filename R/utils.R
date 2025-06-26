@@ -158,7 +158,9 @@ promise_map <- function(.x, .f, ...) {
       this_result <- .f(.x[[pos]], ...)
       promise_resolve(this_result) %...>%
         (function(this_value) {
-          results[[pos]] <<- this_value
+          # This weird assignment is similar to `results[[pos]] <- this_value`,
+          # except that it handles `NULL` values correctly.
+          results[pos] <<- list(this_value)
           do_next(pos + 1)
         })
     }

@@ -1,7 +1,5 @@
 library(testthat)
 
-source("common.R")
-
 describe("then()", {
   it("honors .visible argument", {
     result <- NULL
