@@ -178,14 +178,19 @@ cran_mirrors <- c(
   "https://cran.wu.ac.at"
 )
 
-promise_reduce(cran_mirrors, function(result, mirror) {
-  if (!is.null(result)) {
-    result
-  } else {
-    mirai({
-      # Test the URL; return the URL on success, or NULL on failure
-      if (!httr::http_error(mirror)) mirror
-    }, mirror = mirror)
-  }
-}, .init = NULL) %...>% print()
+promise_reduce(
+  cran_mirrors,
+  function(result, mirror) {
+    if (!is.null(result)) {
+      result
+    } else {
+      mirai({
+        # Test the URL; return the URL on success, or NULL on failure
+        if (!httr::http_error(mirror)) mirror
+      }, mirror = mirror)
+    }
+  },
+  .init = NULL
+) %...>%
+  print()
 ```
