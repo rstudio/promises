@@ -200,14 +200,14 @@ output$summary <- renderPrint({
     read.csv(url) %>%
       summary() %>%
       print()
-  }, environment())
+  }, url = url)
 })
 
 output$plot <- renderPlot({
   mirai({
     df <- read.csv(url)
     ggplot(df, aes(length, width)) + geom_point()
-  }, environment())
+  }, url = url)
 })
 ```
 
