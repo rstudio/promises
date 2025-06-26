@@ -1,10 +1,14 @@
 # promises (development version)
 
+* Fixed #47: `promise_map()` can now properly handle `NULL` values being returned. (Thank you, @RLesur! #138)
+
+
 # promises 1.3.3
 
 * Changed the way we create future objects to stay compatible with new versions of `{future}`. Apparently the way we were doing it was never idiomatic and only worked by accident. (#121)
 
 * Fixed #122: Use `future::future(..., lazy = TRUE)` to avoid manual capturing of state within `future_promise` (Thank you, @HenrikBengtsson! #123)
+
 
 # promises 1.3.2
 
