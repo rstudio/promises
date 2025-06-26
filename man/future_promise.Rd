@@ -32,13 +32,11 @@ identified.}
 Unlike \code{\link[future:future]{future::future()}}, \code{future_promise()} returns a \code{\link[=promise]{promise()}} object that will eventually resolve the \pkg{future} \code{expr}.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-}
-\details{
 When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until a worker becomes available.
 This occurs when there is more submitted \pkg{future} work than there are available \pkg{future} workers.
 To counter this situation, we can create a promise to execute work using future (using \code{future_promise()}) and only begin the work if a \pkg{future} worker is available.
-
+}
+\details{
 Using \code{future_promise()} is recommended whenever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
 
 For more details and examples, please see the \href{https://rstudio.github.io/promises/articles/promises_05b_future_promise.html}{\code{vignette("future_promise", "promises")}} vignette.
