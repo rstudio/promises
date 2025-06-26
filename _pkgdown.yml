@@ -37,20 +37,25 @@ reference:
 navbar:
   components:
     articles:
-      text: Learning
+      text: Articles
       menu:
+      - text: Overview
       - text: 1. Why use promises?
         href: articles/promises_01_motivation.html
       - text: 2. An informal intro to async programming
         href: articles/promises_02_intro.html
       - text: 3. Working with promises
         href: articles/promises_03_overview.html
+      - text: -------
+      - text: Integration
       - text: 4. Launching tasks with mirai
         href: articles/promises_04__mirai.html
       - text: 5a. Launching tasks with future
         href: articles/promises_04_futures.html
       - text: 5b. Advanced future and promises usage
         href: articles/promises_05_future_promise.html
+      - text: -------
+      - text: Usage
       - text: 6. Using promises with Shiny
         href: articles/promises_06_shiny.html
       - text: 7. Combining promises

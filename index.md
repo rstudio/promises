@@ -16,6 +16,8 @@ install.packages("promises")
 
 ## Contents
 
+### Overview
+
 #### [1. Why use `promises`?](articles/motivation.html)
 
 Why do we need async programming? What is it good for, and not good for?
@@ -28,6 +30,8 @@ Async programming can require a serious mental shift, even for veteran programme
 
 A more thorough exploration of the concepts behind `promises`, and the API provided by the `promises` package.
 
+### Integration
+
 #### [4. Launching tasks](articles/mirai.html)
 
 A guide to the `mirai` package, the place where we expect most async programming in R to begin.
@@ -38,6 +42,8 @@ A guide to the `mirai` package, the place where we expect most async programming
 A guide to the `future` package, an alternative that pre-dates `mirai` and used to be the main method for async programming.
 
 Leverage `promises` to make sure that `future` execution does not block the main R process.
+
+### Usage
 
 #### [6. Using promises with Shiny](articles/shiny.html)
 
