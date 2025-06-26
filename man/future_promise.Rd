@@ -61,11 +61,7 @@ with_two_workers <- function(expr) {
     return()
   }
   old_plan <- future::plan(future::multisession, workers = 2)
-  on.exit({
-    print(sessioninfo::session_info())
-    future::futureSessionInfo()
-    # future::plan(old_plan)
-  }, add = TRUE)
+  on.exit({future::plan(old_plan)}, add = TRUE)
   start <<- Sys.time()
   force(expr)
   while(!later::loop_empty()) {Sys.sleep(0.1); later::run_now()}
@@ -84,10 +80,7 @@ print_msg <- function(pid, msg) {
 # The important thing to note is the first four times will be roughly the same
 with_two_workers({
   promise_resolve(Sys.getpid()) \%...>\% print_msg("promise done")
-  for (i in 1:6) {
-    message("Starting future ", i)
-    future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
-  }
+  for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
 })
 {
 #> PID: XXX; 2.5s promise done
