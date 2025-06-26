@@ -361,7 +361,7 @@ future_promise_queue <- local({
 #'
 #' Using `future_promise()` is recommended whenever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
 #'
-#' For more details and examples, please see the [`vignette("future_promise", "promises")`](https://rstudio.github.io/promises/articles/future_promise.html) vignette.
+#' For more details and examples, please see the [`vignette("future_promise", "promises")`](https://rstudio.github.io/promises/articles/promises_05b_future_promise.html) vignette.
 #' @describeIn future_promise Creates a [promise()] that will execute the `expr` using [future::future()].
 #' @inheritParams future::future
 #' @param expr An R expression. While the `expr` is eventually sent to [`future::future()`], please use the same precautions that you would use with regular `promises::promise()` expressions. `future_promise()` may have to hold the `expr` in a [promise()] while waiting for a \pkg{future} worker to become available.

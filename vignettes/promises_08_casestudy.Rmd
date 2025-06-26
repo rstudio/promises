@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-In this case study, we'll work through an application of reasonable complexity, turning its slowest operations into futures/promises and modifying all the downstream reactive expressions and outputs to deal with promises.
+In this case study, we'll work through an application of reasonable complexity, turning its slowest operations into mirai/promises and modifying all the downstream reactive expressions and outputs to deal with promises.
 
 ## Motivation
 
@@ -145,15 +145,15 @@ In that sense, the cranwhales app isn't a perfect example, because it has lots o
 
 ## Converting to async
 
-To quote the article [*Using promises with Shiny*](https://rstudio.github.io/promises/articles/shiny.html), async programming with Shiny boils down to following a few steps:
+To quote the article [*Using promises with Shiny*](https://rstudio.github.io/promises/articles/promises_06_shiny.html), async programming with Shiny boils down to following a few steps:
 
 1. Identify slow operations in your app.
-2. Convert the slow operations into futures.
-3. Any code that relies on the result of those operations (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the future object.
+2. Convert the slow operations into mirai.
+3. Any code that relies on the result of those operations (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the mirai object.
 
 In this case, the slow operations are easy to identify: the downloading and parsing that takes place in the `data` reactive expression can each take several long seconds.
 
-Converting the download and parsing operations into futures turns out to be the most complicated part of the process, for reasons we'll get into later.
+Converting the download and parsing operations into mirai turns out to be the most complicated part of the process, for reasons we'll get into later.
 
 Assuming we do that successfully, the `data` reactive expression will no longer return a data frame, but a `promise` object (that resolves to a data frame). Since the `whales` and `whale_downloads` reactive expressions both rely on `data`, those will both also need to be converted to read and return `promise` objects. And therefore, because the outputs all rely on one or more reactive expressions, they will all need to know how to deal with `promise` objects.
 
@@ -165,23 +165,23 @@ In the sections below, we'll take a look at the code behind some outputs and rea
 
 In some cases, these code snippets may be slightly abridged. See the [GitHub repository](https://github.com/rstudio/cranwhales) for the full code.
 
-Until you've received an introduction to the `%...>%` operator, the async code below will make no sense, so if you haven't read [*An informal intro to async programming*](https://rstudio.github.io/promises/articles/intro.html) and/or [*Working with promises in R*](https://rstudio.github.io/promises/articles/overview.html), I highly recommend doing so before continuing!
+Until you've received an introduction to the `%...>%` operator, the async code below will make no sense, so if you haven't read [*An informal intro to async programming*](https://rstudio.github.io/promises/articles/promises_02_intro.html) and/or [*Working with promises in R*](https://rstudio.github.io/promises/articles/promises_03_overview.html), I highly recommend doing so before continuing!
 
-### Loading `promises` and `future`
+### Loading `promises` and `mirai`
 
 The first thing we'll do is load the basic libraries of async programming.
 
 ```r
 library(promises)
-library(future)
-plan(multisession)
+library(mirai)
+daemons(6)
 ```
 
-I originally used `multiprocess` but file downloading inside a future seemed to fail on Mac. (I've found that it's usually not worth spending a lot of time trying to figure out why `multiprocess` doesn't work for some specific code; instead, just use `multisession`, since that's probably going to be the solution anyway.)
+The above sets 6 daemons (background processes) on the local machine, but this could also be anything else supported by the `daemons()` function.
 
-### The `data` reactive: future_promise() all the things
+### The `data` reactive: mirai() all the things
 
-The next thing we'll do is convert the `data` event reactive to use `future` for the expensive bits. The original code looks lke this:
+The next thing we'll do is convert the `data` event reactive to use `mirai` for the expensive bits. The original code looks lke this:
 
 ```r
 # SYNCHRONOUS version
@@ -221,20 +221,20 @@ data <- eventReactive(input$date, {
   url <- glue("http://cran-logs.rstudio.com/{year}/{date}.csv.gz")
   path <- file.path("data_cache", paste0(date, ".csv.gz"))
 
-  future_promise({
+  mirai({
     if (!file.exists(path)) {
       download.file(url, path)
     }
     read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
-  })
+  }, path = path, url = url)
 })
 ```
 
-Pretty straightforward. This reactive now returns a future (which counts as a promise), not a data frame.
+Pretty straightforward. This reactive now returns a mirai (which counts as a promise), not a data frame.
 
-Remember that we **must** read any reactive values (including `input`) and reactive expressions [from **outside** the future](https://rstudio.github.io/promises/articles/shiny.html#shiny-specific-caveats-and-limitations). (You will get an error if you attempt to read one from inside the future.)
+Remember that we **must** read any reactive values (including `input`) and reactive expressions [from **outside** the mirai](https://rstudio.github.io/promises/articles/promises_06_shiny.html#shiny-specific-caveats-and-limitations). (You will get an error if you attempt to read one from inside the mirai.)
 
-At this point, since there are no other long-running operations we want to make asynchronous, we're actually done interacting directly with the `future` package. The rest of the reactive expressions will deal with the future returned by `data` using general async functions and operators from `promises`.
+At this point, since there are no other long-running operations we want to make asynchronous, we're actually done interacting directly with the `mirai` package. The rest of the reactive expressions will deal with the mirai returned by `data` using general async functions and operators from `promises`.
 
 ### The `whales` reactive: simple pipelines are simple
 
@@ -272,9 +272,9 @@ The input (`data()`) is a promise, the resulting output object is a promise, eac
 
 An example this simple may seem reductive, but this best-case scenario happens surprisingly often, if your coding style is influenced by the tidyverse. In this example app, **59%** of the reactives, observers, and outputs were converted using nothing more than replacing `%>%` with `%...>%`.
 
-One last thing before we move on. In the last section, I emphasized that reactive values cannot be read from inside a future. Here, we're using `head(input$count)` inside a promise-pipeline; since `data()` is written using a future, doesn't that mean… well… isn't this wrong?
+One last thing before we move on. In the last section, I emphasized that reactive values cannot be read from inside a mirai. Here, we're using `head(input$count)` inside a promise-pipeline; since `data()` is written using a mirai, doesn't that mean… well… isn't this wrong?
 
-Nope—this code is just fine. The prohibition is against reading reactive values/expressions from *inside* a future, because code inside a future is executed in a totally different R process. The steps in a promise-pipeline aren't futures, but promise handlers. These aren't executed in a different process; rather, they're executed back in the original R process after a promise is resolved. We're allowed and expected to access reactive values and expressions from these handlers.
+Nope—this code is just fine. The prohibition is against reading reactive values/expressions from *inside* a mirai, because code inside a mirai is executed in a totally different R process. The steps in a promise-pipeline are not mirai, but promise handlers. These aren't executed in a different process; rather, they're executed back in the original R process after a promise is resolved. We're allowed and expected to access reactive values and expressions from these handlers.
 
 ### The `whale_downloads` reactive: reading from multiple promises
 
@@ -324,12 +324,12 @@ whale_downloads <- reactive({
 
 #### Promises: the Gathering
 
-This solution uses the [promise gathering](https://rstudio.github.io/promises/articles/combining.html#gathering) pattern, which combines `promises_all`, `%...>%`, and `with`.
+This solution uses the [promise gathering](https://rstudio.github.io/promises/articles/promises_07_combining.html#gathering) pattern, which combines `promises_all`, `%...>%`, and `with`.
 
 * The `promise_all` function gathers multiple promise objects together, and returns a single promise object. This new promise object doesn't resolve until all the input promise objects are resolved, and it yields a list of those results.
 
 ```r
-> promise_all(a = future_promise("Hello"), b = future_promise("World")) %...>% print()
+> promise_all(a = mirai("Hello"), b = mirai("World")) %...>% print()
 $a
 [1] "Hello"
 
@@ -353,13 +353,13 @@ Error: object 'x' not found
 Let's once again combine the three, with the simplest possible example of the gathering pattern:
 
 ```r
-> promise_all(x = future_promise("Hello"), y = future_promise("World")) %...>%
+> promise_all(x = mirai("Hello"), y = mirai("World")) %...>%
 +   with({ paste(x, y) }) %...>%
 +   print()
 [1] "Hello World"
 ```
 
-You can make use of this pattern without remembering exactly how these pieces combine. Just remember that the arguments to `promise_all` provide the promise objects (`future_promise(1)` and `future_promise(2)`), along with the names you want to use to refer to their yielded values (`x ` and `y`); and the code block you put in `with()` can refer to those names without worrying about the fact that they were ever promises to begin with.
+You can make use of this pattern without remembering exactly how these pieces combine. Just remember that the arguments to `promise_all` provide the promise objects (`mirai(1)` and `mirai(2)`), along with the names you want to use to refer to their yielded values (`x ` and `y`); and the code block you put in `with()` can refer to those names without worrying about the fact that they were ever promises to begin with.
 
 ### The `total_downloaders` value box: simple pipelines are for output, too
 
@@ -501,15 +501,15 @@ data <- eventReactive(input$date, {
 })
 ```
 
-Progress reporting currently presents two challenges for future.
+Progress reporting currently presents two challenges for mirai.
 
-First, the `withProgress({...})` function cannot be used with async. `withProgress` is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to `future_promise()` will return immediately even though the actual task is far from done, using `withProgress` won't work; the progress dialog would be dismissed before the download even got going.
+First, the `withProgress({...})` function cannot be used with async. `withProgress` is designed to wrap a slow synchronous action, and dismisses its progress dialog when the block of code it wraps is done executing. Since the call to `mirai()` will return immediately even though the actual task is far from done, using `withProgress` won't work; the progress dialog would be dismissed before the download even got going.
 
-It's conceivable that `withProgress` could gain promise compatibility someday, but it's not in Shiny v1.1.0. In the meantime, we can work around this by using the alternative, [object-oriented progress API](https://shiny.posit.co/r/reference/shiny/latest/progress.html) that Shiny offers. It's a bit more verbose and fiddly than `withProgress`/`setProgress`, but it is flexible enough to work with futures/promises.
+It's conceivable that `withProgress` could gain promise compatibility someday, but it's not in Shiny v1.1.0. In the meantime, we can work around this by using the alternative, [object-oriented progress API](https://shiny.posit.co/r/reference/shiny/latest/progress.html) that Shiny offers. It's a bit more verbose and fiddly than `withProgress`/`setProgress`, but it is flexible enough to work with mirai/promises.
 
-Second, progress messages can't be sent from futures. This is simply because futures are executed in child processes, which don't have direct access to the browser like the main Shiny process does.
+Second, progress messages can't be sent from mirai. This is simply because mirai are executed in child processes, which don't have direct access to the browser like the main Shiny process does.
 
-It's conceivable that `future` could gain the ability for child processes to communicate back to their parents, but no good solution exists at the time of this writing. In the meantime, we can work around this by taking the one future that does both downloading and parsing, and splitting it into two separate futures. After the download future has completed, we can send a progress message that parsing is beginning, and then start the parsing future.
+It's conceivable that `mirai` could gain the ability for child processes to communicate back to their parents, but no good solution exists at the time of this writing. In the meantime, we can work around this by taking the one mirai that does both downloading and parsing, and splitting it into two separate mirai. After the download mirai has completed, we can send a progress message that parsing is beginning, and then start the parsing mirai.
 
 The regrettably complicated solution is below.
 
@@ -525,27 +525,30 @@ data <- eventReactive(input$date, {
 
   p <- Progress$new()
   p$set(value = NULL, message = "Downloading data...")
-  future_promise({
+  mirai({
     if (!file.exists(path)) {
       download.file(url, path)
-    }
+    },
+    path = path, url = url
   }) %...>%
     { p$set(message = "Parsing data...") } %...>%
-    { future_promise(read_csv(path, col_types = "Dti---c-ci", progress = FALSE)) } %>%
+    { mirai({
+        read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
+      }, path = path) } %>%
     finally(~p$close())
 })
 ```
 
-The single future we wrote earlier has now become a pipeline of promises:
+The single mirai we wrote earlier has now become a pipeline of promises:
 
-1. future (download)
+1. mirai (download)
 2. send progress message
-3. future (parse)
+3. mirai (parse)
 4. dismiss progress dialog
 
-Note that neither the R6 call `p$set(message = ...)` nor the second `future_promise()` call are tidy, so they use curly-brace blocks, as discussed in the above section about `biggest_whales`.
+Note that neither the R6 call `p$set(message = ...)` nor the second `mirai()` call are tidy, so they use curly-brace blocks, as discussed in the above section about `biggest_whales`.
 
-The final step of dismissing the progress dialog doesn't use `%...>%` at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use the regular pipe `%>%` and `finally()` function instead. See the relevant section in [*Working with promises in R*](https://rstudio.github.io/promises/articles/overview.html#cleaning-up-with-finally) to learn more.
+The final step of dismissing the progress dialog doesn't use `%...>%` at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use the regular pipe `%>%` and `finally()` function instead. See the relevant section in [*Working with promises in R*](https://rstudio.github.io/promises/articles/promises_03_overview.html#cleaning-up-with-finally) to learn more.
 
 With these changes in place, we've now covered all of the changes to the application. You can see the full changes side-by-side via [this GitHub diff](https://github.com/rstudio/cranwhales/compare/sync...async?diff=split).
 
@@ -577,9 +580,9 @@ And as you can see from this plot, the behavior of the async app is much improve
 
 I was surprised that the async version's page load times weren't even faster, and even more surprised to see that the blue rectangles were just as wide as the sync version. Why isn't the async version way faster? The sync version does all of its work on a single thread, and I specifically designed this app to be a nightmare for scalability by having each session kick off by parsing hundreds of megabytes of CSV, an operation that is quite expensive. The async version gets to spread these jobs across several workers. Why aren't we seeing a greater time savings?
 
-Mostly, it's because calling `future_promise(read_csv("big_file.csv"))` is almost a worst-case scenario for future and async. `read_csv` is generally fast, but because the CRAN log files are so big, `read_csv("big_file.csv")` is slow. The value it returns is a very large data frame, that has now been loaded not into the Shiny process, but a `future` worker process. In order to return that data frame to the Shiny process, that data must first be serialized (I believe `future` essentially uses `saveRDS` for this), transmitted to the Shiny process, and then deserialized; to make matters worse, the transmitting and deserialization steps happen on the main R thread that we're working so hard to try to keep idle. **The larger the data we send back and forth to the future, the more performance suffers,** and in this case we're sending back quite a lot of data.
+Mostly, it's because calling `mirai(read_csv("big_file.csv"))` is almost a worst-case scenario for mirai and async. `read_csv` is generally fast, but because the CRAN log files are so big, `read_csv("big_file.csv")` is slow. The value it returns is a very large data frame, that has now been loaded not into the Shiny process, but a `mirai` daemon process. In order to return that data frame to the Shiny process, that data must first be serialized, transmitted to the Shiny process, and then deserialized; to make matters worse, the transmitting and deserialization steps happen on the main R thread that we're working so hard to try to keep idle. **The larger the data we send back and forth to the mirai, the more performance suffers,** and in this case we're sending back quite a lot of data.
 
-We can make our code significantly faster by doing more summarizing, aggregation, and filtering _inside_ the future; not only does this make more of the work happen in parallel, but by returning the data in already-processed form, we can have much less data to transfer from the worker process back to the Shiny process. (For example, the data for May 31, 2018 weighs 75MB before optimization, and 8.8MB afterwards.)
+We can make our code significantly faster by doing more summarizing, aggregation, and filtering _inside_ the mirai; not only does this make more of the work happen in parallel, but by returning the data in already-processed form, we can have much less data to transfer from the worker process back to the Shiny process. (For example, the data for May 31, 2018 weighs 75MB before optimization, and 8.8MB afterwards.)
 
 Compare all three runs in the image below (the newly optimized version is labelled "async2"). The homepage load times have dropped further, and the calculation times are now dramatically faster than the sync code.
 
@@ -597,7 +600,7 @@ To get a visceral sense for what it feels like to use the app under load, here's
 <iframe class="embed-responsive-item" src="https://www.youtube-nocookie.com/embed/HsjdEZMnb0w?rel=0&amp;showinfo=0&amp;ecver=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 </p>
 
-Take a look at the [code diff for async vs. async2](https://github.com/rstudio/cranwhales/compare/async...async2?diff=split). While the code has not changed very dramatically, it has lost a little elegance and maintainability: the code for each of the affected outputs now has one foot in the the render function and one foot in the future. If your app's total audience is a team of a hundred analysts and execs, you may choose to forgo the extra performance and stick with the original async (or even sync) code. But if you have serious scaling needs, the refactoring is probably a small price to pay.
+Take a look at the [code diff for async vs. async2](https://github.com/rstudio/cranwhales/compare/async...async2?diff=split). While the code has not changed very dramatically, it has lost a little elegance and maintainability: the code for each of the affected outputs now has one foot in the the render function and one foot in the mirai. If your app's total audience is a team of a hundred analysts and execs, you may choose to forgo the extra performance and stick with the original async (or even sync) code. But if you have serious scaling needs, the refactoring is probably a small price to pay.
 
 Let's get real for a second, though. If this weren't an example app written for exposition purposes, but a real production app that was intended to scale to thousands of concurrent users across dozens of R processes, we wouldn't download and parse CSV files on the fly. Instead, we'd establish a proper [ETL procedure](https://solutions.posit.co/gallery/twitter-etl/) to run every night and put the results into a properly indexed database table, or RDS files with just the data we need. As I said [earlier](#improving-performance-and-scalability), a little precomputation and caching can make a huge difference!
 

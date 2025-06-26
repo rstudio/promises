@@ -19,19 +19,18 @@ vignette: >
 ```
 
 <div class="alert alert-secondary">
-While this article and others on this site focus on the `future` package, there's a much newer package called [`mirai`](https://mirai.r-lib.org/) that you may want to consider instead.
+While this article focuses on the `future` package, you may wish to consider the newer [`mirai`](promises_04_mirai.html) package, which didn't exist when this article was first written.
 Here are some factors to consider as you choose between the two.
 
-1. The `future` package tries hard to automatically infer what variables and packages you need from the main R package, and makes those available to the child process. `mirai` doesn't try to do this for you; you need to pass in whatever data you need explicitly, and make package-namespaced calls explicitly inside of your inner code.
-2. `mirai` is very fast; it's much faster than `future` at starting up and has less per-task overhead. `mirai` creates event-driven promises, whereas promises using `future` time-poll every 0.1 seconds. This makes `mirai` ideal where response times and latency are critical.
-3. `future` is designed to be a general API supporting many types of distributed computing backends, and potentially offers more options. `mirai` on the other hand is its own system, whilst it does support both local and distributed execution.
-4. `mirai` is inherently queued, meaning it readily accepts more tasks than workers. This means you don’t need an equivalent of `future_promise()`. With `future` you need to manage cases where futures launch other futures ("evaluation topologies") upfront, whereas with `mirai` they will just work.
-5. `mirai` supports task cancellation and the ability to interrupt ongoing tasks on the worker.
+1. The `future` package tries hard to automatically infer what variables and packages you need from the main R session, and makes those available to the child process. `mirai` doesn't try to do this for you; you need to pass in whatever data you need explicitly, and namespace package function calls within your code.
+2. `mirai` is very fast; it's much faster than `future` at starting up and has less per-task overhead. `mirai` creates event-driven promises, whereas promises using `future` time-poll every 0.1 seconds. This makes `mirai` much better-suited to situations where response times and latency are critical.
+3. `future` is designed to be a general API, and supports distributed computing backends provided by other packages. `mirai` on the other hand provides integrated launchers for high-performance computing clusters and any computer reachable via SSH.
+4. `mirai` is designed as an async framework and is inherently queued, meaning it readily accepts more tasks than workers. This means the distinction between `future()` and `future_promise()` doesn't exist for mirai.
 </div>
 
-The `future` package provides a lightweight way to launch R tasks that don't block the current R session. It was created by Henrik Bengtsson long before the `promises` package existed—the first CRAN release of `future` predates development of `promises` by almost two years.
+The `future` package provides a lightweight way to launch R tasks that don't block the current R session. It was created by Henrik Bengtsson long before the `promises` package existed—the first CRAN release of `future` predates development of `promises` by almost two years!
 
-The `promises` package provides the API for working with the results of async tasks, but it totally abdicates responsibility for actually launching/creating async tasks. The idea is that any number of different packages could be capable of launching async tasks, using whatever techniques they want, but all of them would either return promise objects (or objects that can be converted to promise objects, as is the case for `future`). However, for now, `future` is likely to be the primary or even exclusive way that async tasks are created.
+The `promises` package provides the API for working with the results of async tasks, but it totally abdicates responsibility for actually launching/creating async tasks. The idea is that any number of different packages could be capable of launching async tasks, using whatever techniques they want, but all of them would either return promise objects or objects that can be converted to promise objects, as is the case for `future`.
 
 This document will give an introduction to the parts of `future` that are most relevant to promises. For more information, please consult the vignettes that come with `future`, especially the [Comprehensive Overview](https://CRAN.R-project.org/package=future/vignettes/future-1-overview.html).
 
@@ -106,13 +105,11 @@ First, if the return value is very large, the copying process can take some time
 
 Second, objects that refer to native resources are unlikely to work in this direction either; just as you can't use the parent's database connections in the child process, you also cannot have the child process return a database connection for the parent to use.
 
-<div style="display:flex;">
-  <div style="font-size: 20px; margin-top: 40px; margin-left: auto;">
+<div style="font-size: 20px; margin-top: 40px; text-align: right;">
 
 Next:
 
-* [Advanced `future` and `promises` usage](promises_05_future_promise.html)
+* [Advanced `future` and `promises` usage](promises_05b_future_promise.html)
 * [Using `promises` with Shiny](promises_06_shiny.html)
 
-  </div>
 </div>

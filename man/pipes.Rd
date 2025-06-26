@@ -69,5 +69,5 @@ mirai(read.csv("http://example.com/data.csv")) \%...!\%
 
 }
 \seealso{
-https://rstudio.github.io/promises/articles/overview.html#using-pipes
+https://rstudio.github.io/promises/articles/promises_03_overview.html#using-pipes
 }

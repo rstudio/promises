@@ -29,11 +29,10 @@ Here's an example using `promise_all` to combine the results of two async `read.
 
 ```r
 library(promises)
-library(future)
-plan(multisession)
+library(mirai)
 
-a <- future_promise(read.csv("a.csv"))
-b <- future_promise(read.csv("b.csv"))
+a <- mirai(read.csv("a.csv"))
+b <- mirai(read.csv("b.csv"))
 
 result <- promise_all(a = a, b = b) %...>% {
   rbind(.$a, .$b)
@@ -46,11 +45,10 @@ The `.$` prefix is a bit inelegant, so we recommend the use of the base R functi
 
 ```r
 library(promises)
-library(future)
-plan(multisession)
+library(mirai)
 
-a <- future_promise(read.csv("a.csv"))
-b <- future_promise(read.csv("b.csv"))
+a <- mirai(read.csv("a.csv"))
+b <- mirai(read.csv("b.csv"))
 
 promise_all(a = a, b = b) %...>%
   with({
@@ -70,13 +68,12 @@ Gathering is easy and convenient, but sometimes not flexible enough. For example
 
 ```r
 library(promises)
-library(future)
-plan(multisession)
+library(mirai)
 
-a <- future_promise(1)
+a <- mirai(1)
 
 a %...>% (function(a) {
-  b <- future_promise(2)
+  b <- mirai(2)
   b %...>% (function(b) {
     a + b
   })
@@ -91,11 +88,10 @@ The nesting pattern is effective and flexible. The main downside is the physical
 
 ```r
 library(promises)
-library(future)
-plan(multisession)
+library(mirai)
 
-a <- future_promise({ Sys.sleep(1); 1 })
-b <- future_promise({ Sys.sleep(0.5); 2 })
+a <- mirai({ Sys.sleep(1); 1 })
+b <- mirai({ Sys.sleep(0.5); 2 })
 
 first <- promise_race(a, b)
 ```
@@ -114,14 +110,14 @@ In the example below, we iterate over a named vector of package names. For each 
 
 ```r
 library(promises)
-library(future)
-plan(multisession)
+library(mirai)
 
 get_pub_date <- function(pkg) {
   desc_url <- paste0("https://cran.r-project.org/web/packages/", pkg, "/DESCRIPTION")
-  future_promise({
-    read.dcf(url(desc_url))[, "Date/Publication"] %>% unname()
-  })
+  mirai({
+    r <- read.dcf(url(desc_url))[, "Date/Publication"]
+    unname(r)
+  }, desc_url = desc_url)
 }
 
 packages <- setNames(, c("ggplot2", "dplyr", "knitr"))
@@ -135,13 +131,13 @@ The resulting output looks like this:
 
 ```
 $ggplot2
-[1] "2016-12-30 22:45:17"
+[1] "2025-04-09 09:40:10 UTC"
 
 $dplyr
-[1] "2017-09-28 20:43:29 UTC"
+[1] "2023-11-17 16:50:02 UTC"
 
 $knitr
-[1] "2018-01-29 11:01:22 UTC"
+[1] "2025-03-16 09:20:02 UTC"
 ```
 
 `promise_map` works serially; each time it calls the given function on an element of the list/vector, it will wait for the returned promise to resolve before proceeding to the next element. Furthermore, any error or rejected promise will cause the entire `promise_map` operation to reject.
@@ -173,8 +169,7 @@ The following example loops through a partial list of CRAN mirrors, returning th
 
 ```r
 library(promises)
-library(future)
-plan(multisession)
+library(mirai)
 
 cran_mirrors <- c(
   "https://cloud.r-project.org",
@@ -183,14 +178,19 @@ cran_mirrors <- c(
   "https://cran.wu.ac.at"
 )
 
-promise_reduce(cran_mirrors, function(result, mirror) {
-  if (!is.null(result)) {
-    result
-  } else {
-    future_promise({
-      # Test the URL; return the URL on success, or NULL on failure
-      if (!httr::http_error(mirror)) mirror
-    })
-  }
-}, .init = NULL) %...>% print()
+promise_reduce(
+  cran_mirrors,
+  function(result, mirror) {
+    if (!is.null(result)) {
+      result
+    } else {
+      mirai({
+        # Test the URL; return the URL on success, or NULL on failure
+        if (!httr::http_error(mirror)) mirror
+      }, mirror = mirror)
+    }
+  },
+  .init = NULL
+) %...>%
+  print()
 ```

@@ -41,7 +41,7 @@ To counter this situation, we can create a promise to execute work using future 
 
 Using \code{future_promise()} is recommended whenever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
 
-For more details and examples, please see the \href{https://rstudio.github.io/promises/articles/future_promise.html}{\code{vignette("future_promise", "promises")}} vignette.
+For more details and examples, please see the \href{https://rstudio.github.io/promises/articles/promises_05b_future_promise.html}{\code{vignette("future_promise", "promises")}} vignette.
 }
 \section{Functions}{
 \itemize{
