@@ -145,7 +145,7 @@ In that sense, the cranwhales app isn't a perfect example, because it has lots o
 
 ## Converting to async
 
-To quote the article [*Using promises with Shiny*](https://rstudio.github.io/promises/articles/shiny.html), async programming with Shiny boils down to following a few steps:
+To quote the article [*Using promises with Shiny*](https://rstudio.github.io/promises/articles/promises_06_shiny.html), async programming with Shiny boils down to following a few steps:
 
 1. Identify slow operations in your app.
 2. Convert the slow operations into mirai.
@@ -165,7 +165,7 @@ In the sections below, we'll take a look at the code behind some outputs and rea
 
 In some cases, these code snippets may be slightly abridged. See the [GitHub repository](https://github.com/rstudio/cranwhales) for the full code.
 
-Until you've received an introduction to the `%...>%` operator, the async code below will make no sense, so if you haven't read [*An informal intro to async programming*](https://rstudio.github.io/promises/articles/intro.html) and/or [*Working with promises in R*](https://rstudio.github.io/promises/articles/overview.html), I highly recommend doing so before continuing!
+Until you've received an introduction to the `%...>%` operator, the async code below will make no sense, so if you haven't read [*An informal intro to async programming*](https://rstudio.github.io/promises/articles/promises_02_intro.html) and/or [*Working with promises in R*](https://rstudio.github.io/promises/articles/promises_03_overview.html), I highly recommend doing so before continuing!
 
 ### Loading `promises` and `mirai`
 
@@ -232,7 +232,7 @@ data <- eventReactive(input$date, {
 
 Pretty straightforward. This reactive now returns a mirai (which counts as a promise), not a data frame.
 
-Remember that we **must** read any reactive values (including `input`) and reactive expressions [from **outside** the mirai](https://rstudio.github.io/promises/articles/shiny.html#shiny-specific-caveats-and-limitations). (You will get an error if you attempt to read one from inside the mirai.)
+Remember that we **must** read any reactive values (including `input`) and reactive expressions [from **outside** the mirai](https://rstudio.github.io/promises/articles/promises_06_shiny.html#shiny-specific-caveats-and-limitations). (You will get an error if you attempt to read one from inside the mirai.)
 
 At this point, since there are no other long-running operations we want to make asynchronous, we're actually done interacting directly with the `mirai` package. The rest of the reactive expressions will deal with the mirai returned by `data` using general async functions and operators from `promises`.
 
@@ -324,7 +324,7 @@ whale_downloads <- reactive({
 
 #### Promises: the Gathering
 
-This solution uses the [promise gathering](https://rstudio.github.io/promises/articles/combining.html#gathering) pattern, which combines `promises_all`, `%...>%`, and `with`.
+This solution uses the [promise gathering](https://rstudio.github.io/promises/articles/promises_07_combining.html#gathering) pattern, which combines `promises_all`, `%...>%`, and `with`.
 
 * The `promise_all` function gathers multiple promise objects together, and returns a single promise object. This new promise object doesn't resolve until all the input promise objects are resolved, and it yields a list of those results.
 
@@ -548,7 +548,7 @@ The single mirai we wrote earlier has now become a pipeline of promises:
 
 Note that neither the R6 call `p$set(message = ...)` nor the second `mirai()` call are tidy, so they use curly-brace blocks, as discussed in the above section about `biggest_whales`.
 
-The final step of dismissing the progress dialog doesn't use `%...>%` at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use the regular pipe `%>%` and `finally()` function instead. See the relevant section in [*Working with promises in R*](https://rstudio.github.io/promises/articles/overview.html#cleaning-up-with-finally) to learn more.
+The final step of dismissing the progress dialog doesn't use `%...>%` at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use the regular pipe `%>%` and `finally()` function instead. See the relevant section in [*Working with promises in R*](https://rstudio.github.io/promises/articles/promises_03_overview.html#cleaning-up-with-finally) to learn more.
 
 With these changes in place, we've now covered all of the changes to the application. You can see the full changes side-by-side via [this GitHub diff](https://github.com/rstudio/cranwhales/compare/sync...async?diff=split).
 

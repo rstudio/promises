@@ -53,7 +53,7 @@ magrittr::"%T>%"
 #'
 #' @return A new promise.
 #'
-#' @seealso https://rstudio.github.io/promises/articles/overview.html#using-pipes
+#' @seealso https://rstudio.github.io/promises/articles/promises_03_overview.html#using-pipes
 #'
 #' @name pipes
 #' @export

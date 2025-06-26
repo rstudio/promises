@@ -54,7 +54,7 @@ So if a regular, synchronous function call generally looks like this:
 value <- read.csv("http://example.com/data/data.csv")
 ```
 
-An asynchronous function call (which uses [the mirai package](promises_04__mirai.html)) will look instead like:
+An asynchronous function call (which uses [the mirai package](promises_04_mirai.html)) will look instead like:
 
 ```r
 promise <- as.promise(mirai(read.csv("http://example.com/data/data.csv")))
@@ -368,5 +368,5 @@ png_bytes <-
 In this example, we need a temp file for the duration of the pipeline. Our `finally` makes sure the temp file is deleted when the operation is done, regardless of whether it succeeded or failed.
 
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
-Next: [Launching tasks](promises_04__mirai.html)
+Next: [Launching tasks](promises_04_mirai.html)
 </div>

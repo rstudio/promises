@@ -24,7 +24,7 @@ Async programming with Shiny boils down to following a few steps.
 
 1. Identify slow operations (function calls or blocks of statements) in your app.
 
-2. Convert the slow operation into a 'mirai' using `mirai()`. (If you haven't read the [article on mirai](promises_04__mirai.html), definitely do that before proceeding!)
+2. Convert the slow operation into a 'mirai' using `mirai()`. (If you haven't read the [article on mirai](promises_04_mirai.html), definitely do that before proceeding!)
 
 3. Any code that relies on the result of that operation (if any), whether directly or indirectly, now must be converted to promise handlers that operate on the mirai object.
 
@@ -64,7 +64,7 @@ The `promises` library is necessary for the `%...>%` operator. You may also want
 
 The `mirai` library is needed because the `mirai()` function call is how you will launch asynchronous tasks.
 
-`daemons(6)` is a directive to the `mirai` package, telling it how mirai tasks should actually be executed. See the [article on mirai](promises_04__mirai.html) for more details.
+`daemons(6)` is a directive to the `mirai` package, telling it how mirai tasks should actually be executed. See the [article on mirai](promises_04_mirai.html) for more details.
 
 ## Identifying slow operations
 
@@ -101,7 +101,7 @@ mirai({
 })
 ```
 
-The fact that the mirai code block executes in a separate process means we have to take special care to deal with a number of practical issues. All the objects required by the code block must be passed along as part of the `mirai()` function call; certain objects may require custom serialization to be set up, and other objects cannot be safely used across process boundaries. Again, see the [article on mirai](promises_04__mirai.html) for more details.
+The fact that the mirai code block executes in a separate process means we have to take special care to deal with a number of practical issues. All the objects required by the code block must be passed along as part of the `mirai()` function call; certain objects may require custom serialization to be set up, and other objects cannot be safely used across process boundaries. Again, see the [article on mirai](promises_04_mirai.html) for more details.
 
 ### Shiny-specific caveats and limitations
 

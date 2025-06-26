@@ -18,26 +18,26 @@ install.packages("promises")
 
 ### Overview
 
-#### [1. Why use `promises`?](articles/motivation.html)
+#### [1. Why use `promises`?](articles/promises_01_motivation.html)
 
 Why do we need async programming? What is it good for, and not good for?
 
-#### [2. An informal intro to async programming](articles/intro.html)
+#### [2. An informal intro to async programming](articles/promises_02_intro.html)
 
 Async programming can require a serious mental shift, even for veteran programmers. This document attempts to introduce the "average" R user to the topic, as gently as possible.
 
-#### [3. Working with `promises`](articles/overview.html)
+#### [3. Working with `promises`](articles/promises_03_overview.html)
 
 A more thorough exploration of the concepts behind `promises`, and the API provided by the `promises` package.
 
 ### Integration
 
-#### [4. Launching tasks](articles/mirai.html)
+#### [4. Launching tasks](articles/promises_04_mirai.html)
 
 A guide to the `mirai` package, the place where we expect most async programming in R to begin.
 
-#### [5a. Launching tasks with `future`](articles/futures.html)
-#### [5b. Advance `future` and `promises` usage](articles/future_promise.html)
+#### [5a. Launching tasks with `future`](articles/promises_05a_futures.html)
+#### [5b. Advance `future` and `promises` usage](articles/promises_05b_future_promise.html)
 
 A guide to the `future` package, an alternative that pre-dates `mirai` and used to be the main method for async programming.
 
@@ -45,14 +45,14 @@ Leverage `promises` to make sure that `future` execution does not block the main
 
 ### Usage
 
-#### [6. Using promises with Shiny](articles/shiny.html)
+#### [6. Using promises with Shiny](articles/promises_06_shiny.html)
 
 Learn how to integrate `promises` into your Shiny applications.
 
-#### [7. Combining `promises`](articles/combining.html)
+#### [7. Combining `promises`](articles/promises_07_combining.html)
 
 Functions and techniques for working with multiple `promises` simultaneously.
 
-#### [8. Case study: converting a Shiny app to async](articles/casestudy.html)
+#### [8. Case study: converting a Shiny app to async](articles/promises_08_casestudy.html)
 
 Walk through the conversion of a realistic Shiny example app to async.

@@ -19,7 +19,7 @@ vignette: >
 ```
 
 <div class="alert alert-secondary">
-While this article focuses on the `future` package, you may wish to consider the newer [`mirai`](promises_04__mirai.html) package, which didn't exist when this article was first written.
+While this article focuses on the `future` package, you may wish to consider the newer [`mirai`](promises_04_mirai.html) package, which didn't exist when this article was first written.
 Here are some factors to consider as you choose between the two.
 
 1. The `future` package tries hard to automatically infer what variables and packages you need from the main R session, and makes those available to the child process. `mirai` doesn't try to do this for you; you need to pass in whatever data you need explicitly, and namespace package function calls within your code.
@@ -109,7 +109,7 @@ Second, objects that refer to native resources are unlikely to work in this dire
 
 Next:
 
-* [Advanced `future` and `promises` usage](promises_05_future_promise.html)
+* [Advanced `future` and `promises` usage](promises_05b_future_promise.html)
 * [Using `promises` with Shiny](promises_06_shiny.html)
 
 </div>
