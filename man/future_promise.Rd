@@ -51,7 +51,7 @@ For more details and examples, please see the \href{https://rstudio.github.io/pr
 
 }}
 \examples{
-\donttest{# Relative start time
+\dontrun{# Relative start time
 start <- Sys.time()
 # Helper to force two `future` workers
 with_two_workers <- function(expr) {
@@ -59,7 +59,7 @@ with_two_workers <- function(expr) {
     message("`future` not installed")
     return()
   }
-  old_plan <- future::plan(future::multisession(workers = 2))
+  old_plan <- future::plan(future::multisession, workers = 2)
   on.exit({future::plan(old_plan)}, add = TRUE)
   start <<- Sys.time()
   force(expr)

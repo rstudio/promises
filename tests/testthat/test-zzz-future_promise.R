@@ -1,4 +1,5 @@
 skip_on_cran()
+skip_on_os("mac") # TODO: Remove this skip once paralely is fixed on macOS in GHA
 skip_on_os("windows") # timing is not consistent on Windows GHA
 
 skip_if_not_installed("future", "1.21.0")
@@ -13,7 +14,7 @@ local({
   # Set up a plan with 2 future workers
   with_test_workers <- function(code) {
     # (Can not use a variable for workers if in a local({}))
-    old_plan <- future::plan(future::multisession(workers = 2))
+    old_plan <- future::plan(future::multisession, workers = 2)
     on.exit(
       {
         future::plan(old_plan)
