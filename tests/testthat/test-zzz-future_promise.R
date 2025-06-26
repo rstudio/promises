@@ -1,4 +1,5 @@
 skip_on_cran()
+skip_on_os("mac") # TODO: Remove this skip once paralely is fixed on macOS in GHA
 skip_on_os("windows") # timing is not consistent on Windows GHA
 
 skip_if_not_installed("future", "1.21.0")
@@ -201,7 +202,8 @@ local({
       err <- capture.output(type = "message", {
         future_promise(stop("boom1")) %>%
           then(
-            onRejected = ~ {}
+            onRejected = ~ {
+            }
           ) %>%
           wait_for_it()
       })
