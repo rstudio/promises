@@ -12,6 +12,6 @@ ignore_unused_imports <- function() {
 release_bullets <- function() {
   c(
     "Update staticimports: `staticimports::import()`",
-    "Revert https://github.com/rstudio/promises/pull/134"
+    "Revert `future_promise()` example to use `\\donttest{}`, not `\\dontrun{}`",
   )
 }
