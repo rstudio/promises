@@ -526,11 +526,12 @@ data <- eventReactive(input$date, {
   p <- Progress$new()
   p$set(value = NULL, message = "Downloading data...")
   mirai({
-    if (!file.exists(path)) {
-      download.file(url, path)
+      if (!file.exists(path)) {
+        download.file(url, path)
+      }
     },
     path = path, url = url
-  }) %...>%
+  ) %...>%
     { p$set(message = "Parsing data...") } %...>%
     { mirai({
         read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
