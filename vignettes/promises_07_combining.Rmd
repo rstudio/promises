@@ -114,10 +114,13 @@ library(mirai)
 
 get_pub_date <- function(pkg) {
   desc_url <- paste0("https://cran.r-project.org/web/packages/", pkg, "/DESCRIPTION")
-  mirai({
-    r <- read.dcf(url(desc_url))[, "Date/Publication"]
-    unname(r)
-  }, desc_url = desc_url)
+  mirai(
+    {
+      r <- read.dcf(url(desc_url))[, "Date/Publication"]
+      unname(r)
+    },
+    desc_url = desc_url
+  )
 }
 
 packages <- setNames(, c("ggplot2", "dplyr", "knitr"))
@@ -184,10 +187,13 @@ promise_reduce(
     if (!is.null(result)) {
       result
     } else {
-      mirai({
-        # Test the URL; return the URL on success, or NULL on failure
-        if (!httr::http_error(mirror)) mirror
-      }, mirror = mirror)
+      mirai(
+        {
+          # Test the URL; return the URL on success, or NULL on failure
+          if (!httr::http_error(mirror)) mirror
+        },
+        mirror = mirror
+      )
     }
   },
   .init = NULL

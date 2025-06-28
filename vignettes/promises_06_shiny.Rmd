@@ -64,7 +64,7 @@ The `promises` library is necessary for the `%...>%` operator. You may also want
 
 The `mirai` library is needed because the `mirai()` function call is how you will launch asynchronous tasks.
 
-`daemons(6)` is a directive to the `mirai` package, telling it how mirai tasks should actually be executed. See the [article on mirai](promises_04_mirai.html) for more details.
+`daemons(6)` is a directive to the `mirai` package, telling it where and how tasks should actually be executed. See the [article on mirai](promises_04_mirai.html) for more details.
 
 ## Identifying slow operations
 
@@ -114,9 +114,12 @@ function(input, output, session) {
   r1 <- reactive({ ... })
 
   r2 <- reactive({
-    mirai({
-      r1() # Will error--don't do this!
-    }, r1 = r1)
+    mirai(
+      {
+        r1() # Will error--don't do this!
+      },
+      r1 = r1
+    )
   })
 }
 ```
@@ -129,9 +132,12 @@ function(input, output, session) {
 
   r2 <- reactive({
     val <- r1()
-    mirai({
-      val # No problem!
-    }, val = val)
+    mirai(
+      {
+        val # No problem!
+      },
+      val = val
+    )
   })
 }
 ```
@@ -180,9 +186,13 @@ or, trading elegance for efficiency:
 ```R
 output$table <- renderTable({
   input_date <- input$date
-  mirai({
-    read.csv(url) %>% filter(date == input_date)
-  }, url = url, input_date = input_date)
+  mirai(
+    {
+      read.csv(url) %>% filter(date == input_date)
+    },
+    url = url,
+    input_date = input_date
+  )
 })
 ```
 
@@ -196,18 +206,24 @@ With promises, these render functions can work in a similar way, but with a cave
 
 ```R
 output$summary <- renderPrint({
-  mirai({
-    read.csv(url) %>%
-      summary() %>%
-      print()
-  }, url = url)
+  mirai(
+    {
+      read.csv(url) %>%
+        summary() %>%
+        print()
+    },
+    url = url
+  )
 })
 
 output$plot <- renderPlot({
-  mirai({
-    df <- read.csv(url)
-    ggplot(df, aes(length, width)) + geom_point()
-  }, url = url)
+  mirai(
+    {
+      df <- read.csv(url)
+      ggplot(df, aes(length, width)) + geom_point()
+    },
+    url = url
+  )
 })
 ```
 
@@ -255,11 +271,14 @@ data <- reactiveVal(readRDS("cached.rds"))
 
 function(input, output, session) {
   observeEvent(input$refresh_data, {
-    mirai({
-      df <- read.csv(url)
-      saveRDS(df, "cached.rds")
-      df
-    }, url = url) %...>%
+    mirai(
+      {
+        df <- read.csv(url)
+        saveRDS(df, "cached.rds")
+        df
+      },
+      url = url
+    ) %...>%
       data()
   })
 }
