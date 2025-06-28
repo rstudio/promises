@@ -64,7 +64,7 @@ The `promises` library is necessary for the `%...>%` operator. You may also want
 
 The `mirai` library is needed because the `mirai()` function call is how you will launch asynchronous tasks.
 
-`daemons(6)` is a directive to the `mirai` package, telling it how mirai tasks should actually be executed. See the [article on mirai](promises_04_mirai.html) for more details.
+`daemons(6)` is a directive to the `mirai` package, telling it where and how tasks should actually be executed. See the [article on mirai](promises_04_mirai.html) for more details.
 
 ## Identifying slow operations
 
