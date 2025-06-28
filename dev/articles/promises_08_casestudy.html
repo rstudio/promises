@@ -440,12 +440,16 @@ now:</p>
 <span>  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span></span>
 <span>  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span></span>
-<span>    <span class="op">}</span></span>
-<span>    <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>, path <span class="op">=</span> <span class="va">path</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span></span>
+<span>      <span class="op">}</span></span>
+<span>      <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    path <span class="op">=</span> <span class="va">path</span>,</span>
+<span>    url <span class="op">=</span> <span class="va">url</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Pretty straightforward. This reactive now returns a mirai (which
 counts as a promise), not a data frame.</p>
@@ -804,29 +808,36 @@ parsing, and splitting it into two separate mirai. After the download
 mirai has completed, we can send a progress message that parsing is
 beginning, and then start the parsing mirai.</p>
 <p>The regrettably complicated solution is below.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># ASYNCHRONOUS version</span></span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">eventReactive</span>(input<span class="sc">$</span>date, {</span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>  date <span class="ot">&lt;-</span> input<span class="sc">$</span>date</span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>  year <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">year</span>(date)</span>
-<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a></span>
-<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>  url <span class="ot">&lt;-</span> <span class="fu">glue</span>(<span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span>)</span>
-<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>  path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">"data_cache"</span>, <span class="fu">paste0</span>(date, <span class="st">".csv.gz"</span>))</span>
-<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a></span>
-<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a>  p <span class="ot">&lt;-</span> Progress<span class="sc">$</span><span class="fu">new</span>()</span>
-<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a>  p<span class="sc">$</span><span class="fu">set</span>(<span class="at">value =</span> <span class="cn">NULL</span>, <span class="at">message =</span> <span class="st">"Downloading data..."</span>)</span>
-<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a>  <span class="fu">mirai</span>({</span>
-<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(path)) {</span>
-<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a>      <span class="fu">download.file</span>(url, path)</span>
-<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a>    },</span>
-<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a>    path <span class="ot">=</span> path, url <span class="ot">=</span> url</span>
-<span id="cb23-17"><a href="#cb23-17" tabindex="-1"></a>  }) <span class="sc">%...&gt;%</span></span>
-<span id="cb23-18"><a href="#cb23-18" tabindex="-1"></a>    { p<span class="sc">$</span><span class="fu">set</span>(<span class="at">message =</span> <span class="st">"Parsing data..."</span>) } <span class="sc">%...&gt;%</span></span>
-<span id="cb23-19"><a href="#cb23-19" tabindex="-1"></a>    { <span class="fu">mirai</span>({</span>
-<span id="cb23-20"><a href="#cb23-20" tabindex="-1"></a>        <span class="fu">read_csv</span>(path, <span class="at">col_types =</span> <span class="st">"Dti---c-ci"</span>, <span class="at">progress =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb23-21"><a href="#cb23-21" tabindex="-1"></a>      }, <span class="at">path =</span> path) } <span class="sc">%&gt;%</span></span>
-<span id="cb23-22"><a href="#cb23-22" tabindex="-1"></a>    <span class="fu">finally</span>(<span class="sc">~</span>p<span class="sc">$</span><span class="fu">close</span>())</span>
-<span id="cb23-23"><a href="#cb23-23" tabindex="-1"></a>})</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># ASYNCHRONOUS version</span></span>
+<span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">eventReactive</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date</span>, <span class="op">{</span></span>
+<span>  <span class="va">date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span></span>
+<span>  <span class="va">year</span> <span class="op">&lt;-</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">url</span> <span class="op">&lt;-</span> <span class="fu">glue</span><span class="op">(</span><span class="st">"http://cran-logs.rstudio.com/{year}/{date}.csv.gz"</span><span class="op">)</span></span>
+<span>  <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"data_cache"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">".csv.gz"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="va">Progress</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">p</span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>value <span class="op">=</span> <span class="cn">NULL</span>, message <span class="op">=</span> <span class="st">"Downloading data..."</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">path</span><span class="op">)</span></span>
+<span>      <span class="op">}</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    path <span class="op">=</span> <span class="va">path</span>,</span>
+<span>    url <span class="op">=</span> <span class="va">url</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="op">{</span> <span class="va">p</span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>message <span class="op">=</span> <span class="st">"Parsing data..."</span><span class="op">)</span> <span class="op">}</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="op">{</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>        <span class="op">{</span></span>
+<span>          <span class="fu">read_csv</span><span class="op">(</span><span class="va">path</span>, col_types <span class="op">=</span> <span class="st">"Dti---c-ci"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>        <span class="op">}</span>,</span>
+<span>        path <span class="op">=</span> <span class="va">path</span></span>
+<span>      <span class="op">)</span> <span class="op">}</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="../reference/then.html">finally</a></span><span class="op">(</span><span class="op">~</span><span class="va">p</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The single mirai we wrote earlier has now become a pipeline of
 promises:</p>
 <ol style="list-style-type: decimal">

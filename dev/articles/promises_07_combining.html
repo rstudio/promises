@@ -229,10 +229,13 @@ date.</p>
 <span></span>
 <span><span class="va">get_pub_date</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pkg</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">desc_url</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"https://cran.r-project.org/web/packages/"</span>, <span class="va">pkg</span>, <span class="st">"/DESCRIPTION"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dcf.html" class="external-link">read.dcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html" class="external-link">url</a></span><span class="op">(</span><span class="va">desc_url</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="st">"Date/Publication"</span><span class="op">]</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>, desc_url <span class="op">=</span> <span class="va">desc_url</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dcf.html" class="external-link">read.dcf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html" class="external-link">url</a></span><span class="op">(</span><span class="va">desc_url</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="st">"Date/Publication"</span><span class="op">]</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    desc_url <span class="op">=</span> <span class="va">desc_url</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">packages</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, <span class="st">"dplyr"</span>, <span class="st">"knitr"</span><span class="op">)</span><span class="op">)</span></span>
@@ -307,10 +310,13 @@ returning the first one that passes whatever check
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>      <span class="va">result</span></span>
 <span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>      <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>        <span class="co"># Test the URL; return the URL on success, or NULL on failure</span></span>
-<span>        <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/http_error.html" class="external-link">http_error</a></span><span class="op">(</span><span class="va">mirror</span><span class="op">)</span><span class="op">)</span> <span class="va">mirror</span></span>
-<span>      <span class="op">}</span>, mirror <span class="op">=</span> <span class="va">mirror</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>        <span class="op">{</span></span>
+<span>          <span class="co"># Test the URL; return the URL on success, or NULL on failure</span></span>
+<span>          <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/http_error.html" class="external-link">http_error</a></span><span class="op">(</span><span class="va">mirror</span><span class="op">)</span><span class="op">)</span> <span class="va">mirror</span></span>
+<span>        <span class="op">}</span>,</span>
+<span>        mirror <span class="op">=</span> <span class="va">mirror</span></span>
+<span>      <span class="op">)</span></span>
 <span>    <span class="op">}</span></span>
 <span>  <span class="op">}</span>,</span>
 <span>  .init <span class="op">=</span> <span class="cn">NULL</span></span>

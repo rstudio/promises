@@ -214,8 +214,8 @@ instead:</p>
 <p>This passes the calling environment, which includes both the
 <code>download_data</code> function as well as <code>url</code>.</p>
 <p>Care should be taken when using this feature as it will also pass
-anything else that happens to be in the same environment. It is usually
-safer to use when mirai is called inside of another function, then
+anything else that happens to be in the same environment. It is safer to
+use when mirai is called inside of another function, then
 <code><a href="https://rdrr.io/r/base/environment.html" class="external-link">environment()</a></code> will only consist of variables passed as
 arguments to that function, or created locally within it.</p>
 </div>
@@ -228,12 +228,11 @@ example, using <code>dplyr::mutate()</code> instead of just
 <code>mutate()</code>, even if the <code>dplyr</code> package is loaded
 in your main session, as the other process will not have any packages
 loaded by default.</p>
-<p>Alternatively, make a call to load the package inside your mirai
-code, for example by adding <code><a href="https://dplyr.tidyverse.org" class="external-link">library(dplyr)</a></code> at the top of
-your code. Note that for infix operators such as the magrittr pipe
-<code>%&gt;%</code>, this may be the most convenient option. Use of the
-pipe requires that the package be loaded beforehand using
-<code><a href="https://magrittr.tidyverse.org" class="external-link">library(magrittr)</a></code>.</p>
+<p>Alternatively, make a call to load the package inside your mirai code
+chunk, for example by adding <code><a href="https://dplyr.tidyverse.org" class="external-link">library(dplyr)</a></code>. Sometimes this
+may be the most convenient option, especially for for infix operators.
+For example the magrittr pipe <code>%&gt;%</code>, requires a
+<code><a href="https://magrittr.tidyverse.org" class="external-link">library(magrittr)</a></code> to load the package beforehand.</p>
 </div>
 <div class="section level3">
 <h3 id="custom-data-types">Custom Data Types<a class="anchor" aria-label="anchor" href="#custom-data-types"></a>

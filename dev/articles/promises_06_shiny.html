@@ -146,8 +146,8 @@ utility functions like <code>promise_all</code> and
 <code><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai()</a></code> function call is how you will launch asynchronous
 tasks.</p>
 <p><code>daemons(6)</code> is a directive to the <code>mirai</code>
-package, telling it how mirai tasks should actually be executed. See the
-<a href="promises_04_mirai.html">article on mirai</a> for more
+package, telling it where and how tasks should actually be executed. See
+the <a href="promises_04_mirai.html">article on mirai</a> for more
 details.</p>
 </div>
 <div class="section level2">
@@ -228,9 +228,12 @@ there will be no way for readers to be notified about invalidation.</p>
 <span>  <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>      <span class="fu">r1</span><span class="op">(</span><span class="op">)</span> <span class="co"># Will error--don't do this!</span></span>
-<span>    <span class="op">}</span>, r1 <span class="op">=</span> <span class="va">r1</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>      <span class="op">{</span></span>
+<span>        <span class="fu">r1</span><span class="op">(</span><span class="op">)</span> <span class="co"># Will error--don't do this!</span></span>
+<span>      <span class="op">}</span>,</span>
+<span>      r1 <span class="op">=</span> <span class="va">r1</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Even though <code>r1()</code> is called from inside the
@@ -243,9 +246,12 @@ values/expressions you need in advance of launching the mirai:</p>
 <span></span>
 <span>  <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="va">val</span> <span class="op">&lt;-</span> <span class="fu">r1</span><span class="op">(</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>      <span class="va">val</span> <span class="co"># No problem!</span></span>
-<span>    <span class="op">}</span>, val <span class="op">=</span> <span class="va">val</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>      <span class="op">{</span></span>
+<span>        <span class="va">val</span> <span class="co"># No problem!</span></span>
+<span>      <span class="op">}</span>,</span>
+<span>      val <span class="op">=</span> <span class="va">val</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>However, it’s perfectly fine to read reactive values/expressions from
@@ -293,9 +299,13 @@ such a value instead.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output</span><span class="op">$</span><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu">renderTable</span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">input_date</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">date</span></span>
-<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input_date</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>, url <span class="op">=</span> <span class="va">url</span>, input_date <span class="op">=</span> <span class="va">input_date</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">input_date</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    url <span class="op">=</span> <span class="va">url</span>,</span>
+<span>    input_date <span class="op">=</span> <span class="va">input_date</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The important thing to keep in mind is that the promise (or promise
 pipeline) must be the final expression in the code block. Shiny only
@@ -318,18 +328,24 @@ process won’t have any effect on the Shiny output in the original
 process. These examples, then, are incorrect:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu">renderPrint</span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    url <span class="op">=</span> <span class="va">url</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">renderPlot</span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
-<span>    <span class="fu">ggplot</span><span class="op">(</span><span class="va">df</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">length</span>, <span class="va">width</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
+<span>      <span class="fu">ggplot</span><span class="op">(</span><span class="va">df</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">length</span>, <span class="va">width</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    url <span class="op">=</span> <span class="va">url</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Instead, do printing and plotting after control returns back to the
 original process, via a promise handler:</p>
@@ -382,11 +398,14 @@ also used to update the reactive value <code>data</code>.</p>
 <span></span>
 <span><span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">refresh_data</span>, <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>      <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"cached.rds"</span><span class="op">)</span></span>
-<span>      <span class="va">df</span></span>
-<span>    <span class="op">}</span>, url <span class="op">=</span> <span class="va">url</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
+<span>      <span class="op">{</span></span>
+<span>        <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"cached.rds"</span><span class="op">)</span></span>
+<span>        <span class="va">df</span></span>
+<span>      <span class="op">}</span>,</span>
+<span>      url <span class="op">=</span> <span class="va">url</span></span>
+<span>    <span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
