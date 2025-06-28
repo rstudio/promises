@@ -221,12 +221,16 @@ data <- eventReactive(input$date, {
   url <- glue("http://cran-logs.rstudio.com/{year}/{date}.csv.gz")
   path <- file.path("data_cache", paste0(date, ".csv.gz"))
 
-  mirai({
-    if (!file.exists(path)) {
-      download.file(url, path)
-    }
-    read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
-  }, path = path, url = url)
+  mirai(
+    {
+      if (!file.exists(path)) {
+        download.file(url, path)
+      }
+      read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
+    },
+    path = path,
+    url = url
+  )
 })
 ```
 
@@ -525,17 +529,22 @@ data <- eventReactive(input$date, {
 
   p <- Progress$new()
   p$set(value = NULL, message = "Downloading data...")
-  mirai({
+  mirai(
+    {
       if (!file.exists(path)) {
         download.file(url, path)
       }
     },
-    path = path, url = url
+    path = path,
+    url = url
   ) %...>%
     { p$set(message = "Parsing data...") } %...>%
-    { mirai({
-        read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
-      }, path = path) } %>%
+    { mirai(
+        {
+          read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
+        },
+        path = path
+      ) } %>%
     finally(~p$close())
 })
 ```
