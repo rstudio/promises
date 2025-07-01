@@ -18,6 +18,16 @@ vignette: >
 }
 ```
 
+We've updated this guide to using the `mirai` package from `future` as we believe the following benefits are compelling in the context of Shiny apps:
+
+1. Faster startup times and much less per-task overhead, meaning you can boost performance by making even shorter tasks async.
+1. More linear scaling, meaning you get the same relative benefits whether running 2 or 200 cores.
+1. Event-driven promises using `mirai` vs. promises using `future` which time-poll every 100 ms. Lower latency and response times can help with the user experience.
+
+The previous guide using `future` is available [here](promises_05a_futures.html). Using `future` continues to be supported within the Shiny ecosystem, and Henrik Bengtsson‘s excellent work on the futureverse deserves credit for pushing the boundaries of parallelism in R farther than many thought possible.
+
+<hr>
+
 The `mirai` package provides a lightweight way to launch R tasks that don't block the current R session.
 
 The `promises` package provides the API for working with the results of async tasks, but it totally abdicates responsibility for actually launching/creating async tasks. The idea is that any number of different packages could be capable of launching async tasks, using whatever techniques they want, but all of them would either return promise objects or objects that can be converted to promise objects, as is the case for `mirai`.
