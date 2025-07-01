@@ -91,37 +91,6 @@
   background-color: inherit;
 }
 </style>
-<div class="alert alert-secondary">
-<p>While this article focuses on the <code>future</code> package, you
-may wish to consider the newer <a href="promises_04_mirai.html"><code>mirai</code></a> package, which
-didn’t exist when this article was first written. Here are some factors
-to consider as you choose between the two.</p>
-<ol style="list-style-type: decimal">
-<li>The <code>future</code> package tries hard to automatically infer
-what variables and packages you need from the main R session, and makes
-those available to the child process. <code>mirai</code> doesn’t try to
-do this for you; you need to pass in whatever data you need explicitly,
-and namespace package function calls within your code.</li>
-<li>
-<code>mirai</code> is very fast; it’s much faster than
-<code>future</code> at starting up and has less per-task overhead.
-<code>mirai</code> creates event-driven promises, whereas promises using
-<code>future</code> time-poll every 0.1 seconds. This makes
-<code>mirai</code> much better-suited to situations where response times
-and latency are critical.</li>
-<li>
-<code>future</code> is designed to be a general API, and supports
-distributed computing backends provided by other packages.
-<code>mirai</code> on the other hand provides integrated launchers for
-high-performance computing clusters and any computer reachable via
-SSH.</li>
-<li>
-<code>mirai</code> is designed as an async framework and is
-inherently queued, meaning it readily accepts more tasks than workers.
-This means the distinction between <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future()</a></code> and
-<code><a href="../reference/future_promise.html">future_promise()</a></code> doesn’t exist for mirai.</li>
-</ol>
-</div>
 <p>The <code>future</code> package provides a lightweight way to launch
 R tasks that don’t block the current R session. It was created by Henrik
 Bengtsson long before the <code>promises</code> package existed—the

@@ -91,6 +91,24 @@
   background-color: inherit;
 }
 </style>
+<p>We’ve updated this guide to using the <code>mirai</code> package from
+<code>future</code> as we believe the following benefits are compelling
+in the context of Shiny apps:</p>
+<ol style="list-style-type: decimal">
+<li>Faster startup times and much less per-task overhead, meaning you
+can boost performance by making even shorter tasks async.</li>
+<li>More linear scaling, meaning you get the same relative benefits
+whether running 2 or 200 cores.</li>
+<li>Event-driven promises using <code>mirai</code> vs. promises using
+<code>future</code> which time-poll every 100 ms. Lower latency and
+response times can help with the user experience.</li>
+</ol>
+<p>The previous guide using <code>future</code> is available <a href="promises_05a_futures.html">here</a>. Using <code>future</code>
+continues to be supported within the Shiny ecosystem, and Henrik
+Bengtsson‘s excellent work on the futureverse deserves credit for
+pushing the boundaries of parallelism in R farther than many thought
+possible.</p>
+<hr>
 <p>The <code>mirai</code> package provides a lightweight way to launch R
 tasks that don’t block the current R session.</p>
 <p>The <code>promises</code> package provides the API for working with
