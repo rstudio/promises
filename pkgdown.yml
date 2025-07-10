@@ -5,12 +5,13 @@ articles:
   promises_01_motivation: promises_01_motivation.html
   promises_02_intro: promises_02_intro.html
   promises_03_overview: promises_03_overview.html
-  promises_04_futures: promises_04_futures.html
-  promises_05_future_promise: promises_05_future_promise.html
+  promises_04_mirai: promises_04_mirai.html
+  promises_05a_futures: promises_05a_futures.html
+  promises_05b_future_promise: promises_05b_future_promise.html
   promises_06_shiny: promises_06_shiny.html
   promises_07_combining: promises_07_combining.html
   promises_08_casestudy: promises_08_casestudy.html
-last_built: 2025-06-24T11:29Z
+last_built: 2025-07-10T23:07Z
 urls:
   reference: https://rstudio.github.io/promises/reference
   article: https://rstudio.github.io/promises/articles
