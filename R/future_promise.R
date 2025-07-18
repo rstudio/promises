@@ -1,7 +1,16 @@
-debug_msg_can_print <- FALSE
+debug_msg_can_print <- TRUE
+
+spaces_env <- new.env(parent = emptyenv())
+spaces_env$spaces <- 0L
+inc_spaces <- function() {
+  spaces_env$spaces <- spaces_env$spaces + 2L
+}
+dec_spaces <- function() {
+  spaces_env$spaces <- max(0L, spaces_env$spaces - 2L)
+}
 debug_msg <- function(...) {
   if (debug_msg_can_print) {
-    message(...)
+    message(rep(" ", spaces_env$spaces, collapse = ""), ...)
   }
 }
 
@@ -30,7 +39,21 @@ assert_work_queue_pkgs <- local({
   }
 })
 future_worker_is_free <- function() {
-  future::nbrOfFreeWorkers() > 0
+  now <- Sys.time()
+  debug_msg("future_worker_is_free() started")
+  on.exit(
+    {
+      debug_msg(
+        "future_worker_is_free() finished in ",
+        Sys.time() - now,
+        "; ",
+        ans
+      )
+    },
+    add = TRUE
+  )
+  ans <- future::nbrOfFreeWorkers() > 0
+  ans
 }
 
 
@@ -224,7 +247,16 @@ WorkQueue <- R6::R6Class(
     #   If a delayed check has already been registered, Return
     #   Else, check again after some delay
     attempt_work = function(can_delay = FALSE) {
-      debug_msg('attempt_work()')
+      now <- Sys.time()
+      debug_msg('attempt_work() started')
+      inc_spaces()
+      on.exit(
+        {
+          dec_spaces()
+          debug_msg("attempt_work() finished in ", Sys.time() - now)
+        },
+        add = TRUE
+      )
       # If nothing to start, return early
       if (private$queue$size() == 0) {
         return()
@@ -257,7 +289,16 @@ WorkQueue <- R6::R6Class(
 
     # Actually process an item in the queue
     do_work = function() {
-      debug_msg("do_work()")
+      now <- Sys.time()
+      debug_msg("do_work() started")
+      inc_spaces()
+      on.exit(
+        {
+          dec_spaces()
+          debug_msg("do_work() finished in ", Sys.time() - now)
+        },
+        add = TRUE
+      )
 
       # Get first item in queue
       work_fn <- private$queue$remove()
@@ -275,7 +316,7 @@ WorkQueue <- R6::R6Class(
       # Try to attempt work immediately after the future job has finished
       # (whether it succeeds or fails doesn't matter)
       continue_work <- function() {
-        debug_msg("finished work. queue size: ", private$queue$size())
+        debug_msg("continue work. queue size: ", private$queue$size())
         private$attempt_work()
       }
 
@@ -324,7 +365,16 @@ WorkQueue <- R6::R6Class(
     #' Schedule work
     #' @param fn function to execute when `can_proceed()` returns `TRUE`.
     schedule_work = function(fn) {
-      debug_msg("schedule_work()")
+      now <- Sys.time()
+      debug_msg("schedule_work() started")
+      inc_spaces()
+      on.exit(
+        {
+          dec_spaces()
+          debug_msg("schedule_work() finished in ", Sys.time() - now)
+        },
+        add = TRUE
+      )
       stopifnot(is.function(fn))
       private$queue$add(fn)
 
