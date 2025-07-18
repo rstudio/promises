@@ -477,6 +477,7 @@ as.promise.Future <- function(x) {
   # We want to create a promise only once for each Future object, and cache it
   # as an attribute. This spares us from having multiple polling loops waiting
   # for the same Future.
+  ## Note: 2025-07-barret: Active bindings will not work as `{future}` does not proactively retrieve results. A poll must be used.
 
   cached <- attr(x, "converted_promise", exact = TRUE)
   if (!is.null(cached)) {
