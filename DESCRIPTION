@@ -4,7 +4,8 @@ Title: Abstractions for Promise-Based Asynchronous Programming
 Version: 1.3.3.9000
 Authors@R: c(
     person("Joe", "Cheng", , "joe@posit.co", role = c("aut", "cre")),
-    person("Posit Software, PBC", role = c("cph", "fnd"), comment = c(ROR = "03wc8by49"))
+    person("Posit Software, PBC", role = c("cph", "fnd"),
+           comment = c(ROR = "03wc8by49"))
   )
 Description: Provides fundamental abstractions for doing asynchronous
     programming in R using promises. Asynchronous programming is useful
@@ -20,6 +21,7 @@ Imports:
     fastmap (>= 1.1.0),
     later,
     magrittr (>= 1.5),
+    otel,
     R6,
     Rcpp,
     rlang,
@@ -28,6 +30,7 @@ Suggests:
     future (>= 1.21.0),
     knitr,
     mirai,
+    otelsdk,
     purrr,
     rmarkdown,
     spelling,
@@ -38,6 +41,9 @@ LinkingTo:
     Rcpp
 VignetteBuilder:
     knitr
+Remotes:
+    r-lib/otel,
+    r-lib/otelsdk
 Config/Needs/website: rsconnect, tidyverse/tidytemplate
 Config/testthat/edition: 3
 Config/usethis/last-upkeep: 2025-05-27
