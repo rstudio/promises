@@ -4,15 +4,15 @@ CMD
 Cheng's
 ETL
 FutureErrors
-futureverse
 Globals
 Hadley’s
 JS
 Lopp
-mirai
+Mirai
 Multisession
 NSE
 OpenCPU
+OpenTelemetry
 PBC
 RServe
 RStudio
@@ -22,7 +22,6 @@ UI
 anonymized
 async
 backoff
-cloneable
 conf
 cranwhales
 deserialization
@@ -31,6 +30,7 @@ downloaders
 dplyr
 effecty
 funder
+futureverse
 ggplot
 github
 globals
@@ -44,11 +44,12 @@ lke
 magrittr
 magrittr's
 memoise
+mirai
 multisession
-namespaced
 natively
 occured
 onRejected
+otel
 pre
 precomputation
 profiler
@@ -70,9 +71,7 @@ syntaxes
 th
 this’ll
 tidyverse
-topologies
 totalling
-unevaluated
 unhandled
 users’
 wc

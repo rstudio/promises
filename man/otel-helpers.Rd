@@ -30,7 +30,7 @@ Create and manage otel promise domain / spans
 \item \code{local_promise_domain()}: Local promise domain for an active OpenTelemetry
 span. The promise domain will be removed when the \code{.envir} is removed from
 the stack. This method is currently only compatible with
-\code{create_otel_active_span_promise_domain(active_span)} as we can garantee
+\code{create_otel_active_span_promise_domain(active_span)} as we can guarantee
 that the domain's \code{wrapSync} is \code{base::force}.
 
 }}

@@ -7,33 +7,7 @@
 #' * [`create_otel_active_span_promise_domain()`]
 #' * [`local_promise_domain()`]
 #' * [`with_promise_domain()`]
-#' @example
-#' \dontrun{
-#' # Example usage:
-#' library(promises)
-#' library(otel)
-#'
-#' # Create an active span
-#' inactive_span <- otel_create_inactive_span("example_span")
-#'
-#' # Use the local promise domain
-#' local_otel_active_span_promise_domain(inactive_span)
-#'
-#' # Create a promise within the active span domain
-#' p <- promise_resolve(TRUE) %...>% {
-#'   # This will run within the active span domain
-#'   # Run user code here
-#'   Sys.sleep(1)
-#'   "Done"
-#' } %...>% {
-#'   # This will run within the active span domain
-#'   print(.)
-#' }
-#' p <- finally(p, function() {
-#'   # This will run after the promise is resolved
-#'   otel::end_span(active_span)
-#' })
-#' }
+#' @example inst/ex-roxygen/otel_create_inactive_span.R
 #' @describeIn otel Create (but do not start) an OpenTelemetry span that will be used
 #'   within a promise domain. The span will need to be ended manually (`otel::end_span(spn)`).
 #'   The returned object is intended to be used with `otel::local_active_span(spn)` or
@@ -172,7 +146,7 @@ create_otel_active_span_promise_domain <- function(
 #' @describeIn otel-helpers Local promise domain for an active OpenTelemetry
 #'   span. The promise domain will be removed when the `.envir` is removed from
 #'   the stack. This method is currently only compatible with
-#'   `create_otel_active_span_promise_domain(active_span)` as we can garantee
+#'   `create_otel_active_span_promise_domain(active_span)` as we can guarantee
 #'   that the domain's `wrapSync` is `base::force`.
 local_promise_domain <- function(
   domain,
