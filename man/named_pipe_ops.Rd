@@ -36,7 +36,7 @@ A new promise.
 \description{
 Promise-aware pipe operators containing the method within the pipeline.
 Like R's pipe operator,\verb{|>}, these operators can be used to chain together pipelines
-of promise-transforming operations. Unlike \verb{|>}, these pipeable methods wait
+of promise-transforming operations. Unlike \verb{|>}, these pipe operators methods wait
 for promise resolution and pass the unwrapped value (or error) to the \code{rhs}
 function call.
 }

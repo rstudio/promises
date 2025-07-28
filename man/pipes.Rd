@@ -26,11 +26,12 @@ a promise or non-promise value, or throw an error.}
 A new promise.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} by \code{\link[=named_pipe_opts]{then()}},
-\code{\link[=named_pipe_opts]{catch()}}, and
-\code{\link[=named_pipe_opts]{finally()}}, with tee methods
-\code{\link[=named_pipe_opts]{then_tee()}} and
-\code{\link[=named_pipe_opts]{catch_tee()}}.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} by
+\code{\%then\%},
+\code{\%catch\%}, and
+\code{\%finally\%}, with tee methods
+\code{\%then_tee\%} and
+\code{\%catch_tee\%}. Please see \code{\link{\%then\%}} for more details.
 }
 \details{
 Promise-aware pipe operators, in the style of \href{https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html}{magrittr}.

@@ -10,7 +10,7 @@ magrittr::"%T>%"
 #'
 #' Promise-aware pipe operators containing the method within the pipeline.
 #' Like R's pipe operator,`|>`, these operators can be used to chain together pipelines
-#' of promise-transforming operations. Unlike `|>`, these pipeable methods wait
+#' of promise-transforming operations. Unlike `|>`, these pipe operators methods wait
 #' for promise resolution and pass the unwrapped value (or error) to the `rhs`
 #' function call.
 #'
@@ -178,11 +178,12 @@ magrittr::"%T>%"
 
 #' Promise pipe operators
 #'
-#' `r lifecycle::badge('superseded')` by \code{\link[=named_pipe_opts]{then()}},
-#' \code{\link[=named_pipe_opts]{catch()}}, and
-#' \code{\link[=named_pipe_opts]{finally()}}, with tee methods
-#' \code{\link[=named_pipe_opts]{then_tee()}} and
-#' \code{\link[=named_pipe_opts]{catch_tee()}}.
+#' `r lifecycle::badge('superseded')` by
+#' \code{\%then\%},
+#' \code{\%catch\%}, and
+#' \code{\%finally\%}, with tee methods
+#' \code{\%then_tee\%} and
+#' \code{\%catch_tee\%}. Please see [`%then%`] for more details.
 #'
 #' Promise-aware pipe operators, in the style of [magrittr](https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html).
 #' Like magrittr pipes, these operators can be used to chain together pipelines
