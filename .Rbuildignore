@@ -14,3 +14,4 @@
 ^CRAN-RELEASE$
 ^LICENSE\.md$
 ^CRAN-SUBMISSION$
+^_dev$

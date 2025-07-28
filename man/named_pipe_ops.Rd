@@ -84,7 +84,6 @@ mirai(cars) \%then\%
 # If the read.csv fails, resolve to NULL instead
 mirai(read.csv("http://example.com/data.csv")) \%catch\%
   { NULL }
-}
 
 # Return a list of results from a list of promises:
 proms <- list(
@@ -97,6 +96,7 @@ proms \%all\% print()
 #>
 #> [[2]]
 #> [1] 2
+
 # Return the first promise to resolve from a list of promises:
 proms <- list(
   mirai({ Sys.sleep(1); 1 }),
@@ -104,6 +104,9 @@ proms <- list(
 )
 proms \%race\% print()
 #> [1] 2
+
+}
+
 }
 \seealso{
 https://rstudio.github.io/promises/articles/promises_03_overview.html#using-pipes

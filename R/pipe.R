@@ -44,6 +44,27 @@ magrittr::"%T>%"
 #' # If the read.csv fails, resolve to NULL instead
 #' mirai(read.csv("http://example.com/data.csv")) %catch%
 #'   { NULL }
+#'
+#' # Return a list of results from a list of promises:
+#' proms <- list(
+#'   mirai({ Sys.sleep(1); 1 }),
+#'   mirai({ Sys.sleep(0.5); 2 })
+#' )
+#' proms %all% print()
+#' #> [[1]]
+#' #> [1] 1
+#' #>
+#' #> [[2]]
+#' #> [1] 2
+#'
+#' # Return the first promise to resolve from a list of promises:
+#' proms <- list(
+#'   mirai({ Sys.sleep(1); 1 }),
+#'   mirai({ Sys.sleep(0.5); 2 })
+#' )
+#' proms %race% print()
+#' #> [1] 2
+#'
 #' }
 #'
 #' @return A new promise.
@@ -81,6 +102,8 @@ magrittr::"%T>%"
 #' @export
 `%finally%` <-
   function(lhs, rhs) {
+    # TODO: remove rhs `.` and document that it doesn't exist
+
     # the parent environment
     parent <- parent.frame()
 
@@ -124,18 +147,6 @@ magrittr::"%T>%"
 
 #' @describeIn named_pipe_ops Waits for all promises within the `lhs` list before passing through a list of results to the `rhs`. Equivalent to `promise_all(.list = lhs) %then% rhs`.
 #' @export
-#' @examples
-#' # Return a list of results from a list of promises:
-#' proms <- list(
-#'   mirai({ Sys.sleep(1); 1 }),
-#'   mirai({ Sys.sleep(0.5); 2 })
-#' )
-#' proms %all% print()
-#' #> [[1]]
-#' #> [1] 1
-#' #>
-#' #> [[2]]
-#' #> [1] 2
 `%all%` <- function(lhs, rhs) {
   # the parent environment
   parent <- parent.frame()
@@ -151,14 +162,6 @@ magrittr::"%T>%"
 
 #' @describeIn named_pipe_ops Waits for the first promise to resolve within the `lhs` list of promises before passing through the value from the promise that resolved first. Equivalent to `promise_race(.list = lhs) %then% rhs`.
 #' @export
-#' @examples
-#' # Return the first promise to resolve from a list of promises:
-#' proms <- list(
-#'   mirai({ Sys.sleep(1); 1 }),
-#'   mirai({ Sys.sleep(0.5); 2 })
-#' )
-#' proms %race% print()
-#' #> [1] 2
 `%race%` <- function(lhs, rhs) {
   # the parent environment
   parent <- parent.frame()
@@ -175,9 +178,11 @@ magrittr::"%T>%"
 
 #' Promise pipe operators
 #'
-#' `r lifecycle::badge('superseded')` by \code{\%then\%}, \code{\%catch\%}, and
-#' \code{\%finally\%}, with tee methods \code{\%then_tee\%} and \code{\%catch_tee\%}
-#' described in [`named_pipe_ops`].
+#' `r lifecycle::badge('superseded')` by \code{\link[=named_pipe_opts]{then()}},
+#' \code{\link[=named_pipe_opts]{catch()}}, and
+#' \code{\link[=named_pipe_opts]{finally()}}, with tee methods
+#' \code{\link[=named_pipe_opts]{then_tee()}} and
+#' \code{\link[=named_pipe_opts]{catch_tee()}}.
 #'
 #' Promise-aware pipe operators, in the style of [magrittr](https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html).
 #' Like magrittr pipes, these operators can be used to chain together pipelines
