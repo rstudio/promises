@@ -167,7 +167,7 @@ So this:
 
 ```R
 output$table <- renderTable({
-  read.csv(url) %>%
+  read.csv(url) |>
     filter(date == input$date)
 })
 ```
@@ -188,7 +188,8 @@ output$table <- renderTable({
   input_date <- input$date
   mirai(
     {
-      read.csv(url) %>% filter(date == input_date)
+      read.csv(url) |>
+        filter(date == input_date)
     },
     url = url,
     input_date = input_date
@@ -208,8 +209,8 @@ With promises, these render functions can work in a similar way, but with a cave
 output$summary <- renderPrint({
   mirai(
     {
-      read.csv(url) %>%
-        summary() %>%
+      read.csv(url) |>
+        summary() |>
         print()
     },
     url = url
@@ -301,11 +302,11 @@ function(input, output, session) {
   })
 
   filteredData <- reactive({
-    data() %>% filter(date == input$date)
+    data() |> filter(date == input$date)
   })
 
   output$table <- renderTable({
-    filteredData() %>% head(5)
+    filteredData() |> head(5)
   })
 }
 ```

@@ -88,10 +88,10 @@ then(promise,
   })
 ```
 
-If this code looks ugly to you, don’t worry — you’ll rarely write promise code that looks like this. As we go, we’ll introduce several types of syntactic sugar to make working with promises more pleasant. To start with, we can use the [magrittr pipe operator](https://r4ds.had.co.nz/pipes.html), which gives us a pretty marginal benefit right now but will pay dividends shortly:
+If this code looks ugly to you, don’t worry — you’ll rarely write promise code that looks like this. As we go, we’ll introduce several types of syntactic sugar to make working with promises more pleasant. To start with, we can use the R pipe operator (`|>`) or the [`{magrittr}` pipe operator](https://r4ds.had.co.nz/pipes.html), which gives us a pretty marginal benefit right now but will pay dividends shortly:
 
 ```r
-promise %>%
+promise |>
   then(function(value) {
     cat("The operation completed!\n")
     print(value)
@@ -102,12 +102,12 @@ Note that the call to `then()` always returns immediately, without invoking the 
 
 ## Using formulas
 
-You don’t have to use anonymous functions as callbacks; you can use named functions as well. So `promise %>% then(print)` works, if you just want to print a value.
+You don’t have to use anonymous functions as callbacks; you can use named functions as well. So `promise |> then(print)` works, if you just want to print a value.
 
 If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use [purrr's "lambda formula" style](https://r4ds.had.co.nz/iteration.html); if you’re not familiar with purrr, for now just know that you can access the value (or error) using `.` as a variable name.
 
 ```r
-promise %>%
+promise |>
   then(~{
     cat("The operation completed!")
     print(.)
@@ -118,13 +118,13 @@ promise %>%
 
 ## Using pipes
 
-We can take the syntactic sugar a step further by using the *promise pipe*, a promise-aware version of `%>%` (the magrittr pipe operator). The promise pipe looks like `%then%` and performs most of the same tricks as `%>%`, but adds the functionality of `then`.
+We can take the syntactic sugar a step further by using the *promise pipe*, a promise-aware version of a pipe operator. The promise pipe looks like `%then%` and performs most of the same tricks as `|>`, but adds the functionality of `then`.
 
 The following two blocks of code are equivalent:
 
 ```r
 # Without promise pipe
-promise %>%
+promise |>
   then(~{
     filter(., state == "NY")
   })
@@ -136,7 +136,7 @@ promise %then%
 
 (Note that the `%then%` operator only supports the `onFulfilled` part of `then()`, so it’s not useful for handling errors; there’s a separate `%catch%` operator for that. We’ll cover this below in the section on [Error Handling](#error-handling).)
 
-Like magrittr's pipe, the promise pipe lets you chain together operations using a variety of syntaxes. You can use code blocks, which can come in handy if you have multiple lines of code to execute that don't necessarily match the pipe paradigm:
+Like `{magrittr}`'s pipe, the promise pipe lets you chain together operations using a variety of syntaxes. You can use code blocks, which can come in handy if you have multiple lines of code to execute that don't necessarily match the pipe paradigm:
 
 ```r
 promise %then% {
@@ -159,7 +159,7 @@ The `then` function has an important function beyond registering callbacks. It a
 For example:
 
 ```r
-promise2 <- promise %>%
+promise2 <- promise |>
   then(nrow)
 ```
 
@@ -168,10 +168,10 @@ In this case, after `promise` is fulfilled with a data frame, `promise2` will be
 Because `then` uses promises for both input and output, you can chain multiple `then` calls together directly:
 
 ```r
-promise %>%
-  then(filter(year == 2006)) %>%
-  then(group_by(state)) %>%
-  then(summarise(pop = sum(population))) %>%
+promise |>
+  then(filter(year == 2006)) |>
+  then(group_by(state)) |>
+  then(summarise(pop = sum(population))) |>
   then(arrange(desc(pop)))
 ```
 
@@ -189,10 +189,10 @@ Or, a third way:
 
 ```r
 promise %then% (function(df) {
-  df %>%
-    filter(year == 2006) %>%
-    group_by(state) %>%
-    summarise(pop = sum(population)) %>%
+  df |>
+    filter(year == 2006) |>
+    group_by(state) |>
+    summarise(pop = sum(population)) |>
     arrange(desc(pop))
 })
 ```
@@ -215,7 +215,7 @@ promise %then%
 
 This is not correct, as the `print(nrow(.))` stage will not only print the desired value, but pass the return value of `print(nrow(.))`, which is just `invisible(nrow(.))`, to the next stage.
 
-For synchronous code, magrittr offers the `%T>%` (pronounced “tee”) operator, which operates like a regular `%>%` except that, after executing its right-hand side, it returns its left-hand side value.
+For synchronous code, `{magrittr}` offers the `%T>%` (pronounced “tee”) operator, which operates like a regular `|>` except that, after executing its right-hand side, it returns its left-hand side value.
 
 Similarly, for asynchronous code, you can use the `%then_tee%` operator, which is like `%then%` except that after execution it resolves using its input promise. The only difference in the corrected code below is the operator immediately preceding `print(nrow(.))` has changed from `%then%` to `%then_tee%`.
 
@@ -238,7 +238,7 @@ Many scripts and Shiny apps that use promises will not contain any explicit erro
 The lowest level of error handling is built into the `then` function. To review, the `then` function takes an input promise, and up to two callbacks: `onFulfilled` and `onRejected`; and it returns a new promise as output. If the operation behind by the input promise succeeds, the `onFulfilled` callback (if provided) will be invoked. If the input promise’s operation fails, then `onRejected` (if provided) will be invoked with an error object.
 
 ```r
-promise2 <- promise1 %>%
+promise2 <- promise1 |>
   then(
     onFulfilled = function(value) {
       # Getting here means promise1 succeeded
@@ -273,7 +273,7 @@ value <- tryCatch(
 would be this, when the operation is performed asynchronously:
 
 ```r
-promise <- mirai(somepkg::operation()) %>%
+promise <- mirai(somepkg::operation()) |>
   then(onRejected = function(err) {
     warning("An error occurred: ", err)
     warning("Using default value of 0 instead")
@@ -288,8 +288,8 @@ In the synchronous case, an error in `operation()` will result in the error bein
 In many of the examples above, we called `then` with an `onFulfilled` but no `onRejected`. What is the behavior of `then` if its input promise is rejected with an error, but the caller has not provided an explicit `onRejected` callback?
 
 ```r
-promise2 <- promise1 %>%
-  then(head) %>%
+promise2 <- promise1 |>
+  then(head) |>
   then(print)
 ```
 
@@ -302,7 +302,7 @@ Well, `then` has its own default version of `onRejected`. It’s *not* an empty 
 The same syntactic sugar that is offered for non-error cases, is available for error handling code as well. You can use formulas in `onRejected`:
 
 ```r
-mirai(somepkg::operation()) %>%
+mirai(somepkg::operation()) |>
   then(onRejected = ~warning(.))
 ```
 
@@ -316,7 +316,7 @@ mirai(somepkg::operation()) %catch%
 There’s also a `catch()` function that is just a shorthand for `then(onRejected)`. It saves a little typing, but more importantly, is easier to read:
 
 ```r
-mirai(somepkg::operation()) %>%
+mirai(somepkg::operation()) |>
   catch(warning)
 ```
 
@@ -340,7 +340,7 @@ promise %catch% function(err) {
 That’s a fair amount of boilerplate. Instead, you can either add `tee = TRUE` to your `catch` call, or equivalently, use the `%catch_tee%` operator. These two lines are equivalent to each other, and to the previous code chunk:
 
 ```r
-promise %>% catch(print, tee = TRUE)
+promise |> catch(print, tee = TRUE)
 
 promise %catch_tee% print()
 ```

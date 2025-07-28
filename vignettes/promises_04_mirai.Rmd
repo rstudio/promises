@@ -116,7 +116,7 @@ Care should be taken when using this feature as it will also pass anything else 
 
 Besides variables, package functions need to be declared with the full namespace so that they can be found in the other process. For example, using `dplyr::mutate()` instead of just `mutate()`, even if the `dplyr` package is loaded in your main session, as the other process will not have any packages loaded by default.
 
-Alternatively, make a call to load the package inside your mirai code chunk, for example by adding `library(dplyr)`. Sometimes this may be the most convenient option, especially for for infix operators. For example the magrittr pipe `%>%`, requires a `library(magrittr)` to load the package beforehand.
+Alternatively, make a call to load the package inside your mirai code chunk, for example by adding `library(dplyr)`. Sometimes this may be the most convenient option, especially for for infix operators. For example the `{magrittr}` pipe `%>%`, requires a `library(magrittr)` to load the package beforehand.
 
 ### Custom Data Types
 

@@ -248,9 +248,9 @@ The `whales` reactive takes the data frame from `data`, and uses dplyr to find t
 # SYNCHRONOUS version
 
 whales <- reactive({
-  data() %>%
-    count(ip_id) %>%
-    arrange(desc(n)) %>%
+  data() |>
+    count(ip_id) |>
+    arrange(desc(n)) |>
     head(input$count)
 })
 ```
@@ -259,7 +259,7 @@ Since `data()` now returns a promise, the whole function needs to be modified to
 
 This is basically a best-case scenario for working with `promises`. The whole expression consists of a single magrittr pipeline. There's only one object  (`data()`) that's been converted to a promise. The promise object only appears once, at the head of the pipeline.
 
-When the stars align like this, converting this code to async is literally as easy as replacing each `%>%` with `%then%`:
+When the stars align like this, converting this code to async is literally as easy as replacing each `|>` with `%then%`:
 
 ```r
 # ASYNCHRONOUS version
@@ -274,7 +274,7 @@ whales <- reactive({
 
 The input (`data()`) is a promise, the resulting output object is a promise, each stage of the pipeline returns a promise; but we can read and write this code almost as easily as the synchronous version!
 
-An example this simple may seem reductive, but this best-case scenario happens surprisingly often, if your coding style is influenced by the tidyverse. In this example app, **59%** of the reactives, observers, and outputs were converted using nothing more than replacing `%>%` with `%then%`.
+An example this simple may seem reductive, but this best-case scenario happens surprisingly often, if your coding style is influenced by the tidyverse. In this example app, **59%** of the reactives, observers, and outputs were converted using nothing more than replacing `|>` with `%then%`.
 
 One last thing before we move on. In the last section, I emphasized that reactive values cannot be read from inside a mirai. Here, we're using `head(input$count)` inside a promise-pipeline; since `data()` is written using a mirai, doesn't that mean… well… isn't this wrong?
 
@@ -288,8 +288,8 @@ The `whale_downloads` reactive is a bit more complicated case.
 # SYNCHRONOUS version
 
 whale_downloads <- reactive({
-  data() %>%
-    inner_join(whales(), "ip_id") %>%
+  data() |>
+    inner_join(whales(), "ip_id") |>
     select(-n)
 })
 ```
@@ -319,8 +319,8 @@ Here's what the real solution looks like:
 
 whale_downloads <- reactive({
   promise_all(data_df = data(), whales_df = whales()) %then% with({
-    data_df %>%
-      inner_join(whales_df, "ip_id") %>%
+    data_df |>
+      inner_join(whales_df, "ip_id") |>
       select(-n)
   })
 })
@@ -375,11 +375,11 @@ All of the value boxes in this app ended up looking a lot like this:
 # SYNCHRONOUS version
 
 output$total_downloaders <- renderValueBox({
-  data() %>%
-    pull(ip_id) %>%
-    unique() %>%
-    length() %>%
-    format(big.mark = ",") %>%
+  data() |>
+    pull(ip_id) |>
+    unique() |>
+    length() |>
+    format(big.mark = ",") |>
     valueBox("unique downloaders")
 })
 ```
@@ -428,16 +428,16 @@ In a cruel twist of API design fate, one of the cornerstone packages of the tidy
 # SYNCHRONOUS version
 
 output$downloaders <- renderPlot({
-  whales() %>%
+  whales() |>
     ggplot(aes(ip_name, n)) +
     geom_bar(stat = "identity") +
     ylab("Downloads on this day")
 })
 ```
 
-While `dplyr` and other tidyverse packages are designed to link calls together with `%>%`, the older `ggplot2` package uses the `+` operator. This is mostly a small aesthetic wart when synchronous code, but it's a real problem with async, because the `promises` package doesn't currently have a promise-aware replacement for `+` like it does for `%>%`.
+While `dplyr` and other tidyverse packages are designed to link calls together with `|>`, the older `ggplot2` package uses the `+` operator. This is mostly a small aesthetic wart when synchronous code, but it's a real problem with async, because the `promises` package doesn't currently have a promise-aware replacement for `+` like it does for `|>`.
 
-Fortunately, there's a pretty good escape hatch for `%>%`, and `%then%` inherited it too. Instead of a pipeline stage being a simple function call, you can put a `{` and `}` delimited code block, and inside of that code block, you can access the "it" value using a period (`.`).
+Fortunately, there's a pretty good escape hatch for `|>`, and `%then%` inherited it too. Instead of a pipeline stage being a simple function call, you can put a `{` and `}` delimited code block, and inside of that code block, you can access the "it" value using a period (`.`).
 
 ```r
 # ASYNCHRONOUS version
@@ -458,7 +458,7 @@ Tip: if you have extensive or complex code to put in a code block, start the blo
 
 ```r
 whales() %then% {
-  . %>% filter(n > 1000)
+  . |> filter(n > 1000)
 }
 ```
 
@@ -467,7 +467,7 @@ This fixes it:
 ```r
 whales() %then% {
   whales_df <- .
-  whales_df %>% filter(n > 1000)
+  whales_df |> filter(n > 1000)
 }
 ```
 

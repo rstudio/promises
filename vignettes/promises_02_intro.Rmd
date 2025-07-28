@@ -103,16 +103,16 @@ whenever the operation completes. These operations might have side effects (like
 plotting, or writing to disk, or printing to the console) or they might
 transform the result values somehow.
 
-**Chain together operations? Using the `%>%` operator?**
+**Chain together operations? Using the `|>` operator?**
 
-A lot like that! You can’t use the `%>%` operator itself, but we provide a
+A lot like that! You can’t use the `|>` operator itself, but we provide a
 promise-compatible version of it: `%then%`. So whereas you might do this to a
 regular data frame:
 
 ```r
 library(dplyr)
-read.csv("https://rstudio.github.io/promises/data.csv") %>%
-  filter(state == "NY") %>%
+read.csv("https://rstudio.github.io/promises/data.csv") |>
+  filter(state == "NY") |>
   View()
 ```
 
@@ -182,7 +182,7 @@ dplyr::filter(df_promise, state == "NY")
 
 Try this and you’ll get an error like `no applicable method for 'filter_'
 applied to an object of class "promise"`. And the pipe won’t help you either;
-`df_promise %>% filter(state == "NY")` will give you the same error.
+`df_promise |> filter(state == "NY")` will give you the same error.
 
 **Right, that makes sense. `filter` is designed to work on data frames, and
 `df_promise` isn’t a data frame.**
@@ -206,11 +206,11 @@ back?**
 
 I’ll tell you the answer, but it’s not going to be satisfying at first.
 
-When you use a regular `%>%`, the result you get back is the return value from
+When you use a regular `|>`, the result you get back is the return value from
 the right-hand side:
 
 ```r
-df_filtered <- df %>% filter(state == "NY")
+df_filtered <- df |> filter(state == "NY")
 ```
 
 When you use `%then%`, the result you get back is a promise, whose *eventual*
