@@ -302,10 +302,10 @@ functions.
 **Wait, there are other promise-aware operators and functions?**
 
 Yes. The `%then%` is the one you’ll most commonly use, but there is a variant
-`%then_tee>%`, which we call the *promise tee* operator (it’s analogous to the
-magrittr `%T>%` operator). The `%...T>%` operator mostly acts like `%...>%`, but
+`%then_tee%`, which we call the *promise tee* operator (it’s analogous to the
+magrittr `%T>%` operator). The `%then_tee%` operator mostly acts like `%then%`, but
 instead of returning a promise for the result value, it returns the original
-value instead. Meaning `p %...T>% cat("\n")` won’t return a promise for the
+value instead. Meaning `p %then_tee% cat("\n")` won’t return a promise for the
 return value of `cat()` (which is always `NULL`) but instead the value of `p`.
 This is useful for logging, or other “side effecty” operations.
 

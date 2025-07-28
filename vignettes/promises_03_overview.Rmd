@@ -118,7 +118,7 @@ promise %>%
 
 ## Using pipes
 
-We can take the syntactic sugar a step further by using the *promise pipe*, a promise-aware version of `%>%` (the magrittr pipe operator). The promise pipe looks like `%...>%` and performs most of the same tricks as `%>%`, but adds the functionality of `then`.
+We can take the syntactic sugar a step further by using the *promise pipe*, a promise-aware version of `%>%` (the magrittr pipe operator). The promise pipe looks like `%then%` and performs most of the same tricks as `%>%`, but adds the functionality of `then`.
 
 The following two blocks of code are equivalent:
 
@@ -130,7 +130,7 @@ promise %>%
   })
 
 # Using promise pipe
-promise %...>%
+promise %then%
   filter(state == "NY")
 ```
 
@@ -139,7 +139,7 @@ promise %...>%
 Like magrittr's pipe, the promise pipe lets you chain together operations using a variety of syntaxes. You can use code blocks, which can come in handy if you have multiple lines of code to execute that don't necessarily match the pipe paradigm:
 
 ```r
-promise %...>% {
+promise %then% {
   filter(., state == "NY")
 }
 ```
@@ -147,7 +147,7 @@ promise %...>% {
 You can use anonymous functions (which you must wrap in parentheses), which helps if you prefer to give the promise result object an explicit name (in this case, `df`):
 
 ```r
-promise %...>% (function(df) {
+promise %then% (function(df) {
   filter(df, state == "NY")
 })
 ```
@@ -178,17 +178,17 @@ promise %>%
 Or, equivalently:
 
 ```r
-promise %...>%
-  filter(year == 2006) %...>%
-  group_by(state) %...>%
-  summarise(pop = sum(population)) %...>%
+promise %then%
+  filter(year == 2006) %then%
+  group_by(state) %then%
+  summarise(pop = sum(population)) %then%
   arrange(desc(pop))
 ```
 
 Or, a third way:
 
 ```r
-promise %...>% (function(df) {
+promise %then% (function(df) {
   df %>%
     filter(year == 2006) %>%
     group_by(state) %>%
@@ -205,11 +205,11 @@ When working with promise pipelines, it may sometimes be useful to have a stage 
 
 ```r
 # Incorrect!
-promise %...>%
-  filter(year == 2006) %...>%
-  print(nrow(.)) %...>%
-  group_by(state) %...>%
-  summarise(pop = sum(population)) %...>%
+promise %then%
+  filter(year == 2006) %then%
+  print(nrow(.)) %then%
+  group_by(state) %then%
+  summarise(pop = sum(population)) %then%
   arrange(desc(pop))
 ```
 
@@ -217,15 +217,15 @@ This is not correct, as the `print(nrow(.))` stage will not only print the desir
 
 For synchronous code, magrittr offers the `%T>%` (pronounced “tee”) operator, which operates like a regular `%>%` except that, after executing its right-hand side, it returns its left-hand side value.
 
-Similarly, for asynchronous code, you can use the `%...T>%` operator, which is like `%...>%` except that after execution it resolves using its input promise. The only difference in the corrected code below is the operator immediately preceding `print(nrow(.))` has changed from `%...>%` to `%...T>%`.
+Similarly, for asynchronous code, you can use the `%then_tee%` operator, which is like `%then%` except that after execution it resolves using its input promise. The only difference in the corrected code below is the operator immediately preceding `print(nrow(.))` has changed from `%then%` to `%then_tee%`.
 
 ```r
 # Correct.
-promise %...>%
-  filter(year == 2006) %...T>%
-  print(nrow(.)) %...>%
-  group_by(state) %...>%
-  summarise(pop = sum(population)) %...>%
+promise %then%
+  filter(year == 2006) %then_tee%
+  print(nrow(.)) %then%
+  group_by(state) %then%
+  summarise(pop = sum(population)) %then%
   arrange(desc(pop))
 ```
 

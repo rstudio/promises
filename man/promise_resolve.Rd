@@ -26,7 +26,7 @@ promise_resolve(mtcars) \%...>\%
   head() \%...>\%
   print()
 
-promise_reject("Something went wrong") \%...T!\%
+promise_reject("Something went wrong") \%catch_tee\%
   { message(conditionMessage(.)) }
 
 }
