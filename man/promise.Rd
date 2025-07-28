@@ -42,7 +42,7 @@ p1 <- promise(function(resolve, reject) {
   later::later(~resolve(runif(1)), delay = 2)
 })
 
-p1 \%...>\% print()
+p1 \%then\% print()
 
 # Create a promise that errors immediately
 p2 <- promise(~{

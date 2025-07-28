@@ -27,13 +27,13 @@
 #' p2 <- promise(~later::later(~resolve(2), delay = 2))
 #'
 #' # Resolves after 1 second, to the value: 1
-#' promise_race(p1, p2) %...>% {
+#' promise_race(p1, p2) %then% {
 #'   cat("promise_race:\n")
 #'   str(.)
 #' }
 #'
 #' # Resolves after 2 seconds, to the value: list(1, 2)
-#' promise_all(p1, p2) %...>% {
+#' promise_all(p1, p2) %then% {
 #'   cat("promise_all:\n")
 #'   str(.)
 #' }
@@ -137,7 +137,7 @@ promise_race <- function(..., .list = NULL) {
 #'   }, delay = x))
 #' }
 #'
-#' promise_map(list(A=1, B=2, C=3), wait_this_long) %...>%
+#' promise_map(list(A=1, B=2, C=3), wait_this_long) %then%
 #'   print()
 #'
 #' @export
@@ -156,7 +156,7 @@ promise_map <- function(.x, .f, ...) {
       # The next line may throw, that's fine, it will be caught by resolve() and
       # reject the promise
       this_result <- .f(.x[[pos]], ...)
-      promise_resolve(this_result) %...>%
+      promise_resolve(this_result) %then%
         (function(this_value) {
           # This weird assignment is similar to `results[[pos]] <- this_value`,
           # except that it handles `NULL` values correctly.
@@ -200,13 +200,13 @@ promise_map <- function(.x, .f, ...) {
 #' }
 #'
 #' # Prints 55 after a little over 5 seconds
-#' promise_reduce(1:10, slowly_add, .init = 0) %...>% print()
+#' promise_reduce(1:10, slowly_add, .init = 0) %then% print()
 #'
 #' @export
 promise_reduce <- function(.x, .f, ..., .init) {
   p <- promise_resolve(.init)
   lapply(.x, function(item) {
-    p <<- p %...>% .f(item, ...)
+    p <<- p %then% .f(item, ...)
   })
   p
 }

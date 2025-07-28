@@ -91,8 +91,8 @@ promiseDomain <- list(
     # reenter the domain. This is important for this kind of code:
     #
     #     with_promise_domain(domain, {
-    #       async_sleep(0.1) %...>% {
-    #         async_sleep(0.1) %...>% {
+    #       async_sleep(0.1) %then% {
+    #         async_sleep(0.1) %then% {
     #           # Without re-entry, this would be outside the domain!
     #         }
     #       }

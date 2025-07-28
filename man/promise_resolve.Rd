@@ -22,8 +22,8 @@ Helper functions to conveniently create a promise that is resolved to the
 given value (or rejected with the given reason).
 }
 \examples{
-promise_resolve(mtcars) \%...>\%
-  head() \%...>\%
+promise_resolve(mtcars) \%then\%
+  head() \%then\%
   print()
 
 promise_reject("Something went wrong") \%catch_tee\%

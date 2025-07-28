@@ -2,7 +2,7 @@ describe("C++ interface", {
   it("basically works", {
     promise(function(resolve, reject) {
       asyncFib(resolve, reject, 3)
-    }) %...>%
+    }) %then%
       {
         expect_identical(., 2)
       } %>%
@@ -16,11 +16,11 @@ describe("C++ interface", {
     with_promise_domain(cd, {
       promise(function(resolve, reject) {
         asyncFib(resolve, reject, 3)
-      }) %...>%
+      }) %then%
         {
           expect_identical(., 2)
           expect_identical(cd$counts$onFulfilledCalled, 1L)
-          promise_resolve(TRUE) %...>%
+          promise_resolve(TRUE) %then%
             {
               expect_true(!is.null(current_promise_domain()))
               expect_identical(cd$counts$onFulfilledCalled, 2L)

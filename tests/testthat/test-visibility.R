@@ -68,12 +68,10 @@ describe("visibility", {
               switch(
                 add_finally,
                 "false" = p,
-                "expr" = p %>%
-                  finally(
-                    ~ {
-                      finally_val <<- TRUE
-                    }
-                  )
+                "expr" = p %finally%
+                  {
+                    finally_val <<- TRUE
+                  }
               )
 
             extended_val <-

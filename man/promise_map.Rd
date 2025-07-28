@@ -39,7 +39,7 @@ wait_this_long <- function(x) {
   }, delay = x))
 }
 
-promise_map(list(A=1, B=2, C=3), wait_this_long) \%...>\%
+promise_map(list(A=1, B=2, C=3), wait_this_long) \%then\%
   print()
 
 }

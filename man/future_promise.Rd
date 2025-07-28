@@ -78,8 +78,8 @@ print_msg <- function(pid, msg) {
 # `"promise done"` will appear after four workers are done and the main R session is not blocked
 # The important thing to note is the first four times will be roughly the same
 with_two_workers({
-  promise_resolve(Sys.getpid()) \%...>\% print_msg("promise done")
-  for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+  promise_resolve(Sys.getpid()) \%then\% print_msg("promise done")
+  for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) \%then\% print_msg("future done")
 })
 {
 #> PID: XXX; 2.5s promise done
@@ -94,8 +94,8 @@ with_two_workers({
 # `"promise done"` will almost immediately, before any workers have completed
 # The first two `"future done"` comments appear earlier the example above
 with_two_workers({
-  promise_resolve(Sys.getpid()) \%...>\% print_msg("promise")
-  for (i in 1:6) future_promise({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+  promise_resolve(Sys.getpid()) \%then\% print_msg("promise")
+  for (i in 1:6) future_promise({Sys.sleep(1); Sys.getpid()}) \%then\% print_msg("future done")
 })
 {
 #> PID: XXX; 0.2s promise done

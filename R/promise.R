@@ -319,7 +319,7 @@ normalizeOnRejected <- function(onRejected) {
 #'   later::later(~resolve(runif(1)), delay = 2)
 #' })
 #'
-#' p1 %...>% print()
+#' p1 %then% print()
 #'
 #' # Create a promise that errors immediately
 #' p2 <- promise(~{
@@ -396,8 +396,8 @@ promise <- function(action) {
 #' @param reason An error message string, or error object.
 #'
 #' @examples
-#' promise_resolve(mtcars) %...>%
-#'   head() %...>%
+#' promise_resolve(mtcars) %then%
+#'   head() %then%
 #'   print()
 #'
 #' promise_reject("Something went wrong") %catch_tee%

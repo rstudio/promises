@@ -49,8 +49,8 @@ daemons(6)
 
 function(input, output, session) {
   output$plot <- renderPlot({
-    mirai({ expensive_operation() }) %...>%
-      head(input$n) %...>%
+    mirai({ expensive_operation() }) %then%
+      head(input$n) %then%
       plot()
   })
 }
@@ -60,7 +60,7 @@ function(input, output, session) {
 
 The easiest part is adding `library(promises)`, `library(mirai)`, and `daemons(6)` to the top of the app.
 
-The `promises` library is necessary for the `%...>%` operator. You may also want to use promise utility functions like `promise_all` and `promise_race`.
+The `promises` library is necessary for the `%then%` operator. You may also want to use promise utility functions like `promise_all` and `promise_race`.
 
 The `mirai` library is needed because the `mirai()` function call is how you will launch asynchronous tasks.
 
@@ -85,7 +85,7 @@ Conceptually, mirai works like this:
 ```R
 mirai({
   # Expensive code goes here
-}) %...>% (function(result) {
+}) %then% (function(result) {
   # Code to handle result of expensive code goes here
 })
 ```
@@ -96,7 +96,7 @@ which seems incredibly simple. What's actually happening is that the mirai runs 
 # Code here runs in process A
 mirai({
   # Code here runs in (child) process B
-}) %...>% (function(result) {
+}) %then% (function(result) {
   # Code here runs in process A
 })
 ```
@@ -149,7 +149,7 @@ function(input, output, session) {
   r1 <- reactive({ ... })
 
   r2 <- reactive({
-    mirai({ ... }) %...>%
+    mirai({ ... }) %then%
       rbind(r1()) # OK!
   })
 }
@@ -176,7 +176,7 @@ could become:
 
 ```R
 output$table <- renderTable({
-  mirai(read.csv(url), url = url) %...>%
+  mirai(read.csv(url), url = url) %then%
     filter(date == input$date)
 })
 ```
@@ -231,13 +231,13 @@ Instead, do printing and plotting after control returns back to the original pro
 
 ```R
 output$summary <- renderPrint({
-  mirai(read.csv(url), url = url) %...>%
-    summary() %...>%
+  mirai(read.csv(url), url = url) %then%
+    summary() %then%
     print()
 })
 
 output$plot <- renderPlot({
-  mirai(read.csv(url), url = url) %...>%
+  mirai(read.csv(url), url = url) %then%
   {
     ggplot(., aes(length, width)) + geom_point()
   }
@@ -278,13 +278,13 @@ function(input, output, session) {
         df
       },
       url = url
-    ) %...>%
+    ) %then%
       data()
   })
 }
 ```
 
-Note that in this version, we cannot call `data(df)` inside the mirai, as this would cause the update to happen in the wrong process. Instead, we use the `%...>%` operator to perform the assignment back in the main process once the mirai resolves.
+Note that in this version, we cannot call `data(df)` inside the mirai, as this would cause the update to happen in the wrong process. Instead, we use the `%then%` operator to perform the assignment back in the main process once the mirai resolves.
 
 ### Reactive expressions
 
@@ -319,11 +319,11 @@ function(input, output, session) {
   })
 
   filteredData <- reactive({
-    data() %...>% filter(date == input$date)
+    data() %then% filter(date == input$date)
   })
 
   output$table <- renderTable({
-    filteredData() %...>% head(5)
+    filteredData() %then% head(5)
   })
 }
 ```
@@ -359,7 +359,7 @@ doEventLoop <- function() {
   # Use the received data to update reactive inputs
   session$updateInput(input)
   # Execute all invalidated outputs/observers
-  flushReact() %...>% {
+  flushReact() %then% {
 	# After ALL outputs execute, send the results back
     flushOutputs()
     # Continue the event loop

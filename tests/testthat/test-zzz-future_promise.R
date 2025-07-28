@@ -95,7 +95,7 @@ local({
               future::future({
                 Sys.sleep(worker_job_time)
                 time_diff()
-              }) %...>%
+              }) %then%
                 {
                   future_exec_times <<- c(future_exec_times, .)
                 }
@@ -112,7 +112,7 @@ local({
           time_diff()
         })
       }) %>%
-        promise_all(.list = .) %...>%
+        promise_all(.list = .) %then%
         {
           exec_times <<- unlist(.)
         }

@@ -39,6 +39,6 @@ slowly_add <- function(e1, e2) {
 }
 
 # Prints 55 after a little over 5 seconds
-promise_reduce(1:10, slowly_add, .init = 0) \%...>\% print()
+promise_reduce(1:10, slowly_add, .init = 0) \%then\% print()
 
 }
