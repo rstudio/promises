@@ -50,9 +50,8 @@ test_that("local promise domain can be created", {
       # expect_false(spn2$is_recording())
 
       otel::with_active_span(spn1, {
-        otel::start_local_active_span("spn1 sub")
-        # expect_true(spn1$is_recording())
-        # expect_false(spn2$is_recording())
+        sub_spn <- otel::start_local_active_span("spn1 sub")
+        expect_equal(spn1$span_id, sub_spn$parent)
       })
 
       # expect_false(spn1$is_recording())
@@ -92,7 +91,6 @@ test_that("local promise domain with active span works", {
         p1 <-
           promise_resolve("Start1") %...>%
           {
-            # message("sub1_span_1")
             prom_names <<- c(prom_names, "sub1_span_1")
             sub_spn <- otel::start_local_active_span("sub1_span_1")
             expect_true(tstspn1$is_recording())
@@ -103,7 +101,6 @@ test_that("local promise domain with active span works", {
             promise_resolve("Middle1")
           } %...>%
           {
-            # message("sub1_span_2")
             prom_names <<- c(prom_names, "sub1_span_2")
             sub_spn <- otel::start_local_active_span("sub1_span_2")
             expect_equal(sub_spn$span_id, tstspn1$span_id)
@@ -113,7 +110,6 @@ test_that("local promise domain with active span works", {
             promise_resolve("End1")
           } %...>%
           {
-            # message("sub1_span_3")
             prom_names <<- c(prom_names, "sub1_span_3")
             sub_spn <- otel::start_local_active_span("sub1_span_3")
             expect_true(tstspn1$is_recording())
@@ -126,7 +122,6 @@ test_that("local promise domain with active span works", {
         p2 <-
           promise_resolve("Start2") %...>%
           {
-            # message("sub2_span_1")
             prom_names <<- c(prom_names, "sub2_span_1")
             sub_spn <- otel::start_local_active_span("sub2_span_1")
             expect_true(tstspn2$is_recording())
@@ -137,7 +132,6 @@ test_that("local promise domain with active span works", {
             promise_resolve("Middle2")
           } %...>%
           {
-            # message("sub2_span_2")
             prom_names <<- c(prom_names, "sub2_span_2")
             sub_spn <- otel::start_local_active_span("sub2_span_2")
             expect_equal(sub_spn$span_id, tstspn2$span_id)
@@ -147,7 +141,6 @@ test_that("local promise domain with active span works", {
             promise_resolve("End2")
           } %...>%
           {
-            # message("sub2_span_3")
             prom_names <<- c(prom_names, "sub2_span_3")
             sub_spn <- otel::start_local_active_span("sub2_span_3")
             expect_true(tstspn2$is_recording())
@@ -160,6 +153,7 @@ test_that("local promise domain with active span works", {
       # expect_false(tstspn1$is_recording())
 
       wait_for_it(p1)
+      wait_for_it(p2)
 
       # expect_length(prom_names, 6)
       expect_equal(
@@ -175,10 +169,10 @@ test_that("local promise domain with active span works", {
       )
     })
 
-  spns <- record[["traces"]]
-  str(spns)
-  spns$sub
-  spns$`test span 2`
+  # spns <- record[["traces"]]
+  # # str(spns)
+  # spns$sub
+  # spns$`test span 2`
   # expect_equal(names(spns)[1], "test span")
   # expect_equal(spns[[1]]$name, "test span")
 })
