@@ -38,7 +38,7 @@ magrittr::"%T>%"
 #' library(mirai)
 #'
 #' mirai(cars) %then%
-#'   head(5) %tee%
+#'   head(5) %then_tee%
 #'   print()
 #'
 #' # If the read.csv fails, resolve to NULL instead
@@ -94,7 +94,7 @@ magrittr::"%T>%"
 
 #' @describeIn named_pipe_ops Handling a successful resolution, returning the `lhs`. Equivalent to `promise `%T>%` then(func, tee = TRUE)`, which uses the \pkg{magrittr} tee operator, [`%T>%`].
 #' @export
-`%tee%` <- function(lhs, rhs) {
+`%then_tee%` <- function(lhs, rhs) {
   # the parent environment
   parent <- parent.frame()
 
@@ -128,7 +128,7 @@ NULL
 #' Promise pipe operators
 #'
 #' `r lifecycle::badge('superseded')` by \code{\%then\%}, \code{\%catch\%}, and
-#' \code{\%finally\%}, with tee methods \code{\%tee\%} and \code{\%catch_tee\%}
+#' \code{\%finally\%}, with tee methods \code{\%then_tee\%} and \code{\%catch_tee\%}
 #' described in [`named_pipe_ops`].
 #'
 #' Promise-aware pipe operators, in the style of [magrittr](https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html).
@@ -184,7 +184,7 @@ NULL
 
 #' @rdname pipes
 #' @export
-`%...T>%` <- `%tee%`
+`%...T>%` <- `%then_tee%`
 
 #' @rdname pipes
 #' @export
