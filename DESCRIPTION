@@ -19,6 +19,7 @@ BugReports: https://github.com/rstudio/promises/issues
 Imports:
     fastmap (>= 1.1.0),
     later,
+    lifecycle,
     magrittr (>= 1.5),
     R6,
     Rcpp,

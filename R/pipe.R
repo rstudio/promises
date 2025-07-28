@@ -6,7 +6,130 @@ magrittr::"%>%"
 #' @export
 magrittr::"%T>%"
 
+#' Named promise pipe operators
+#'
+#' Promise-aware pipe operators containing the method within the pipeline.
+#' Like R's pipe operator,`|>`, these operators can be used to chain together pipelines
+#' of promise-transforming operations. Unlike `|>`, these pipeable methods wait
+#' for promise resolution and pass the unwrapped value (or error) to the `rhs`
+#' function call.
+#'
+#' `%then%` is for handling a successful resolution, while `%catch%` is for
+#' handling errors, and finally, `%finally%` is for handling code that runs
+#' after the already chained (successful or failed) promises have been handled.
+#'
+#' The `_tee` variants of each return the `lhs` instead of the `rhs`, which is
+#' useful for pipeline steps that are used for side effects (printing, plotting,
+#' saving). One situation where the `_tee` variants break down is when `func()`
+#' throws an error, or returns a promise that ultimately fails. In that case,
+#' the failure will be propagated by our pipe operators but not by the
+#' magrittr-plus-function _equivalents_.
+#'
+#' For simplicity of implementation, we do not support the \pkg{magrittr} feature of
+#' using a `.` at the head of a pipeline to turn the entire pipeline into a
+#' function instead of an expression.
+#'
+#' @param lhs A promise object.
+#' @param rhs A function call using the magrittr semantics. It can return either
+#'   a promise or non-promise value, or throw an error.
+#'
+#' @examples
+#' \dontrun{
+#' library(mirai)
+#'
+#' mirai(cars) %then%
+#'   head(5) %tee%
+#'   print()
+#'
+#' # If the read.csv fails, resolve to NULL instead
+#' mirai(read.csv("http://example.com/data.csv")) %catch%
+#'   { NULL }
+#' }
+#'
+#' @return A new promise.
+#'
+#' @seealso https://rstudio.github.io/promises/articles/promises_03_overview.html#using-pipes
+#'
+#' @export
+#' @describeIn named_pipe_ops Handling a successful resolution. Equivalent to `promise |> then(func)`
+`%then%` <- function(lhs, rhs) {
+  # the parent environment
+  parent <- parent.frame()
+
+  # the environment in which to evaluate pipeline
+  env <- new.env(parent = parent)
+
+  parts <- match.call()
+  func <- pipeify_rhs(parts[[3L]], env)
+  then(lhs, func)
+}
+#' @describeIn named_pipe_ops Handling an error. Equivalent to `promise |> catch(func)`
+#' @export
+`%catch%` <- function(lhs, rhs) {
+  # the parent environment
+  parent <- parent.frame()
+
+  # the environment in which to evaluate pipeline
+  env <- new.env(parent = parent)
+
+  parts <- match.call()
+  func <- pipeify_rhs(parts[[3L]], env)
+  catch(lhs, func)
+}
+
+#' @describeIn named_pipe_ops Handling code that runs after already chained (successful or failed) promises have been handled. Equivalent to `promise |> finally(func)`
+#' @export
+`%finally%` <-
+  function(lhs, rhs) {
+    # the parent environment
+    parent <- parent.frame()
+
+    # the environment in which to evaluate pipeline
+    env <- new.env(parent = parent)
+
+    parts <- match.call()
+    func <- pipeify_rhs(parts[[3L]], env)
+    finally(lhs, func)
+  }
+
+#' @describeIn named_pipe_ops Handling a successful resolution, returning the `lhs`. Equivalent to `promise `%T>%` then(func, tee = TRUE)`, which uses the \pkg{magrittr} tee operator, [`%T>%`].
+#' @export
+`%tee%` <- function(lhs, rhs) {
+  # the parent environment
+  parent <- parent.frame()
+
+  # the environment in which to evaluate pipeline
+  env <- new.env(parent = parent)
+
+  parts <- match.call()
+  func <- pipeify_rhs(parts[[3L]], env)
+  lhs %>%
+    then(func) %>%
+    then(function(value) lhs)
+}
+
+#' @describeIn named_pipe_ops Handling an error, returning the lhs. Equivalent to `promise |> catch(func, tee = TRUE)` or `promise %T>% catch(func)`, which uses the \pkg{magrittr} tee operator, [`%T>%`].
+#' @export
+`%catch_tee%` <- function(lhs, rhs) {
+  # the parent environment
+  parent <- parent.frame()
+
+  # the environment in which to evaluate pipeline
+  env <- new.env(parent = parent)
+
+  parts <- match.call()
+  func <- pipeify_rhs(parts[[3L]], env)
+  catch(lhs, func, tee = TRUE)
+}
+
+# ' `r lifecycle::badge('superseded')`
+NULL
+
 #' Promise pipe operators
+#'
+#' `r lifecycle::badge('superseded')` by \code{\%then\%}, \code{\%catch\%}, and
+#' \code{\%finally\%}, with tee methods \code{\%tee\%} and \code{\%catch_tee\%}
+#' described in [`named_pipe_ops`].
 #'
 #' Promise-aware pipe operators, in the style of [magrittr](https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html).
 #' Like magrittr pipes, these operators can be used to chain together pipelines
@@ -57,61 +180,19 @@ magrittr::"%T>%"
 #'
 #' @name pipes
 #' @export
-`%...>%` <- function(lhs, rhs) {
-  # the parent environment
-  parent <- parent.frame()
-
-  # the environment in which to evaluate pipeline
-  env <- new.env(parent = parent)
-
-  parts <- match.call()
-  func <- pipeify_rhs(parts[[3L]], env)
-  then(lhs, func)
-}
+`%...>%` <- `%then%`
 
 #' @rdname pipes
 #' @export
-`%...T>%` <- function(lhs, rhs) {
-  # the parent environment
-  parent <- parent.frame()
-
-  # the environment in which to evaluate pipeline
-  env <- new.env(parent = parent)
-
-  parts <- match.call()
-  func <- pipeify_rhs(parts[[3L]], env)
-  lhs %>%
-    then(func) %>%
-    then(function(value) lhs)
-}
+`%...T>%` <- `%tee%`
 
 #' @rdname pipes
 #' @export
-`%...!%` <- function(lhs, rhs) {
-  # the parent environment
-  parent <- parent.frame()
-
-  # the environment in which to evaluate pipeline
-  env <- new.env(parent = parent)
-
-  parts <- match.call()
-  func <- pipeify_rhs(parts[[3L]], env)
-  catch(lhs, func)
-}
+`%...!%` <- `%catch%`
 
 #' @rdname pipes
 #' @export
-`%...T!%` <- function(lhs, rhs) {
-  # the parent environment
-  parent <- parent.frame()
-
-  # the environment in which to evaluate pipeline
-  env <- new.env(parent = parent)
-
-  parts <- match.call()
-  func <- pipeify_rhs(parts[[3L]], env)
-  catch(lhs, func, tee = TRUE)
-}
+`%...T!%` <- `%catch_tee%`
 
 has.visible <- function(func) {
   ".visible" %in% names(formals(func))
