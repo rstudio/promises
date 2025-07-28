@@ -27,7 +27,7 @@ A new promise.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} by \code{\%then\%}, \code{\%catch\%}, and
-\code{\%finally\%}, with tee methods \code{\%tee\%} and \code{\%catch_tee\%}
+\code{\%finally\%}, with tee methods \code{\%then_tee\%} and \code{\%catch_tee\%}
 described in \code{\link{named_pipe_ops}}.
 }
 \details{

@@ -301,15 +301,15 @@ functions.
 
 **Wait, there are other promise-aware operators and functions?**
 
-Yes. The `%...>%` is the one you’ll most commonly use, but there is a variant
-`%...T>%`, which we call the *promise tee* operator (it’s analogous to the
+Yes. The `%then%` is the one you’ll most commonly use, but there is a variant
+`%then_tee>%`, which we call the *promise tee* operator (it’s analogous to the
 magrittr `%T>%` operator). The `%...T>%` operator mostly acts like `%...>%`, but
 instead of returning a promise for the result value, it returns the original
 value instead. Meaning `p %...T>% cat("\n")` won’t return a promise for the
 return value of `cat()` (which is always `NULL`) but instead the value of `p`.
 This is useful for logging, or other “side effecty” operations.
 
-There’s also `%...!%`, and its tee version, `%...T!%`, which are used for error
+There’s also `%catch%`, and its tee version, `%catch_tee%`, which are used for error
 handling. I won’t confuse you with more about that now, but you can read more
 [here](promises_03_overview.html#error-handling).
 

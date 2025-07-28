@@ -4,7 +4,7 @@
 \alias{\%then\%}
 \alias{\%catch\%}
 \alias{\%finally\%}
-\alias{\%tee\%}
+\alias{\%then_tee\%}
 \alias{\%catch_tee\%}
 \title{Named promise pipe operators}
 \usage{
@@ -14,7 +14,7 @@ lhs \%catch\% rhs
 
 lhs \%finally\% rhs
 
-lhs \%tee\% rhs
+lhs \%then_tee\% rhs
 
 lhs \%catch_tee\% rhs
 }
@@ -35,26 +35,18 @@ for promise resolution and pass the unwrapped value (or error) to the \code{rhs}
 function call.
 }
 \details{
-\verb{\%then\%} is for handling a successful resolution, while \verb{\%catch\%} is
-for handling errors, and finally, \verb{\%finally\%} is for handling code that runs
+\verb{\%then\%} is for handling a successful resolution, while \verb{\%catch\%} is for
+handling errors, and finally, \verb{\%finally\%} is for handling code that runs
 after the already chained (successful or failed) promises have been handled.
-\enumerate{
-\item \code{promise \%...>\% func()} is equivalent to \code{promise \%>\% then(func)}.
-\item \code{promise \%...!\% func()} is equivalent to \code{promise \%>\% catch(func)}.
-\item \code{promise \%...T>\% func()} is equivalent to \code{promise \%T>\% then(func)}.
-\item \code{promise \%...T!\% func()} is equivalent to \code{promise \%T>\%
-catch(func)} or \code{promise \%>\% catch(func, tee = TRUE)}.
-}
 
-The \verb{_tee} variants of each return the \code{lhs} instead of the
-\code{rhs}, which is useful for pipeline steps that are used for side effects
-(printing, plotting, saving).
-One situation where the \verb{_tee} variants break down is when \code{func()} throws an
-error, or returns a promise that ultimately fails. In that case, the failure
-will be propagated by our pipe operators but not by the
+The \verb{_tee} variants of each return the \code{lhs} instead of the \code{rhs}, which is
+useful for pipeline steps that are used for side effects (printing, plotting,
+saving). One situation where the \verb{_tee} variants break down is when \code{func()}
+throws an error, or returns a promise that ultimately fails. In that case,
+the failure will be propagated by our pipe operators but not by the
 magrittr-plus-function \emph{equivalents}.
 
-For simplicity of implementation, we do not support the magrittr feature of
+For simplicity of implementation, we do not support the \pkg{magrittr} feature of
 using a \code{.} at the head of a pipeline to turn the entire pipeline into a
 function instead of an expression.
 }
@@ -66,7 +58,7 @@ function instead of an expression.
 
 \item \code{lhs \%finally\% rhs}: Handling code that runs after already chained (successful or failed) promises have been handled. Equivalent to \code{promise |> finally(func)}
 
-\item \code{lhs \%tee\% rhs}: Handling a successful resolution, returning the \code{lhs}. Equivalent to \code{promise }\%T>\%\code{ then(func, tee = TRUE)}, which uses the \pkg{magrittr} tee operator, \code{\link{\%T>\%}}.
+\item \code{lhs \%then_tee\% rhs}: Handling a successful resolution, returning the \code{lhs}. Equivalent to \code{promise }\%T>\%\code{ then(func, tee = TRUE)}, which uses the \pkg{magrittr} tee operator, \code{\link{\%T>\%}}.
 
 \item \code{lhs \%catch_tee\% rhs}: Handling an error, returning the lhs. Equivalent to \code{promise |> catch(func, tee = TRUE)} or \code{promise \%T>\% catch(func)}, which uses the \pkg{magrittr} tee operator, \code{\link{\%T>\%}}.
 
@@ -76,7 +68,7 @@ function instead of an expression.
 library(mirai)
 
 mirai(cars) \%then\%
-  head(5) \%tee\%
+  head(5) \%then_tee\%
   print()
 
 # If the read.csv fails, resolve to NULL instead

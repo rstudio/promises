@@ -134,7 +134,7 @@ promise %...>%
   filter(state == "NY")
 ```
 
-(Note that the `%...>%` operator only supports the `onFulfilled` part of `then()`, so it’s not useful for handling errors; there’s a separate `%...!%` operator for that. We’ll cover this below in the section on [Error Handling](#error-handling).)
+(Note that the `%then%` operator only supports the `onFulfilled` part of `then()`, so it’s not useful for handling errors; there’s a separate `%catch%` operator for that. We’ll cover this below in the section on [Error Handling](#error-handling).)
 
 Like magrittr's pipe, the promise pipe lets you chain together operations using a variety of syntaxes. You can use code blocks, which can come in handy if you have multiple lines of code to execute that don't necessarily match the pipe paradigm:
 
@@ -306,10 +306,10 @@ mirai(somepkg::operation()) %>%
   then(onRejected = ~warning(.))
 ```
 
-There’s an error handling pipe operator `%...!%`, that works similar to `%...>%` but it binds to `then(onRejected)` instead of `then(onFulfilled)`:
+There’s an error handling pipe operator `%catch%`, that works similar to `%then%` but it binds to `then(onRejected)` instead of `then(onFulfilled)`:
 
 ```r
-mirai(somepkg::operation()) %...!%
+mirai(somepkg::operation()) %catch%
   warning()
 ```
 
@@ -325,29 +325,29 @@ mirai(somepkg::operation()) %>%
 Because it’s fairly common to want to do something with an error without stopping it from propagating (such as logging), there are a couple of additional shorthands for doing so without having to explicitly call `stop(err)`. For example:
 
 ```r
-promise %...!% print()
+promise %catch% print()
 ```
 
 will print the error, but also eat it. To print the error without eating it, you’d have to do this:
 
 ```r
-promise %...!% function(err) {
+promise %catch% function(err) {
   print(err)
   stop(err)
 }
 ```
 
-That’s a fair amount of boilerplate. Instead, you can either add `tee = TRUE` to your `catch` call, or equivalently, use the `%...T!%` operator. These two lines are equivalent to each other, and to the previous code chunk:
+That’s a fair amount of boilerplate. Instead, you can either add `tee = TRUE` to your `catch` call, or equivalently, use the `%catch_tee%` operator. These two lines are equivalent to each other, and to the previous code chunk:
 
 ```r
 promise %>% catch(print, tee = TRUE)
 
-promise %...T!% print()
+promise %catch_tee% print()
 ```
 
 ## Cleaning up with `finally`
 
-In synchronous programming, you use either`tryCatch(expr, finally = ...)` or `on.exit(...)` to perform tasks (usually relating to freeing resources or reverting temporary changes) regardless of whether the main logic succeeds or fails (throws an error). When programming with promises, you can use the `finally` function to do the same. The `finally` function is similar to `then` but it only takes a single callback that executes on both success and failure, and its return value is ignored.
+In synchronous programming, you use either`tryCatch(expr, finally = ...)` or `on.exit(...)` to perform tasks (usually relating to freeing resources or reverting temporary changes) regardless of whether the main logic succeeds or fails (throws an error). When programming with promises, you can use the `%finally%` operator or the `finally` call to do the same. The `finally` function is similar to `then` but it only takes a single callback that executes on both success and failure, and its return value is ignored.
 
 ```r
 file_path <- tempfile(fileext = ".png")
@@ -360,12 +360,12 @@ png_bytes_promise <-
       file_path
     },
     file_path = file_path
-  ) %...>%
-  brio::read_file_raw() %>%
-  finally(~unlink(file_path))
+  ) %then%
+  brio::read_file_raw() %finally%
+  { unlink(file_path) }
 ```
 
-In this example, we need a temp file for the duration of the pipeline. Our `finally` makes sure the temp file is deleted when the operation is done, regardless of whether it succeeded or failed.
+In this example, we need a temp file for the duration of the pipeline. Our `%finally%` code expression makes sure the temp file is deleted when the operation is done, regardless of whether it succeeded or failed.
 
 <div style="font-size: 20px; margin-top: 40px; text-align: right;">
 Next: [Launching tasks](promises_04_mirai.html)
