@@ -20,7 +20,7 @@
 #' by) calling `onFulfilled`/`onRejected` will be used to fulfill (reject) the
 #' new promise.
 #'
-#' ```
+#' ```r
 #' promise_a <- get_data_frame_async()
 #' promise_b <- then(promise_a, onFulfilled = head)
 #' ```
@@ -36,7 +36,7 @@
 #' example, where we expect `some_async_operation` to fail, and want to consider
 #' it an error if it doesn't:
 #'
-#' ```
+#' ```r
 #' promise_c <- some_async_operation()
 #' promise_d <- then(promise_c,
 #'   onFulfilled = function(value) {
@@ -55,11 +55,11 @@
 #' **Warning:** Be very careful not to accidentally turn failure into success,
 #' if your error handling code is not the last item in a chain!
 #'
-#' ```
-#' some_async_operation() %>%
+#' ```r
+#' some_async_operation() |>
 #'   catch(function(reason) {
 #'     warning("An error occurred: ", reason)
-#'   }) %>%
+#'   }) |>
 #'   then(function() {
 #'     message("I guess we succeeded...?")  # No!
 #'   })

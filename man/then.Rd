@@ -65,7 +65,7 @@ promise waits for the original promise to be fulfilled or rejected, and for
 by) calling \code{onFulfilled}/\code{onRejected} will be used to fulfill (reject) the
 new promise.
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{promise_a <- get_data_frame_async()
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{promise_a <- get_data_frame_async()
 promise_b <- then(promise_a, onFulfilled = head)
 }\if{html}{\out{</div>}}
 
@@ -80,7 +80,7 @@ possible to turn failure to success and success to failure. Consider this
 example, where we expect \code{some_async_operation} to fail, and want to consider
 it an error if it doesn't:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{promise_c <- some_async_operation()
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{promise_c <- some_async_operation()
 promise_d <- then(promise_c,
   onFulfilled = function(value) \{
     stop("That's strange, the operation didn't fail!")
@@ -98,10 +98,10 @@ versa.
 \strong{Warning:} Be very careful not to accidentally turn failure into success,
 if your error handling code is not the last item in a chain!
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{some_async_operation() \%>\%
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{some_async_operation() |>
   catch(function(reason) \{
     warning("An error occurred: ", reason)
-  \}) \%>\%
+  \}) |>
   then(function() \{
     message("I guess we succeeded...?")  # No!
   \})
