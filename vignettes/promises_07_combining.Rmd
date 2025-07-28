@@ -17,10 +17,11 @@ So far, all of our examples have involved chaining operations onto a single prom
 
 ## Gathering
 
-The most common pattern for combining promises is gathering, where you have two or more promises in hand and you want to use all of their results in a computation. The `promise_all` function is designed for this. Its signature looks like this:
+The most common pattern for combining promises is gathering, where you have two or more promises in hand and you want to use all of their results in a computation. The `promise_all` function and `%all%` promise operator are designed for this. Their signatures looks like:
 
 ```r
 promise_all(..., .list = NULL)
+lhs %all% rhs
 ```
 
 `promise_all` takes any number of promises as named arguments, and returns a promise of a list containing named elements with the results of those promises.
@@ -60,7 +61,15 @@ promise_all(a = a, b = b) %then%
 
 The combination of `promise_all` and `with` is a concise and powerful way to gather the results of multiple promises.
 
-`promise_all` also gives you two other options for passing input promises. First, if you would rather your result list be unnamed, you can pass in promises as unnamed arguments: `promise_all(a, b)` would yield `list(1, 2)`. Second, if you have a list of promises already in hand, you can pass the list as a single argument using `promise_all(.list = x)` (instead of, say, using `do.call(promise_all, x)`).
+`promise_all` also gives you two other options for passing input promises. First, if you would rather your result list be unnamed, you can pass in promises as unnamed arguments: `promise_all(a, b)` would yield `list(1, 2)`. Second, if you have a list of promises already in hand, you can pass the list as a single argument using `promise_all(.list = x)` or `%all%` (instead of, say, using `do.call(promise_all, x)`).
+
+```r
+lapply(c(a = "a.csv", b = "b.csv"), function(file) {
+  mirai(read.csv(file))
+}) %all% with({
+    rbind(a, b)
+  })
+```
 
 ## Nesting
 
@@ -101,6 +110,16 @@ first <- promise_race(a, b)
 If one of the input promises rejects before any succeed, then the returned promise will be rejected.
 
 Note that promises does not currently support cancellation. So losing promises will attempt to run to completion even after the race ends.
+
+Similar to `promise_all`'s `%all%`, `promise_race` has a `%race%` operator for convenience.
+
+```r
+proms <- list(
+  mirai({ Sys.sleep(1); 1 }),
+  mirai({ Sys.sleep(0.5); 2 })
+)
+proms %race% print()
+```
 
 ## Mapping
 

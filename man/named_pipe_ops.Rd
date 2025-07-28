@@ -6,6 +6,8 @@
 \alias{\%finally\%}
 \alias{\%then_tee\%}
 \alias{\%catch_tee\%}
+\alias{\%all\%}
+\alias{\%race\%}
 \title{Named promise pipe operators}
 \usage{
 lhs \%then\% rhs
@@ -17,6 +19,10 @@ lhs \%finally\% rhs
 lhs \%then_tee\% rhs
 
 lhs \%catch_tee\% rhs
+
+lhs \%all\% rhs
+
+lhs \%race\% rhs
 }
 \arguments{
 \item{lhs}{A promise object.}
@@ -60,7 +66,11 @@ function instead of an expression.
 
 \item \code{lhs \%then_tee\% rhs}: Handling a successful resolution, returning the \code{lhs}. Equivalent to \code{promise }\%T>\%\code{ then(func, tee = TRUE)}, which uses the \pkg{magrittr} tee operator, \code{\link{\%T>\%}}.
 
-\item \code{lhs \%catch_tee\% rhs}: Handling an error, returning the lhs. Equivalent to \code{promise |> catch(func, tee = TRUE)} or \code{promise \%T>\% catch(func)}, which uses the \pkg{magrittr} tee operator, \code{\link{\%T>\%}}.
+\item \code{lhs \%catch_tee\% rhs}: Handling an error, returning the \code{lhs}. Equivalent to \code{promise |> catch(func, tee = TRUE)} or \code{promise \%T>\% catch(func)}, which uses the \pkg{magrittr} tee operator, \code{\link{\%T>\%}}.
+
+\item \code{lhs \%all\% rhs}: Waits for all promises within the \code{lhs} list before passing through a list of results to the \code{rhs}. Equivalent to \code{promise_all(.list = lhs) \%then\% rhs}.
+
+\item \code{lhs \%race\% rhs}: Waits for the first promise to resolve within the \code{lhs} list of promises before passing through the value from the promise that resolved first. Equivalent to \code{promise_race(.list = lhs) \%then\% rhs}.
 
 }}
 \examples{
@@ -76,6 +86,24 @@ mirai(read.csv("http://example.com/data.csv")) \%catch\%
   { NULL }
 }
 
+# Return a list of results from a list of promises:
+proms <- list(
+  mirai({ Sys.sleep(1); 1 }),
+  mirai({ Sys.sleep(0.5); 2 })
+)
+proms \%all\% print()
+#> [[1]]
+#> [1] 1
+#>
+#> [[2]]
+#> [1] 2
+# Return the first promise to resolve from a list of promises:
+proms <- list(
+  mirai({ Sys.sleep(1); 1 }),
+  mirai({ Sys.sleep(0.5); 2 })
+)
+proms \%race\% print()
+#> [1] 2
 }
 \seealso{
 https://rstudio.github.io/promises/articles/promises_03_overview.html#using-pipes

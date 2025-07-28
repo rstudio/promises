@@ -77,16 +77,19 @@ describe("2.2. The `then` Method", {
       results <- new.env(parent = emptyenv())
 
       all_promises <- lapply(1:10, function(i) {
-        results[[as.character(i)]] <- p$promise %>%
+        ret <- p$promise %>%
           then(function(value) {
             callbacks_called <<- callbacks_called + 1L
             expect_identical(callbacks_called, i)
             value
           })
+        results[[as.character(i)]] <- ret
+        ret
       })
 
+      # str(all_promises)
       p$resolve(cars)
-      promise_all(.list = all_promises) %>% wait_for_it()
+      all_promises %all% force() %>% wait_for_it()
 
       lapply(as.list(results), function(x) {
         expect_identical(extract(x), cars)
@@ -109,7 +112,7 @@ describe("2.2. The `then` Method", {
     })
 
     p$reject(simpleError("an error"))
-    promise_all(.list = all_promises) %>% wait_for_it()
+    all_promises %all% force() %>% wait_for_it()
 
     lapply(as.list(results), function(x) {
       expect_identical(extract(x), simpleError("an error"))

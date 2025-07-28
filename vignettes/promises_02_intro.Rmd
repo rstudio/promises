@@ -324,7 +324,7 @@ There are the lower-level functions `then`, `catch`, and `finally`, which are
 the non-pipe, non-operator equivalents of the promise operators we’ve been
 discussing. See [reference](promises_03_overview.html#accessing-results-with-then).
 
-And finally, there are `promise_all`, `promise_race`, and `promise_lapply`, used to combine
+And finally, there are `promise_all` / `%all%`, `promise_race` / `%race%`, and `promise_map`, used to combine
 multiple promises into a single promise. Learn more about them [here](../reference/promise_all.html).
 
 **OK, looks like I have a lot of stuff to read up on. And I’ll probably have to

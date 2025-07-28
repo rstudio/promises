@@ -108,7 +108,7 @@ magrittr::"%T>%"
     then(function(value) lhs)
 }
 
-#' @describeIn named_pipe_ops Handling an error, returning the lhs. Equivalent to `promise |> catch(func, tee = TRUE)` or `promise %T>% catch(func)`, which uses the \pkg{magrittr} tee operator, [`%T>%`].
+#' @describeIn named_pipe_ops Handling an error, returning the `lhs`. Equivalent to `promise |> catch(func, tee = TRUE)` or `promise %T>% catch(func)`, which uses the \pkg{magrittr} tee operator, [`%T>%`].
 #' @export
 `%catch_tee%` <- function(lhs, rhs) {
   # the parent environment
@@ -122,8 +122,56 @@ magrittr::"%T>%"
   catch(lhs, func, tee = TRUE)
 }
 
-# ' `r lifecycle::badge('superseded')`
-NULL
+#' @describeIn named_pipe_ops Waits for all promises within the `lhs` list before passing through a list of results to the `rhs`. Equivalent to `promise_all(.list = lhs) %then% rhs`.
+#' @export
+#' @examples
+#' # Return a list of results from a list of promises:
+#' proms <- list(
+#'   mirai({ Sys.sleep(1); 1 }),
+#'   mirai({ Sys.sleep(0.5); 2 })
+#' )
+#' proms %all% print()
+#' #> [[1]]
+#' #> [1] 1
+#' #>
+#' #> [[2]]
+#' #> [1] 2
+`%all%` <- function(lhs, rhs) {
+  # the parent environment
+  parent <- parent.frame()
+
+  # the environment in which to evaluate pipeline
+  env <- new.env(parent = parent)
+
+  parts <- match.call()
+  func <- pipeify_rhs(parts[[3L]], env)
+  prom <- promise_all(.list = lhs)
+  then(prom, func)
+}
+
+#' @describeIn named_pipe_ops Waits for the first promise to resolve within the `lhs` list of promises before passing through the value from the promise that resolved first. Equivalent to `promise_race(.list = lhs) %then% rhs`.
+#' @export
+#' @examples
+#' # Return the first promise to resolve from a list of promises:
+#' proms <- list(
+#'   mirai({ Sys.sleep(1); 1 }),
+#'   mirai({ Sys.sleep(0.5); 2 })
+#' )
+#' proms %race% print()
+#' #> [1] 2
+`%race%` <- function(lhs, rhs) {
+  # the parent environment
+  parent <- parent.frame()
+
+  # the environment in which to evaluate pipeline
+  env <- new.env(parent = parent)
+
+  parts <- match.call()
+  func <- pipeify_rhs(parts[[3L]], env)
+  prom <- promise_race(.list = lhs)
+  then(prom, func)
+}
+
 
 #' Promise pipe operators
 #'

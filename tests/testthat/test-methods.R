@@ -155,29 +155,12 @@ describe("finally()", {
   })
   it("method ignores non-functions or NULL...", {
     p1 <-
-      promise(~ resolve(1)) %finally%
-      {
-        10
-      } %finally%
-      {
-        NULL
-      }
+      promise(~ resolve(1))$finally(10)$finally(NULL)
     expect_identical(extract(p1), 1)
   })
   it("...but function only ignores NULL, not non-functions", {
-    expect_error(
-      promise(~ resolve(1)) %finally%
-        {
-          10
-        }
-    )
-    expect_error(
-      promise(~ resolve(1)) %finally%
-        {
-          NULL
-        },
-      NA
-    )
+    expect_error(promise(~ resolve(1)) %>% finally(10))
+    expect_error(promise(~ resolve(1)) %>% finally(NULL), NA)
   })
 })
 
