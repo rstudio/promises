@@ -147,6 +147,7 @@ magrittr::"%T>%"
 
 #' @describeIn named_pipe_ops Waits for all promises within the `lhs` list before passing through a list of results to the `rhs`. Equivalent to `promise_all(.list = lhs) %then% rhs`.
 #' @export
+# TODO: Move these to separate help files
 `%all%` <- function(lhs, rhs) {
   # the parent environment
   parent <- parent.frame()
