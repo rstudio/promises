@@ -116,7 +116,6 @@ ExpoDelay <- R6::R6Class(
 # FIFO queue of workers
 #' Future promise work queue
 #'
-#' #' `r lifecycle::badge('experimental')`
 #'
 #' An \pkg{R6} class to help with scheduling work to be completed. `WorkQueue` will only execute work if the `can_proceed()` returns `TRUE`. For the use case of `future`, `can_proceed()` defaults to `future::nbrOfFreeWorkers() > 0` which will not allow for work to be executed if a \pkg{future} worker is not available.
 #'
@@ -353,7 +352,6 @@ future_promise_queue <- local({
 
 #' \pkg{future} promise
 #'
-#' `r lifecycle::badge('experimental')`
 #'
 #' When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until a worker becomes available.
 #' This occurs when there is more submitted \pkg{future} work than there are available \pkg{future} workers.
