@@ -165,7 +165,7 @@ In the sections below, we'll take a look at the code behind some outputs and rea
 
 In some cases, these code snippets may be slightly abridged. See the [GitHub repository](https://github.com/rstudio/cranwhales) for the full code.
 
-Until you've received an introduction to the `%then%` operator, the async code below will make no sense, so if you haven't read [*An informal intro to async programming*](https://rstudio.github.io/promises/articles/promises_02_intro.html) and/or [*Working with promises in R*](https://rstudio.github.io/promises/articles/promises_03_overview.html), I highly recommend doing so before continuing!
+Until you've received an introduction to `lhs |> then(func)` chaining, the async code below will make no sense, so if you haven't read [*An informal intro to async programming*](https://rstudio.github.io/promises/articles/promises_02_intro.html) and/or [*Working with promises in R*](https://rstudio.github.io/promises/articles/promises_03_overview.html), I highly recommend doing so before continuing!
 
 ### Loading `promises` and `mirai`
 
@@ -259,22 +259,22 @@ Since `data()` now returns a promise, the whole function needs to be modified to
 
 This is basically a best-case scenario for working with `promises`. The whole expression consists of a single magrittr pipeline. There's only one object  (`data()`) that's been converted to a promise. The promise object only appears once, at the head of the pipeline.
 
-When the stars align like this, converting this code to async is literally as easy as replacing each `|>` with `%then%`:
+When the stars align like this, converting this code to async is literally as easy as wrapping each line in an anonymous function inside `then()`:
 
 ```r
 # ASYNCHRONOUS version
 
 whales <- reactive({
-  data() %then%
-    count(ip_id) %then%
-    arrange(desc(n)) %then%
-    head(input$count)
+  data() |>
+    then(\(df) df |> count(ip_id)) |>
+    then(\(df) df |> arrange(desc(n))) |>
+    then(\(df) df |> head(input$count))
 })
 ```
 
 The input (`data()`) is a promise, the resulting output object is a promise, each stage of the pipeline returns a promise; but we can read and write this code almost as easily as the synchronous version!
 
-An example this simple may seem reductive, but this best-case scenario happens surprisingly often, if your coding style is influenced by the tidyverse. In this example app, **59%** of the reactives, observers, and outputs were converted using nothing more than replacing `|>` with `%then%`.
+An example this simple may seem reductive, but this best-case scenario happens surprisingly often, if your coding style is influenced by the tidyverse. In this example app, **59%** of the reactives, observers, and outputs were converted using nothing more than replacing `|>` with `then()`.
 
 One last thing before we move on. In the last section, I emphasized that reactive values cannot be read from inside a mirai. Here, we're using `head(input$count)` inside a promise-pipeline; since `data()` is written using a mirai, doesn't that mean… well… isn't this wrong?
 
@@ -300,17 +300,17 @@ Looks simple, but we can't just do a simple replacement this time. Can you see w
 # BAD VERSION DOESN'T WORK
 
 whale_downloads <- reactive({
-  data() %then%
-    inner_join(whales(), "ip_id") %then%
-    select(-n)
+  data() |>
+    then(\(df) df |> inner_join(whales(), "ip_id")) |>
+    then(\(df) df |> select(-n))
 })
 ```
 
 Remember, both `data()` and `whales()` now return a promise object, not a data frame. None of the dplyr verbs know how to deal with promises natively (and the same is true for almost every other R function, anywhere in the R universe).
 
-We're able to use `%then%` with promises on the left-hand side and regular dplyr calls on the right-hand side, only because the `%then%` operator "unwraps" the promise object for us, yielding a regular object (data frame or whatever) to be passed to dplyr. But in this case, we're passing `whales()`, which a promise object, directly to `inner_join`, and `inner_join` has no idea what to do with it.
+We're able to use `then()` with promises on the left-hand side and regular dplyr calls on the right-hand side, only because the `then()` operator "unwraps" the promise object for us, yielding a regular object (data frame or whatever) to be passed to dplyr. But in this case, we're passing `whales()`, which a promise object, directly to `inner_join`, and `inner_join` has no idea what to do with it.
 
-The fundamental thing to pattern-match on here, is that **we have a block of code that relies on more than one promise object**, and that means `%then%` won't be enough. This is a pretty common situation as well, and occurs in **12%** of reactives and outputs in this example app.
+The fundamental thing to pattern-match on here, is that **we have a block of code that relies on more than one promise object**, and that means `then()` won't be enough. This is a pretty common situation as well, and occurs in **12%** of reactives and outputs in this example app.
 
 Here's what the real solution looks like:
 
@@ -318,49 +318,53 @@ Here's what the real solution looks like:
 # ASYNCHRONOUS version
 
 whale_downloads <- reactive({
-  promise_all(data_df = data(), whales_df = whales()) %then% with({
-    data_df |>
-      inner_join(whales_df, "ip_id") |>
-      select(-n)
-  })
-})
+  promise_all(data_df = data(), whales_df = whales()) |>
+    then(\(values) {
+      with(values, {
+        data_df |>
+          inner_join(whales_df, "ip_id") |>
+          select(-n)
+      })
+    })
 ```
 
 #### Promises: the Gathering
 
-This solution uses the [promise gathering](https://rstudio.github.io/promises/articles/promises_07_combining.html#gathering) pattern, which combines `promises_all`, `%then%`, and `with`.
+This solution uses the [promise gathering](https://rstudio.github.io/promises/articles/promises_07_combining.html#gathering) pattern, which combines `promises_all`, `then`, and `with`.
 
 * The `promise_all` function gathers multiple promise objects together, and returns a single promise object. This new promise object doesn't resolve until all the input promise objects are resolved, and it yields a list of those results.
 
 ```r
-> promise_all(a = mirai("Hello"), b = mirai("World")) %then% print()
-$a
-[1] "Hello"
-
-$b
-[1] "World"
+promise_all(a = mirai("Hello"), b = mirai("World")) |> then(print)
+#> $a
+#> [1] "Hello"
+#>
+#> $b
+#> [1] "World"
 ```
 
-* The `%then%`, as before, "unwraps" the promise object and passes the result to its right hand side.
+* The `then`, as before, "unwraps" the promise object and passes the result to its right hand side.
 * The `with` function (from base R) takes a named list, and makes it into a sort of virtual parent environment while evaluating a code block you pass it.
 
 ```r
-> x + y
-Error: object 'x' not found
+x + y
+#> Error: object 'x' not found
 
-> with(list(x = 1, y = 2), {
-+   x + y
-+ })
-[1] 3
+with(list(x = 1, y = 2), {
+  x + y
+})
+#> [1] 3
 ```
 
 Let's once again combine the three, with the simplest possible example of the gathering pattern:
 
 ```r
-> promise_all(x = mirai("Hello"), y = mirai("World")) %then%
-+   with({ paste(x, y) }) %then%
-+   print()
-[1] "Hello World"
+promise_all(x = mirai("Hello"), y = mirai("World")) |>
+  then(\(values) with(values, {
+    paste(x, y)
+  })) |>
+  then(print)
+#> [1] "Hello World"
 ```
 
 You can make use of this pattern without remembering exactly how these pieces combine. Just remember that the arguments to `promise_all` provide the promise objects (`mirai(1)` and `mirai(2)`), along with the names you want to use to refer to their yielded values (`x ` and `y`); and the code block you put in `with()` can refer to those names without worrying about the fact that they were ever promises to begin with.
@@ -393,11 +397,11 @@ Meaning, you *don't* do this:
 
 output$total_downloaders <- renderValueBox({
   valueBox(
-    data() %then%
-      pull(ip_id) %then%
-      unique() %then%
-      length() %then%
-      format(big.mark = ","),
+    data() |>
+      then(\(df) pull(df, ip_id)) |>
+      then(\(col) unique(col)) |>
+      then(length) |>
+      then(\(n) format(n, big.mark = ",")),
     "unique downloaders"
   )
 })
@@ -409,12 +413,12 @@ Instead, you do this:
 # ASYNCHRONOUS version
 
 output$total_downloaders <- renderValueBox({
-  data() %then%
-    pull(ip_id) %then%
-    unique() %then%
-    length() %then%
-    format(big.mark = ",") %then%
-    valueBox("unique downloaders")
+  data() |>
+    then(\(df) pull(df, ip_id)) |>
+    then(\(col) unique(col)) |>
+    then(length) |>
+    then(\(n) format(n, big.mark = ",")) |>
+    then(\(val) valueBox(val, "unique downloaders"))
 })
 ```
 
@@ -437,43 +441,23 @@ output$downloaders <- renderPlot({
 
 While `dplyr` and other tidyverse packages are designed to link calls together with `|>`, the older `ggplot2` package uses the `+` operator. This is mostly a small aesthetic wart when synchronous code, but it's a real problem with async, because the `promises` package doesn't currently have a promise-aware replacement for `+` like it does for `|>`.
 
-Fortunately, there's a pretty good escape hatch for `|>`, and `%then%` inherited it too. Instead of a pipeline stage being a simple function call, you can put a `{` and `}` delimited code block, and inside of that code block, you can access the "it" value using a period (`.`).
+Instead of a pipeline stage being a simple function call, you can perform a multi-line code block inside a `then()` wrapper.
 
 ```r
 # ASYNCHRONOUS version
 
 output$downloaders <- renderPlot({
-  whales() %then% {
-    whale_df <- .
-    ggplot(whale_df, aes(ip_name, n)) +
-      geom_bar(stat = "identity") +
-      ylab("Downloads on this day")
-  }
+  whales() |>
+    then(\(whale_df) {
+      ggplot(whale_df, aes(ip_name, n)) +
+        geom_bar(stat = "identity") +
+        ylab("Downloads on this day")
+    })
 })
 ```
 
-**The importance of this pattern cannot be overstated!** Using `%then%` and simple calls alone, you're restricted to doing pipeline-compatible operations. But `%then%` together with a curly-brace code block means your handler code can be any shape or size. Once inside that code block, you have a regular, non-promise value in `.` (if you even want to use it—sometimes you don't, as we'll see later). You can have zero, one, or more statements. You can use the `.` multiple times, in nested expressions, whatever.
+**The importance of this pattern cannot be overstated!** Using `then()` and simple calls alone, you're restricted to doing pipeline-compatible operations. But `then()` together with a curly-brace code block means your handler code can be any shape or size. You can have zero, one, or more statements.
 
-Tip: if you have extensive or complex code to put in a code block, start the block by creating a properly named variable to store the value of `.`. The reason for this is that `.` may acquire a different meaning than you intend as you add code to the code block. For example, if a magrittr pipeline starts with `.`, instead of evaluating the pipeline and returning a value, it creates a function that takes a single argument. So the following code wouldn't filter the resolved value of `whales()`, but instead, create an anonymous function that calls `filter(n > 1000)` on whatever you pass it.
-
-```r
-whales() %then% {
-  . |> filter(n > 1000)
-}
-```
-
-This fixes it:
-
-```r
-whales() %then% {
-  whales_df <- .
-  whales_df |> filter(n > 1000)
-}
-```
-
-There are other ways to work around the above problem as well, but I like this fix because it doesn't require any thought or care. Just give the `.` value a new name, and forget the `.` exists.
-
-For untidy code with a single promise object, just remember: pair a single `%then%` with a code block and you should be able to do almost anything.
 
 ### Revisiting the `data` reactive: progress support
 
@@ -537,16 +521,17 @@ data <- eventReactive(input$date, {
     },
     path = path,
     url = url
-  ) %then%
-    { p$set(message = "Parsing data...") } %then%
-    { mirai(
+  ) |>
+    then(\() p$set(message = "Parsing data...") ) |>
+    then(\() {
+      mirai(
         {
           read_csv(path, col_types = "Dti---c-ci", progress = FALSE)
         },
         path = path
       )
-    } %finally%
-    { p$close() }
+    }) |>
+    finally(\() p$close())
 })
 ```
 
@@ -559,7 +544,7 @@ The single mirai we wrote earlier has now become a pipeline of promises:
 
 Note that neither the R6 call `p$set(message = ...)` nor the second `mirai()` call are tidy, so they use curly-brace blocks, as discussed in the above section about `biggest_whales`.
 
-The final step of dismissing the progress dialog doesn't use `%then%` at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use `%finally%` operator instead. See the relevant section in [*Working with promises in R*](https://rstudio.github.io/promises/articles/promises_03_overview.html#cleaning-up-with-finally) to learn more.
+The final step of dismissing the progress dialog doesn't use `then()` at all; because we want the progress dialog to dismiss whether the download and parse operations succeed or fail, we use `finally()` operator instead. See the relevant section in [*Working with promises in R*](https://rstudio.github.io/promises/articles/promises_03_overview.html#cleaning-up-with-finally) to learn more.
 
 With these changes in place, we've now covered all of the changes to the application. You can see the full changes side-by-side via [this GitHub diff](https://github.com/rstudio/cranwhales/compare/sync...async?diff=split).
 

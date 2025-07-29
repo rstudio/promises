@@ -285,6 +285,7 @@ normalizeOnRejected <- function(onRejected) {
   }
 }
 
+# TODO make issue to de-formula-ify promise() to `promise(\(resolve) ...)` or `promise(\(resolve, reject) ...)`
 #' Create a new promise object
 #'
 #' `promise()` creates a new promise. A promise is a placeholder object for the
@@ -319,7 +320,7 @@ normalizeOnRejected <- function(onRejected) {
 #'   later::later(~resolve(runif(1)), delay = 2)
 #' })
 #'
-#' p1 %then% print()
+#' p1 |> then(print)
 #'
 #' # Create a promise that errors immediately
 #' p2 <- promise(~{
@@ -396,22 +397,22 @@ promise <- function(action) {
 #' @param reason An error message string, or error object.
 #'
 #' @examples
-#' promise_resolve(mtcars) %then%
-#'   head() %then%
-#'   print()
+#' promise_resolve(mtcars) |>
+#'   then(head) |>
+#'   then(print)
 #'
-#' promise_reject("Something went wrong") %catch_tee%
-#'   { message(conditionMessage(.)) }
+#' promise_reject("Something went wrong") |>
+#'   catch(tee = TRUE, \(e) message(conditionMessage(e)))
 #'
 #' @export
 promise_resolve <- function(value) {
-  promise(~ resolve(value))
+  promise(\(resolve, reject) resolve(value))
 }
 
 #' @rdname promise_resolve
 #' @export
 promise_reject <- function(reason) {
-  promise(~ reject(reason))
+  promise(\(resolve, reject) reject(reason))
 }
 
 #' Coerce to a promise

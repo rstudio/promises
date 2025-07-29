@@ -70,6 +70,7 @@ library(Rcpp)
 
 promise(function(resolve, reject) {
   promise:::asyncFib(resolve, reject, 45)
-}) %then% print()
+}) |>
+  then(print)
 
  */

@@ -6,7 +6,7 @@
 \alias{finally}
 \title{Access the results of a promise}
 \usage{
-then(promise, onFulfilled = NULL, onRejected = NULL)
+then(promise, onFulfilled = NULL, onRejected = NULL, tee = FALSE)
 
 catch(promise, onRejected, tee = FALSE)
 
@@ -15,20 +15,18 @@ finally(promise, onFinally)
 \arguments{
 \item{promise}{A promise object. The object can be in any state.}
 
-\item{onFulfilled}{A function (or a formula--see Details) that will be
-invoked if the promise value successfully resolves. When invoked, the
-function will be called with a single argument: the resolved value.
-Optionally, the function can take a second parameter \code{.visible} if you care
-whether the promise was resolved with a visible or invisible value. The
-function can return a value or a promise object, or can throw an error;
-these will affect the resolution of the promise object that is returned
-by \code{then()}.}
+\item{onFulfilled}{A function that will be invoked if the promise value
+successfully resolves. When invoked, the function will be called with a
+single argument: the resolved value. Optionally, the function can take a
+second parameter \code{.visible} if you care whether the promise was resolved
+with a visible or invisible value. The function can return a value or a
+promise object, or can throw an error; these will affect the resolution of
+the promise object that is returned by \code{then()}.}
 
-\item{onRejected}{A function taking the argument \code{error} (or a formula--see
-Details). The function can return a value or a promise object, or can throw
-an error. If \code{onRejected} is provided and doesn't throw an error (or return
-a promise that fails) then this is the async equivalent of catching an
-error.}
+\item{onRejected}{A function taking the argument \code{error}. The function can
+return a value or a promise object, or can throw an error. If \code{onRejected}
+is provided and doesn't throw an error (or return a promise that fails)
+then this is the async equivalent of catching an error.}
 
 \item{tee}{If \code{TRUE}, ignore the return value of the callback, and use the
 original value instead. This is useful for performing operations with
@@ -42,16 +40,29 @@ operation either succeeds or fails. Usually used for freeing resources that
 were used during async operations.}
 }
 \description{
-Use the \code{then} function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to \code{then} is non-blocking, that is, it returns immediately; so what it does \emph{not} do is immediately return the result value of the promise. Instead, you pass logic you want to execute to \code{then}, in the form of function callbacks (or formulas, see Details). If you provide an \code{onFulfilled} callback, it will be called upon the promise's successful resolution, with a single argument \code{value}: the result value. If you provide an \code{onRejected} callback, it will be called if the operation fails, with a single argument \code{reason}: the error that caused the failure.
+Use the \code{then} function to access the eventual result of a promise (or, if
+the operation fails, the reason for that failure). Regardless of the state of
+the promise, the call to \code{then} is non-blocking, that is, it returns
+immediately; so what it does \emph{not} do is immediately return the result value
+of the promise. Instead, you pass logic you want to execute to \code{then}, in the
+form of function callbacks. If you provide an
+\code{onFulfilled} callback, it will be called upon the promise's successful
+resolution, with a single argument \code{value}: the result value. If you provide
+an \code{onRejected} callback, it will be called if the operation fails, with a
+single argument \code{reason}: the error that caused the failure.
 }
 \section{Formulas}{
 
 
-For convenience, the \code{then()}, \code{catch()}, and \code{finally()} functions use
-\code{\link[rlang:as_function]{rlang::as_function()}} to convert \code{onFulfilled}, \code{onRejected}, and
-\code{onFinally} arguments to functions. This means that you can use formulas to
-create very compact anonymous functions, using \code{.} to access the value (in
-the case of \code{onFulfilled}) or error (in the case of \code{onRejected}).
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
+With \code{{promises}} depending on R >= 4.1, the shorthand of a formula, \code{~ fn(.)} is no longer recommended by the \code{{promises}} package or tidyverse (for
+example,
+\href{https://github.com/tidyverse/purrr/commit/670c3ed9920f15da0d4175068ecddc41f0f1f335#diff-c4dcc43795da5c7f6bf5a94d957b5507ce795fedd6d3eb092ccad03678c4f76dR15}{\code{{purrr}}})
+as we now have access to the function shorthand, \verb{\\(x) fn(x)}. Please update
+your code to use the new function shorthand syntax \verb{\\(x) fn(x, arg1, args2)}
+instead of \code{~ fn(., arg1, arg2)}. The \code{.} can be confusing when chained with
+other methods.
 }
 
 \section{Chaining promises}{
@@ -121,7 +132,7 @@ argument. It is typically used at the end of a promise chain to perform error
 handling/logging.
 
 The \code{finally} function is similar to \code{then}, but takes a single no-argument
-function (or formula) that will be executed upon completion of the promise,
+function that will be executed upon completion of the promise,
 regardless of whether the result is success or failure. It is typically used
 at the end of a promise chain to perform cleanup tasks, like closing file
 handles or database connections. Unlike \code{then} and \code{catch}, the return value

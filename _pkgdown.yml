@@ -16,11 +16,9 @@ reference:
   - title: Handling promises
     contents:
       - then
-      - "%then%"
       - pipes
   - title: Combining promises
     contents:
-      - "%all%"
       - promise_all
   - title: Functional promises
     contents:

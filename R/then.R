@@ -1,14 +1,28 @@
 #' Access the results of a promise
 #'
-#' Use the `then` function to access the eventual result of a promise (or, if the operation fails, the reason for that failure). Regardless of the state of the promise, the call to `then` is non-blocking, that is, it returns immediately; so what it does *not* do is immediately return the result value of the promise. Instead, you pass logic you want to execute to `then`, in the form of function callbacks (or formulas, see Details). If you provide an `onFulfilled` callback, it will be called upon the promise's successful resolution, with a single argument `value`: the result value. If you provide an `onRejected` callback, it will be called if the operation fails, with a single argument `reason`: the error that caused the failure.
+#' Use the `then` function to access the eventual result of a promise (or, if
+#' the operation fails, the reason for that failure). Regardless of the state of
+#' the promise, the call to `then` is non-blocking, that is, it returns
+#' immediately; so what it does *not* do is immediately return the result value
+#' of the promise. Instead, you pass logic you want to execute to `then`, in the
+#' form of function callbacks. If you provide an
+#' `onFulfilled` callback, it will be called upon the promise's successful
+#' resolution, with a single argument `value`: the result value. If you provide
+#' an `onRejected` callback, it will be called if the operation fails, with a
+#' single argument `reason`: the error that caused the failure.
 #'
 #' @section Formulas:
 #'
-#' For convenience, the `then()`, `catch()`, and `finally()` functions use
-#' [rlang::as_function()] to convert `onFulfilled`, `onRejected`, and
-#' `onFinally` arguments to functions. This means that you can use formulas to
-#' create very compact anonymous functions, using `.` to access the value (in
-#' the case of `onFulfilled`) or error (in the case of `onRejected`).
+#' `r lifecycle::badge("superseded")`
+#'
+#' With `{promises}` depending on R >= 4.1, the shorthand of a formula, `~
+#' fn(.)` is no longer recommended by the `{promises}` package or tidyverse (for
+#' example,
+#' [`{purrr}`](https://github.com/tidyverse/purrr/commit/670c3ed9920f15da0d4175068ecddc41f0f1f335#diff-c4dcc43795da5c7f6bf5a94d957b5507ce795fedd6d3eb092ccad03678c4f76dR15))
+#' as we now have access to the function shorthand, `\(x) fn(x)`. Please update
+#' your code to use the new function shorthand syntax `\(x) fn(x, arg1, args2)`
+#' instead of `~ fn(., arg1, arg2)`. The `.` can be confusing when chained with
+#' other methods.
 #'
 #' @section Chaining promises:
 #'
@@ -77,7 +91,7 @@
 #' handling/logging.
 #'
 #' The `finally` function is similar to `then`, but takes a single no-argument
-#' function (or formula) that will be executed upon completion of the promise,
+#' function that will be executed upon completion of the promise,
 #' regardless of whether the result is success or failure. It is typically used
 #' at the end of a promise chain to perform cleanup tasks, like closing file
 #' handles or database connections. Unlike `then` and `catch`, the return value
@@ -91,23 +105,21 @@
 #'
 #' @param promise A promise object. The object can be in any state.
 #'
-#' @param onFulfilled A function (or a formula--see Details) that will be
-#'   invoked if the promise value successfully resolves. When invoked, the
-#'   function will be called with a single argument: the resolved value.
-#'   Optionally, the function can take a second parameter `.visible` if you care
-#'   whether the promise was resolved with a visible or invisible value. The
-#'   function can return a value or a promise object, or can throw an error;
-#'   these will affect the resolution of the promise object that is returned
-#'   by `then()`.
+#' @param onFulfilled A function that will be invoked if the promise value
+#'   successfully resolves. When invoked, the function will be called with a
+#'   single argument: the resolved value. Optionally, the function can take a
+#'   second parameter `.visible` if you care whether the promise was resolved
+#'   with a visible or invisible value. The function can return a value or a
+#'   promise object, or can throw an error; these will affect the resolution of
+#'   the promise object that is returned by `then()`.
 #'
-#' @param onRejected A function taking the argument `error` (or a formula--see
-#'   Details). The function can return a value or a promise object, or can throw
-#'   an error. If `onRejected` is provided and doesn't throw an error (or return
-#'   a promise that fails) then this is the async equivalent of catching an
-#'   error.
+#' @param onRejected A function taking the argument `error`. The function can
+#'   return a value or a promise object, or can throw an error. If `onRejected`
+#'   is provided and doesn't throw an error (or return a promise that fails)
+#'   then this is the async equivalent of catching an error.
 #'
 #' @export
-then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
+then <- function(promise, onFulfilled = NULL, onRejected = NULL, tee = FALSE) {
   promise <- as.promise(promise)
 
   if (!is.null(onFulfilled)) {
@@ -116,7 +128,27 @@ then <- function(promise, onFulfilled = NULL, onRejected = NULL) {
   if (!is.null(onRejected)) {
     onRejected <- rlang::as_function(onRejected)
   }
-  invisible(promise$then(onFulfilled = onFulfilled, onRejected = onRejected))
+  then_prom <-
+    if (!tee) {
+      promise$then(onFulfilled = onFulfilled, onRejected = onRejected)
+    } else {
+      promise$then(
+        onFulfilled = function(value, visible) {
+          onFulfilled(value, visible)
+
+          if (visible) {
+            value
+          } else {
+            invisible(value)
+          }
+        },
+        onRejected = function(reason) {
+          onRejected(reason)
+          stop(reason) # Re-throw the error to propagate it
+        }
+      )
+    }
+  invisible(then_prom)
 }
 
 #' @param tee If `TRUE`, ignore the return value of the callback, and use the

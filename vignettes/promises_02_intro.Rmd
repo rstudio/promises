@@ -105,9 +105,9 @@ transform the result values somehow.
 
 **Chain together operations? Using the `|>` operator?**
 
-A lot like that! You can’t use the `|>` operator itself, but we provide a
-promise-compatible version of it: `%then%`. So whereas you might do this to a
-regular data frame:
+A lot like that! You can’t use the `|>` operator itself as we need to wrap the promise
+context in a function that may be called with the incoming promise resolves. So whereas
+you might do this to a regular data frame:
 
 ```r
 library(dplyr)
@@ -120,41 +120,30 @@ The async version would look like:
 
 ```r
 library(dplyr)
-read.csv.async("https://rstudio.github.io/promises/data.csv") %then%
-  filter(state == "NY") %then%
-  View()
+read.csv.async("https://rstudio.github.io/promises/data.csv") |>
+  then(\(df) df |> filter(state == "NY")) |>
+  then(\(df) View(df))
 ```
 
-The `%then%` operator here is the secret sauce. It’s called the *promise pipe*;
+The `then()` call here is the secret sauce. It’s called the *promise pipe*;
 the `...` stands for promise, and `>` mimics the standard pipe operator.
 
-**What a strange looking operator. Does it work just like a regular pipe?**
+**Why can't I just use `|>` directly?**
 
-In many ways `%then%` does work like a regular pipe: it rewrites each stage’s
-function call to take the previous stage’s output as the first argument. (All
-the [standard magrittr
-tricks](https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html)
-apply here: `.`, `{`, parenthesized lambdas, etc.) But the differences, while
-subtle, are profound.
+Not all values are promises. So while the `|>` operator can be used to
+chain together operations on an object, it does not wrap and unwrap promise objects.
+Instead, the `then()` function is designed to work with promises, and it will
+unwrap the promise for you, passing the result value to the function you provide.
 
-The first and most important difference is that `%then%` *must* take a promise
-as input; that is, the left-hand side of the operator must be an expression that
-yields a promise. The `%then%` will do the work of “extracting” the result value
-from the promise, and passing that (unwrapped) result to the function call on
-the right-hand side.
-
-This last fact—that `%then%` passes an unwrapped, plain old, not-a-promise value
-to the right-hand side—is critically important. It means we can use promise
-objects with non-promise-aware functions, with `%then%` serving as the bridge
+`then()` *must* take a promise
+as input; that is, the left-hand side of the `|>` operator must be an expression that
+yields a promise. `then()` will _then_ pass the unwrapped, plain old, not-a-promise value
+to the function—this is critically important. It means we can use promise
+objects with non-promise-aware functions, with `then()` serving as the bridge
 between asynchronous and synchronous code.
 
-**So the left-hand side of `%then%` needs to be one of these special promise
-objects, but the right-hand side can be regular R base functions?**
-
-Yes! R base functions, dplyr, ggplot2, or whatever.
-
 However, that work often can’t be done in the present, since the whole point of
-a promise is that it represents work that hasn’t completed yet. So `%then%` does
+a promise is that it represents work that hasn’t completed yet. So `then()` does
 the work of extracting and piping not at the time that it’s called, but rather,
 sometime in the future.
 
@@ -190,15 +179,15 @@ applied to an object of class "promise"`. And the pipe won’t help you either;
 Exactly. Now let’s try something that actually works:
 
 ```r
-df_promise %then% filter(state == "NY")
+df_promise |> then(\(df) df |> filter(state == "NY"))
 ```
 
 At the moment it’s called, this code won’t appear to do much of anything,
 really. But whenever the `df_promise` operation actually completes successfully,
 then the result of that operation—the plain old data frame—will be passed to
-`filter(., state = "NY")`.
+`filter(df, state = "NY")`.
 
-**OK, so that’s good. I see what you mean about `%then%` letting you use
+**OK, so that’s good. I see what you mean about `then()` letting you use
 non-promise functions with promises. But the whole point of using the
 `filter` function is to get a data frame back. If `filter` isn’t even
 going to be called until some random time in the future, how do we get its value
@@ -213,15 +202,15 @@ the right-hand side:
 df_filtered <- df |> filter(state == "NY")
 ```
 
-When you use `%then%`, the result you get back is a promise, whose *eventual*
+When you use `then()`, the result you get back is a promise, whose *eventual*
 result will be the return value from the right-hand side:
 
 ```r
-df_filtered_promise <- df_promise %then% filter(state == "NY")
+df_filtered_promise <- df_promise |> then(\(df) df |> filter(state == "NY"))
 ```
 
-**Wait, what? If I have a promise, I can do stuff to it using `%then%`, but
-then I just end up with another promise? Why not just have `%then%` return a
+**Wait, what? If I have a promise, I can do stuff to it using `then()`, but
+then I just end up with another promise? Why not just have `then()` return a
 regular value instead of a promise?**
 
 Remember, the whole point of a promise is that we don’t know its value yet! So
@@ -231,7 +220,7 @@ value as output, you’d need to either be a time traveler or an oracle.
 To summarize, once you start working with a promise, any calculations and
 actions that are “downstream” of that promise will need to become
 promise-oriented. Generally, this means once you have a promise, you need to use
-`%then%` and keep using it until your pipeline terminates.
+`then()` and keep using it until your pipeline terminates.
 
 **I guess that makes sense. Still, if the only thing you can do with promises is
 make more promises, that limits their usefulness, doesn’t it?**
@@ -246,8 +235,8 @@ An example of the latter:
 
 ```r
 output$table <- renderTable({
-  read.csv.async("https://rstudio.github.io/promises/data.csv") %then%
-    filter(state == "NY")
+  read.csv.async("https://rstudio.github.io/promises/data.csv") |>
+    then(\(df) df |> filter(state == "NY"))
 })
 ```
 
@@ -263,17 +252,17 @@ works perfectly fine:
 ```r
 # A reactive expression that returns a promise
 filtered_df <- reactive({
-  read.csv.async("https://rstudio.github.io/promises/data.csv") %then%
-    filter(state == "NY") %then%
-    arrange(median_income)
+  read.csv.async("https://rstudio.github.io/promises/data.csv") |>
+    then(\(df) df |> filter(state == "NY")) |>
+    then(\(df) df |> arrange(median_income))
 })
 
 # A reactive expression that reads the previous
 # (promise-returning) reactive, and returns a
 # new promise
 top_n_by_income <- reactive({
-  filtered_df() %then%
-    head(input$n)
+  filtered_df() |>
+    then(\(df) df |> head(input$n))
 })
 
 output$table <- renderTable({
@@ -286,8 +275,8 @@ asynchronous tasks in response to reactivity.
 
 ```r
 observeEvent(input$save, {
-  filtered_df() %then%
-    write.csv("ny_data.csv")
+  filtered_df() |>
+    then(\(df) write.csv(df, "ny_data.csv"))
 })
 ```
 
@@ -296,20 +285,19 @@ there’s no need to, because Shiny knows what to do with them.**
 
 Yes, that’s basically right. You just need to keep track of which functions and
 reactive expressions return promises instead of regular values, and be sure to
-interact with them using `%then%` or other promise-aware operators and
-functions.
+interact with them using `then()` or other promise-aware functions.
 
-**Wait, there are other promise-aware operators and functions?**
+**Wait, there are other promise-aware functions?**
 
-Yes. The `%then%` is the one you’ll most commonly use, but there is a variant
-`%then_tee%`, which we call the *promise tee* operator (it’s analogous to the
-magrittr `%T>%` operator). The `%then_tee%` operator mostly acts like `%then%`, but
+Yes. The `then()` method is the one you’ll most commonly use, but there is a variant
+`then(tee = TRUE)`, which we call the *promise tee* method (it’s analogous to the
+magrittr `%T>%` operator). `then(tee = TRUE)` method acts like `then()`, but
 instead of returning a promise for the result value, it returns the original
-value instead. Meaning `p %then_tee% cat("\n")` won’t return a promise for the
+value instead. Meaning `p |> then(tee = TRUE, \(df) cat(df, "\n"))` won’t return a promise for the
 return value of `cat()` (which is always `NULL`) but instead the value of `p`.
 This is useful for logging, or other “side effecty” operations.
 
-There’s also `%catch%`, and its tee version, `%catch_tee%`, which are used for error
+There’s also `catch()` and its tee version, `catch(tee = TRUE)`, which are used for error
 handling. I won’t confuse you with more about that now, but you can read more
 [here](promises_03_overview.html#error-handling).
 
@@ -324,7 +312,7 @@ There are the lower-level functions `then`, `catch`, and `finally`, which are
 the non-pipe, non-operator equivalents of the promise operators we’ve been
 discussing. See [reference](promises_03_overview.html#accessing-results-with-then).
 
-And finally, there are `promise_all` / `%all%`, `promise_race` / `%race%`, and `promise_map`, used to combine
+And finally, there are `promise_all`, `promise_race`, and `promise_map`, used to combine
 multiple promises into a single promise. Learn more about them [here](../reference/promise_all.html).
 
 **OK, looks like I have a lot of stuff to read up on. And I’ll probably have to

@@ -17,11 +17,10 @@ So far, all of our examples have involved chaining operations onto a single prom
 
 ## Gathering
 
-The most common pattern for combining promises is gathering, where you have two or more promises in hand and you want to use all of their results in a computation. The `promise_all` function and `%all%` promise operator are designed for this. Their signatures looks like:
+The most common pattern for combining promises is gathering, where you have two or more promises in hand and you want to use all of their results in a computation. The `promise_all` function is designed for this. Its signature looks like:
 
 ```r
 promise_all(..., .list = NULL)
-lhs %all% rhs
 ```
 
 `promise_all` takes any number of promises as named arguments, and returns a promise of a list containing named elements with the results of those promises.
@@ -35,14 +34,15 @@ library(mirai)
 a <- mirai(read.csv("a.csv"))
 b <- mirai(read.csv("b.csv"))
 
-result <- promise_all(a = a, b = b) %then% {
-  rbind(.$a, .$b)
-}
+result <- promise_all(a = a, b = b) |>
+  then(\(values) {
+    rbind(values$a, values$b)
+  })
 ```
 
-In this example, the value of `.` within the curly braces is a list whose elements `a` and `b` are both data frames. We use `rbind` to combine them.
+In this example, the value of `values` within the curly braces is a list whose elements `a` and `b` are both data frames. We use `rbind` to combine them.
 
-The `.$` prefix is a bit inelegant, so we recommend the use of the base R function `with`, which lets you skip the prefix. Here's the same example, with `with`:
+The `values$` prefix is a bit inelegant, so we recommend the use of the base R function `with`, which lets you skip the prefix. Here's the same example, with `with`:
 
 ```r
 library(promises)
@@ -51,9 +51,11 @@ library(mirai)
 a <- mirai(read.csv("a.csv"))
 b <- mirai(read.csv("b.csv"))
 
-promise_all(a = a, b = b) %then%
-  with({
-    rbind(a, b)
+promise_all(a = a, b = b) |>
+  then(\(values) {
+    with(values, {
+      rbind(a, b)
+    })
   })
 ```
 
@@ -61,13 +63,19 @@ promise_all(a = a, b = b) %then%
 
 The combination of `promise_all` and `with` is a concise and powerful way to gather the results of multiple promises.
 
-`promise_all` also gives you two other options for passing input promises. First, if you would rather your result list be unnamed, you can pass in promises as unnamed arguments: `promise_all(a, b)` would yield `list(1, 2)`. Second, if you have a list of promises already in hand, you can pass the list as a single argument using `promise_all(.list = x)` or `%all%` (instead of, say, using `do.call(promise_all, x)`).
+`promise_all` also gives you two other options for passing input promises. First, if you would rather your result list be unnamed, you can pass in promises as unnamed arguments: `promise_all(a, b)` would yield `list(1, 2)`. Second, if you have a list of promises already in hand, you can pass the list as a single argument using `promise_all(.list = x)`(instead of, say, using `do.call(promise_all, x)`).
 
 ```r
-lapply(c(a = "a.csv", b = "b.csv"), function(file) {
-  mirai(read.csv(file))
-}) %all% with({
-    rbind(a, b)
+proms <-
+  lapply(c(a = "a.csv", b = "b.csv"), function(file) {
+    mirai(read.csv(file))
+  })
+promise_all(.list = proms) |>
+  then(\(values) {
+    # values is a named list with elements a and b
+    with(values, {
+      rbind(a, b)
+    })
   })
 ```
 
@@ -81,12 +89,11 @@ library(mirai)
 
 a <- mirai(1)
 
-a %then% (function(a) {
-  b <- mirai(2)
-  b %then% (function(b) {
-    a + b
+a |>
+  then(\(a) {
+    b <- mirai(2)
+    b |> then(\(b) a + b)
   })
-})
 ```
 
 (We use anonymous functions here to mask the names of the original promises--i.e. once inside the first anonymous function, the symbol `a` now refers to the result of the promise `a`.)
@@ -110,16 +117,6 @@ first <- promise_race(a, b)
 If one of the input promises rejects before any succeed, then the returned promise will be rejected.
 
 Note that promises does not currently support cancellation. So losing promises will attempt to run to completion even after the race ends.
-
-Similar to `promise_all`'s `%all%`, `promise_race` has a `%race%` operator for convenience.
-
-```r
-proms <- list(
-  mirai({ Sys.sleep(1); 1 }),
-  mirai({ Sys.sleep(0.5); 2 })
-)
-proms %race% print()
-```
 
 ## Mapping
 
@@ -146,7 +143,7 @@ packages <- setNames(, c("ggplot2", "dplyr", "knitr"))
 
 pkg_dates <- promise_map(packages, get_pub_date)
 
-pkg_dates %then% print()
+pkg_dates |> then(print)
 ```
 
 The resulting output looks like this:
@@ -170,7 +167,7 @@ If you want behavior that's similar to `promise_map` but for all the async opera
 pkg_dates <- purrr::map(packages, get_pub_date) |>
   promise_all(.list = .)
 
-pkg_dates %then% print()
+pkg_dates |> then(print)
 ```
 
 ## Reducing
@@ -216,6 +213,6 @@ promise_reduce(
     }
   },
   .init = NULL
-) %then%
-  print()
+) |>
+  then(print)
 ```
