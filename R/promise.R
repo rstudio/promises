@@ -66,12 +66,10 @@ Promise <- R6::R6Class(
       private$visible <- visible
       private$state <- "fulfilled"
 
-      later::later(function() {
-        lapply(private$onFulfilled, function(f) {
-          f(private$value, private$visible)
-        })
-        private$onFulfilled <- list()
+      lapply(private$onFulfilled, function(f) {
+        f(private$value, private$visible)
       })
+      private$onFulfilled <- list()
     },
     doRejectFinalReason = function(reason) {
       private$value <- reason
