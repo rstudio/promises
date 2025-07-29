@@ -103,7 +103,7 @@ by <code>promise_map</code> immediately rejects with that err.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Waits x seconds, then returns x*10</span></span></span>
 <span class="r-in"><span><span class="va">wait_this_long</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="promise.html">promise</a></span><span class="op">(</span><span class="op">~</span><span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/later/reference/later.html" class="external-link">later</a></span><span class="op">(</span><span class="op">~</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="promise.html">promise</a></span><span class="op">(</span><span class="op">~</span><span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://later.r-lib.org/reference/later.html" class="external-link">later</a></span><span class="op">(</span><span class="op">~</span><span class="op">{</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="va">x</span><span class="op">*</span><span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span>, delay <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
@@ -120,7 +120,7 @@ by <code>promise_map</code> immediately rejects with that err.</p>
    </div>
   <footer><div class="container">
   <div class="pkgdown-footer-left">
-  <p>Developed by Joe Cheng, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
+  <p>Developed by Joe Cheng, <a href="http://schloerke.com" class="external-link">Barret Schloerke</a>, <a href="https://github.com/wch" class="external-link">Winston Chang</a>, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
