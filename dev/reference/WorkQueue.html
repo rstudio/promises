@@ -60,8 +60,7 @@ Future promise work queue"><meta name="robots" content="noindex"></head><body>
 
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>#' <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
-<p>An <span class="pkg">R6</span> class to help with scheduling work to be completed. <code>WorkQueue</code> will only execute work if the <code>can_proceed()</code> returns <code>TRUE</code>. For the use case of <code>future</code>, <code>can_proceed()</code> defaults to <code>future::nbrOfFreeWorkers() &gt; 0</code> which will not allow for work to be executed if a <span class="pkg">future</span> worker is not available.</p>
+    <p>An <span class="pkg">R6</span> class to help with scheduling work to be completed. <code>WorkQueue</code> will only execute work if the <code>can_proceed()</code> returns <code>TRUE</code>. For the use case of <code>future</code>, <code>can_proceed()</code> defaults to <code>future::nbrOfFreeWorkers() &gt; 0</code> which will not allow for work to be executed if a <span class="pkg">future</span> worker is not available.</p>
 <p><code>WorkQueue</code> will constantly try to start new work once prior work item finishes.  However, if <code>can_proceed()</code> returns <code>FALSE</code> (no future workers are available) and there is more work to be done, then work is attempted later a random amount of time later using exponential backoff.  The exponential backoff will cap out at 10 seconds to prevent unnecessarily large wait times.</p>
 <p>Each time <code>WorkQueue</code> tries to start more work, it will repeat until <code>can_proceed()</code> returns <code>FALSE</code> or there is no more work in the <code>queue</code>.</p>
     </div>
