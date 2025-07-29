@@ -45,7 +45,7 @@ promise_all <- function(..., .list = NULL) {
   }
 
   if (length(.list) == 0) {
-    return(promise(~ resolve(list())))
+    return(promise(function(resolve, reject) resolve(list())))
   }
 
   # Verify that .list members are either all named or all unnamed
