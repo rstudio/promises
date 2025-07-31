@@ -127,7 +127,7 @@ then <- function(
   tee = FALSE
 ) {
   rlang::check_dots_empty()
-  check_bool(tee)
+  check_tee(tee)
 
   promise <- as.promise(promise)
 
@@ -171,7 +171,7 @@ then <- function(
 catch <- function(promise, onRejected, ..., tee = FALSE) {
   rlang::check_dots_empty()
   promise <- as.promise(promise)
-  check_bool(tee)
+  check_tee(tee)
 
   if (!is.null(onRejected)) {
     onRejected <- rlang::as_function(onRejected)
@@ -201,4 +201,16 @@ finally <- function(promise, onFinally) {
     onFinally <- rlang::as_function(onFinally)
   }
   promise$finally(onFinally)
+}
+
+
+check_tee <- function(tee) {
+  if (is.boolean(tee)) {
+    return()
+  }
+
+  rlang::abort(
+    "`tee=` must be `TRUE` or `FALSE`",
+    call = parent.frame()
+  )
 }
