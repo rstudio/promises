@@ -106,13 +106,16 @@ local({
       }
 
       exec_times <- NA
-      p <- lapply(seq_len(worker_jobs), function(i) {
-        prom_fn({
-          Sys.sleep(worker_job_time)
-          time_diff()
+      proms <-
+        lapply(seq_len(worker_jobs), function(i) {
+          prom_fn({
+            Sys.sleep(worker_job_time)
+            time_diff()
+          })
         })
-      }) |>
-        promise_all(.list = _) |>
+
+      p <-
+        promise_all(.list = proms) |>
         then(\(x) {
           exec_times <<- unlist(x)
         })
