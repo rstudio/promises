@@ -28,7 +28,6 @@ Imports:
     later,
     magrittr (>= 1.5),
     R6,
-    Rcpp,
     rlang,
     stats
 Suggests:
@@ -36,13 +35,11 @@ Suggests:
     knitr,
     mirai,
     purrr,
+    Rcpp,
     rmarkdown,
     spelling,
     testthat (>= 3.0.0),
     vembedr
-LinkingTo:
-    later,
-    Rcpp
 VignetteBuilder:
     knitr
 Config/Needs/website: rsconnect, tidyverse/tidytemplate
