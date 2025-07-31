@@ -51,7 +51,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="promises-development-version">promises (development version)<a class="anchor" aria-label="anchor" href="#promises-development-version"></a></h2>
-<ul><li>Fixed <a href="https://github.com/rstudio/promises/issues/47" class="external-link">#47</a>: <code><a href="../reference/promise_map.html">promise_map()</a></code> can now properly handle <code>NULL</code> values being returned. (Thank you, <a href="https://github.com/RLesur" class="external-link">@RLesur</a>! <a href="https://github.com/rstudio/promises/issues/138" class="external-link">#138</a>)</li>
+<ul><li><p>Fixed <a href="https://github.com/rstudio/promises/issues/154" class="external-link">#154</a>: Makes promises a pure R package that does not require compilation. We include a test of a C++ interface in <code>inst/promise_task.cpp</code> that is now dynamically compiled during testing. (<a href="https://github.com/rstudio/promises/issues/155" class="external-link">#155</a>)</p></li>
+<li><p>Fixed <a href="https://github.com/rstudio/promises/issues/47" class="external-link">#47</a>: <code><a href="../reference/promise_map.html">promise_map()</a></code> can now properly handle <code>NULL</code> values being returned. (Thank you, <a href="https://github.com/RLesur" class="external-link">@RLesur</a>! <a href="https://github.com/rstudio/promises/issues/138" class="external-link">#138</a>)</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.3.3" id="promises-133">promises 1.3.3<a class="anchor" aria-label="anchor" href="#promises-133"></a></h2><p class="text-muted">CRAN release: 2025-05-29</p>
