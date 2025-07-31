@@ -117,9 +117,17 @@
 #'   return a value or a promise object, or can throw an error. If `onRejected`
 #'   is provided and doesn't throw an error (or return a promise that fails)
 #'   then this is the async equivalent of catching an error.
-#'
+#' @param ... Ignored.
 #' @export
-then <- function(promise, onFulfilled = NULL, onRejected = NULL, tee = FALSE) {
+then <- function(
+  promise,
+  onFulfilled = NULL,
+  onRejected = NULL,
+  ...,
+  tee = FALSE
+) {
+  rlang::check_dots_empty()
+
   promise <- as.promise(promise)
 
   if (!is.null(onFulfilled)) {
@@ -159,7 +167,8 @@ then <- function(promise, onFulfilled = NULL, onRejected = NULL, tee = FALSE) {
 #'   an effect if the callback does not throw).
 #' @rdname then
 #' @export
-catch <- function(promise, onRejected, tee = FALSE) {
+catch <- function(promise, onRejected, ..., tee = FALSE) {
+  rlang::check_dots_empty()
   promise <- as.promise(promise)
 
   if (!is.null(onRejected)) {

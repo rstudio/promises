@@ -6,9 +6,9 @@
 \alias{finally}
 \title{Access the results of a promise}
 \usage{
-then(promise, onFulfilled = NULL, onRejected = NULL, tee = FALSE)
+then(promise, onFulfilled = NULL, onRejected = NULL, ..., tee = FALSE)
 
-catch(promise, onRejected, tee = FALSE)
+catch(promise, onRejected, ..., tee = FALSE)
 
 finally(promise, onFinally)
 }
@@ -27,6 +27,8 @@ the promise object that is returned by \code{then()}.}
 return a value or a promise object, or can throw an error. If \code{onRejected}
 is provided and doesn't throw an error (or return a promise that fails)
 then this is the async equivalent of catching an error.}
+
+\item{...}{Ignored.}
 
 \item{tee}{If \code{TRUE}, ignore the return value of the callback, and use the
 original value instead. This is useful for performing operations with
