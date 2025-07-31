@@ -85,7 +85,7 @@ Promise <- R6::R6Class(
         private$onRejected <- list()
 
         later::later(
-          ~ {
+          function() {
             if (!private$rejectionHandled) {
               # warning() was unreliable here
               cat(
@@ -403,13 +403,13 @@ promise <- function(action) {
 #'
 #' @export
 promise_resolve <- function(value) {
-  promise(~ resolve(value))
+  promise(function(resolve, reject) resolve(value))
 }
 
 #' @rdname promise_resolve
 #' @export
 promise_reject <- function(reason) {
-  promise(~ reject(reason))
+  promise(function(resolve, reject) reject(reason))
 }
 
 #' Coerce to a promise
