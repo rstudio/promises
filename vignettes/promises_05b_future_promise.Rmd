@@ -20,7 +20,7 @@ For a concrete example, let's imagine a scenario, where seven `plumber` requests
 
 ```r
 #* @get /slow/<k>
-function() {
+\() {
   future::future({
     slow_calc()
   })
@@ -31,7 +31,7 @@ Let's also assume the `plumber` route serving the last request does not use any 
 
 ```r
 #* @get /fast/<k>
-function() {
+\() {
   fast_calc()
 }
 ```
@@ -46,7 +46,7 @@ Note how R has to wait 20s before processing the 7th request (shown in green). T
 
 ```{r, echo = FALSE}
 library(vembedr)
-embed_vimeo("505287449") %>%
+embed_vimeo("505287449") |>
   use_align("center")
 ```
 
@@ -59,7 +59,7 @@ Continuing with the example above, we can swap out the calls to `future::future(
 
 ```r
 #* @get /slow/<k>
-function() {
+\() {
   promises::future_promise({
     slow_calc()
   })
@@ -75,7 +75,7 @@ The vertical gray bars in the figure above represent timepoints where the main R
 
 ```{r, echo = FALSE}
 library(vembedr)
-embed_vimeo("505286442") %>%
+embed_vimeo("505286442") |>
   use_align("center")
 ```
 

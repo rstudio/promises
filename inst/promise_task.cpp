@@ -3,8 +3,8 @@
 
 class PromiseTask : public later::BackgroundTask {
 public:
-  PromiseTask(Rcpp::Function resolve, Rcpp::Function reject) :
-    resolve(resolve), reject(reject) {
+  PromiseTask(Rcpp::Function resolve, Rcpp::Function reject)
+      : resolve(resolve), reject(reject) {
   }
 
 protected:
@@ -15,6 +15,7 @@ protected:
     Rcpp::RObject result = get_result();
     resolve(result);
   }
+
 private:
   Rcpp::Function resolve;
   Rcpp::Function reject;
@@ -24,13 +25,13 @@ long fib(long x) {
   if (x <= 2) {
     return 1;
   }
-  return fib(x-1) + fib(x-2);
+  return fib(x - 1) + fib(x - 2);
 }
 
 class FibonacciTask : public PromiseTask {
 public:
-  FibonacciTask(Rcpp::Function resolve, Rcpp::Function reject, double x) :
-    PromiseTask(resolve, reject), x(x) {
+  FibonacciTask(Rcpp::Function resolve, Rcpp::Function reject, double x)
+      : PromiseTask(resolve, reject), x(x) {
   }
 
   void execute() {
@@ -63,6 +64,7 @@ Rcpp::sourceCpp(system.file("promise_task.cpp", package = "promises"))
 
 promise(function(resolve, reject) {
   asyncFib(resolve, reject, 45)
-}) %...>% print()
+}) |>
+  then(print)
 
  */

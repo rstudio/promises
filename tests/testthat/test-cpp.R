@@ -8,10 +8,10 @@ describe("C++ interface", {
   it("basically works", {
     promise(function(resolve, reject) {
       env$asyncFib(resolve, reject, 3)
-    }) %...>%
-      {
-        expect_identical(., 2)
-      } %>%
+    }) |>
+      then(\(x) {
+        expect_identical(x, 2)
+      }) |>
       wait_for_it()
   })
 
@@ -22,16 +22,16 @@ describe("C++ interface", {
     with_promise_domain(cd, {
       promise(function(resolve, reject) {
         env$asyncFib(resolve, reject, 3)
-      }) %...>%
-        {
-          expect_identical(., 2)
+      }) |>
+        then(\(x) {
+          expect_identical(x, 2)
           expect_identical(cd$counts$onFulfilledCalled, 1L)
-          promise_resolve(TRUE) %...>%
-            {
+          promise_resolve(TRUE) |>
+            then(\(y) {
               expect_true(!is.null(current_promise_domain()))
               expect_identical(cd$counts$onFulfilledCalled, 2L)
-            }
-        } %>%
+            })
+        }) |>
         wait_for_it()
     })
   })

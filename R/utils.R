@@ -23,20 +23,22 @@
 #'   will be passed through to the returned promise.
 #'
 #' @examples
-#' p1 <- promise(~later::later(~resolve(1), delay = 1))
-#' p2 <- promise(~later::later(~resolve(2), delay = 2))
+#' p1 <- promise(\(resolve, reject) later::later(\() resolve(1), delay = 1))
+#' p2 <- promise(\(resolve, reject) later::later(\() resolve(2), delay = 2))
 #'
 #' # Resolves after 1 second, to the value: 1
-#' promise_race(p1, p2) %...>% {
-#'   cat("promise_race:\n")
-#'   str(.)
-#' }
+#' promise_race(p1, p2) |>
+#'   then(\(x) {
+#'     cat("promise_race:\n")
+#'     str(x)
+#'   })
 #'
 #' # Resolves after 2 seconds, to the value: list(1, 2)
-#' promise_all(p1, p2) %...>% {
-#'   cat("promise_all:\n")
-#'   str(.)
-#' }
+#' promise_all(p1, p2) |>
+#'   then(\(x) {
+#'     cat("promise_all:\n")
+#'     str(x)
+#'   })
 #'
 #' @export
 promise_all <- function(..., .list = NULL) {
@@ -45,7 +47,7 @@ promise_all <- function(..., .list = NULL) {
   }
 
   if (length(.list) == 0) {
-    return(promise(function(resolve, reject) resolve(list())))
+    return(promise_resolve(list()))
   }
 
   # Verify that .list members are either all named or all unnamed
@@ -132,13 +134,16 @@ promise_race <- function(..., .list = NULL) {
 #' @examples
 #' # Waits x seconds, then returns x*10
 #' wait_this_long <- function(x) {
-#'   promise(~later::later(~{
-#'     resolve(x*10)
-#'   }, delay = x))
+#'   promise(\(resolve, reject) {
+#'     later::later(\() resolve(x*10), delay = x)
+#'   })
 #' }
 #'
-#' promise_map(list(A=1, B=2, C=3), wait_this_long) %...>%
-#'   print()
+#' promise_map(
+#'   list(A=1, B=2, C=3),
+#'   wait_this_long
+#' ) |>
+#'   then(print)
 #'
 #' @export
 promise_map <- function(.x, .f, ...) {
@@ -156,13 +161,13 @@ promise_map <- function(.x, .f, ...) {
       # The next line may throw, that's fine, it will be caught by resolve() and
       # reject the promise
       this_result <- .f(.x[[pos]], ...)
-      promise_resolve(this_result) %...>%
-        (function(this_value) {
-          # This weird assignment is similar to `results[[pos]] <- this_value`,
-          # except that it handles `NULL` values correctly.
-          results[pos] <<- list(this_value)
-          do_next(pos + 1)
-        })
+      p <- promise_resolve(this_result)
+      then(p, function(this_value) {
+        # This weird assignment is similar to `results[[pos]] <- this_value`,
+        # except that it handles `NULL` values correctly.
+        results[pos] <<- list(this_value)
+        do_next(pos + 1)
+      })
     }
   }
 
@@ -196,17 +201,22 @@ promise_map <- function(.x, .f, ...) {
 #' @examples
 #' # Returns a promise for the sum of e1 + e2, with a 0.5 sec delay
 #' slowly_add <- function(e1, e2) {
-#'   promise(~later::later(~resolve(e1 + e2), delay = 0.5))
+#'   promise(\(resolve, reject) {
+#'     later::later(\() resolve(e1 + e2), delay = 0.5)
+#'   })
 #' }
 #'
 #' # Prints 55 after a little over 5 seconds
-#' promise_reduce(1:10, slowly_add, .init = 0) %...>% print()
+#' promise_reduce(1:10, slowly_add, .init = 0) |>
+#'   then(print)
 #'
 #' @export
 promise_reduce <- function(.x, .f, ..., .init) {
   p <- promise_resolve(.init)
   lapply(.x, function(item) {
-    p <<- p %...>% .f(item, ...)
+    p <<- then(p, function(x) {
+      .f(x, item, ...)
+    })
   })
   p
 }

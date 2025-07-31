@@ -22,11 +22,11 @@ Helper functions to conveniently create a promise that is resolved to the
 given value (or rejected with the given reason).
 }
 \examples{
-promise_resolve(mtcars) \%...>\%
-  head() \%...>\%
-  print()
+promise_resolve(mtcars) |>
+  then(head) |>
+  then(print)
 
-promise_reject("Something went wrong") \%...T!\%
-  { message(conditionMessage(.)) }
+promise_reject("Something went wrong") |>
+  catch(tee = TRUE, \(e) message(conditionMessage(e)))
 
 }

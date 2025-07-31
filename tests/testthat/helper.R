@@ -24,7 +24,7 @@ wait_for_it <- function(p = NULL, timeout = if (on_ci) 60 else 30) {
 
   err <- NULL
   if (!is.null(p)) {
-    p %...!% (function(reason) err <<- reason)
+    p |> catch(\(reason) err <<- reason)
   }
 
   while (!loop_empty()) {
@@ -48,8 +48,8 @@ wait_for_it <- function(p = NULL, timeout = if (on_ci) 60 else 30) {
 extract <- function(promise) {
   promise_value <- NULL
 
-  promise %...>%
-    (function(value) promise_value <<- value) %>%
+  promise |>
+    then(\(value) promise_value <<- value) |>
     wait_for_it()
 
   promise_value
@@ -57,14 +57,14 @@ extract <- function(promise) {
 
 resolve_later <- function(value, delaySecs) {
   force(value)
-  promise(~ later::later(~ resolve(value), delaySecs))
+  promise(\(resolve, reject) later::later(\() resolve(value), delaySecs))
 }
 
 # Prevent "Unhandled promise error" warning that happens if you don't handle the
 # rejection of a promise
 squelch_unhandled_promise_error <- function(promise) {
-  promise %...!%
-    (function(reason) {
+  promise |>
+    catch(\(reason) {
       if (inherits(reason, "failure")) {
         # Don't squelch test failures
         stop(reason)

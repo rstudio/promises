@@ -37,12 +37,12 @@ describe("visibility", {
               switch(
                 add_then,
                 "false" = p,
-                "single" = p %>% then(single_fn),
-                "double" = p %>% then(double_fn),
-                "expr" = p %>%
+                "single" = p |> then(single_fn),
+                "double" = p |> then(double_fn),
+                "expr" = p |>
                   then(
-                    ~ {
-                      info <- withVisible(.)
+                    \(value) {
+                      info <- withVisible(value)
                       if (info$visible) {
                         info$value
                       } else {
@@ -55,11 +55,11 @@ describe("visibility", {
               switch(
                 add_catch,
                 "false" = p,
-                "single" = p %>% catch(single_fn),
-                "double" = p %>% catch(double_fn),
-                "expr" = p %>%
+                "single" = p |> catch(single_fn),
+                "double" = p |> catch(double_fn),
+                "expr" = p |>
                   catch(
-                    ~ {}
+                    \(err) {}
                   )
               )
 
@@ -68,26 +68,24 @@ describe("visibility", {
               switch(
                 add_finally,
                 "false" = p,
-                "expr" = p %>%
-                  finally(
-                    ~ {
-                      finally_val <<- TRUE
-                    }
-                  )
+                "expr" = p |>
+                  finally(\() {
+                    finally_val <<- TRUE
+                  })
               )
 
             extended_val <-
-              p %>%
+              p |>
               then(function(value, .visible) {
                 list(value = value, visible = .visible)
-              }) %>%
+              }) |>
               extract()
 
             regular_val <-
-              p %>%
+              p |>
               then(function(value) {
                 withVisible(value)
-              }) %>%
+              }) |>
               extract()
 
             if (add_finally != "false") {
