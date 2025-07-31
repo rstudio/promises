@@ -20,7 +20,7 @@ For a concrete example, let's imagine a scenario, where seven `plumber` requests
 
 ```r
 #* @get /slow/<k>
-function() {
+\() {
   future::future({
     slow_calc()
   })
@@ -31,7 +31,7 @@ Let's also assume the `plumber` route serving the last request does not use any 
 
 ```r
 #* @get /fast/<k>
-function() {
+\() {
   fast_calc()
 }
 ```
@@ -59,7 +59,7 @@ Continuing with the example above, we can swap out the calls to `future::future(
 
 ```r
 #* @get /slow/<k>
-function() {
+\() {
   promises::future_promise({
     slow_calc()
   })

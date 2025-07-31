@@ -125,8 +125,7 @@ read.csv.async("https://rstudio.github.io/promises/data.csv") |>
   then(\(df) View(df))
 ```
 
-The `then()` call here is the secret sauce. It’s called the *promise pipe*;
-the `...` stands for promise, and `>` mimics the standard pipe operator.
+The `then()` call here is the secret sauce. It creates a promise pipeline, chaining the provided callback by having it run on the result of the incoming promise value.
 
 **Why can't I just use `|>` directly?**
 
@@ -170,7 +169,7 @@ dplyr::filter(df_promise, state == "NY")
 ```
 
 Try this and you’ll get an error like `no applicable method for 'filter_'
-applied to an object of class "promise"`. And the pipe won’t help you either;
+applied to an object of class "promise"`. And the native pipe won’t help you either;
 `df_promise |> filter(state == "NY")` will give you the same error.
 
 **Right, that makes sense. `filter` is designed to work on data frames, and
@@ -179,7 +178,8 @@ applied to an object of class "promise"`. And the pipe won’t help you either;
 Exactly. Now let’s try something that actually works:
 
 ```r
-df_promise |> then(\(df) df |> filter(state == "NY"))
+df_promise |>
+  then(\(df) df |> filter(state == "NY"))
 ```
 
 At the moment it’s called, this code won’t appear to do much of anything,
@@ -290,7 +290,7 @@ interact with them using `then()` or other promise-aware functions.
 **Wait, there are other promise-aware functions?**
 
 Yes. The `then()` method is the one you’ll most commonly use, but there is a variant
-`then(tee = TRUE)`, which we call the *promise tee* method (it’s analogous to the
+`then(tee = TRUE)`, which creates a *promise tee* object (it’s analogous to the
 magrittr `%T>%` operator). `then(tee = TRUE)` method acts like `then()`, but
 instead of returning a promise for the result value, it returns the original
 value instead. Meaning `p |> then(tee = TRUE, \(df) cat(df, "\n"))` won’t return a promise for the

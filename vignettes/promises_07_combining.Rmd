@@ -67,7 +67,7 @@ The combination of `promise_all` and `with` is a concise and powerful way to gat
 
 ```r
 proms <-
-  lapply(c(a = "a.csv", b = "b.csv"), function(file) {
+  lapply(c(a = "a.csv", b = "b.csv"), \(file) {
     mirai(read.csv(file))
   })
 promise_all(.list = proms) |>
@@ -128,7 +128,7 @@ In the example below, we iterate over a named vector of package names. For each 
 library(promises)
 library(mirai)
 
-get_pub_date <- function(pkg) {
+get_pub_date <- \(pkg) {
   desc_url <- paste0("https://cran.r-project.org/web/packages/", pkg, "/DESCRIPTION")
   mirai(
     {
@@ -199,7 +199,7 @@ cran_mirrors <- c(
 
 promise_reduce(
   cran_mirrors,
-  function(result, mirror) {
+  \(result, mirror) {
     if (!is.null(result)) {
       result
     } else {

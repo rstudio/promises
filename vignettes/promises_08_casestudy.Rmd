@@ -257,7 +257,7 @@ whales <- reactive({
 
 Since `data()` now returns a promise, the whole function needs to be modified to deal with promises.
 
-This is basically a best-case scenario for working with `promises`. The whole expression consists of a single magrittr pipeline. There's only one object  (`data()`) that's been converted to a promise. The promise object only appears once, at the head of the pipeline.
+This is basically a best-case scenario for working with `promises`. The whole expression consists of native pipes. There's only one object  (`data()`) that's been converted to a promise. The promise object only appears once, at the head of the pipeline.
 
 When the stars align like this, converting this code to async is literally as easy as wrapping each line in an anonymous function inside `then()`:
 

@@ -69,7 +69,7 @@ You might guess that you could call a function or method on a promise to extract
 The `promises::then` function is what ultimately makes promise objects useful. It is used to register success and failure handlers on a promise. Its signature looks like:
 
 ```r
-then(promise, onFulfilled = NULL, onRejected = NULL)
+then(promise, onFulfilled = NULL, onRejected = NULL, ..., tee = FALSE)
 ```
 
 In promise terminology, “fulfilled” (and equivalently, “resolved”) means success and “rejected” means failure. You can pass functions with single arguments to `onFulfilled` and `onRejected` to be notified when a promise succeeds or fails. (If the promise has already been fulfilled or resolved by the time `then` is called, don't worry—the appropriate callback will be still be called. It's never too late to call `then` on a promise.)
@@ -82,80 +82,28 @@ The following example shows a simple example of printing out a success message a
 
 ```r
 then(promise,
-  function(value) {
+  \(value) {
     cat("The operation completed!\n")
     print(value)
   })
 ```
 
-If this code looks ugly to you, don’t worry — you’ll rarely write promise code that looks like this. As we go, we’ll introduce several types of syntactic sugar to make working with promises more pleasant. To start with, we can use the R pipe operator (`|>`) (or the [`{magrittr}` pipe operator](https://r4ds.had.co.nz/pipes.html)), which gives us a pretty marginal benefit right now but will pay dividends shortly:
+In the example above, we used the anonymous function shorthand (`\(x) { }`) to write an anonymous function. `function(x) { }` would behave just the same.
+
+To help reduce the amount of in/out reading, we can use the R pipe operator (`|>`):
 
 ```r
 promise |>
-  then(function(value) {
+  then(\(value) {
     cat("The operation completed!\n")
     print(value)
   })
 ```
 
-Note that the call to `then()` always returns immediately, without invoking the callback function. The callback function will be invoked sometime in the future—it could be very soon, or it could be hours, depending mostly on how long it takes the async operation to complete.
+Note that the call to `then()` **always returns immediately**, without invoking the callback function. The callback function will be invoked sometime in the future—it could be very soon, or it could be hours, depending mostly on how long it takes the async operation to complete.
 
-## Using formulas
 
-You don’t have to use anonymous functions as callbacks; you can use named functions as well. So `promise |> then(print)` works, if you just want to print a value.
 
-If you don’t have a named function that does what you want, though, you still have an alternative to using anonymous functions, which can be a little verbose: you can use formulas to save a few keystrokes. These use [purrr's "lambda formula" style](https://r4ds.had.co.nz/iteration.html); if you’re not familiar with purrr, for now just know that you can access the value (or error) using `.` as a variable name.
-
-```r
-promise |>
-  then(~{
-    cat("The operation completed!")
-    print(.)
-  })
-```
-
-(Yes, you can have entire blocks of code as formulas!)
-
-Note, it is recommended to use an anonymous function (`\(x) { }`) when writing multi-line code or when the `.` context is ambiguous.
-
-```r
-# Clearer intent of value
-promise |>
-  then(\(x) {
-    cat("The operation completed!")
-    print(x)
-  })
-
-# Confusing usage of `.`
-promise_resolve(sample(1:10)) |>
-  then(~ {
-    . |>
-      # What is the `.` here? Sample vector? An item of `.` (the sample vector)?
-      purrr::detect(~ . > 5)
-  }) |>
-  then(print)
-
-# Clearer usage of values
-promise_resolve(sample(1:10)) |>
-  then(print) |>
-  then(\(x) {
-    x |>
-      # What is the `.` here?
-      purrr::detect(\(val) val > 5)
-  }) |>
-  then(print)
-```
-
-TODO: re-write to `|>` w/ `then()`
-#### Ex:
-```r
-promise_resolve(palmerpenguins::penguins) |>
-  then(\(df) filter(df, year == 2008)) |>
-  then(\(df) group_by(df, species)) |>
-  then(\(df) summarise(df, mean_bill = mean(bill_length_mm, na.rm = TRUE))) |>
-  then(\(df) arrange(df, desc(mean_bill))) |>
-  then(print)
-```
 
 
 ## Promise chaining
@@ -193,13 +141,13 @@ Or, equivalently:
 
 ```r
 p |>
-then(\(df) {
-  df |>
-    filter(year == 2006) |>
-    group_by(state) |>
-    summarise(pop = sum(population)) |>
-    arrange(desc(pop))
-})
+  then(\(df) {
+    df |>
+      filter(year == 2006) |>
+      group_by(state) |>
+      summarise(pop = sum(population)) |>
+      arrange(desc(pop))
+  })
 ```
 
 Evaluating this expression results in a promise that will eventually resolve to the filtered, summarized, and ordered data.
@@ -221,7 +169,7 @@ promise |>
 
 This is not correct, as the `print(nrow(df))` stage will not only print the desired value, but pass the return value of `print(nrow(.))`, which is just `invisible(nrow(df))`, to the next stage.
 
-For synchronous code, the `{magrittr}` package offered the `%T>%` (pronounced “tee”) operator, which operates like a regular `|>` except that, after executing its right-hand side, it returns its left-hand side value.
+For synchronous code, the [`{magrittr}` package offered the `%T>%` (pronounced “tee”) operator](https://magrittr.tidyverse.org/reference/tee.html), which operates like a regular `|>` except that, after executing its right-hand side, it returns its left-hand side value.
 
 Similarly, for asynchronous code, you can use the `then(tee = TRUE)` method, which is like `then()` except that after execution it resolves using its input promise. The only difference in the corrected code below is the operator immediately preceding `print(nrow(df))` has changed from `then()` to `then(tee = TRUE)`.
 
@@ -247,10 +195,10 @@ The lowest level of error handling is built into the `then` function. To review,
 ```r
 promise2 <- promise1 |>
   then(
-    onFulfilled = function(value) {
+    onFulfilled = \(value) {
       # Getting here means promise1 succeeded
     },
-    onRejected = function(err) {
+    onRejected = \(err) {
       # Getting here means promise1 failed
     }
   )
@@ -269,7 +217,7 @@ So the equivalent to this (synchronous) code:
 ```r
 value <- tryCatch(
   somepkg::operation(),
-  error = function(err) {
+  error = \(err) {
     warning("An error occurred: ", err)
     warning("Using default value of 0 instead")
     0
@@ -281,11 +229,11 @@ would be this, when the operation is performed asynchronously:
 
 ```r
 promise <- mirai(somepkg::operation()) |>
-  then(onRejected = function(err) {
+  then(onRejected = \(err) {
     warning("An error occurred: ", err)
     warning("Using default value of 0 instead")
     0
-  }
+  })
 ```
 
 In the synchronous case, an error in `operation()` will result in the error being logged as a warning, and `0` being assigned to `value`. In the asynchronous case, the same warning log messages will happen but then the value of `0` will be used to resolve `promise`. In both cases, the error is caught, dealt with, and turned into a non-error.
@@ -300,7 +248,7 @@ promise2 <- promise1 |>
   then(print)
 ```
 
-Well, `then` has its own default version of `onRejected`. It’s *not* an empty `onRejected = function(err) { }`, as you might think. Even though this function has no code in its body, it still returns normally, and thus would cause any errors to be caught and swallowed. That’s not the behavior we want; in the code above, we want a failure in `promise1` to cause `promise2` to be rejected so we know that something went wrong. So the default callback actually looks like: `onRejected = stop`, meaning, do nothing but raise the error, pushing the responsibility for error handling downstream.
+Well, `then` has its own default version of `onRejected`. It’s *not* an empty `onRejected = \(err) { }`, as you might think. Even though this function has no code in its body, it still returns normally, and thus would cause any errors to be caught and swallowed. That’s not the behavior we want; in the code above, we want a failure in `promise1` to cause `promise2` to be rejected so we know that something went wrong. So the default callback actually looks like: `onRejected = stop`, meaning, do nothing but raise the error, pushing the responsibility for error handling downstream.
 
 (Incidentally, it’s valid to call `then` with `onRejected` and not `onFulfilled`, and the default version of `onFulfilled` is not an empty function either; instead, it’s `onFulfilled = identity`, so that the input promise’s return value can be passed through to the output promise.)
 
@@ -310,7 +258,7 @@ The same syntactic sugar that is offered for non-error cases, is available for e
 
 ```r
 mirai(somepkg::operation()) |>
-  then(onRejected = ~warning(.))
+  then(onRejected = \(err) warning(err))
 ```
 
 There’s a `catch()` function that is just a shorthand for `then(onRejected)`. It saves a little typing, but more importantly, is easier to read:

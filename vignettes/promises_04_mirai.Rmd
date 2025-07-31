@@ -80,7 +80,7 @@ These objects include any functions which are defined in your session and not in
 
 For example:
 ```R
-download_data <- function(url) {
+download_data <- \(url) {
   file <- tempfile()
   download.file(url, file, "libcurl")
   file
