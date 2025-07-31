@@ -1,6 +1,5 @@
 ---
 title: "Case study: converting a Shiny app to async"
-author: Joe Cheng (joe@rstudio.com)
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Case study: converting a Shiny app to async}
@@ -14,7 +13,7 @@ In this case study, we'll work through an application of reasonable complexity, 
 
 > As a web service increases in popularity, so does the number of rogue scripts that abuse it for no apparent reason.
 >
-> _—Cheng's Law of Why We Can't Have Nice Things_
+> _—Joe Cheng's Law of Why We Can't Have Nice Things_
 
 I first noticed this in 2011, when the then-new RStudio IDE was starting to gather steam. We had a dashboard that tracked how often RStudio was being downloaded, and the numbers were generally tracking smoothly upward. But once every few months, we'd have huge spikes in the download counts, ten times greater than normal—and invariably, we'd find that all of the unexpected increase could be tracked to one or two IP addresses.
 

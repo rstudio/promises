@@ -143,7 +143,7 @@ Or, equivalently:
 p |>
   then(\(df) {
     df |>
-      filter(year == 2006) |>
+      filter(year == 2008) |>
       group_by(state) |>
       summarise(pop = sum(population)) |>
       arrange(desc(pop))
@@ -159,7 +159,7 @@ When working with promise pipelines, it may sometimes be useful to have a stage 
 ```r
 # Incorrect!
 promise |>
-  then(\(df) df |> filter(year == 2006)) |>
+  then(\(df) df |> filter(year == 2008)) |>
   then(\(df) print(nrow(df))) |>
   then(\(df) df |> group_by(state)) |>
   then(\(df) df |> summarise(pop = sum(population))) |>
@@ -176,7 +176,7 @@ Similarly, for asynchronous code, you can use the `then(tee = TRUE)` method, whi
 ```r
 # Correct.
 promise |>
-  then(\(df) df |> filter(year == 2006)) |>
+  then(\(df) df |> filter(year == 2008)) |>
   then(tee = TRUE, \(df) print(nrow(df))) |>
   then(\(df) df |> group_by(state)) |>
   then(\(df) df |> summarise(pop = sum(population))) |>

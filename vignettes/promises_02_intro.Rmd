@@ -52,7 +52,7 @@ before the real work has actually completed.
 ```r
 library(mirai)
 
-read.csv.async <- function(file, header = TRUE, stringsAsFactors = FALSE) {
+read.csv.async <- \(file, header = TRUE, stringsAsFactors = FALSE) {
   mirai(
     read.csv(file, header = header, stringsAsFactors = stringsAsFactors),
     .args = environment()
@@ -105,8 +105,7 @@ transform the result values somehow.
 
 **Chain together operations? Using the `|>` operator?**
 
-A lot like that! You can’t use the `|>` operator itself as we need to wrap the promise
-context in a function that may be called with the incoming promise resolves. So whereas
+A lot like that! You can’t use the `|>` operator itself as we need to wrap execution of the promise step within a function that may be called with the incoming promise resolves. So whereas
 you might do this to a regular data frame:
 
 ```r
