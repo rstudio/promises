@@ -16,3 +16,4 @@
 ^CRAN-SUBMISSION$
 ^_dev$
 ^.claude$
+^.vscode$
