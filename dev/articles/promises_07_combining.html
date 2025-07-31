@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.3.3.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.3.3.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,7 +109,7 @@ function to each of a list’s elements and reducing</li>
 <p>The most common pattern for combining promises is gathering, where
 you have two or more promises in hand and you want to use all of their
 results in a computation. The <code>promise_all</code> function is
-designed for this. Its signature looks like this:</p>
+designed for this. Its signature looks like:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span><span class="va">...</span>, .list <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
 <p><code>promise_all</code> takes any number of promises as named
@@ -124,15 +124,16 @@ results of two async <code>read.csv</code> operations:</p>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">a</span>, <span class="va">.</span><span class="op">$</span><span class="va">b</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-<p>In this example, the value of <code>.</code> within the curly braces
-is a list whose elements <code>a</code> and <code>b</code> are both data
-frames. We use <code>rbind</code> to combine them.</p>
-<p>The <code>.$</code> prefix is a bit inelegant, so we recommend the
-use of the base R function <code>with</code>, which lets you skip the
-prefix. Here’s the same example, with <code>with</code>:</p>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">values</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">values</span><span class="op">$</span><span class="va">a</span>, <span class="va">values</span><span class="op">$</span><span class="va">b</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>In this example, the value of <code>values</code> within the curly
+braces is a list whose elements <code>a</code> and <code>b</code> are
+both data frames. We use <code>rbind</code> to combine them.</p>
+<p>The <code>values$</code> prefix is a bit inelegant, so we recommend
+the use of the base R function <code>with</code>, which lets you skip
+the prefix. Here’s the same example, with <code>with</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
@@ -140,9 +141,11 @@ prefix. Here’s the same example, with <code>with</code>:</p>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"a.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"b.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">a</span>, b <span class="op">=</span> <span class="va">b</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">values</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">values</span>, <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>(Note that since the <code>promise_all</code> argument names are the
 same as the variable names (<code>a = a</code>, <code>b = b</code>), the
@@ -159,8 +162,21 @@ input promises. First, if you would rather your result list be unnamed,
 you can pass in promises as unnamed arguments:
 <code>promise_all(a, b)</code> would yield <code>list(1, 2)</code>.
 Second, if you have a list of promises already in hand, you can pass the
-list as a single argument using <code>promise_all(.list = x)</code>
-(instead of, say, using <code>do.call(promise_all, x)</code>).</p>
+list as a single argument using
+<code>promise_all(.list = x)</code>(instead of, say, using
+<code>do.call(promise_all, x)</code>).</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">proms</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a <span class="op">=</span> <span class="st">"a.csv"</span>, b <span class="op">=</span> <span class="st">"b.csv"</span><span class="op">)</span>, \<span class="op">(</span><span class="va">file</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>.list <span class="op">=</span> <span class="va">proms</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">values</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># values is a named list with elements a and b</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">values</span>, <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="nesting">Nesting<a class="anchor" aria-label="anchor" href="#nesting"></a>
@@ -169,18 +185,17 @@ list as a single argument using <code>promise_all(.list = x)</code>
 For example, if you use the result of promise <code>a</code> to decide
 whether to launch a second async task, whose result you then use in
 combination with the result of <code>a</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">a</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
-<span>  <span class="va">b</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">a</span> <span class="op">+</span> <span class="va">b</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">a</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
+<span>    <span class="va">b</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="va">a</span> <span class="op">+</span> <span class="va">b</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>(We use anonymous functions here to mask the names of the original
 promises–i.e. once inside the first anonymous function, the symbol
 <code>a</code> now refers to the result of the promise
@@ -194,7 +209,7 @@ doom”).</p>
 <div class="section level2">
 <h2 id="racing">Racing<a class="anchor" aria-label="anchor" href="#racing"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
@@ -223,11 +238,11 @@ also a promise.</p>
 names. For each package name, we launch an async task to download the
 package’s description file from CRAN pick out the last published
 date.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">get_pub_date</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pkg</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="va">get_pub_date</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">pkg</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">desc_url</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"https://cran.r-project.org/web/packages/"</span>, <span class="va">pkg</span>, <span class="st">"/DESCRIPTION"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span>
 <span>    <span class="op">{</span></span>
@@ -242,7 +257,7 @@ date.</p>
 <span></span>
 <span><span class="va">pkg_dates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/promise_map.html">promise_map</a></span><span class="op">(</span><span class="va">packages</span>, <span class="va">get_pub_date</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">pkg_dates</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">pkg_dates</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="va">print</span><span class="op">)</span></span></code></pre></div>
 <p>The resulting output looks like this:</p>
 <pre><code>$ggplot2
 [1] "2025-04-09 09:40:10 UTC"
@@ -261,11 +276,11 @@ any error or rejected promise will cause the entire
 for all the async operations to occur in parallel, you can achieve that
 with a combination of a regular <code><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">purrr::map</a></code> and
 <code>promise_all</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pkg_dates</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">packages</span>, <span class="va">get_pub_date</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>.list <span class="op">=</span> <span class="va">.</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pkg_dates</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">packages</span>, <span class="va">get_pub_date</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/promise_all.html">promise_all</a></span><span class="op">(</span>.list <span class="op">=</span> <span class="va">_</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">pkg_dates</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">pkg_dates</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="va">print</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reducing">Reducing<a class="anchor" aria-label="anchor" href="#reducing"></a>
@@ -276,7 +291,7 @@ to run an async operation on each of the elements, and to do so serially
 you’re searching through some elements using an async operation and want
 to terminate early when your search succeeds.</p>
 <p>The signature of <code>promise_reduce</code> is as follows:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/promise_reduce.html">promise_reduce</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">func</span>, init <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
 <p>If you’ve worked with <code><a href="https://rdrr.io/r/base/funprog.html" class="external-link">base::Reduce()</a></code> or
 <code>purr:::reduce()</code>, this should seem reasonably familiar:
@@ -293,7 +308,7 @@ promise that resolves to the ultimate accumulated value.</p>
 <p>The following example loops through a partial list of CRAN mirrors,
 returning the first one that passes whatever check
 <code>http::http_error</code> performs.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/promises/">promises</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span>
 <span></span>
@@ -306,7 +321,7 @@ returning the first one that passes whatever check
 <span></span>
 <span><span class="fu"><a href="../reference/promise_reduce.html">promise_reduce</a></span><span class="op">(</span></span>
 <span>  <span class="va">cran_mirrors</span>,</span>
-<span>  <span class="kw">function</span><span class="op">(</span><span class="va">result</span>, <span class="va">mirror</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  \<span class="op">(</span><span class="va">result</span>, <span class="va">mirror</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>      <span class="va">result</span></span>
 <span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
@@ -320,8 +335,8 @@ returning the first one that passes whatever check
 <span>    <span class="op">}</span></span>
 <span>  <span class="op">}</span>,</span>
 <span>  .init <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span> <span class="op"><a href="../reference/pipes.html">%...&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/then.html">then</a></span><span class="op">(</span><span class="va">print</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

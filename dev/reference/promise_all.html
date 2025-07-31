@@ -11,7 +11,7 @@ objects to be either fulfilled or rejected."><meta name="robots" content="noinde
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.3.3.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.3.3.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,20 +94,22 @@ will be passed through to the returned promise.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="promise.html">promise</a></span><span class="op">(</span><span class="op">~</span><span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://later.r-lib.org/reference/later.html" class="external-link">later</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, delay <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="promise.html">promise</a></span><span class="op">(</span><span class="op">~</span><span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://later.r-lib.org/reference/later.html" class="external-link">later</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, delay <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="promise.html">promise</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">resolve</span>, <span class="va">reject</span><span class="op">)</span> <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://later.r-lib.org/reference/later.html" class="external-link">later</a></span><span class="op">(</span>\<span class="op">(</span><span class="op">)</span> <span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, delay <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="promise.html">promise</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">resolve</span>, <span class="va">reject</span><span class="op">)</span> <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://later.r-lib.org/reference/later.html" class="external-link">later</a></span><span class="op">(</span>\<span class="op">(</span><span class="op">)</span> <span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, delay <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Resolves after 1 second, to the value: 1</span></span></span>
-<span class="r-in"><span><span class="fu">promise_race</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"promise_race:\n"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">promise_race</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="then.html">then</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"promise_race:\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Resolves after 2 seconds, to the value: list(1, 2)</span></span></span>
-<span class="r-in"><span><span class="fu">promise_all</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"promise_all:\n"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">promise_all</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="then.html">then</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"promise_all:\n"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
