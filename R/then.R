@@ -126,16 +126,16 @@ then <- function(
   ...,
   tee = FALSE
 ) {
-  check_dots_empty()
+  rlang::check_dots_empty()
   check_bool(tee)
 
   promise <- as.promise(promise)
 
   if (!is.null(onFulfilled)) {
-    onFulfilled <- as_function(onFulfilled)
+    onFulfilled <- rlang::as_function(onFulfilled)
   }
   if (!is.null(onRejected)) {
-    onRejected <- as_function(onRejected)
+    onRejected <- rlang::as_function(onRejected)
   }
   then_prom <-
     if (!tee) {
@@ -169,12 +169,12 @@ then <- function(
 #' @rdname then
 #' @export
 catch <- function(promise, onRejected, ..., tee = FALSE) {
-  check_dots_empty()
+  rlang::check_dots_empty()
   promise <- as.promise(promise)
   check_bool(tee)
 
   if (!is.null(onRejected)) {
-    onRejected <- as_function(onRejected)
+    onRejected <- rlang::as_function(onRejected)
   }
 
   if (!tee) {
@@ -198,7 +198,7 @@ finally <- function(promise, onFinally) {
   promise <- as.promise(promise)
 
   if (!is.null(onFinally)) {
-    onFinally <- as_function(onFinally)
+    onFinally <- rlang::as_function(onFinally)
   }
   promise$finally(onFinally)
 }
