@@ -203,7 +203,7 @@ local({
       err <- capture.output(type = "message", {
         future_promise(stop("boom1")) |>
           then(
-            onRejected = ~ {}
+            onRejected = \(err) {}
           ) |>
           wait_for_it()
       })

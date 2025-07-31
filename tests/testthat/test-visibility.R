@@ -41,8 +41,8 @@ describe("visibility", {
                 "double" = p |> then(double_fn),
                 "expr" = p |>
                   then(
-                    ~ {
-                      info <- withVisible(.)
+                    \(value) {
+                      info <- withVisible(value)
                       if (info$visible) {
                         info$value
                       } else {
@@ -59,7 +59,7 @@ describe("visibility", {
                 "double" = p |> catch(double_fn),
                 "expr" = p |>
                   catch(
-                    ~ {}
+                    \(err) {}
                   )
               )
 

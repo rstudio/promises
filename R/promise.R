@@ -343,13 +343,13 @@ normalizeOnRejected <- function(onRejected) {
 #'
 #' @export
 promise <- function(action) {
-  if (inherits(action, "formula")) {
-    if (length(action) != 2) {
-      stop("'action' must be a function or one-sided formula")
-    }
-  } else if (is.function(action)) {
+  if (is.function(action)) {
     if (length(formals(action)) != 2) {
       stop("'action' function must have two arguments")
+    }
+  } else if (inherits(action, "formula")) {
+    if (length(action) != 2) {
+      stop("'action' must be a function or one-sided formula")
     }
   } else {
     stop("Invalid action argument--must be a function or formula")
@@ -362,10 +362,6 @@ promise <- function(action) {
       if (is.function(action)) {
         action(p$resolve, p$reject)
       } else if (inherits(action, "formula")) {
-        lifecycle::deprecate_soft(
-          "1.4.0",
-          "promise(action = 'Formulas are no longer recommended when creating a promise. Please provide a `function(resolve, reject){ }` call directly.')"
-        )
         eval(
           action[[2]],
           list(
