@@ -1,3 +1,4 @@
 {
-    "C_Cpp.clang_format_fallbackStyle": "{     \"C_Cpp.clang_format_fallbackStyle\": \"WebKit\" }"
+    "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: Google, AccessModifierOffset: -2, ColumnLimit: 0, AllowShortFunctionsOnASingleLine: false}",
+    "C_Cpp.vcFormat.newLine.scopeBracesOnSeparateLines": true,
 }
