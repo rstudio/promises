@@ -352,7 +352,7 @@ promise <- function(action) {
       stop("'action' must be a function or one-sided formula")
     }
   } else {
-    stop("Invalid action argument--must be a function or formula")
+    stop("Invalid action argument--should be a function")
   }
 
   p <- Promise$new()
