@@ -134,12 +134,12 @@ wrap_with_signature <- function(func, formal_args) {
   stopifnot("..." %in% names(formals(func)))
 
   args <- names(formal_args)
-  recall <- rlang::call2(
+  recall <- call2(
     func,
-    !!!rlang::set_names(lapply(args, as.symbol), args)
+    !!!set_names(lapply(args, as.symbol), args)
   )
 
-  rlang::new_function(formal_args, recall)
+  new_function(formal_args, recall)
 }
 
 globals <- new.env(parent = emptyenv())
