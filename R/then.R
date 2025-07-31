@@ -126,8 +126,8 @@ then <- function(
   ...,
   tee = FALSE
 ) {
-  tee <- isTRUE(tee)
   check_dots_empty()
+  check_bool(tee)
 
   promise <- as.promise(promise)
 
@@ -171,7 +171,7 @@ then <- function(
 catch <- function(promise, onRejected, ..., tee = FALSE) {
   check_dots_empty()
   promise <- as.promise(promise)
-  tee <- isTRUE(tee)
+  check_bool(tee)
 
   if (!is.null(onRejected)) {
     onRejected <- as_function(onRejected)
