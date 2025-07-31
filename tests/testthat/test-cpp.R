@@ -1,6 +1,9 @@
 describe("C++ interface", {
   env <- new.env()
-  Rcpp::sourceCpp(system.file("promise_task.cpp", package = "promises"), env = env)
+  Rcpp::sourceCpp(
+    system.file("promise_task.cpp", package = "promises"),
+    env = env
+  )
 
   it("basically works", {
     promise(function(resolve, reject) {
