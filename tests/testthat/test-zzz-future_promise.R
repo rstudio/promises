@@ -1,5 +1,5 @@
 skip_on_cran()
-skip_on_os("mac") # TODO: Remove this skip once paralely is fixed on macOS in GHA
+skip_on_os("mac") # TODO: Remove this skip once paralely is fixed on macOS in GHA; https://github.com/futureverse/doFuture/issues/87#issuecomment-3001858683
 skip_on_os("windows") # timing is not consistent on Windows GHA
 
 skip_if_not_installed("future", "1.21.0")
