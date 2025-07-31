@@ -1,5 +1,7 @@
 # promises (development version)
 
+* Promoted usage of R's native pipe (`|>`) and lambda (`\(x) fn(x)`) syntax over promise-specific pipe methods. The promise pipe methods (`%...>%`, `%...!%`, `%...T>%`) are now superseded in favor of the R syntax supported in R 4.1 or later. Promises now requires R 4.1 or later to access these language features. (#148)
+
 * Fixed #154: Makes promises a pure R package that does not require compilation. We include a test of a C++ interface in `inst/promise_task.cpp` that is now dynamically compiled during testing. (#155)
 
 * Fixed #47: `promise_map()` can now properly handle `NULL` values being returned. (Thank you, @RLesur! #138)
