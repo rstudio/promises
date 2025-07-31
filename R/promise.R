@@ -1,5 +1,3 @@
-#' @useDynLib promises
-#' @importFrom Rcpp evalCpp
 #' @import later
 NULL
 
@@ -87,7 +85,7 @@ Promise <- R6::R6Class(
         private$onRejected <- list()
 
         later::later(
-          ~ {
+          function() {
             if (!private$rejectionHandled) {
               # warning() was unreliable here
               cat(
