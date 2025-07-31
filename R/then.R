@@ -127,6 +127,7 @@ then <- function(
   tee = FALSE
 ) {
   rlang::check_dots_empty()
+  tee <- isTRUE(tee)
 
   promise <- as.promise(promise)
 
@@ -170,6 +171,7 @@ then <- function(
 catch <- function(promise, onRejected, ..., tee = FALSE) {
   rlang::check_dots_empty()
   promise <- as.promise(promise)
+  tee <- isTRUE(tee)
 
   if (!is.null(onRejected)) {
     onRejected <- rlang::as_function(onRejected)
