@@ -315,13 +315,13 @@ normalizeOnRejected <- function(onRejected) {
 #' @examples
 #' # Create a promise that resolves to a random value after 2 secs
 #' p1 <- promise(function(resolve, reject) {
-#'   later::later(~resolve(runif(1)), delay = 2)
+#'   later::later(\() resolve(runif(1)), delay = 2)
 #' })
 #'
 #' p1 |> then(print)
 #'
 #' # Create a promise that errors immediately
-#' p2 <- promise(~{
+#' p2 <- promise(\(resolve, reject) {
 #'   reject("An error has occurred")
 #' })
 #' then(p2,
