@@ -1,7 +1,10 @@
 describe("C++ interface", {
+  env <- new.env()
+  Rcpp::sourceCpp(system.file("promise_task.cpp", package = "promises"), env = env)
+
   it("basically works", {
     promise(function(resolve, reject) {
-      asyncFib(resolve, reject, 3)
+      env$asyncFib(resolve, reject, 3)
     }) %...>%
       {
         expect_identical(., 2)
@@ -15,7 +18,7 @@ describe("C++ interface", {
     expect_true(is.null(current_promise_domain()))
     with_promise_domain(cd, {
       promise(function(resolve, reject) {
-        asyncFib(resolve, reject, 3)
+        env$asyncFib(resolve, reject, 3)
       }) %...>%
         {
           expect_identical(., 2)

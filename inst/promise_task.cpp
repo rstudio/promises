@@ -48,19 +48,21 @@ private:
   long result;
 };
 
+// [[Rcpp::depends(later)]]
 // [[Rcpp::export]]
 void asyncFib(Rcpp::Function resolve, Rcpp::Function reject, double x) {
   FibonacciTask* fib = new FibonacciTask(resolve, reject, x);
   fib->begin();
 }
 
-/*** R
+/* R
 library(promises)
 library(later)
 library(Rcpp)
+Rcpp::sourceCpp(system.file("promise_task.cpp", package = "promises"))
 
 promise(function(resolve, reject) {
-  promise:::asyncFib(resolve, reject, 45)
+  asyncFib(resolve, reject, 45)
 }) %...>% print()
 
  */
