@@ -283,7 +283,6 @@ normalizeOnRejected <- function(onRejected) {
   }
 }
 
-# TODO make issue to de-formula-ify promise() to `promise(\(resolve) ...)` or `promise(\(resolve, reject) ...)`
 #' Create a new promise object
 #'
 #' `promise()` creates a new promise. A promise is a placeholder object for the
@@ -307,14 +306,27 @@ normalizeOnRejected <- function(onRejected) {
 #'
 #' The return value of `action` will be ignored.
 #'
-#' @param action A function with signature `function(resolve, reject)`, or a
-#'   one-sided formula. See Details.
+#' @section `action=` formulas:
+#'
+#' `r lifecycle::badge("superseded")`
+#'
+#' With `{promises}` depending on R >= 4.1, the shorthand of a formula, `~
+#' fn(.)` for `action` is no longer recommended by the `{promises}` package or
+#' tidyverse (for example,
+#' [`{purrr}`](https://github.com/tidyverse/purrr/commit/670c3ed9920f15da0d4175068ecddc41f0f1f335#diff-c4dcc43795da5c7f6bf5a94d957b5507ce795fedd6d3eb092ccad03678c4f76dR15))
+#' as we now have access to the function shorthand, `\(x) fn(x)`. Please update
+#' your `action` code to use the new function shorthand syntax `\(resolve,
+#' reject) resolve(arg1, arg2)` instead of `~ { resolve(arg1, arg2) }`. The
+#' magically created `resolve`/`reject` functions can be confusing when chained
+#' with other methods.
+#'
+#' @param action A function with signature `function(resolve, reject)`.
 #'
 #' @return A promise object (see \code{\link{then}}).
 #'
 #' @examples
 #' # Create a promise that resolves to a random value after 2 secs
-#' p1 <- promise(function(resolve, reject) {
+#' p1 <- promise(\(resolve, reject) {
 #'   later::later(\() resolve(runif(1)), delay = 2)
 #' })
 #'
@@ -325,8 +337,8 @@ normalizeOnRejected <- function(onRejected) {
 #'   reject("An error has occurred")
 #' })
 #' then(p2,
-#'   onFulfilled = ~message("Success"),
-#'   onRejected = ~message("Failure")
+#'   onFulfilled = \(value) message("Success"),
+#'   onRejected = \(err) message("Failure")
 #' )
 #'
 #' @export
@@ -350,6 +362,10 @@ promise <- function(action) {
       if (is.function(action)) {
         action(p$resolve, p$reject)
       } else if (inherits(action, "formula")) {
+        lifecycle::deprecate_soft(
+          "1.4.0",
+          "promise(action = 'Formulas are no longer recommended when creating a promise. Please provide a `function(resolve, reject){ }` call directly.')"
+        )
         eval(
           action[[2]],
           list(

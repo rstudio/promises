@@ -7,8 +7,7 @@
 promise(action)
 }
 \arguments{
-\item{action}{A function with signature \verb{function(resolve, reject)}, or a
-one-sided formula. See Details.}
+\item{action}{A function with signature \verb{function(resolve, reject)}.}
 }
 \value{
 A promise object (see \code{\link{then}}).
@@ -36,9 +35,23 @@ equivalent of a function call that never returns, i.e. hangs).
 
 The return value of \code{action} will be ignored.
 }
+\section{\verb{action=} formulas}{
+
+
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
+With \code{{promises}} depending on R >= 4.1, the shorthand of a formula, \code{~ fn(.)} for \code{action} is no longer recommended by the \code{{promises}} package or
+tidyverse (for example,
+\href{https://github.com/tidyverse/purrr/commit/670c3ed9920f15da0d4175068ecddc41f0f1f335#diff-c4dcc43795da5c7f6bf5a94d957b5507ce795fedd6d3eb092ccad03678c4f76dR15}{\code{{purrr}}})
+as we now have access to the function shorthand, \verb{\\(x) fn(x)}. Please update
+your \code{action} code to use the new function shorthand syntax \verb{\\(resolve, reject) resolve(arg1, arg2)} instead of \code{~ { resolve(arg1, arg2) }}. The
+magically created \code{resolve}/\code{reject} functions can be confusing when chained
+with other methods.
+}
+
 \examples{
 # Create a promise that resolves to a random value after 2 secs
-p1 <- promise(function(resolve, reject) {
+p1 <- promise(\(resolve, reject) {
   later::later(\() resolve(runif(1)), delay = 2)
 })
 
@@ -49,8 +62,8 @@ p2 <- promise(\(resolve, reject) {
   reject("An error has occurred")
 })
 then(p2,
-  onFulfilled = ~message("Success"),
-  onRejected = ~message("Failure")
+  onFulfilled = \(value) message("Success"),
+  onRejected = \(err) message("Failure")
 )
 
 }
