@@ -31,7 +31,7 @@ Imports:
     lifecycle,
     magrittr (>= 1.5),
     R6,
-    rlang (>= 1.1.0),
+    rlang,
     stats
 Suggests:
     future (>= 1.21.0),
