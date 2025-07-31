@@ -112,7 +112,7 @@ local({
           time_diff()
         })
       }) |>
-        promise_all(.list = .) |>
+        promise_all(.list = _) |>
         then(\(x) {
           exec_times <<- unlist(x)
         })

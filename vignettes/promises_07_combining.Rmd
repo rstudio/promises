@@ -165,7 +165,7 @@ If you want behavior that's similar to `promise_map` but for all the async opera
 
 ```r
 pkg_dates <- purrr::map(packages, get_pub_date) |>
-  promise_all(.list = .)
+  promise_all(.list = _)
 
 pkg_dates |> then(print)
 ```
