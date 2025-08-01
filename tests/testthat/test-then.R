@@ -1,3 +1,56 @@
+test_that("complex promise chains with mixed success/failure", {
+  counter <- 0
+  promise_resolve(1) |>
+    then(\(x) {
+      counter <<- counter + 1
+      stop("error1")
+    }) |>
+    catch(\(err) {
+      counter <<- counter + 1
+      "recovered"
+    }) |>
+    then(\(x) {
+      counter <<- counter + 1
+      x
+    }) |>
+    catch(\(err) {
+      counter <<- counter + 1
+      "should not reach"
+    }) |>
+    then(\(x) {
+      counter <<- counter + 1
+      expect_equal(x, "recovered")
+    }) |>
+    wait_for_it()
+  expect_equal(counter, 4)
+})
+
+test_that("then() and catch() handle NULL callbacks correctly", {
+  # NULL onFulfilled should pass through value
+  promise_resolve(42) |>
+    then(NULL, \(err) "error") |>
+    then(\(x) expect_equal(x, 42)) |>
+    wait_for_it()
+
+  # NULL onRejected should pass through error
+  promise_resolve(stop("boom")) |>
+    then(\(x) x, NULL) |>
+    catch(\(err) expect_match(err$message, "boom")) |>
+    wait_for_it()
+})
+
+test_that("then() validates arguments properly", {
+  expect_error(
+    then(promise_resolve(1), onFulfilled = "not a function"),
+    "function"
+  )
+
+  expect_error(
+    catch(promise_resolve(1), "not a function"),
+    "function"
+  )
+})
+
 test_that("tee types are handled correctly", {
   expect_silent({
     p <- promise_resolve(1) |> then(tee = TRUE)
