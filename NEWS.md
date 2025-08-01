@@ -6,7 +6,7 @@
 
 * Updated `catch()` API from `catch(promise, onRejected, tee = FALSE)` to `catch(promise, onRejected, ..., tee = FALSE)`. It requires that `tee=` be specified as a keyword argument. (#148)
 
-* Fixed #156: `then(tee=)` and `catch(tee=)` is now required to be a boolean value (not just a *truthy* value). (#157)
+* Fixed #156: `then(tee=)` and `catch(tee=)` is now required to be a logical value (not just a *truthy* value). (#157)
 
 * Fixed #154: Makes promises a pure R package that does not require compilation. We include a test of a C++ interface in `inst/promise_task.cpp` that is now dynamically compiled during testing. (#155)
 
