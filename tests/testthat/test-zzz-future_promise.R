@@ -1,5 +1,5 @@
 skip_on_cran()
-skip_on_os("mac") # TODO: Remove this skip once paralely is fixed on macOS in GHA
+skip_on_os("mac") # TODO: Remove this skip once paralely is fixed on macOS in GHA; https://github.com/futureverse/doFuture/issues/87#issuecomment-3001858683
 skip_on_os("windows") # timing is not consistent on Windows GHA
 
 skip_if_not_installed("future", "1.21.0")
@@ -95,10 +95,10 @@ local({
               future::future({
                 Sys.sleep(worker_job_time)
                 time_diff()
-              }) %...>%
-                {
-                  future_exec_times <<- c(future_exec_times, .)
-                }
+              }) |>
+                then(\(x) {
+                  future_exec_times <<- c(future_exec_times, x)
+                })
             },
             delay = 1
           )
@@ -106,19 +106,22 @@ local({
       }
 
       exec_times <- NA
-      p <- lapply(seq_len(worker_jobs), function(i) {
-        prom_fn({
-          Sys.sleep(worker_job_time)
-          time_diff()
+      proms <-
+        lapply(seq_len(worker_jobs), function(i) {
+          prom_fn({
+            Sys.sleep(worker_job_time)
+            time_diff()
+          })
         })
-      }) %>%
-        promise_all(.list = .) %...>%
-        {
-          exec_times <<- unlist(.)
-        }
+
+      p <-
+        promise_all(.list = proms) |>
+        then(\(x) {
+          exec_times <<- unlist(x)
+        })
       post_lapply_time_diff <- time_diff()
 
-      p %>% wait_for_it()
+      p |> wait_for_it()
 
       # expect that the average time is less than the expected total time
       expect_equal(median(exec_times) < expected_total_time, !block_mid_session)
@@ -198,10 +201,10 @@ local({
   test_that("future_promise doesn't report errors that have been handled", {
     with_test_workers({
       err <- capture.output(type = "message", {
-        future_promise(stop("boom1")) %>%
+        future_promise(stop("boom1")) |>
           then(
-            onRejected = ~ {}
-          ) %>%
+            onRejected = \(err) {}
+          ) |>
           wait_for_it()
       })
       expect_equal(err, character(0))

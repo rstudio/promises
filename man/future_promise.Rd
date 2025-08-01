@@ -32,13 +32,11 @@ identified.}
 Unlike \code{\link[future:future]{future::future()}}, \code{future_promise()} returns a \code{\link[=promise]{promise()}} object that will eventually resolve the \pkg{future} \code{expr}.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-}
-\details{
 When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until a worker becomes available.
 This occurs when there is more submitted \pkg{future} work than there are available \pkg{future} workers.
 To counter this situation, we can create a promise to execute work using future (using \code{future_promise()}) and only begin the work if a \pkg{future} worker is available.
-
+}
+\details{
 Using \code{future_promise()} is recommended whenever a continuous runtime is used, such as with \pkg{plumber} or \pkg{shiny}.
 
 For more details and examples, please see the \href{https://rstudio.github.io/promises/articles/promises_05b_future_promise.html}{\code{vignette("future_promise", "promises")}} vignette.
@@ -78,8 +76,12 @@ print_msg <- function(pid, msg) {
 # `"promise done"` will appear after four workers are done and the main R session is not blocked
 # The important thing to note is the first four times will be roughly the same
 with_two_workers({
-  promise_resolve(Sys.getpid()) \%...>\% print_msg("promise done")
-  for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+  promise_resolve(Sys.getpid()) |>
+    then(\(x) {print_msg("promise done")})
+  for (i in 1:6) {
+    future::future({Sys.sleep(1); Sys.getpid()}) |>
+      then(\(x) {print_msg("future done")})
+  }
 })
 {
 #> PID: XXX; 2.5s promise done
@@ -94,8 +96,12 @@ with_two_workers({
 # `"promise done"` will almost immediately, before any workers have completed
 # The first two `"future done"` comments appear earlier the example above
 with_two_workers({
-  promise_resolve(Sys.getpid()) \%...>\% print_msg("promise")
-  for (i in 1:6) future_promise({Sys.sleep(1); Sys.getpid()}) \%...>\% print_msg("future done")
+  promise_resolve(Sys.getpid()) |>
+    then(\(x) {print_msg("promise")})
+  for (i in 1:6) {
+    future_promise({Sys.sleep(1); Sys.getpid()}) |>
+      then(\(x) {print_msg("future done")})
+  }
 })
 {
 #> PID: XXX; 0.2s promise done

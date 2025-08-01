@@ -8,32 +8,32 @@ test_that("promise_map handles NULL values", {
 
   counter <- 0
 
-  prom2_map("anything", "anything_else") %...>%
-    {
+  prom2_map("anything", "anything_else") |>
+    then(\(x) {
       counter <<- counter + 1
-      expect_equal(., list("anything", "anything_else"))
-    } %>%
+      expect_equal(x, list("anything", "anything_else"))
+    }) |>
     wait_for_it()
 
-  prom2_map(NULL, "anything_else") %...>%
-    {
+  prom2_map(NULL, "anything_else") |>
+    then(\(x) {
       counter <<- counter + 1
-      expect_equal(., list(NULL, "anything_else"))
-    } %>%
+      expect_equal(x, list(NULL, "anything_else"))
+    }) |>
     wait_for_it()
 
-  prom2_map("anything", NULL) %...>%
-    {
+  prom2_map("anything", NULL) |>
+    then(\(x) {
       counter <<- counter + 1
-      expect_equal(., list("anything", NULL))
-    } %>%
+      expect_equal(x, list("anything", NULL))
+    }) |>
     wait_for_it()
 
-  prom2_map(NULL, NULL) %...>%
-    {
+  prom2_map(NULL, NULL) |>
+    then(\(x) {
       counter <<- counter + 1
-      expect_equal(., list(NULL, NULL))
-    } %>%
+      expect_equal(x, list(NULL, NULL))
+    }) |>
     wait_for_it()
 
   expect_equal(counter, 4)

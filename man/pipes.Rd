@@ -26,13 +26,16 @@ a promise or non-promise value, or throw an error.}
 A new promise.
 }
 \description{
+With R 4.1, the promise pipe operators are \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} by \code{\link[=then]{then()}}, \code{\link[=catch]{catch()}}, and
+\code{\link[=finally]{finally()}} methods when used in tandem with the function shorthand (\verb{\\(x) rhs(x)}) and \verb{|>}.
+}
+\details{
 Promise-aware pipe operators, in the style of \href{https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html}{magrittr}.
 Like magrittr pipes, these operators can be used to chain together pipelines
 of promise-transforming operations. Unlike magrittr pipes, these pipes wait
 for promise resolution and pass the unwrapped value (or error) to the \code{rhs}
 function call.
-}
-\details{
+
 The \code{>} variants are for handling successful resolution, the \code{!} variants are
 for handling errors. The \code{T} variants of each return the lhs instead of the
 rhs, which is useful for pipeline steps that are used for side effects

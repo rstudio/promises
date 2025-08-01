@@ -6,7 +6,11 @@ magrittr::"%>%"
 #' @export
 magrittr::"%T>%"
 
+
 #' Promise pipe operators
+#'
+#' With R 4.1, the promise pipe operators are `r lifecycle::badge('superseded')` by [`then()`], [`catch()`], and
+#' [`finally()`] methods when used in tandem with the function shorthand (`\(x) rhs(x)`) and `|>`.
 #'
 #' Promise-aware pipe operators, in the style of [magrittr](https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html).
 #' Like magrittr pipes, these operators can be used to chain together pipelines
@@ -112,6 +116,7 @@ magrittr::"%T>%"
   func <- pipeify_rhs(parts[[3L]], env)
   catch(lhs, func, tee = TRUE)
 }
+
 
 has.visible <- function(func) {
   ".visible" %in% names(formals(func))

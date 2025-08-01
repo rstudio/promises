@@ -20,6 +20,13 @@ Useful links:
 \author{
 \strong{Maintainer}: Joe Cheng \email{joe@posit.co}
 
+Authors:
+\itemize{
+  \item Barret Schloerke \email{barret@posit.co} (\href{https://orcid.org/0000-0001-9986-114X}{ORCID})
+  \item Winston Chang \email{winston@posit.co} (\href{https://orcid.org/0000-0002-1576-2126}{ORCID})
+  \item Charlie Gao \email{charlie.gao@posit.co} (\href{https://orcid.org/0000-0002-0750-061X}{ORCID})
+}
+
 Other contributors:
 \itemize{
   \item Posit Software, PBC (03wc8by49) [copyright holder, funder]

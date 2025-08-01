@@ -22,7 +22,7 @@ We've updated this guide to using the `mirai` package from `future` as we believ
 
 1. Faster startup times and much less per-task overhead, meaning you can boost performance by making even shorter tasks async.
 1. More linear scaling, meaning you get the same relative benefits whether running 2 or 200 cores.
-1. Event-driven promises using `mirai` vs. promises using `future` which time-poll every 100 ms. Lower latency and response times can help with the user experience.
+1. Event-driven promises using `mirai` vs. promises using `future`, which time-poll every 100 ms. Lower latency and response times can help with the user experience.
 
 The previous guide using `future` is available [here](promises_05a_futures.html). Using `future` continues to be supported within the Shiny ecosystem, and Henrik Bengtsson‘s excellent work on the futureverse deserves credit for pushing the boundaries of parallelism in R farther than many thought possible.
 
@@ -80,7 +80,7 @@ These objects include any functions which are defined in your session and not in
 
 For example:
 ```R
-download_data <- function(url) {
+download_data <- \(url) {
   file <- tempfile()
   download.file(url, file, "libcurl")
   file
@@ -116,7 +116,7 @@ Care should be taken when using this feature as it will also pass anything else 
 
 Besides variables, package functions need to be declared with the full namespace so that they can be found in the other process. For example, using `dplyr::mutate()` instead of just `mutate()`, even if the `dplyr` package is loaded in your main session, as the other process will not have any packages loaded by default.
 
-Alternatively, make a call to load the package inside your mirai code chunk, for example by adding `library(dplyr)`. Sometimes this may be the most convenient option, especially for for infix operators. For example the magrittr pipe `%>%`, requires a `library(magrittr)` to load the package beforehand.
+Alternatively, make a call to load the package inside your mirai code chunk, for example by adding `library(dplyr)`. Sometimes this may be the most convenient option, especially for for infix operators. For example the `{magrittr}` pipe `%>%`, requires a `library(magrittr)` to load the package beforehand.
 
 ### Custom Data Types
 

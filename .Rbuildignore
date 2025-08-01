@@ -15,3 +15,5 @@
 ^LICENSE\.md$
 ^CRAN-SUBMISSION$
 ^_dev$
+^.claude$
+^.vscode$
