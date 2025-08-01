@@ -141,20 +141,31 @@ then <- function(
     if (!tee) {
       promise$then(onFulfilled = onFulfilled, onRejected = onRejected)
     } else {
-      promise$then(
-        onFulfilled = function(value, visible) {
-          onFulfilled(value, visible)
+      # tee == TRUE
 
-          if (visible) {
-            value
-          } else {
-            invisible(value)
-          }
-        },
-        onRejected = function(reason) {
+      # Must normalize the callbacks to ensure they accept their arguments
+
+      onFulfilledTee <- NULL
+      if (!is.null(onFulfilled)) {
+        onFulfilled <- normalizeOnFulfilled(onFulfilled)
+        onFulfilledTee <- \(value, .visible) {
+          onFulfilled(value, .visible)
+          if (.visible) value else invisible(value)
+        }
+      }
+
+      onRejectedTee <- NULL
+      if (!is.null(onRejected)) {
+        onRejected <- normalizeOnRejected(onRejected)
+        onRejectedTee <- \(reason) {
           onRejected(reason)
           stop(reason) # Re-throw the error to propagate it
         }
+      }
+
+      promise$then(
+        onFulfilled = onFulfilledTee,
+        onRejected = onRejectedTee
       )
     }
   invisible(then_prom)
@@ -178,9 +189,10 @@ catch <- function(promise, onRejected, ..., tee = FALSE) {
   }
 
   if (!tee) {
-    return(promise$catch(onRejected))
+    promise$catch(onRejected)
   } else {
-    promise$catch(function(reason) {
+    onRejected <- normalizeOnRejected(onRejected)
+    promise$catch(\(reason) {
       onRejected(reason)
       stop(reason)
     })
