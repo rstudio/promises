@@ -4,7 +4,7 @@
       then(promise_resolve(1), tee = 4)
     Condition
       Error in `then()`:
-      ! `tee` must be `TRUE` or `FALSE`, not the number 4.
+      ! `tee` must be `TRUE` or `FALSE`
 
 ---
 
@@ -12,5 +12,5 @@
       catch(promise_resolve(1), function(err) { }, tee = "4")
     Condition
       Error in `catch()`:
-      ! `tee` must be `TRUE` or `FALSE`, not the string "4".
+      ! `tee` must be `TRUE` or `FALSE`
 
