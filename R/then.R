@@ -104,7 +104,6 @@
 #' which will be `FALSE` if the result value is [invisible][base::invisible()].
 #'
 #' @param promise A promise object. The object can be in any state.
-#'
 #' @param onFulfilled A function that will be invoked if the promise value
 #'   successfully resolves. When invoked, the function will be called with a
 #'   single argument: the resolved value. Optionally, the function can take a
@@ -112,12 +111,17 @@
 #'   with a visible or invisible value. The function can return a value or a
 #'   promise object, or can throw an error; these will affect the resolution of
 #'   the promise object that is returned by `then()`.
-#'
 #' @param onRejected A function taking the argument `error`. The function can
 #'   return a value or a promise object, or can throw an error. If `onRejected`
 #'   is provided and doesn't throw an error (or return a promise that fails)
 #'   then this is the async equivalent of catching an error.
 #' @param ... Ignored.
+#' @param tee If `TRUE`, ignore the return value of the callback, and use the
+#'   original value instead. This is useful for performing operations with
+#'   side-effects, particularly logging to the console or a file. If the
+#'   callback itself throws an error, and `tee` is `TRUE`, that error will still
+#'   be used to fulfill the the returned promise (in other words, `tee` only has
+#'   an effect if the callback does not throw).
 #' @export
 then <- function(
   promise,
@@ -171,12 +175,6 @@ then <- function(
   invisible(then_prom)
 }
 
-#' @param tee If `TRUE`, ignore the return value of the callback, and use the
-#'   original value instead. This is useful for performing operations with
-#'   side-effects, particularly logging to the console or a file. If the
-#'   callback itself throws an error, and `tee` is `TRUE`, that error will still
-#'   be used to fulfill the the returned promise (in other words, `tee` only has
-#'   an effect if the callback does not throw).
 #' @rdname then
 #' @export
 catch <- function(promise, onRejected, ..., tee = FALSE) {
@@ -199,12 +197,10 @@ catch <- function(promise, onRejected, ..., tee = FALSE) {
   }
 }
 
-#' @rdname then
-#'
 #' @param onFinally A function with no arguments, to be called when the async
 #'   operation either succeeds or fails. Usually used for freeing resources that
 #'   were used during async operations.
-#'
+#' @rdname then
 #' @export
 finally <- function(promise, onFinally) {
   promise <- as.promise(promise)
@@ -217,12 +213,12 @@ finally <- function(promise, onFinally) {
 
 
 check_tee <- function(tee) {
-  if (is.boolean(tee)) {
+  if (is.logical(tee)) {
     return()
   }
 
   rlang::abort(
-    "`tee=` must be `TRUE` or `FALSE`",
+    "`tee` must be `TRUE` or `FALSE`",
     call = parent.frame()
   )
 }
