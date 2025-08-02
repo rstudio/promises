@@ -152,7 +152,7 @@ then <- function(
       onFulfilledTee <- NULL
       if (!is.null(onFulfilled)) {
         onFulfilled <- normalizeOnFulfilled(onFulfilled)
-        onFulfilledTee <- \(value, .visible) {
+        onFulfilledTee <- function(value, .visible) {
           onFulfilled(value, .visible)
           if (.visible) value else invisible(value)
         }
@@ -161,7 +161,7 @@ then <- function(
       onRejectedTee <- NULL
       if (!is.null(onRejected)) {
         onRejected <- normalizeOnRejected(onRejected)
-        onRejectedTee <- \(reason) {
+        onRejectedTee <- function(reason) {
           onRejected(reason)
           stop(reason) # Re-throw the error to propagate it
         }
@@ -190,7 +190,7 @@ catch <- function(promise, onRejected, ..., tee = FALSE) {
     promise$catch(onRejected)
   } else {
     onRejected <- normalizeOnRejected(onRejected)
-    promise$catch(\(reason) {
+    promise$catch(function(reason) {
       onRejected(reason)
       stop(reason)
     })
