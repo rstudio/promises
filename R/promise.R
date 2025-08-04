@@ -352,7 +352,7 @@ promise <- function(action) {
       stop("'action' must be a function or one-sided formula")
     }
   } else {
-    stop("Invalid action argument--must be a function or formula")
+    stop("Invalid action argument--should be a function")
   }
 
   p <- Promise$new()
@@ -416,13 +416,13 @@ promise <- function(action) {
 #'
 #' @export
 promise_resolve <- function(value) {
-  promise(\(resolve, reject) resolve(value))
+  promise(function(resolve, reject) resolve(value))
 }
 
 #' @rdname promise_resolve
 #' @export
 promise_reject <- function(reason) {
-  promise(\(resolve, reject) reject(reason))
+  promise(function(resolve, reject) reject(reason))
 }
 
 #' Coerce to a promise
