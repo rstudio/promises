@@ -30,6 +30,7 @@ Imports:
     later,
     lifecycle,
     magrittr (>= 1.5),
+    otel,
     R6,
     rlang,
     stats
@@ -37,6 +38,7 @@ Suggests:
     future (>= 1.21.0),
     knitr,
     mirai,
+    otelsdk,
     purrr,
     Rcpp,
     rmarkdown,
@@ -45,6 +47,9 @@ Suggests:
     vembedr
 VignetteBuilder:
     knitr
+Remotes:
+    r-lib/otel,
+    r-lib/otelsdk
 Config/Needs/website: rsconnect, tidyverse/tidytemplate
 Config/testthat/edition: 3
 Config/usethis/last-upkeep: 2025-05-27
