@@ -179,8 +179,9 @@ then <- function(
 #' @export
 catch <- function(promise, onRejected, ..., tee = FALSE) {
   check_dots(...)
-  promise <- as.promise(promise)
   check_tee(tee)
+
+  promise <- as.promise(promise)
 
   if (!is.null(onRejected)) {
     onRejected <- rlang::as_function(onRejected)
