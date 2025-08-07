@@ -130,7 +130,7 @@ then <- function(
   ...,
   tee = FALSE
 ) {
-  rlang::check_dots_empty()
+  check_dots(...)
   check_tee(tee)
 
   promise <- as.promise(promise)
@@ -178,7 +178,7 @@ then <- function(
 #' @rdname then
 #' @export
 catch <- function(promise, onRejected, ..., tee = FALSE) {
-  rlang::check_dots_empty()
+  check_dots(...)
   promise <- as.promise(promise)
   check_tee(tee)
 
@@ -211,6 +211,11 @@ finally <- function(promise, onFinally) {
   promise$finally(onFinally)
 }
 
+check_dots <- function(..., call = parent.frame()) {
+  if (nargs()) {
+    rlang::check_dots_empty(call = call)
+  }
+}
 
 check_tee <- function(tee) {
   if (is.logical(tee)) {
