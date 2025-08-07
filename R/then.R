@@ -130,15 +130,15 @@ then <- function(
   ...,
   tee = FALSE
 ) {
-  rlang::check_dots_empty()
+  check_dots(...)
   check_tee(tee)
 
   promise <- as.promise(promise)
 
-  if (!is.null(onFulfilled)) {
+  if (!is.null(onFulfilled) && !is.function(onFulfilled)) {
     onFulfilled <- rlang::as_function(onFulfilled)
   }
-  if (!is.null(onRejected)) {
+  if (!is.null(onRejected) && !is.function(onRejected)) {
     onRejected <- rlang::as_function(onRejected)
   }
   then_prom <-
@@ -178,11 +178,12 @@ then <- function(
 #' @rdname then
 #' @export
 catch <- function(promise, onRejected, ..., tee = FALSE) {
-  rlang::check_dots_empty()
-  promise <- as.promise(promise)
+  check_dots(...)
   check_tee(tee)
 
-  if (!is.null(onRejected)) {
+  promise <- as.promise(promise)
+
+  if (!is.null(onRejected) && !is.function(onRejected)) {
     onRejected <- rlang::as_function(onRejected)
   }
 
@@ -205,12 +206,17 @@ catch <- function(promise, onRejected, ..., tee = FALSE) {
 finally <- function(promise, onFinally) {
   promise <- as.promise(promise)
 
-  if (!is.null(onFinally)) {
+  if (!is.null(onFinally) && !is.function(onFinally)) {
     onFinally <- rlang::as_function(onFinally)
   }
   promise$finally(onFinally)
 }
 
+check_dots <- function(..., call = parent.frame()) {
+  if (nargs()) {
+    rlang::check_dots_empty(call = call)
+  }
+}
 
 check_tee <- function(tee) {
   if (is.logical(tee)) {
