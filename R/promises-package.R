@@ -6,7 +6,7 @@
 ## usethis namespace: end
 NULL
 
-otel_tracer_name <- "io.github.rstudio/promises"
+otel_tracer_name <- "co.posit.r-package.promises"
 
 ignore_unused_imports <- function() {
   fastmap::fastqueue
