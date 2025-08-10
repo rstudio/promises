@@ -136,6 +136,12 @@ create_otel_active_span_promise_domain <- function(
         })
       }
     },
+    ## TODO: Is this needed?
+    # wrapSync = function(expr) {
+    #   otel::with_active_span(active_span, {
+    #     force(expr)
+    #   })
+    # },
     "_local_promise_domain" = TRUE
   )
 }
