@@ -58,7 +58,7 @@ promise_all <- function(..., .list = NULL) {
     )
   }
 
-  done <- list()
+  # done <- list()
   results <- list()
 
   promise(function(resolve, reject) {
@@ -68,8 +68,12 @@ promise_all <- function(..., .list = NULL) {
       names(.list)
     }
 
+    doneCounter <- 0
+    n <- length(.list)
+
     lapply(keys, function(key) {
-      done[[key]] <<- FALSE
+      # done[[key]] <<- FALSE
+
       # Forces correct/deterministic ordering of the result list's elements
       results[[key]] <<- NA
 
@@ -82,14 +86,19 @@ promise_all <- function(..., .list = NULL) {
           results[key] <<- list(value)
 
           # Record the fact that the promise was completed.
-          done[[key]] <<- TRUE
+          # done[[key]] <<- TRUE
+          doneCounter <<- doneCounter + 1
+
           # If all of the tasks are done, resolve.
-          if (all(as.logical(done))) {
+          if (
+            doneCounter == n
+            #  && all(as.logical(done))
+          ) {
             resolve(results)
           }
         },
         onRejected = function(reason) {
-          # TODO: Cancel promises that are still running
+          # TODO: Cancel promises that are still running; Use `done` list
           reject(reason)
         }
       )
