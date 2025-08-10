@@ -1,7 +1,16 @@
 # promises (development version)
 
-* Fixed #47: `promise_map()` can now properly handle `NULL` values being returned. (Thank you, @RLesur! #138)
+* Promoted usage of R's native pipe (`|>`) and function shorthand (`\(x) fn(x)`) syntax over promise pipe methods. The promise pipe methods (`%...>%`, `%...!%`, `%...T>%`) are now superseded in favor of the R syntax supported in R 4.1 or later. Promises now requires R 4.1 or later to access these language features. (#148)
 
+* Added `tee=FALSE` parameter to `then()`. When `tee=TRUE`, `then()` will ignore the return value of the callback, and return the original value instead. This is useful for performing operations with side-effects, particularly logging to the console or a file. Adding this parameter gives parity to `catch(tee=)`. `finally()` does not support `tee=` as the return value is always ignored. (#148)
+
+* Updated `catch()` API from `catch(promise, onRejected, tee = FALSE)` to `catch(promise, onRejected, ..., tee = FALSE)`. It requires that `tee=` be specified as a keyword argument. (#148)
+
+* Fixed #156: `then(tee=)` and `catch(tee=)` is now required to be a logical value (not just a *truthy* value). (#157)
+
+* Fixed #154: Makes promises a pure R package that does not require compilation. We include a test of a C++ interface in `inst/promise_task.cpp` that is now dynamically compiled during testing. (#155)
+
+* Fixed #47: `promise_map()` can now properly handle `NULL` values being returned. (Thank you, @RLesur! #138)
 
 # promises 1.3.3
 

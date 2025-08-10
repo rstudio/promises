@@ -13,6 +13,7 @@ mirai
 Multisession
 NSE
 OpenCPU
+ORCID
 PBC
 RServe
 RStudio
@@ -76,3 +77,5 @@ unevaluated
 unhandled
 users’
 wc
+Mirai
+truthy

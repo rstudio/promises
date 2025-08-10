@@ -139,7 +139,6 @@ ExpoDelay <- R6::R6Class(
 # FIFO queue of workers
 #' Future promise work queue
 #'
-#' #' `r lifecycle::badge('experimental')`
 #'
 #' An \pkg{R6} class to help with scheduling work to be completed. `WorkQueue` will only execute work if the `can_proceed()` returns `TRUE`. For the use case of `future`, `can_proceed()` defaults to `future::nbrOfFreeWorkers() > 0` which will not allow for work to be executed if a \pkg{future} worker is not available.
 #'
@@ -403,7 +402,6 @@ future_promise_queue <- local({
 
 #' \pkg{future} promise
 #'
-#' `r lifecycle::badge('experimental')`
 #'
 #' When submitting \pkg{future} work, \pkg{future} (by design) will block the main R session until a worker becomes available.
 #' This occurs when there is more submitted \pkg{future} work than there are available \pkg{future} workers.
@@ -446,8 +444,12 @@ future_promise_queue <- local({
 #' # `"promise done"` will appear after four workers are done and the main R session is not blocked
 #' # The important thing to note is the first four times will be roughly the same
 #' with_two_workers({
-#'   promise_resolve(Sys.getpid()) %...>% print_msg("promise done")
-#'   for (i in 1:6) future::future({Sys.sleep(1); Sys.getpid()}) %...>% print_msg("future done")
+#'   promise_resolve(Sys.getpid()) |>
+#'     then(\(x) {print_msg("promise done")})
+#'   for (i in 1:6) {
+#'     future::future({Sys.sleep(1); Sys.getpid()}) |>
+#'       then(\(x) {print_msg("future done")})
+#'   }
 #' })
 #' {
 #' #> PID: XXX; 2.5s promise done
@@ -462,8 +464,12 @@ future_promise_queue <- local({
 #' # `"promise done"` will almost immediately, before any workers have completed
 #' # The first two `"future done"` comments appear earlier the example above
 #' with_two_workers({
-#'   promise_resolve(Sys.getpid()) %...>% print_msg("promise")
-#'   for (i in 1:6) future_promise({Sys.sleep(1); Sys.getpid()}) %...>% print_msg("future done")
+#'   promise_resolve(Sys.getpid()) |>
+#'     then(\(x) {print_msg("promise")})
+#'   for (i in 1:6) {
+#'     future_promise({Sys.sleep(1); Sys.getpid()}) |>
+#'       then(\(x) {print_msg("future done")})
+#'   }
 #' })
 #' {
 #' #> PID: XXX; 0.2s promise done
@@ -521,132 +527,4 @@ future_promise <- function(
       p
     })
   })
-}
-
-
-if (FALSE) {
-  # ConstDelay <- R6::R6Class("ConstDelay",
-  #   inherit = Delay,
-  #   private = list(
-  #     const = 0.1,
-  #     random = TRUE
-  #   ),
-  #   public = list(
-  #     initialize = function(const = 0.1, random = TRUE) {
-  #       stopifnot(length(const) == 1 && is.numeric(const) && const >= 0)
-  #       private$const <- const
-  #       private$random <- isTRUE(random)
-
-  #       self
-  #     },
-  #     delay = function() {
-  #       if (private$random) {
-  #         runif(n = 1, max = private$const)
-  #       } else {
-  #         private$const
-  #       }
-  #     }
-  #   )
-  # )
-  # LinearDelay <- R6::R6Class("LinearDelay",
-  #   inherit = Delay,
-  #   private = list(
-  #     delta = 0.05,
-  #     random = TRUE
-  #   ),
-  #   public = list(
-  #     initialize = function(delta = 0.03, random = TRUE) {
-  #       stopifnot(length(delta) == 1 && is.numeric(delta) && delta >= 0)
-  #       private$delta <- delta
-  #       private$random <- isTRUE(random)
-
-  #       self
-  #     },
-
-  #     delay = function() {
-  #       delta_delay <- private$delay_count * private$delta
-  #       if (private$random) {
-  #         runif(n = 1, max = delta_delay)
-  #       } else {
-  #         delta_delay
-  #       }
-  #     }
-  #   )
-  # )
-
-  # dev_load <- pkgload::load_all
-
-  # ## test
-  # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) };
-
-  # ## block workers mid job
-  # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:2, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i) }) -> ignore;
-
-  # ## block main worker mid job
-  # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:4, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i/4) }) -> ignore;
-
-  # ## block workers pre job
-  # dev_load(); print_i(); lapply(1:2, function(i) { message("*************** adding blockage", i); future::future({ Sys.sleep(4); message("*************** blockage done", i); i}) }) -> future_jobs; lapply(future_jobs, function(fj) { as.promise(fj) %...>% { print(.) } }); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) };
-
-  # ## block main worker workers pre job
-  # dev_load(); print_i(); start <- Sys.time(); promise_all(.list = lapply(1:10, function(x) { future_promise({ Sys.sleep(1); print(paste0(x)) })})) %...>% { print(Sys.time() - start) }; lapply(1:4, function(i) { later::later(function() { message("*************** adding blockage", i); fj <- future::future({ Sys.sleep(4); message("*************** blockage done", i); i}); then(fj, function(x) { print(paste0("block - ", i))}); }, delay = 0.5 + i/4) }) -> ignore;
-
-  future::plan(future::multisession, workers = 2)
-
-  debug_msg_can_print <- TRUE
-
-  print_i <- function(i = 0) {
-    if (i <= 50) {
-      print(i)
-      later::later(
-        function() {
-          print_i(i + 1)
-        },
-        delay = 0.1
-      )
-    }
-  }
-
-  slow_calc <- function(n) {
-    Sys.sleep(n)
-    "slow!"
-  }
-  n <- 2
-  prom <- future_promise
-  # prom <- future::future
-  a1 <- prom({
-    print(paste0("start 1 - ", Sys.time()))
-    print(slow_calc(n))
-  })
-  a2 <- prom({
-    print(paste0("start 2 - ", Sys.time()))
-    print(slow_calc(n))
-  })
-  a3 <- prom({
-    print(paste0("start 3 - ", Sys.time()))
-    print(slow_calc(n))
-  })
-  a4 <- prom({
-    print(paste0("start 4 - ", Sys.time()))
-    print(slow_calc(n))
-  })
-
-  print("done assignement!")
-
-  a1 %...>%
-    {
-      message("end 1 - ", format(Sys.time()))
-    }
-  a2 %...>%
-    {
-      message("end 2 - ", format(Sys.time()))
-    }
-  a3 %...>%
-    {
-      message("end 3 - ", format(Sys.time()))
-    }
-  a4 %...>%
-    {
-      message("end 4 - ", format(Sys.time()))
-    }
 }
