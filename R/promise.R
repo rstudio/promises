@@ -489,15 +489,15 @@ as.promise.Future <- function(x) {
   # as an attribute. This spares us from having multiple polling loops waiting
   # for the same Future.
   #
-  ## Note: 2025-07-barret: 
+  ## Note: 2025-07-barret:
   ## Active bindings will not work as `{future}` does not proactively retrieve results. A poll must be used.
   #
-  ## Note: 2025-08-barret: 
-  ## From conversation with Henrik, while it may be possible to use `immediateCondition` within future to _immediately_ send a value back from a worker to the main R session, 
+  ## Note: 2025-08-barret:
+  ## From conversation with Henrik, while it may be possible to use `immediateCondition` within future to _immediately_ send a value back from a worker to the main R session,
   ## `future::resolved()` is still required to pull the _immediate_ value into the R session (even when the future has not fully resolved yet).
   ## Therefore, the polling mechanism below is still required.
   ## For comparison, mirai has a background process that waits for results and will interrupt the main R session with the value.
-  
+
   cached <- attr(x, "converted_promise", exact = TRUE)
   if (!is.null(cached)) {
     return(cached)
