@@ -466,11 +466,16 @@ future_promise <- function(
   promise(function(resolve, reject) {
     # add to queue
     queue$schedule_work(function() {
-      # Resolve the outer promising job value
       # Kick off the future job
-      resolve(future_job)
-      # Return a promising object that can be chained by the `queue` after executing this _work_
-      future_job
+      # Turn into a single promise so that we do not have to convert it twice
+      p <- as.promise(future_job)
+
+      # Resolve the outer promising job value
+      resolve(p)
+
+      # Return the promise object that will be chained by the `queue` after
+      # executing this _work_
+      p
     })
   })
 }
