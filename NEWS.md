@@ -12,8 +12,6 @@
 
 * Fixed #47: `promise_map()` can now properly handle `NULL` values being returned. (Thank you, @RLesur! #138)
 
-* Improved `future_promise()` performance by converting `{future}` objects to a promise object before resolving. This cuts the amount of `{future}` communications in half! (#164)
-
 # promises 1.3.3
 
 * Changed the way we create future objects to stay compatible with new versions of `{future}`. Apparently the way we were doing it was never idiomatic and only worked by accident. (#121)
