@@ -63,25 +63,24 @@ promise_all <- function(..., .list = NULL) {
 
   promise(function(resolve, reject) {
     remaining <- length(.list)
-    if (is.null(listnames)) {
-      keys <- seq_len(remaining)
-    } else {
-      keys <- listnames
-      names(keys) <- listnames
+    indices <- seq_len(remaining)
+    if (nameCount > 0) {
+      # By setting names, `results` will have the same names
+      names(indices) <- listnames
     }
 
-    results <- lapply(keys, function(key) {
-      # done[[key]] <<- FALSE
+    results <- lapply(indices, function(idx) {
+      # done[[idx]] <<- FALSE
       then(
-        .list[[key]],
+        .list[[idx]],
         onFulfilled = function(value) {
           # Save the result so we can return it to the user.
-          # This weird assignment is similar to `results[[key]] <- value`, except
+          # This weird assignment is similar to `results[[idx]] <- value`, except
           # that it handles NULL values correctly.
-          results[key] <<- list(value)
+          results[idx] <<- list(value)
 
           # Record the fact that the promise was completed.
-          # done[[key]] <<- TRUE
+          # done[[idx]] <<- TRUE
           remaining <<- remaining - 1L
 
           # If all of the tasks are done, resolve.
@@ -95,8 +94,13 @@ promise_all <- function(..., .list = NULL) {
           reject(reason)
         }
       )
+
+      # Init each `results` entry as `NA` until `onFulfilled()` is called
       NA
     })
+
+    # Return nothing to promise
+    NULL
   })
 }
 
