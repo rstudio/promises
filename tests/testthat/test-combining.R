@@ -25,4 +25,13 @@ describe("promise_all", {
     )
     expect_identical(extract(x), list(a = NULL, b = NULL, c = NULL))
   })
+
+  it("handles duplicate names correctly", {
+    x <- resolve_later(1, 0.5)
+    y <- resolve_later(2, 0.3)
+    z <- resolve_later(3, 0.1)
+
+    x <- promise_all(.list = list(a = x, a = y, a = z))
+    expect_identical(extract(x), list(a = 1, a = 2, a = 3))
+  })
 })
