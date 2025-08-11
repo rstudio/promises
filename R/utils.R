@@ -51,49 +51,56 @@ promise_all <- function(..., .list = NULL) {
   }
 
   # Verify that .list members are either all named or all unnamed
-  nameCount <- sum(nzchar(names(.list)))
+  listnames <- names(.list)
+  nameCount <- sum(nzchar(listnames))
   if (nameCount != 0 && nameCount != length(.list)) {
     stop(
       "promise_all expects promise arguments (or list) to be either all named or all unnamed"
     )
   }
 
-  done <- list()
-  results <- list()
+  # done <- list()
 
   promise(function(resolve, reject) {
-    keys <- if (is.null(names(.list))) {
-      1:length(.list)
-    } else {
-      names(.list)
+    remaining <- length(.list)
+    indices <- seq_len(remaining)
+    if (nameCount > 0) {
+      # By setting names, `results` will have the same names
+      names(indices) <- listnames
     }
 
-    lapply(keys, function(key) {
-      done[[key]] <<- FALSE
-      # Forces correct/deterministic ordering of the result list's elements
-      results[[key]] <<- NA
-
+    results <- lapply(indices, function(idx) {
+      # done[[idx]] <<- FALSE
       then(
-        .list[[key]],
+        .list[[idx]],
         onFulfilled = function(value) {
           # Save the result so we can return it to the user.
-          # This weird assignment is similar to `results[[key]] <- value`, except
+          # This weird assignment is similar to `results[[idx]] <- value`, except
           # that it handles NULL values correctly.
-          results[key] <<- list(value)
+          results[idx] <<- list(value)
 
           # Record the fact that the promise was completed.
-          done[[key]] <<- TRUE
+          # done[[idx]] <<- TRUE
+          remaining <<- remaining - 1L
+
           # If all of the tasks are done, resolve.
-          if (all(as.logical(done))) {
+          # If (all(as.logical(done)))
+          if (remaining == 0L) {
             resolve(results)
           }
         },
         onRejected = function(reason) {
-          # TODO: Cancel promises that are still running
+          # TODO: Cancel promises that are still running; Use `done` list
           reject(reason)
         }
       )
+
+      # Init each `results` entry as `NA` until `onFulfilled()` is called
+      NA
     })
+
+    # Return nothing to promise
+    NULL
   })
 }
 
