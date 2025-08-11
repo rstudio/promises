@@ -51,7 +51,8 @@ promise_all <- function(..., .list = NULL) {
   }
 
   # Verify that .list members are either all named or all unnamed
-  nameCount <- sum(nzchar(names(.list)))
+  listnames <- names(.list)
+  nameCount <- sum(nzchar(listnames))
   if (nameCount != 0 && nameCount != length(.list)) {
     stop(
       "promise_all expects promise arguments (or list) to be either all named or all unnamed"
@@ -59,24 +60,18 @@ promise_all <- function(..., .list = NULL) {
   }
 
   # done <- list()
-  results <- list()
 
   promise(function(resolve, reject) {
-    keys <- if (is.null(names(.list))) {
-      1:length(.list)
+    remaining <- length(.list)
+    if (is.null(listnames)) {
+      keys <- seq_len(remaining)
     } else {
-      names(.list)
+      keys <- listnames
+      names(keys) <- listnames
     }
 
-    doneCounter <- 0
-    n <- length(.list)
-
-    lapply(keys, function(key) {
+    results <- lapply(keys, function(key) {
       # done[[key]] <<- FALSE
-
-      # Forces correct/deterministic ordering of the result list's elements
-      results[[key]] <<- NA
-
       then(
         .list[[key]],
         onFulfilled = function(value) {
@@ -87,13 +82,11 @@ promise_all <- function(..., .list = NULL) {
 
           # Record the fact that the promise was completed.
           # done[[key]] <<- TRUE
-          doneCounter <<- doneCounter + 1
+          remaining <<- remaining - 1L
 
           # If all of the tasks are done, resolve.
-          if (
-            doneCounter == n
-            #  && all(as.logical(done))
-          ) {
+          # If (all(as.logical(done)))
+          if (remaining == 0L) {
             resolve(results)
           }
         },
@@ -102,6 +95,7 @@ promise_all <- function(..., .list = NULL) {
           reject(reason)
         }
       )
+      NA
     })
   })
 }
