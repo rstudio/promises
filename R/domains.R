@@ -263,14 +263,16 @@ compose_domains <- function(base, new) {
 
   list(
     wrapOnFulfilled = function(onFulfilled) {
-      # Force eager evaluation of base$wrapOnFulfilled(onFulfilled)
-      base <- base$wrapOnFulfilled(onFulfilled)
-      new$wrapOnFulfilled(base)
+      # Apply new domain first (innermost), then base domain (outermost)
+      # This ensures the latest domain added wraps callbacks most closely
+      new_wrapped <- new$wrapOnFulfilled(onFulfilled)
+      base$wrapOnFulfilled(new_wrapped)
     },
     wrapOnRejected = function(onRejected) {
-      # Force eager evaluation of base$wrapOnRejected(onRejected)
-      base <- base$wrapOnRejected(onRejected)
-      new$wrapOnRejected(base)
+      # Apply new domain first (innermost), then base domain (outermost)
+      # This ensures the latest domain added wraps callbacks most closely
+      new_wrapped <- new$wrapOnRejected(onRejected)
+      base$wrapOnRejected(new_wrapped)
     },
     # Only include the new wrapSync, assuming that we've already applied the
     # base domain's wrapSync. This assumption won't hold if we either export
