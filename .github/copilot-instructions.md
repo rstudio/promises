@@ -235,24 +235,13 @@ sudo R -e "install.packages('.', type='source', repos=NULL)"
 
 ## Important Files Reference
 
-```bash
-# View common development command outputs without running commands:
+### Repository Structure:
+- **Root**: `.Rbuildignore`, `.github/`, `CLAUDE.md`, `DESCRIPTION`, `LICENSE`, `NAMESPACE`, `NEWS.md`, `R/`, `README.md`, `_pkgdown.yml`, `inst/`, `man/`, `promises.Rproj`, `tests/`, `vignettes/`
 
-# Repository root structure:
-# .Rbuildignore, .github/, CLAUDE.md, DESCRIPTION, LICENSE, 
-# NAMESPACE, NEWS.md, R/, README.md, _pkgdown.yml, inst/, 
-# man/, promises.Rproj, tests/, vignettes/
+### R Source Files (`R/` directory):
+- `domains.R`, `first_type.R`, `future_promise.R`, `is_something.R`, `methods.R`, `pipe.R`, `promise.R`, `promises-package.R`, `staticimports.R`, `then.R`, `utils.R`
 
-# R source files (R/ directory):
-# domains.R, first_type.R, future_promise.R, is_something.R, 
-# methods.R, pipe.R, promise.R, promises-package.R, 
-# staticimports.R, then.R, utils.R
-
-# Test files (tests/testthat/ directory):  
-# helper.R, test-aplus-2-1.R, test-aplus-2-2.R, test-aplus-2-3.R,
-# test-combining.R, test-cpp.R, test-domains.R, test-legacy-*.R,
-# test-methods.R, test-ordering.R, test-promise-map.R, test-then.R,
-# test-visibility.R, test-zzz-future_promise.R
-```
+### Test Files (`tests/testthat/` directory):
+- `helper.R`, `test-aplus-2-1.R`, `test-aplus-2-2.R`, `test-aplus-2-3.R`, `test-combining.R`, `test-cpp.R`, `test-domains.R`, `test-legacy-*.R`, `test-methods.R`, `test-ordering.R`, `test-promise-map.R`, `test-then.R`, `test-visibility.R`, `test-zzz-future_promise.R`
 
 **Remember**: This is an R package focused on asynchronous programming. Always consider promise semantics, error handling, and integration with the later package when making changes.
