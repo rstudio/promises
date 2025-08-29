@@ -263,14 +263,14 @@ compose_domains <- function(base, new) {
 
   list(
     wrapOnFulfilled = function(onFulfilled) {
-      # Apply new domain first (innermost), then base domain (outermost)
-      # This ensures the latest domain added wraps callbacks most closely
+      # Wrap new domain first (innermost), then base domain (outermost)
+      # This ensures that the new domain wraps most closely to the callback
       new_wrapped <- new$wrapOnFulfilled(onFulfilled)
       base$wrapOnFulfilled(new_wrapped)
     },
     wrapOnRejected = function(onRejected) {
-      # Apply new domain first (innermost), then base domain (outermost)
-      # This ensures the latest domain added wraps callbacks most closely
+      # Wrap new domain first (innermost), then base domain (outermost)
+      # This ensures that the new domain wraps most closely to the callback
       new_wrapped <- new$wrapOnRejected(onRejected)
       base$wrapOnRejected(new_wrapped)
     },
