@@ -12,3 +12,6 @@ _dev
 /doc/
 /Meta/
 /.claude/
+..Rcheck/
+*.Rcheck/
+*.tar.gz
