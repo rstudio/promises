@@ -1,0 +1,96 @@
+* using log directory ‘/home/runner/work/promises/promises/promises.Rcheck’
+* using R version 4.3.3 (2024-02-29)
+* using platform: x86_64-pc-linux-gnu (64-bit)
+* R was compiled by
+    gcc (Ubuntu 13.2.0-23ubuntu3) 13.2.0
+    GNU Fortran (Ubuntu 13.2.0-23ubuntu3) 13.2.0
+* running under: Ubuntu 24.04.3 LTS
+* using session charset: UTF-8
+* using options ‘--no-manual --no-build-vignettes’
+* checking for file ‘promises/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘promises’ version ‘1.3.3.9001’
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... NOTE
+Packages suggested but not available for checking: 'mirai', 'vembedr'
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘promises’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd cross-references ... NOTE
+Unknown package ‘mirai’ in Rd xrefs
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking files in ‘vignettes’ ... WARNING
+Files in the 'vignettes' directory but no files in 'inst/doc':
+  ‘case-study-downloaders.png’ ‘case-study-gantt-aligned.png’
+  ‘case-study-gantt-async.png’ ‘case-study-gantt-async2.png’
+  ‘case-study-gantt1.png’ ‘case-study-gantt2.png’
+  ‘case-study-gantt3.png’ ‘case-study-react.png’ ‘case-study-tab1.png’
+  ‘case-study-tab2.png’ ‘case-study-tab3.png’ ‘case-study-tab4.png’
+  ‘case-study-tab5.png’ ‘future_promise/blocked_future_promise.png’
+  ‘future_promise/future.png’ ‘promises_01_motivation.Rmd’
+  ‘promises_02_intro.Rmd’ ‘promises_03_overview.Rmd’
+  ‘promises_04_mirai.Rmd’ ‘promises_05a_futures.Rmd’
+  ‘promises_05b_future_promise.Rmd’ ‘promises_06_shiny.Rmd’
+  ‘promises_07_combining.Rmd’ ‘promises_08_casestudy.Rmd’
+* checking examples ... OK
+* checking for unstated dependencies in ‘tests’ ... OK
+* checking tests ... OK
+  Running ‘spelling.R’
+  Running ‘testthat.R’
+* checking for unstated dependencies in vignettes ... OK
+* checking package vignettes in ‘inst/doc’ ... WARNING
+Directory 'inst/doc' does not exist.
+Package vignettes without corresponding single PDF/HTML:
+  ‘promises_01_motivation.Rmd’
+  ‘promises_02_intro.Rmd’
+  ‘promises_03_overview.Rmd’
+  ‘promises_04_mirai.Rmd’
+  ‘promises_05a_futures.Rmd’
+  ‘promises_05b_future_promise.Rmd’
+  ‘promises_06_shiny.Rmd’
+  ‘promises_07_combining.Rmd’
+  ‘promises_08_casestudy.Rmd’
+* checking running R code from vignettes ... NONE
+  ‘promises_01_motivation.Rmd’ using ‘UTF-8’... OK
+  ‘promises_02_intro.Rmd’ using ‘UTF-8’... OK
+  ‘promises_03_overview.Rmd’ using ‘UTF-8’... OK
+  ‘promises_04_mirai.Rmd’ using ‘UTF-8’... OK
+  ‘promises_05a_futures.Rmd’ using ‘UTF-8’... OK
+  ‘promises_05b_future_promise.Rmd’ using ‘UTF-8’... OK
+  ‘promises_06_shiny.Rmd’ using ‘UTF-8’... OK
+  ‘promises_07_combining.Rmd’ using ‘UTF-8’... OK
+  ‘promises_08_casestudy.Rmd’ using ‘UTF-8’... OK
+* checking re-building of vignette outputs ... SKIPPED
+* DONE
+Status: 2 WARNINGs, 2 NOTEs

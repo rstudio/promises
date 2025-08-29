@@ -1,0 +1,46 @@
+Type: Package
+Package: promises
+Title: Abstractions for Promise-Based Asynchronous Programming
+Version: 1.3.3.9001
+Authors@R: c(
+    person("Joe", "Cheng", , "joe@posit.co", role = c("aut", "cre")),
+    person("Barret", "Schloerke", , "barret@posit.co", role = "aut",
+           comment = c(ORCID = "0000-0001-9986-114X")),
+    person("Winston", "Chang", , "winston@posit.co", role = "aut",
+           comment = c(ORCID = "0000-0002-1576-2126")),
+    person("Charlie", "Gao", , "charlie.gao@posit.co", role = "aut",
+           comment = c(ORCID = "0000-0002-0750-061X")),
+    person("Posit Software, PBC", role = c("cph", "fnd"),
+           comment = c(ROR = "03wc8by49"))
+  )
+Description: Provides fundamental abstractions for doing asynchronous
+    programming in R using promises. Asynchronous programming is useful
+    for allowing a single R process to orchestrate multiple tasks in the
+    background while also attending to something else. Semantics are
+    similar to 'JavaScript' promises, but with a syntax that is idiomatic
+    R.
+License: MIT + file LICENSE
+URL: https://rstudio.github.io/promises/,
+        https://github.com/rstudio/promises
+BugReports: https://github.com/rstudio/promises/issues
+Depends: R (>= 4.1.0)
+Imports: fastmap (>= 1.1.0), later, lifecycle, magrittr (>= 1.5), R6,
+        rlang, stats
+Suggests: future (>= 1.21.0), knitr, mirai, purrr, Rcpp, rmarkdown,
+        spelling, testthat (>= 3.0.0), vembedr
+VignetteBuilder: knitr
+Config/Needs/website: rsconnect, tidyverse/tidytemplate
+Config/testthat/edition: 3
+Config/usethis/last-upkeep: 2025-05-27
+Encoding: UTF-8
+Language: en-US
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+NeedsCompilation: no
+Packaged: 2025-08-29 16:18:15 UTC; runner
+Author: Joe Cheng [aut, cre],
+  Barret Schloerke [aut] (<https://orcid.org/0000-0001-9986-114X>),
+  Winston Chang [aut] (<https://orcid.org/0000-0002-1576-2126>),
+  Charlie Gao [aut] (<https://orcid.org/0000-0002-0750-061X>),
+  Posit Software, PBC [cph, fnd] (03wc8by49)
+Maintainer: Joe Cheng <joe@posit.co>
