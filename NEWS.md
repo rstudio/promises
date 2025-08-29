@@ -1,5 +1,11 @@
 # promises (development version)
 
+## Breaking changes
+
+* Fixed #165: Nested promise domains now correctly invoke in reverse order. Previously, when promise domains were nested, the outer domain would incorrectly take precedence over the inner domain in `wrapOnFulfilled`/`wrapOnRejected` callbacks. This has been fixed so that the innermost (most recently added) domain now properly wraps the callback first, ensuring that nested promise domains behave consistently with the expected scoping behavior. (#166)
+
+## Enhancements
+
 * Promoted usage of R's native pipe (`|>`) and function shorthand (`\(x) fn(x)`) syntax over promise pipe methods. The promise pipe methods (`%...>%`, `%...!%`, `%...T>%`) are now superseded in favor of the R syntax supported in R 4.1 or later. Promises now requires R 4.1 or later to access these language features. (#148)
 
 * Added `tee=FALSE` parameter to `then()`. When `tee=TRUE`, `then()` will ignore the return value of the callback, and return the original value instead. This is useful for performing operations with side-effects, particularly logging to the console or a file. Adding this parameter gives parity to `catch(tee=)`. `finally()` does not support `tee=` as the return value is always ignored. (#148)
@@ -15,6 +21,7 @@
 * Improved performance of `promise_all()` by using a counter instead of checking completion status of all promises. This changes the time complexity from `O(n^2)` to `O(n)` for determining when all promises are complete. (#163)
 
 * Fixed a bug in `promise_all()` where duplicate named arguments (or `.list` entries) were not preserved. Now, a result will be produced for every promise provided. (#163)
+
 
 # promises 1.3.3
 

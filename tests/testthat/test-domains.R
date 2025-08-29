@@ -225,4 +225,77 @@ describe("Promise domains", {
         wait_for_it()
     })
   })
+
+  it("apply nested domains in reverse order (innermost domain closest to callback)", {
+    # Test that when nesting promise domains, the latest domain to be added
+    # (innermost) should be the one that wraps the onFulfilled/onRejected most closely.
+
+    # Create a test environment to track domain activation order
+    test_env <- new.env()
+    test_env$x <- "initial"
+    test_env$activations <- character(0)
+
+    createVarPromiseDomain <- function(env, name, value) {
+      force(env)
+      force(name)
+      force(value)
+
+      new_promise_domain(
+        wrapOnFulfilled = function(onFulfilled) {
+          function(...) {
+            orig <- env[[name]]
+            env[[name]] <- value
+            env$activations <- c(env$activations, paste0(name, "=", value))
+            on.exit({
+              env[[name]] <- orig
+            })
+
+            onFulfilled(...)
+          }
+        },
+        wrapSync = function(expr) {
+          orig <- env[[name]]
+          env[[name]] <- value
+          on.exit(env[[name]] <- orig)
+
+          force(expr)
+        }
+      )
+    }
+
+    domain1 <- createVarPromiseDomain(test_env, "x", 1)
+    domain2 <- createVarPromiseDomain(test_env, "x", 2)
+
+    # Test the nested domain behavior
+    result <- NULL
+
+    with_promise_domain(domain1, {
+      # Outer domain should set x=1
+      expect_identical(test_env$x, 1)
+
+      with_promise_domain(domain2, {
+        # Inner domain should set x=2
+        expect_identical(test_env$x, 2)
+
+        # Create and resolve a promise
+        promise_resolve(TRUE) |>
+          then(function(value) {
+            # The inner domain (domain2) should be closest to this callback,
+            # so x should be 2 when this executes
+            result <<- test_env$x
+            test_env$x
+          }) |>
+          wait_for_it()
+      })
+    })
+
+    # Verify that the innermost domain took precedence
+    expect_identical(result, 2)
+
+    # Verify the activation order: domain1 (outer) activates first,
+    # then domain2 (inner) activates and takes precedence
+    expect_length(test_env$activations, 2)
+    expect_identical(test_env$activations[1], "x=1")
+    expect_identical(test_env$activations[2], "x=2")
+  })
 })
