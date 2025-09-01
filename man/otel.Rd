@@ -83,11 +83,11 @@ asynchronous operations).
 Executes an expression within the context of an active OpenTelemetry span.
 
 Adds an "Active OpenTelemetry promise domain" to the expression evaluation.
-This domain activates the span on restore.
+This domain activates the span during promise domain restoration.
 
-If \code{auto_end_span = TRUE}, the \code{span} will be ended either when the function
-exits (for synchronous operations) or when a returned promise completes (for
-asynchronous operations).
+If \code{auto_end_span = TRUE}, the \code{span} will be automatically ended either when
+the function exits (for synchronous operations) or when a returned promise
+completes (for asynchronous operations).
 
 }}
 \examples{
