@@ -5,7 +5,7 @@
 \alias{create_ospan}
 \alias{end_ospan}
 \alias{with_ospan_async}
-\alias{with_otel_span_async}
+\alias{with_ospan_promise_domain}
 \title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
 \usage{
 is_otel_tracing()
@@ -16,7 +16,7 @@ end_ospan(span)
 
 with_ospan_async(name, expr, ..., attributes = NULL)
 
-with_otel_span_async(span, expr, ..., auto_end_span = FALSE)
+with_ospan_promise_domain(span, expr)
 }
 \arguments{
 \item{name}{Character string. The name of the span.}
@@ -24,15 +24,9 @@ with_otel_span_async(span, expr, ..., auto_end_span = FALSE)
 \item{...}{Additional arguments passed to \code{\link[otel:start_span]{otel::start_span()}}.}
 
 \item{attributes}{Attributes passed through \code{\link[otel:as_attributes]{otel::as_attributes()}} (when
-not \code{NULL})
-
-For \code{with_otel_span_async()}, they must be empty.}
+not \code{NULL})}
 
 \item{expr}{An expression to evaluate within the span context.}
-
-\item{auto_end_span}{Logical, [\code{FALSE}]; If \code{TRUE}, the span will
-be ended either when the function exits (for synchronous operations) or when
-a returned promise completes (for asynchronous operations).}
 }
 \description{
 \pkg{otel} provides tools for integrating with OpenTelemetry, a framework for
@@ -78,16 +72,12 @@ addition, the internal span will be ended either when the function exits (for
 synchronous operations) or when a returned promise completes (for
 asynchronous operations).
 
-\item \code{with_otel_span_async()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\item \code{with_ospan_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Executes an expression within the context of an active OpenTelemetry span.
 
 Adds an "Active OpenTelemetry promise domain" to the expression evaluation.
-This domain activates the span during promise domain restoration.
-
-If \code{auto_end_span = TRUE}, the \code{span} will be automatically ended either when
-the function exits (for synchronous operations) or when a returned promise
-completes (for asynchronous operations).
+This span will be reactivated during promise domain restoration.
 
 }}
 \examples{
@@ -107,7 +97,7 @@ p <- with_ospan_async("async_operation", {
 \dontrun{
 # Start a span for discontiguous work (uncommon; use with caution)
 spn <- create_ospan("my_operation")
-with_otel_span_async(spn, {
+with_ospan_promise_domain(spn, {
   # ... do some work ...
 })
 # ...

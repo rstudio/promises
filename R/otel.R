@@ -29,7 +29,7 @@
 #' \dontrun{
 #' # Start a span for discontiguous work (uncommon; use with caution)
 #' spn <- create_ospan("my_operation")
-#' with_otel_span_async(spn, {
+#' with_ospan_promise_domain(spn, {
 #'   # ... do some work ...
 #' })
 #' # ...
@@ -46,8 +46,6 @@ is_otel_tracing <- function() {
 #' @param ... Additional arguments passed to [`otel::start_span()`].
 #' @param attributes Attributes passed through [`otel::as_attributes()`] (when
 #' not `NULL`)
-#'
-#' For `with_otel_span_async()`, they must be empty.
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
 #' Creates an OpenTelemetry span for discontiguous operations where you need
@@ -126,37 +124,6 @@ with_ospan_async <- function(
 
   span <- create_ospan(name, ..., attributes = attributes)
 
-  with_otel_span_async(span, expr, auto_end_span = TRUE)
-}
-
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Executes an expression within the context of an active OpenTelemetry span.
-#'
-#' Adds an "Active OpenTelemetry promise domain" to the expression evaluation.
-#' This domain activates the span during promise domain restoration.
-#'
-#' If `auto_end_span = TRUE`, the `span` will be automatically ended either when
-#' the function exits (for synchronous operations) or when a returned promise
-#' completes (for asynchronous operations).
-#' @param auto_end_span Logical, \[`FALSE`\]; If `TRUE`, the span will
-#' be ended either when the function exits (for synchronous operations) or when
-#' a returned promise completes (for asynchronous operations).
-#' @export
-with_otel_span_async <- function(span, expr, ..., auto_end_span = FALSE) {
-  check_dots(...)
-
-  if (is.null(span)) {
-    stop("`span=` must not be `NULL`")
-  }
-
-  # Early return if we just need the promise domain
-  if (!isTRUE(auto_end_span)) {
-    return(
-      with_ospan_promise_domain(span, expr)
-    )
-  }
-
   needs_cleanup <- TRUE
   cleanup <- function() {
     end_ospan(span)
@@ -176,18 +143,24 @@ with_otel_span_async <- function(span, expr, ..., auto_end_span = FALSE) {
   })
 }
 
+#' @describeIn otel `r lifecycle::badge("experimental")`
+#'
+#' Executes an expression within the context of an active OpenTelemetry span.
+#'
+#' Adds an "Active OpenTelemetry promise domain" to the expression evaluation.
+#' This span will be reactivated during promise domain restoration.
+#' @export
+with_ospan_promise_domain <- function(span, expr) {
+  act_span_pd <- create_otel_active_span_promise_domain(span)
+  with_promise_domain(act_span_pd, expr)
+}
+
 
 # # TODO: Set attributes on the current active span
 # # 5. Set attributes on the current active span
 # set_ospan_attrs(status = 200L)
 
 # -- Helpers --------------------------------------------------------------
-
-# Executes an expression within the context of an active OpenTelemetry span.
-with_ospan_promise_domain <- function(span, expr) {
-  act_span_pd <- create_otel_active_span_promise_domain(span)
-  with_promise_domain(act_span_pd, expr)
-}
 
 #' Creates a promise domain that activates the given OpenTelemetry span.
 #'

@@ -65,61 +65,6 @@ ignore <- otelsdk::with_otel_record(
         })
       })
 
-      describe("with_otel_span_async()", {
-        it("does not handle NULL values", {
-          expect_error(
-            with_otel_span_async(NULL, {
-              42
-            }),
-            "must not be `NULL`",
-            fixed = TRUE
-          )
-        })
-
-        it("handles synchronous results with auto cleanup", {
-          # Should handle cleanup properly even when otel is unavailable
-          mock_span <- create_ospan("test_span5")
-          on.exit(
-            {
-              end_ospan(mock_span)
-            },
-            add = TRUE
-          )
-
-          result <- with_otel_span_async(
-            mock_span,
-            {
-              42
-            },
-            auto_end_span = TRUE
-          )
-
-          expect_equal(result, 42)
-        })
-
-        it("handles promise results", {
-          # Should work with promises
-          mock_span <- create_ospan("test_span6")
-          on.exit(
-            {
-              end_ospan(mock_span)
-            },
-            add = TRUE
-          )
-
-          result <- with_otel_span_async(
-            mock_span,
-            {
-              promise_resolve(42)
-            },
-            auto_end_span = TRUE
-          )
-
-          expect_true(is.promising(result))
-          expect_equal(extract(result), 42)
-        })
-      })
-
       describe("promise domain integration", {
         it("works with promise chains", {
           # Test integration with actual promise chains (without otel)
