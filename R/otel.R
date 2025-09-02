@@ -8,10 +8,6 @@
 #' \pkg{promises} package, not as a generic replacement.
 #'
 #' @keywords internal
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Check if OpenTelemetry tracing is enabled
-#' @export
 #' @examples
 #' \dontrun{
 #' # Synchronous operation
@@ -37,15 +33,71 @@
 #' end_ospan(spn)
 #' }
 #'
+#' @describeIn otel `r lifecycle::badge("experimental")`
+#'
+#' Creates an OpenTelemetry span, executes the given expression within it, and ends the span.
+#'
+#' This function is designed to handle both synchronous and asynchronous
+#' (promise-based) operations. For promises, the span is automatically ended
+#' when the promise resolves or rejects.
+#'
+#' Returns the result of evaluating `expr`. If `expr` returns a promise,
+#'   the span will be automatically ended when the promise completes.
+#'
+#' This function differs from synchronous otel span operations in that it
+#' installs a promise domain and properly handles asynchronous operations. In
+#' addition, the internal span will be ended either when the function exits (for
+#' synchronous operations) or when a returned promise completes (for
+#' asynchronous operations).
+#'
+#' If OpenTelemetry is not enabled, the expression will be evaluated without any
+#' tracing context.
+#' @param name Character string. The name of the span.
+#' @param expr An expression to evaluate within the span context.
+#' @param ... Additional arguments passed to [`otel::start_span()`].
+#' @param attributes Attributes passed through [`otel::as_attributes()`] (when
+#' not `NULL`)
+#' @export
+with_ospan_async <- function(
+  name,
+  expr,
+  ...,
+  attributes = NULL
+) {
+  if (!is_otel_tracing()) {
+    return(force(expr))
+  }
+
+  span <- create_ospan(name, ..., attributes = attributes)
+
+  needs_cleanup <- TRUE
+  cleanup <- function() {
+    end_ospan(span)
+  }
+  on.exit(if (needs_cleanup) cleanup(), add = TRUE)
+
+  with_ospan_promise_domain(span, {
+    result <- force(expr)
+
+    if (is.promising(result)) {
+      needs_cleanup <- FALSE
+
+      result <- finally(result, cleanup)
+    }
+
+    result
+  })
+}
+
+#' @describeIn otel `r lifecycle::badge("experimental")`
+#'
+#' Check if OpenTelemetry tracing is enabled
+#' @export
 is_otel_tracing <- function() {
   is_installed("otel") && otel::is_tracing_enabled()
 }
 
 
-#' @param name Character string. The name of the span.
-#' @param ... Additional arguments passed to [`otel::start_span()`].
-#' @param attributes Attributes passed through [`otel::as_attributes()`] (when
-#' not `NULL`)
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
 #' Creates an OpenTelemetry span for discontiguous operations where you need
@@ -92,63 +144,13 @@ end_ospan <- function(span) {
 }
 
 
-#' Execute code within an OpenTelemetry span for asynchronous operations
-#'
-#' @param expr An expression to evaluate within the span context.
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Creates an OpenTelemetry span, executes the given expression within it, and ends the span.
-#'
-#' This function is designed to handle both synchronous and asynchronous
-#' (promise-based) operations. For promises, the span is automatically ended
-#' when the promise resolves or rejects.
-#'
-#' Returns the result of evaluating `expr`. If `expr` returns a promise,
-#'   the span will be automatically ended when the promise completes.
-#'
-#' This function differs from synchronous otel span operations in that it
-#' installs a promise domain and properly handles asynchronous operations. In
-#' addition, the internal span will be ended either when the function exits (for
-#' synchronous operations) or when a returned promise completes (for
-#' asynchronous operations).
-#' @export
-with_ospan_async <- function(
-  name,
-  expr,
-  ...,
-  attributes = NULL
-) {
-  if (!is_otel_tracing()) {
-    return(force(expr))
-  }
-
-  span <- create_ospan(name, ..., attributes = attributes)
-
-  needs_cleanup <- TRUE
-  cleanup <- function() {
-    end_ospan(span)
-  }
-  on.exit(if (needs_cleanup) cleanup(), add = TRUE)
-
-  with_ospan_promise_domain(span, {
-    result <- force(expr)
-
-    if (is.promising(result)) {
-      needs_cleanup <- FALSE
-
-      result <- finally(result, cleanup)
-    }
-
-    result
-  })
-}
-
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
 #' Executes an expression within the context of an active OpenTelemetry span.
 #'
 #' Adds an "Active OpenTelemetry promise domain" to the expression evaluation.
 #' This span will be reactivated during promise domain restoration.
+#' @param span An OpenTelemetry span object.
 #' @export
 with_ospan_promise_domain <- function(span, expr) {
   act_span_pd <- create_otel_active_span_promise_domain(span)
