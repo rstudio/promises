@@ -144,6 +144,10 @@ with_ospan_async <- function(
 with_otel_span_async <- function(span, expr, ..., auto_end_span = FALSE) {
   check_dots(...)
 
+  if (is.null(span)) {
+    stop("`span=` must not be `NULL`")
+  }
+
   # Early return if we just need the promise domain
   if (!isTRUE(auto_end_span)) {
     return(
