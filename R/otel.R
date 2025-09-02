@@ -71,6 +71,8 @@ create_ospan <- function(
     otel::start_span(
       name,
       ...,
+      ## Use when otel v0.3.0 is released: https://github.com/r-lib/otel/commit/43e59c45a7de50cfd8af95f73d45f9899f957b44
+      # attributes = otel::as_attributes(attributes)
       attributes = if (!is.null(attributes)) {
         otel::as_attributes(attributes)
       }
@@ -184,12 +186,7 @@ with_otel_span_async <- function(span, expr, ..., auto_end_span = FALSE) {
 # Executes an expression within the context of an active OpenTelemetry span.
 with_ospan_promise_domain <- function(span, expr) {
   act_span_pd <- create_otel_active_span_promise_domain(span)
-
-  new_domain <- compose_domains(
-    current_promise_domain(),
-    act_span_pd
-  )
-  with_promise_domain(new_domain, expr, replace = TRUE)
+  with_promise_domain(act_span_pd, expr)
 }
 
 #' Creates a promise domain that activates the given OpenTelemetry span.
