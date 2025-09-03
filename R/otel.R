@@ -1,6 +1,50 @@
-# Set during `.onLoad()`
-IS_OTEL_TRACING <- NULL
+#' @importFrom otel
+#'   as_attributes
+#'   end_span
+#'   get_tracer
+#'   is_tracing_enabled
+#'   start_span
+#'   with_active_span
+NULL
 
+# Just in case we don't use `promises_otel_tracer()`, hopefully it is found using this variable for `otel::default_tracer_name()`
+otel_tracer_name <- "co.posit.r-package.shiny"
+PROMISES_OTEL_TRACER <- NULL
+
+on_load({
+  PROMISES_OTEL_TRACER <- get_tracer(otel_tracer_name)
+})
+
+
+#' Promises OpenTelemetry tracer
+#'
+#' Placeholder tracer to speed up default methods. No need to look up the tracer
+#' when we can define it here.
+#'
+#' ```
+#' bench::mark(
+#'   otel::is_tracing_enabled(),
+#'   otel::is_tracing_enabled(promises_otel_tracer()),
+#'   promises_otel_tracer()$is_enabled()
+#' )
+#' #> # A tibble: 3 × 13
+#' #>   expression       min  median `itr/sec` mem_alloc `gc/sec` n_itr  n_gc total_time result memory     time       gc
+#' #>   <bch:expr>   <bch:t> <bch:t>     <dbl> <bch:byt>    <dbl> <int> <dbl>   <bch:tm> <list> <list>     <list>     <list>
+#' #> 1 otel::is_tr… 11.11µs 12.55µs    73955.        0B     22.2  9997     3    135.2ms <lgl>  <Rprofmem> <bench_tm> <tibble>
+#' #> 2 otel::is_tr…   3.9µs  4.39µs   220877.        0B     22.1  9999     1     45.3ms <lgl>  <Rprofmem> <bench_tm> <tibble>
+#' #> 3 promises_ot…  1.39µs   1.6µs   595965.        0B      0   10000     0     16.8ms <lgl>  <Rprofmem> <bench_tm> <tibble>
+#' ```
+#'
+#' While we could use `promises_otel_tracer()$is_enabled()`, there is no tryCatch safety during execution.
+#' @noRd
+promises_otel_tracer <- function() {
+  if (Sys.getenv("TESTTHAT") == "true") {
+    # Allow for dynamic values during testing
+    return(get_tracer(otel_tracer_name))
+  }
+
+  PROMISES_OTEL_TRACER
+}
 
 #' `r lifecycle::badge("experimental")` OpenTelemetry integration
 #'
@@ -60,24 +104,29 @@ IS_OTEL_TRACING <- NULL
 #' @param name Character string. The name of the span.
 #' @param expr An expression to evaluate within the span context.
 #' @param ... Additional arguments passed to [`otel::start_span()`].
+#' @param tracer An `{otel}` tracer. The default value is set to promises
+#'   package (which it would eventually calculate). It is strongly recommended
+#'   to provide your own tracer from your own package. See
+#'   [`otel::get_tracer()`] for more details.
 #' @param attributes Attributes passed through [`otel::as_attributes()`] (when
-#' not `NULL`)
+#'   not `NULL`)
 #' @export
 with_ospan_async <- function(
   name,
   expr,
   ...,
+  tracer = promises_otel_tracer(),
   attributes = NULL
 ) {
-  if (!is_otel_tracing()) {
+  if (!is_tracing_enabled(tracer)) {
     return(force(expr))
   }
 
-  span <- create_ospan(name, ..., attributes = attributes)
+  span <- create_ospan(name, ..., tracer = tracer, attributes = attributes)
 
   needs_cleanup <- TRUE
   cleanup <- function() {
-    end_ospan(span)
+    end_ospan(span, tracer = tracer)
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
@@ -94,19 +143,6 @@ with_ospan_async <- function(
 
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
-#' Check if OpenTelemetry tracing is enabled.
-#'
-#' Note: The returned value is precalculated during `.onLoad()`. If `{otel}` is
-#' installed after the `{promises}` package has been loaded, please restart your
-#' R session to retrieve an updated value.
-#' @export
-is_otel_tracing <- function() {
-  IS_OTEL_TRACING
-}
-
-
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
 #' Creates an OpenTelemetry span for discontiguous operations where you need
 #' manual control over when the span ends.
 #'
@@ -118,20 +154,22 @@ is_otel_tracing <- function() {
 create_ospan <- function(
   name,
   ...,
+  tracer = promises_otel_tracer(),
   attributes = NULL
 ) {
-  if (!is_otel_tracing()) {
+  if (!is_tracing_enabled(tracer)) {
     return(NULL)
   }
 
   span <-
-    otel::start_span(
+    start_span(
       name,
       ...,
+      tracer = tracer,
       ## Use when otel v0.3.0 is released: https://github.com/r-lib/otel/commit/43e59c45a7de50cfd8af95f73d45f9899f957b44
-      # attributes = otel::as_attributes(attributes)
+      # attributes = as_attributes(attributes)
       attributes = if (!is.null(attributes)) {
-        otel::as_attributes(attributes)
+        as_attributes(attributes)
       }
     )
   span
@@ -142,12 +180,12 @@ create_ospan <- function(
 #'
 #' Ends an created OpenTelemetry span for discontiguous operations.
 #' @export
-end_ospan <- function(span) {
-  if (!is_otel_tracing() || is.null(span)) {
+end_ospan <- function(span, tracer = promises_otel_tracer()) {
+  if (is.null(span) || !is_tracing_enabled(tracer)) {
     return(invisible())
   }
 
-  otel::end_span(span)
+  end_span(span)
 }
 
 
@@ -186,7 +224,7 @@ create_otel_active_span_promise_domain <- function(span) {
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
       function(...) {
-        otel::with_active_span(span, {
+        with_active_span(span, {
           onFulfilled(...)
         })
       }
@@ -194,13 +232,13 @@ create_otel_active_span_promise_domain <- function(span) {
     wrapOnRejected = function(onRejected) {
       force(onRejected)
       function(...) {
-        otel::with_active_span(span, {
+        with_active_span(span, {
           onRejected(...)
         })
       }
     },
     wrapSync = function(expr) {
-      otel::with_active_span(span, {
+      with_active_span(span, {
         force(expr)
       })
     }

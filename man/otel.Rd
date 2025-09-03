@@ -2,19 +2,22 @@
 % Please edit documentation in R/otel.R
 \name{with_ospan_async}
 \alias{with_ospan_async}
-\alias{is_otel_tracing}
 \alias{create_ospan}
 \alias{end_ospan}
 \alias{with_ospan_promise_domain}
 \title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
 \usage{
-with_ospan_async(name, expr, ..., attributes = NULL)
+with_ospan_async(
+  name,
+  expr,
+  ...,
+  tracer = promises_otel_tracer(),
+  attributes = NULL
+)
 
-is_otel_tracing()
+create_ospan(name, ..., tracer = promises_otel_tracer(), attributes = NULL)
 
-create_ospan(name, ..., attributes = NULL)
-
-end_ospan(span)
+end_ospan(span, tracer = promises_otel_tracer())
 
 with_ospan_promise_domain(span, expr)
 }
@@ -24,6 +27,11 @@ with_ospan_promise_domain(span, expr)
 \item{expr}{An expression to evaluate within the span context.}
 
 \item{...}{Additional arguments passed to \code{\link[otel:start_span]{otel::start_span()}}.}
+
+\item{tracer}{An \code{{otel}} tracer. The default value is set to promises
+package (which it would eventually calculate). It is strongly recommended
+to provide your own tracer from your own package. See
+\code{\link[otel:get_tracer]{otel::get_tracer()}} for more details.}
 
 \item{attributes}{Attributes passed through \code{\link[otel:as_attributes]{otel::as_attributes()}} (when
 not \code{NULL})}
@@ -59,14 +67,6 @@ asynchronous operations).
 
 If OpenTelemetry is not enabled, the expression will be evaluated without any
 tracing context.
-
-\item \code{is_otel_tracing()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-Check if OpenTelemetry tracing is enabled.
-
-Note: The returned value is precalculated during \code{.onLoad()}. If \code{{otel}} is
-installed after the \code{{promises}} package has been loaded, please restart your
-R session to retrieve an updated value.
 
 \item \code{create_ospan()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
