@@ -37,7 +37,7 @@ Suggests:
     future (>= 1.21.0),
     knitr,
     mirai,
-    otel,
+    otel (>= 0.2.0),
     purrr,
     Rcpp,
     rmarkdown,

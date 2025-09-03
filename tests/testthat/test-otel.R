@@ -1,3 +1,5 @@
+skip_on_cran()
+
 skip_if_not_installed("otel")
 skip_if_not_installed("otelsdk")
 
