@@ -1,3 +1,7 @@
+# Set during `.onLoad()`
+IS_OTEL_TRACING <- NULL
+
+
 #' `r lifecycle::badge("experimental")` OpenTelemetry integration
 #'
 #' @description
@@ -35,7 +39,8 @@
 #'
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
-#' Creates an OpenTelemetry span, executes the given expression within it, and ends the span.
+#' Creates an OpenTelemetry span, executes the given expression within it, and
+#' ends the span.
 #'
 #' This function is designed to handle both synchronous and asynchronous
 #' (promise-based) operations. For promises, the span is automatically ended
@@ -76,25 +81,27 @@ with_ospan_async <- function(
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
-  with_ospan_promise_domain(span, {
-    result <- force(expr)
+  result <- with_ospan_promise_domain(span, expr)
 
-    if (is.promising(result)) {
-      needs_cleanup <- FALSE
+  if (is.promising(result)) {
+    needs_cleanup <- FALSE
 
-      result <- finally(result, cleanup)
-    }
+    result <- finally(result, cleanup)
+  }
 
-    result
-  })
+  result
 }
 
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
-#' Check if OpenTelemetry tracing is enabled
+#' Check if OpenTelemetry tracing is enabled.
+#'
+#' Note: The returned value is precalculated during `.onLoad()`. If `{otel}` is
+#' installed after the `{promises}` package has been loaded, please restart your
+#' R session to retrieve an updated value.
 #' @export
 is_otel_tracing <- function() {
-  is_installed("otel") && otel::is_tracing_enabled()
+  IS_OTEL_TRACING
 }
 
 
@@ -153,6 +160,10 @@ end_ospan <- function(span) {
 #' @param span An OpenTelemetry span object.
 #' @export
 with_ospan_promise_domain <- function(span, expr) {
+  if (!inherits(span, "otel_span")) {
+    stop("`span=` must be an {otel} span object")
+  }
+
   act_span_pd <- create_otel_active_span_promise_domain(span)
   with_promise_domain(act_span_pd, expr)
 }

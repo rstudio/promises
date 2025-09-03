@@ -41,7 +41,8 @@ These methods are intended to enhance the framework to be used with the
 \itemize{
 \item \code{with_ospan_async()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
-Creates an OpenTelemetry span, executes the given expression within it, and ends the span.
+Creates an OpenTelemetry span, executes the given expression within it, and
+ends the span.
 
 This function is designed to handle both synchronous and asynchronous
 (promise-based) operations. For promises, the span is automatically ended
@@ -61,7 +62,11 @@ tracing context.
 
 \item \code{is_otel_tracing()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
-Check if OpenTelemetry tracing is enabled
+Check if OpenTelemetry tracing is enabled.
+
+Note: The returned value is precalculated during \code{.onLoad()}. If \code{{otel}} is
+installed after the \code{{promises}} package has been loaded, please restart your
+R session to retrieve an updated value.
 
 \item \code{create_ospan()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
