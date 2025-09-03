@@ -1,6 +1,7 @@
 #' @importFrom otel
 #'   as_attributes
 #'   end_span
+#'   get_active_span
 #'   get_tracer
 #'   is_tracing_enabled
 #'   start_span
@@ -71,14 +72,10 @@ promises_otel_tracer <- function() {
 #' })
 #' }
 #' \dontrun{
-#' # Start a span for discontiguous work (uncommon; use with caution)
-#' spn <- create_ospan("my_operation")
-#' with_ospan_promise_domain(spn, {
-#'   # ... do some work ...
+#' # Set up a promise domain to maintain the active otel span
+#' with_ospan_promise_domain({
+#'   # ... do some promise work ...
 #' })
-#' # ...
-#' # End span when ready
-#' end_ospan(spn)
 #' }
 #'
 #' @describeIn otel `r lifecycle::badge("experimental")`
@@ -130,7 +127,7 @@ with_ospan_async <- function(
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
-  result <- with_ospan_promise_domain(span, expr)
+  result <- with_active_span(span, expr)
 
   if (is.promising(result)) {
     needs_cleanup <- FALSE
@@ -140,6 +137,31 @@ with_ospan_async <- function(
 
   result
 }
+
+#' @describeIn otel `r lifecycle::badge("experimental")`
+#'
+#' Adds a handoff "Active OpenTelemetry promise domain" for the expression.
+#'
+#' Package authors are required to use this function to have otel span context
+#' persist across asynchronous boundaries. It is important to leverage this
+#' function only once within the execution domain, not recursively / many times.
+#'
+#' This method adds a _handoff_ "Active OpenTelemetry promise domain" to the
+#' expression evaluation. This _handoff_ promise domain will only run once on
+#' reactivation. This is critical if there are many layered `with_ospan_async()`
+#' calls, such as within Shiny reactivity. For example, if we nested many
+#' `with_ospan_async()` that added a domain which reactivated each ospan on
+#' restore, we'd reactive `k` ospan objects (`O(k)`) when we only need to
+#' activate the **last** span (`O(1)`).
+#'
+#' The currently active span (during the call to `then()`) will be reactivated
+#' during promise domain restoration.
+#' @export
+with_ospan_promise_domain <- function(expr) {
+  act_span_pd <- create_otel_ospan_handoff_promise_domain()
+  with_promise_domain(act_span_pd, expr)
+}
+
 
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
@@ -189,24 +211,6 @@ end_ospan <- function(span, tracer = promises_otel_tracer()) {
 }
 
 
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Executes an expression within the context of an active OpenTelemetry span.
-#'
-#' Adds an "Active OpenTelemetry promise domain" to the expression evaluation.
-#' This span will be reactivated during promise domain restoration.
-#' @param span An OpenTelemetry span object.
-#' @export
-with_ospan_promise_domain <- function(span, expr) {
-  if (!inherits(span, "otel_span")) {
-    stop("`span=` must be an {otel} span object")
-  }
-
-  act_span_pd <- create_otel_active_span_promise_domain(span)
-  with_promise_domain(act_span_pd, expr)
-}
-
-
 # # TODO: Set attributes on the current active span
 # # 5. Set attributes on the current active span
 # set_ospan_attrs(status = 200L)
@@ -217,12 +221,16 @@ with_ospan_promise_domain <- function(span, expr) {
 #'
 #' @param span An OpenTelemetry span object.
 #' @noRd
-create_otel_active_span_promise_domain <- function(span) {
-  force(span)
-
+create_otel_ospan_handoff_promise_domain <- function() {
   new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
+
+      span <- get_active_span()
+      if (!span$is_recording()) {
+        return(onFulfilled)
+      }
+
       function(...) {
         with_active_span(span, {
           onFulfilled(...)
@@ -231,16 +239,17 @@ create_otel_active_span_promise_domain <- function(span) {
     },
     wrapOnRejected = function(onRejected) {
       force(onRejected)
+
+      span <- get_active_span()
+      if (!span$is_recording()) {
+        return(onRejected)
+      }
+
       function(...) {
         with_active_span(span, {
           onRejected(...)
         })
       }
-    },
-    wrapSync = function(expr) {
-      with_active_span(span, {
-        force(expr)
-      })
     }
   )
 }
