@@ -47,7 +47,6 @@ Suggests:
 VignetteBuilder:
     knitr
 Config/Needs/website: rsconnect, tidyverse/tidytemplate
-Config/Needs/check: r-lib/otelsdk
 Config/testthat/edition: 3
 Config/usethis/last-upkeep: 2025-05-27
 Encoding: UTF-8
