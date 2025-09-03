@@ -1,7 +1,7 @@
 Type: Package
 Package: promises
 Title: Abstractions for Promise-Based Asynchronous Programming
-Version: 1.3.3.9001
+Version: 1.3.3.9002
 Authors@R: c(
     person("Joe", "Cheng", , "joe@posit.co", role = c("aut", "cre")),
     person("Barret", "Schloerke", , "barret@posit.co", role = "aut",
@@ -30,6 +30,7 @@ Imports:
     later,
     lifecycle,
     magrittr (>= 1.5),
+    otel (>= 0.2.0),
     R6,
     rlang,
     stats
@@ -37,7 +38,6 @@ Suggests:
     future (>= 1.21.0),
     knitr,
     mirai,
-    otel (>= 0.2.0),
     purrr,
     Rcpp,
     rmarkdown,
