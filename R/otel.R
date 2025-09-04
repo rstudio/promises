@@ -7,6 +7,9 @@
 #'   with_active_span
 NULL
 
+# For `otel::default_tracer_name()`
+otel_tracer_name <- "co.posit.r-package.shiny"
+
 
 #' `r lifecycle::badge("experimental")` OpenTelemetry integration
 #'
@@ -17,39 +20,117 @@ NULL
 #' These methods are intended to enhance the framework to be used with the
 #' \pkg{promises} package, not as a generic replacement.
 #'
-#' @keywords internal
-#' @examples
-#' \dontrun{
-#' # Synchronous operation
-#' result <- with_ospan_async("my_operation", {
-#'   # ... do some work ...
-#'   42
-#' })
+#' Dev note - Barret 2025/09: This ospan handoff promise domain topic is complex
+#' and has been discussed over many hours. As even advanced Shiny/R developers
+#' are not even aware of promise domains, this topic requires more in-depth
+#' documentation and examples.
 #'
-#' # Asynchronous operation
-#' p <- with_ospan_async("async_operation", {
-#'   # ... return a promise ...
-#'   some_async_function()
-#' })
-#' }
-#' \dontrun{
-#' # Set up a promise domain to maintain the active otel span
-#' with_ospan_promise_domain({
-#'   # ... do some promise work ...
-#' })
-#' }
+#' @section Execution model for with_ospan_promise_domain():
+#'
+#' ### Definitions
+#' * Promise domain: An environment in which has setup/teardown methods. These
+#'   environments can be composed together to facilitate execution context for
+#'   promises. In normal R execution, this can be achieved with scope / stack.
+#'   But for complex situations, such as the currently open graphics device,
+#'   async operations require promise domains to setup/teardown these contexts
+#'   to function properly. Otherwise a multi-stage promise that adds to the
+#'   graphics device at each stage will only ever print to the most recently
+#'   created graphics device, not the associated graphics device. These promise
+#'   domains are not automatically created, they must be manually added to the
+#'   execution stack, for example `with_ospan_promise_domain()` does this for
+#'   OpenTelemetry spans ("ospan").
+#' * Promise domain restoration: When switching from one promise chain to
+#'   another, the execution context is torn down and then re-established. This
+#'   re-establishment is called "promise domain restoration". During this
+#'   process, the promise domains are restored in their previously established
+#'   combination order.
+#' * Promise chain: A set of promise objects to execute over multiple async
+#'   ticks.
+#' * Async tick: the number of times an event loop must run to move computation
+#'   forward. (Similar to a Javascript event loop tick.)
+#' * `then()` promise domain capture: When `then()` is called, it will capture
+#'   the current promise domain. This promise domain is restored (only if
+#'   needed) when evaluating the given `onFulfilled` and `onRejected` callbacks.
+#'   This captured promise domain does not go into any downstream promise chain
+#'   objects. The only way the promise domain is captured is exactly when the
+#'   `then()` method is called.
+#'
+#' `with_ospan_promise_domain()` creates a promise domain that restores the
+#' currently active OpenTelemetry span from when a call to `promises::then()` is
+#' executed. Given the special circumstance where only the current ospan is
+#' needed to continue recording (not a full ancestry tree of ospans), we can
+#' capture _just_ the current ospan and reactivate that ospan during promise
+#' domain restoration.
+#'
+#' ### Complexity
+#'
+#' When reactivating the `k`th step in a promise chain, the currently active
+#' ospan (during the call to `then()`) will be reactivated during promise domain
+#' restoration (`O(1)`). To restore a chain of promises, the active ospan will
+#' be restored at each step (`O(n)`) due to the **`n`** calls to wrapping each
+#' `onFulfilled` and `onRejected` callbacks inside `then()`.
+#'
+#' If we did NOT have a handoff promise domain for ospan restoration, a regular
+#' promise domain approach would be needed at each step to restore the active
+#' ospan. Each step would call `with_active_span()` `k` times (`O(k)`, where as
+#' handoff domain computes in `O(1)`). Taking a step back, to restore each ospan
+#' at for every step in a promise chain would then take `O(n^2)` time, not
+#' `O(n)`. The standard, naive promise domain approach does not scale for
+#' multiple similar promise domain restorations.
+#'
+#'
+#' ### Execution model
+#'
+#' 1. `with_ospan_promise_domain(expr)` is called.
+#'    * The following steps all occur within `expr`.
+#' 2. Create an ospan object using `create_ospan()` or `otel::start_span()`.
+#'    * We need the ospan to be active during the a followup async operation.
+#'      Therefore, `otel::start_local_active_span()` is not appropriate as the
+#'      ospan would be ended when the function exits, not when the promise chain
+#'      resolves.
+#' 2. Be sure your ospan is activated before calling `promises::then()`.
+#'    * Activate it using `with_ospan_async(name, expr)` (which also
+#'      creates/ends the ospan) or `otel::with_active_span(span, expr)`.
+#' 3. Call `promises::then()`
+#'   * When `promises::then()` is called, the two methods (`onFulfilled` and
+#'     `onRejected`) capture the currently active spans. (Performed by the
+#'     initial `with_ospan_promise_domain()`)
+#' 4. During reactivation of the promise chain step, the previously captured
+#'    ospan is reactivated via `with_active_span()`. (Performed by the initial
+#'    `with_ospan_promise_domain()`)
+#'
+#' @section OpenTelemetry span compatibility:
+#'
+#' For ospan objects to exist over may async ticks, the ospan must be created
+#' using `create_ospan()` (or `otel::start_span()`) and later ended using
+#' `end_ospan()` (or `otel::end_span()`). Ending the ospan must occur **after**
+#' any promise chain work has completed.
+#'
+#' If we were to instead use `otel::start_local_active_span()`, the ospan would
+#' be ended when the function exits, not when the promise chain completes. Even
+#' though the local ospan is created, activated, and eventually ended, the ospan
+#' will not exist during reactivation of the ospan promise domain.
+#'
+#' `with_ospan_async()` is a convenience method that creates, activates, and
+#' ends the ospan only after the returned promise (if any) resolves. It also
+#' properly handles both synchronous (ending the ospan within `on.exit()`) and
+#' asynchronous operations (ending the ospan within `promises::finally()`).
+#'
+#'
+#'
 #'
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
 #' Creates an OpenTelemetry span, executes the given expression within it, and
-#' ends the span.
+#' ends the span. This method requires the use of `with_ospan_promise_domain()`
+#' to be within the execution stack.
 #'
 #' This function is designed to handle both synchronous and asynchronous
 #' (promise-based) operations. For promises, the span is automatically ended
 #' when the promise resolves or rejects.
 #'
-#' Returns the result of evaluating `expr`. If `expr` returns a promise,
-#'   the span will be automatically ended when the promise completes.
+#' Returns the result of evaluating `expr`. If `expr` returns a promise, the
+#' span will be automatically ended when the promise completes.
 #'
 #' This function differs from synchronous otel span operations in that it
 #' installs a promise domain and properly handles asynchronous operations. In
@@ -62,18 +143,53 @@ NULL
 #' @param name Character string. The name of the span.
 #' @param expr An expression to evaluate within the span context.
 #' @param ... Additional arguments passed to [`otel::start_span()`].
-#' @param tracer An `{otel}` tracer. The default value is set to promises
-#'   package (which it would eventually calculate). It is strongly recommended
-#'   to provide your own tracer from your own package. See
-#'   [`otel::get_tracer()`] for more details.
+#' @param tracer An `{otel}` tracer. If not provided, code will be executed
+#'   under a `{promises}` package tracer. It is strongly recommended to provide
+#'   your own tracer from your own package. See [`otel::get_tracer()`] for more
+#'   details.
 #' @param attributes Attributes passed through [`otel::as_attributes()`] (when
 #'   not `NULL`)
 #' @export
+#' @keywords internal
+#' @examples
+#' \dontrun{
+#' # Set up promise domain to be able to restore active otel span
+#' # * Makes a small promise domain that will restore the active span from when
+#' #   `promises::then()` is called
+#' # * Does not activate any spans, the author must do that themselves
+#' #   (or use `with_ospan_async()`)
+#' with_ospan_promise_domain({
+#'
+#'   # ... deep inside some code execution ...
+#'
+#'   # Synchronous operation
+#'   # * Creates `my_operation` span
+#'   result <- with_ospan_async("my_operation", {
+#'     # ... do some work ...
+#'     42
+#'   })
+#'
+#'   # Asynchronous operation
+#'   # * Creates `async_op` ospan
+#'   # * Automatically ends the ospan (`async_op`) when the promise (p)
+#'   #   resolves or rejects
+#'
+#'   # t0.0
+#'   with_ospan_async("async_op", {
+#'     # ... return a promise ...
+#'     p <- # t0.1
+#'       init_async_work() |> # t0.2
+#'       then(some_async_work) # t1.0
+#'   }) # t0.3
+#'   p2 <- p |> # t0.4
+#'     then(more_async_work) # t2.0
+#' })
+#' }
 with_ospan_async <- function(
   name,
   expr,
   ...,
-  tracer = promises_otel_tracer(),
+  tracer = NULL,
   attributes = NULL
 ) {
   if (!is_tracing_enabled(tracer)) {
@@ -84,7 +200,7 @@ with_ospan_async <- function(
 
   needs_cleanup <- TRUE
   cleanup <- function() {
-    end_ospan(span, tracer = tracer)
+    end_ospan(span) #, tracer = tracer)
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
@@ -115,8 +231,6 @@ with_ospan_async <- function(
 #' restore, we'd reactive `k` ospan objects (`O(k)`) when we only need to
 #' activate the **last** span (`O(1)`).
 #'
-#' The currently active span (during the call to `then()`) will be reactivated
-#' during promise domain restoration.
 #' @export
 with_ospan_promise_domain <- function(expr) {
   act_span_pd <- create_otel_ospan_handoff_promise_domain()
@@ -137,7 +251,7 @@ with_ospan_promise_domain <- function(expr) {
 create_ospan <- function(
   name,
   ...,
-  tracer = promises_otel_tracer(),
+  tracer = NULL,
   attributes = NULL
 ) {
   if (!is_tracing_enabled(tracer)) {
@@ -163,8 +277,11 @@ create_ospan <- function(
 #'
 #' Ends an created OpenTelemetry span for discontiguous operations.
 #' @export
-end_ospan <- function(span, tracer = promises_otel_tracer()) {
-  if (is.null(span) || !is_tracing_enabled(tracer)) {
+end_ospan <- function(span) {
+  if (
+    is.null(span)
+    #  || !is_tracing_enabled(tracer)
+  ) {
     return(invisible())
   }
 
@@ -198,6 +315,11 @@ create_otel_ospan_handoff_promise_domain <- function() {
       #> 2 get_active_span()  14.3µs 15.13µs    64876.    7.02KB     38.9  9994     6      154ms <otl_spn_> <Rprofmem> <bench_tm>
       # ℹ 1 more variable: gc <list>
       ## tl/dr: Speed comes at the cost of safety. Just use this for now as it is only a single cost on restore.
+
+      # Instead, use `get_active_span()` directly so that the recording status
+      # can be changed over time for testing and within the terminal. The 10
+      # microseconds is not worth the inconsistent behavior or the time to debug
+      # the inconsistent behavior.
 
       span <- get_active_span()
       if (!span$is_recording()) {

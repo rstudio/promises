@@ -204,7 +204,6 @@ with_ospan_promise_domain({
         expect_equal(result2, "init2_step12_step22_step23_final2")
 
         # Check that execution alternates between chains
-        # Expected pattern: chain1_step1, chain2_step1, chain1_step2, chain2_step2, etc.
         expected_alternating_pattern <- c(
           "chain1_step1",
           "chain2_step1",
@@ -223,10 +222,10 @@ with_ospan_promise_domain({
         )
       })
 
-      # Verify spans at each step have the same parent, even though the previous
-      # calculation may have been a different promise domain
-      # (All steps in chain1 should have same parent span, all in chain2 should have same parent span)
-
+      # * Verify spans at each step have the same parent, even though the
+      #   previous calculation may have been a different promise domain.
+      # * All steps in chain1 should have same parent span, all in chain2 should
+      #   have same parent span.
       chain1_id <- recording$traces[["chain_1"]]$span_id
       for (name in c(
         "chain1_step1",
