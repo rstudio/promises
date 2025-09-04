@@ -187,6 +187,18 @@ create_otel_ospan_handoff_promise_domain <- function() {
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
 
+      ## Motivation on why we can't use
+      ## `promises_otel_tracer()$get_active_span()` here to save 10 microseconds:
+      ## https://github.com/r-lib/otel/issues/31#issuecomment-3250669840
+      #> ❯❯ bench::mark(promises_otel_tracer()$get_active_span(), get_active_span())
+      #> # A tibble: 2 × 13
+      #>   expression            min  median `itr/sec` mem_alloc `gc/sec` n_itr  n_gc total_time result     memory     time
+      #>   <bch:expr>         <bch:> <bch:t>     <dbl> <bch:byt>    <dbl> <int> <dbl>   <bch:tm> <list>     <list>     <list>
+      #> 1 promises_otel_tra…  4.8µs  6.52µs   144270.        0B     14.4  9999     1     69.3ms <otl_spn_> <Rprofmem> <bench_tm>
+      #> 2 get_active_span()  14.3µs 15.13µs    64876.    7.02KB     38.9  9994     6      154ms <otl_spn_> <Rprofmem> <bench_tm>
+      # ℹ 1 more variable: gc <list>
+      ## tl/dr: Speed comes at the cost of safety. Just use this for now as it is only a single cost on restore.
+
       span <- get_active_span()
       if (!span$is_recording()) {
         return(onFulfilled)
