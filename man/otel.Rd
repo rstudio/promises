@@ -16,9 +16,9 @@ create_ospan(name, ..., tracer = NULL, attributes = NULL)
 end_ospan(span)
 }
 \arguments{
-\item{name}{Character string. The name of the span.}
+\item{name}{Character string. The name of the ospan.}
 
-\item{expr}{An expression to evaluate within the span context.}
+\item{expr}{An expression to evaluate within the ospan context.}
 
 \item{...}{Additional arguments passed to \code{\link[otel:start_span]{otel::start_span()}}.}
 
@@ -47,7 +47,9 @@ topic requires more in-depth documentation and examples.
 \item \code{with_ospan_async()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Creates an OpenTelemetry span, executes the given expression within it, and
-ends the span. This method requires the use of \code{with_ospan_promise_domain()}
+ends the span.
+
+This method \strong{requires} the use of \code{with_ospan_promise_domain()}
 to be within the execution stack.
 
 This function is designed to handle both synchronous and asynchronous
@@ -68,7 +70,7 @@ tracing context.
 
 \item \code{with_ospan_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
-Adds a handoff "Active OpenTelemetry promise domain" for the expression.
+Adds a handoff "Active OpenTelemetry promise domain".
 
 Package authors are required to use this function to have otel span context
 persist across asynchronous boundaries. It is important to leverage this
@@ -82,12 +84,14 @@ calls, such as within Shiny reactivity. For example, if we nested many
 restore, we'd reactive \code{k} ospan objects (\code{O(k)}) when we only need to
 activate the \strong{last} span (\code{O(1)}).
 
+Returns the result of evaluating \code{expr}.
+
 \item \code{create_ospan()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Creates an OpenTelemetry span for discontiguous operations where you need
 manual control over when the span ends.
 
-Note, the created span is not activated. Please use \code{\link[=with_ospan_async]{with_ospan_async()}} to
+Note, the created span is not activated. Please use \code{\link{with_ospan_async}} to
 activate it for the supplied expression.
 
 Returns an \pkg{otel} span object.
@@ -295,13 +299,18 @@ asynchronous operations (ending the ospan within \code{promises::finally()}).
 
 \examples{
 \dontrun{
-# Set up (single) promise domain to be able to restore active otel span
-# * Makes a small promise domain that will restore the active span from when
-#   `promises::then()` is called
-# * Does not activate any spans, the author must do that themselves
-#   (or use `with_ospan_async()`)
+# Common usage:
 with_ospan_promise_domain({
+  # ... deep inside some code execution ...
 
+  # Many calls to `with_ospan_async()` within `with_ospan_promise_domain()`
+  with_ospan_async("my_operation", {
+    # ... do some work ...
+  })
+})
+}
+\dontrun{
+with_ospan_promise_domain({
   # ... deep inside some code execution ...
 
   # Synchronous operation
@@ -314,7 +323,7 @@ with_ospan_promise_domain({
     prom_nested <- with_ospan_async("my_nested_operation", {
       # ... do some more work ...
       promise_resolve(42) |>
-        then((value) {
+        then(\(value) {
           print(otel::get_active_span()$name) # "my_nested_operation"
           print(value) # 42
         })
@@ -336,5 +345,9 @@ with_ospan_promise_domain({
   })
 })
 }
+}
+\seealso{
+\code{\link[otel:start_span]{otel::start_span()}}, \code{\link[otel:with_active_span]{otel::with_active_span()}},
+\code{\link[otel:end_span]{otel::end_span()}}
 }
 \keyword{internal}

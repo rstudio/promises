@@ -192,7 +192,9 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
 #' Creates an OpenTelemetry span, executes the given expression within it, and
-#' ends the span. This method requires the use of `with_ospan_promise_domain()`
+#' ends the span.
+#'
+#' This method **requires** the use of `with_ospan_promise_domain()`
 #' to be within the execution stack.
 #'
 #' This function is designed to handle both synchronous and asynchronous
@@ -210,8 +212,9 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #'
 #' If OpenTelemetry is not enabled, the expression will be evaluated without any
 #' tracing context.
-#' @param name Character string. The name of the span.
-#' @param expr An expression to evaluate within the span context.
+#'
+#' @param name Character string. The name of the ospan.
+#' @param expr An expression to evaluate within the ospan context.
 #' @param ... Additional arguments passed to [`otel::start_span()`].
 #' @param tracer An `{otel}` tracer. If not provided, code will be executed
 #'   under a `{promises}` package tracer. It is strongly recommended to provide
@@ -221,15 +224,22 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #'   not `NULL`)
 #' @export
 #' @keywords internal
+#' @seealso [`otel::start_span()`], [`otel::with_active_span()`],
+#'   [`otel::end_span()`]
 #' @examples
 #' \dontrun{
-#' # Set up (single) promise domain to be able to restore active otel span
-#' # * Makes a small promise domain that will restore the active span from when
-#' #   `promises::then()` is called
-#' # * Does not activate any spans, the author must do that themselves
-#' #   (or use `with_ospan_async()`)
+#' # Common usage:
 #' with_ospan_promise_domain({
+#'   # ... deep inside some code execution ...
 #'
+#'   # Many calls to `with_ospan_async()` within `with_ospan_promise_domain()`
+#'   with_ospan_async("my_operation", {
+#'     # ... do some work ...
+#'   })
+#' })
+#' }
+#' \dontrun{
+#' with_ospan_promise_domain({
 #'   # ... deep inside some code execution ...
 #'
 #'   # Synchronous operation
@@ -242,7 +252,7 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #'     prom_nested <- with_ospan_async("my_nested_operation", {
 #'       # ... do some more work ...
 #'       promise_resolve(42) |>
-#'         then((value) {
+#'         then(\(value) {
 #'           print(otel::get_active_span()$name) # "my_nested_operation"
 #'           print(value) # 42
 #'         })
@@ -296,7 +306,7 @@ with_ospan_async <- function(
 
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
-#' Adds a handoff "Active OpenTelemetry promise domain" for the expression.
+#' Adds a handoff "Active OpenTelemetry promise domain".
 #'
 #' Package authors are required to use this function to have otel span context
 #' persist across asynchronous boundaries. It is important to leverage this
@@ -310,6 +320,8 @@ with_ospan_async <- function(
 #' restore, we'd reactive `k` ospan objects (`O(k)`) when we only need to
 #' activate the **last** span (`O(1)`).
 #'
+#' Returns the result of evaluating `expr`.
+#'
 #' @export
 with_ospan_promise_domain <- function(expr) {
   act_span_pd <- create_otel_ospan_handoff_promise_domain()
@@ -322,7 +334,7 @@ with_ospan_promise_domain <- function(expr) {
 #' Creates an OpenTelemetry span for discontiguous operations where you need
 #' manual control over when the span ends.
 #'
-#' Note, the created span is not activated. Please use [`with_ospan_async()`] to
+#' Note, the created span is not activated. Please use [`promises::with_ospan_async`] to
 #' activate it for the supplied expression.
 #'
 #' Returns an \pkg{otel} span object.
