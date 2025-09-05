@@ -156,13 +156,13 @@ current_promise_domain <- function() {
 #' domain object (for the duration of evaluating a given expression) using
 #' `with_promise_domain`.
 #'
-#' While `with_promise_domain` is on the call stack, any calls to [then()] (or
-#' higher level functions or operators, like [catch()] or the various [pipes])
-#' will belong to the promise domain. In addition, when a `then` callback that
-#' belongs to a promise domain is invoked, then any new calls to `then` will
-#' also belong to that promise domain. In other words, a promise domain
-#' "infects" not only the immediate calls to `then`, but also to "nested" calls
-#' to `then`.
+#' While `with_promise_domain` is on the call stack, any calls to
+#' [`promises::then()`] (or higher level functions or operators, like
+#' [`promises::catch()`]) will belong to the promise domain. In addition, when a
+#' `then` callback that belongs to a promise domain is invoked, then any new
+#' calls to `then` will also belong to that promise domain. In other words, a
+#' promise domain "infects" not only the immediate calls to `then`, but also to
+#' "nested" calls to `then`.
 #'
 #' For more background, read the
 #' [original design doc](https://gist.github.com/jcheng5/b1c87bb416f6153643cd0470ac756231).
@@ -205,17 +205,18 @@ reenter_promise_domain <- function(domain, expr, replace) {
 }
 
 #' @param wrapOnFulfilled A function that takes a single argument: a function
-#'   that was passed as an `onFulfilled` argument to [then()]. The
+#'   that was passed as an `onFulfilled` argument to [`promises::then()`]. The
 #'   `wrapOnFulfilled` function should return a function that is suitable for
 #'   `onFulfilled` duty.
 #' @param wrapOnRejected A function that takes a single argument: a function
-#'   that was passed as an `onRejected` argument to [then()]. The
+#'   that was passed as an `onRejected` argument to [`promises::then()`]. The
 #'   `wrapOnRejected` function should return a function that is suitable for
 #'   `onRejected` duty.
 #' @param wrapSync A function that takes a single argument: a (lazily evaluated)
 #'   expression that the function should [force()]. This expression represents
-#'   the `expr` argument passed to [with_promise_domain()]; `wrapSync` allows
-#'   the domain to manipulate the environment before/after `expr` is evaluated.
+#'   the `expr` argument passed to [`promises::with_promise_domain()`];
+#'   `wrapSync` allows the domain to manipulate the environment before/after
+#'   `expr` is evaluated.
 #' @param onError A function that takes a single argument: an error. `onError`
 #'   will be called whenever an exception occurs in a domain (that isn't caught
 #'   by a `tryCatch`). Providing an `onError` callback doesn't cause errors to
@@ -225,7 +226,7 @@ reenter_promise_domain <- function(domain, expr, replace) {
 #'   domain object, and can be accessed as items in an environment (i.e. using
 #'   `[[` or `$`).
 #' @param wrapOnFinally A function that takes a single argument: a function
-#'   that was passed as an `onFinally` argument to [then()]. The
+#'   that was passed as an `onFinally` argument to [`promises::then()`]. The
 #'   `wrapOnFinally` function should return a function that is suitable for
 #'   `onFinally` duty. If `wrapOnFinally` is `NULL` (the default), then the
 #'   domain will use both `wrapOnFulfilled` and `wrapOnRejected` to wrap the

@@ -39,8 +39,9 @@ that was passed as an \code{onRejected} argument to \code{\link[=then]{then()}}.
 
 \item{wrapSync}{A function that takes a single argument: a (lazily evaluated)
 expression that the function should \code{\link[=force]{force()}}. This expression represents
-the \code{expr} argument passed to \code{\link[=with_promise_domain]{with_promise_domain()}}; \code{wrapSync} allows
-the domain to manipulate the environment before/after \code{expr} is evaluated.}
+the \code{expr} argument passed to \code{\link[=with_promise_domain]{with_promise_domain()}};
+\code{wrapSync} allows the domain to manipulate the environment before/after
+\code{expr} is evaluated.}
 
 \item{onError}{A function that takes a single argument: an error. \code{onError}
 will be called whenever an exception occurs in a domain (that isn't caught
@@ -69,13 +70,13 @@ domain object (for the duration of evaluating a given expression) using
 \code{with_promise_domain}.
 }
 \details{
-While \code{with_promise_domain} is on the call stack, any calls to \code{\link[=then]{then()}} (or
-higher level functions or operators, like \code{\link[=catch]{catch()}} or the various \link{pipes})
-will belong to the promise domain. In addition, when a \code{then} callback that
-belongs to a promise domain is invoked, then any new calls to \code{then} will
-also belong to that promise domain. In other words, a promise domain
-"infects" not only the immediate calls to \code{then}, but also to "nested" calls
-to \code{then}.
+While \code{with_promise_domain} is on the call stack, any calls to
+\code{\link[=then]{then()}} (or higher level functions or operators, like
+\code{\link[=catch]{catch()}}) will belong to the promise domain. In addition, when a
+\code{then} callback that belongs to a promise domain is invoked, then any new
+calls to \code{then} will also belong to that promise domain. In other words, a
+promise domain "infects" not only the immediate calls to \code{then}, but also to
+"nested" calls to \code{then}.
 
 For more background, read the
 \href{https://gist.github.com/jcheng5/b1c87bb416f6153643cd0470ac756231}{original design doc}.

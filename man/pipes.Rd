@@ -26,8 +26,8 @@ a promise or non-promise value, or throw an error.}
 A new promise.
 }
 \description{
-With R 4.1, the promise pipe operators are \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} by \code{\link[=then]{then()}}, \code{\link[=catch]{catch()}}, and
-\code{\link[=finally]{finally()}} methods when used in tandem with the function shorthand (\verb{\\(x) rhs(x)}) and \verb{|>}.
+With R 4.1, the promise pipe operators are \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} by \code{\link{then}}, \code{\link{catch}}, and
+\code{\link{finally}} methods when used in tandem with the function shorthand (\verb{\\(x) rhs(x)}) and \verb{|>}.
 }
 \details{
 Promise-aware pipe operators, in the style of \href{https://CRAN.R-project.org/package=magrittr/vignettes/magrittr.html}{magrittr}.
