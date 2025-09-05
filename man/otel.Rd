@@ -37,10 +37,10 @@ observability and tracing in distributed systems.
 These methods are intended to enhance the framework to be used with the
 \pkg{promises} package, not as a generic replacement.
 
-Dev note - Barret 2025/09: This ospan handoff promise domain topic is complex
-and has been discussed over many hours. Many advanced Shiny/R developers
-are not even aware of promise domains (very reasonable!), therefore this
-topic requires more in-depth documentation and examples.
+Developer note - Barret 2025/09: This ospan handoff promise domain topic is
+complex and has been discussed over many hours. Many advanced Shiny/R
+developers are not even aware of promise domains (very reasonable!),
+therefore this topic requires more in-depth documentation and examples.
 }
 \section{Functions}{
 \itemize{
@@ -123,7 +123,7 @@ combination order.
 \item Promise chain: A set of promise objects to execute over multiple async
 ticks.
 \item Async tick: the number of times an event loop must run to move computation
-forward. (Similar to a Javascript event loop tick.)
+forward. (Similar to a JavaScript event loop tick.)
 \item \code{then()} promise domain capture: When \code{then()} is called, it will capture
 the current promise domain. This promise domain is restored (only if
 needed) when evaluating the given \code{onFulfilled} and \code{onRejected} callbacks.

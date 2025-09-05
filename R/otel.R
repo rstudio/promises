@@ -20,10 +20,10 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' These methods are intended to enhance the framework to be used with the
 #' \pkg{promises} package, not as a generic replacement.
 #'
-#' Dev note - Barret 2025/09: This ospan handoff promise domain topic is complex
-#' and has been discussed over many hours. Many advanced Shiny/R developers
-#' are not even aware of promise domains (very reasonable!), therefore this
-#' topic requires more in-depth documentation and examples.
+#' Developer note - Barret 2025/09: This ospan handoff promise domain topic is
+#' complex and has been discussed over many hours. Many advanced Shiny/R
+#' developers are not even aware of promise domains (very reasonable!),
+#' therefore this topic requires more in-depth documentation and examples.
 #'
 #' @section Definitions:
 #'
@@ -46,7 +46,7 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' * Promise chain: A set of promise objects to execute over multiple async
 #'   ticks.
 #' * Async tick: the number of times an event loop must run to move computation
-#'   forward. (Similar to a Javascript event loop tick.)
+#'   forward. (Similar to a JavaScript event loop tick.)
 #' * `then()` promise domain capture: When `then()` is called, it will capture
 #'   the current promise domain. This promise domain is restored (only if
 #'   needed) when evaluating the given `onFulfilled` and `onRejected` callbacks.
