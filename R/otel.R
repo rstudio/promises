@@ -8,7 +8,7 @@
 NULL
 
 # For `otel::default_tracer_name()`
-otel_tracer_name <- "co.posit.r-package.shiny"
+otel_tracer_name <- "co.posit.r-package.promises"
 
 
 #' `r lifecycle::badge("experimental")` OpenTelemetry integration
