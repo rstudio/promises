@@ -132,7 +132,7 @@ ExpoDelay <- R6::R6Class(
 #'
 #' However, it is possible to use a private loop inside a user-defined `WorkQueue` may work which can be provided directly to `future_promise(queue=custom_queue)`. Having a concrete example (or need) will help us understand the problem better. If you have an example, please reach out .
 #'
-#' @seealso [future_promise_queue()] which returns a `WorkQueue` which is cached per R session.
+#' @seealso [`promises::future_promise_queue()`] which returns a `WorkQueue` which is cached per R session.
 #' @keywords internal
 WorkQueue <- R6::R6Class(
   "WorkQueue",
@@ -335,8 +335,8 @@ WorkQueue <- R6::R6Class(
 )
 
 
-#' @describeIn future_promise Default `future_promise()` work queue to use. This function returns a [WorkQueue] that is cached per R session.
-#' @seealso [`WorkQueue`]
+#' @describeIn future_promise Default `future_promise()` work queue to use. This function returns a [`promises::WorkQueue`] that is cached per R session.
+#' @seealso [`promises::WorkQueue`]
 #' @export
 future_promise_queue <- local({
   future_promise_queue_ <- NULL
@@ -364,7 +364,7 @@ future_promise_queue <- local({
 #' @inheritParams future::future
 #' @param expr An R expression. While the `expr` is eventually sent to [`future::future()`], please use the same precautions that you would use with regular `promises::promise()` expressions. `future_promise()` may have to hold the `expr` in a [promise()] while waiting for a \pkg{future} worker to become available.
 #' @param ... extra parameters provided to [`future::future()`]
-#' @param queue A queue that is used to schedule work to be done using [future::future()].  This queue defaults to [future_promise_queue()] and requires that method `queue$schedule_work(fn)` exist.  This method should take in a function that will execute the promised \pkg{future} work.
+#' @param queue A queue that is used to schedule work to be done using [future::future()].  This queue defaults to [`promises::future_promise_queue()`] and requires that method `queue$schedule_work(fn)` exist.  This method should take in a function that will execute the promised \pkg{future} work.
 #' @return Unlike [`future::future()`], `future_promise()` returns a [promise()] object that will eventually resolve the \pkg{future} `expr`.
 #' @examples
 #' \dontrun{# Relative start time

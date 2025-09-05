@@ -43,7 +43,7 @@ For more details and examples, please see the \href{https://rstudio.github.io/pr
 }
 \section{Functions}{
 \itemize{
-\item \code{future_promise_queue()}: Default \code{future_promise()} work queue to use. This function returns a \link{WorkQueue} that is cached per R session.
+\item \code{future_promise_queue()}: Default \code{future_promise()} work queue to use. This function returns a \code{\link{WorkQueue}} that is cached per R session.
 
 \item \code{future_promise()}: Creates a \code{\link[=promise]{promise()}} that will execute the \code{expr} using \code{\link[future:future]{future::future()}}.
 
