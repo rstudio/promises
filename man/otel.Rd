@@ -2,41 +2,33 @@
 % Please edit documentation in R/otel.R
 \name{with_ospan_async}
 \alias{with_ospan_async}
+\alias{with_ospan_promise_domain}
 \alias{create_ospan}
 \alias{end_ospan}
-\alias{with_ospan_promise_domain}
 \title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
 \usage{
-with_ospan_async(
-  name,
-  expr,
-  ...,
-  tracer = promises_otel_tracer(),
-  attributes = NULL
-)
+with_ospan_async(name, expr, ..., tracer = NULL, attributes = NULL)
 
-create_ospan(name, ..., tracer = promises_otel_tracer(), attributes = NULL)
+with_ospan_promise_domain(expr)
 
-end_ospan(span, tracer = promises_otel_tracer())
+create_ospan(name, ..., tracer = NULL, attributes = NULL)
 
-with_ospan_promise_domain(span, expr)
+end_ospan(span)
 }
 \arguments{
-\item{name}{Character string. The name of the span.}
+\item{name}{Character string. The name of the ospan.}
 
-\item{expr}{An expression to evaluate within the span context.}
+\item{expr}{An expression to evaluate within the ospan context.}
 
 \item{...}{Additional arguments passed to \code{\link[otel:start_span]{otel::start_span()}}.}
 
-\item{tracer}{An \code{{otel}} tracer. The default value is set to promises
-package (which it would eventually calculate). It is strongly recommended
-to provide your own tracer from your own package. See
-\code{\link[otel:get_tracer]{otel::get_tracer()}} for more details.}
+\item{tracer}{An \code{{otel}} tracer. If not provided, code will be executed
+under a \code{{promises}} package tracer. It is strongly recommended to provide
+your own tracer from your own package. See \code{\link[otel:get_tracer]{otel::get_tracer()}} for more
+details.}
 
 \item{attributes}{Attributes passed through \code{\link[otel:as_attributes]{otel::as_attributes()}} (when
 not \code{NULL})}
-
-\item{span}{An OpenTelemetry span object.}
 }
 \description{
 \pkg{otel} provides tools for integrating with OpenTelemetry, a framework for
@@ -44,6 +36,11 @@ observability and tracing in distributed systems.
 
 These methods are intended to enhance the framework to be used with the
 \pkg{promises} package, not as a generic replacement.
+
+Developer note - Barret 2025/09: This ospan handoff promise domain topic is
+complex and has been discussed over many hours. Many advanced Shiny/R
+developers are not even aware of promise domains (very reasonable!),
+therefore this topic requires more in-depth documentation and examples.
 }
 \section{Functions}{
 \itemize{
@@ -52,12 +49,15 @@ These methods are intended to enhance the framework to be used with the
 Creates an OpenTelemetry span, executes the given expression within it, and
 ends the span.
 
+This method \strong{requires} the use of \code{with_ospan_promise_domain()}
+to be within the execution stack.
+
 This function is designed to handle both synchronous and asynchronous
 (promise-based) operations. For promises, the span is automatically ended
 when the promise resolves or rejects.
 
-Returns the result of evaluating \code{expr}. If \code{expr} returns a promise,
-the span will be automatically ended when the promise completes.
+Returns the result of evaluating \code{expr}. If \code{expr} returns a promise, the
+span will be automatically ended when the promise completes.
 
 This function differs from synchronous otel span operations in that it
 installs a promise domain and properly handles asynchronous operations. In
@@ -68,12 +68,30 @@ asynchronous operations).
 If OpenTelemetry is not enabled, the expression will be evaluated without any
 tracing context.
 
+\item \code{with_ospan_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+Adds a handoff "Active OpenTelemetry promise domain".
+
+Package authors are required to use this function to have otel span context
+persist across asynchronous boundaries. It is important to leverage this
+function only once within the execution domain, not recursively / many times.
+
+This method adds a \emph{handoff} "Active OpenTelemetry promise domain" to the
+expression evaluation. This \emph{handoff} promise domain will only run once on
+reactivation. This is critical if there are many layered \code{with_ospan_async()}
+calls, such as within Shiny reactivity. For example, if we nested many
+\code{with_ospan_async()} that added a domain which reactivated each ospan on
+restore, we'd reactive \code{k} ospan objects (\code{O(k)}) when we only need to
+activate the \strong{last} span (\code{O(1)}).
+
+Returns the result of evaluating \code{expr}.
+
 \item \code{create_ospan()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Creates an OpenTelemetry span for discontiguous operations where you need
 manual control over when the span ends.
 
-Note, the created span is not activated. Please use \code{\link[=with_ospan_async]{with_ospan_async()}} to
+Note, the created span is not activated. Please use \code{\link{with_ospan_async}} to
 activate it for the supplied expression.
 
 Returns an \pkg{otel} span object.
@@ -82,38 +100,254 @@ Returns an \pkg{otel} span object.
 
 Ends an created OpenTelemetry span for discontiguous operations.
 
-\item \code{with_ospan_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-Executes an expression within the context of an active OpenTelemetry span.
-
-Adds an "Active OpenTelemetry promise domain" to the expression evaluation.
-This span will be reactivated during promise domain restoration.
-
 }}
+\section{Definitions}{
+
+\itemize{
+\item Promise domain: An environment in which has setup/teardown methods. These
+environments can be composed together to facilitate execution context for
+promises. In normal R execution, this can be achieved with scope / stack.
+But for complex situations, such as the currently open graphics device,
+async operations require promise domains to setup/teardown these contexts
+to function properly. Otherwise a multi-stage promise that adds to the
+graphics device at each stage will only ever print to the most recently
+created graphics device, not the associated graphics device. These promise
+domains are not automatically created, they must be manually added to the
+execution stack, for example \code{with_ospan_promise_domain()} does this for
+OpenTelemetry spans ("ospan").
+\item Promise domain restoration: When switching from one promise chain to
+another, the execution context is torn down and then re-established. This
+re-establishment is called "promise domain restoration". During this
+process, the promise domains are restored in their previously established
+combination order.
+\item Promise chain: A set of promise objects to execute over multiple async
+ticks.
+\item Async tick: the number of times an event loop must run to move computation
+forward. (Similar to a JavaScript event loop tick.)
+\item \code{then()} promise domain capture: When \code{then()} is called, it will capture
+the current promise domain. This promise domain is restored (only if
+needed) when evaluating the given \code{onFulfilled} and \code{onRejected} callbacks.
+This captured promise domain does not go into any downstream promise chain
+objects. The only way the promise domain is captured is exactly when the
+\code{then()} method is called.
+}
+
+\code{with_ospan_promise_domain()} creates a promise domain that restores the
+currently active OpenTelemetry span from when a call to \code{promises::then()} is
+executed. Given the special circumstance where only the current ospan is
+needed to continue recording (not a full ancestry tree of ospans), we can
+capture \emph{just} the current ospan and reactivate that ospan during promise
+domain restoration.
+}
+
+\section{When promise domains are captured}{
+
+
+Asynchronous operation
+\itemize{
+\item Creates \code{async_op} ospan
+\item Automatically ends the ospan (\code{async_op}) when the promise (p)
+resolves or rejects
+}
+
+The code below illustrates an example of when the promise domain are
+created/captured/restored and when ospan objects are
+created/activated/reactivated/ended.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# t0.0
+p2 <- with_ospan_promise_domain(\{
+  # t0.1
+  p <- with_ospan_async("async_op", \{
+    # ... return a promise ...
+    init_async_work() |> # t0.2
+      then( # t0.3
+        some_async_work # t1.0
+      )
+  \}) # t0.4, t1.0, t2.0
+  p |>
+    then( # t0.5
+      more_async_work # t3.0
+    )
+\}) # t0.6
+
+p_final <-
+  p2 |> then( # t0.7
+    final_work # t4.0
+  )
+}\if{html}{\out{</div>}}
+
+An in-depth explanation of the execution timeline is below.
+\itemize{
+\item At the first initial tick, \verb{t0.*}:
+\itemize{
+\item \code{t0.0}: The code is wrapped in \code{with_ospan_promise_domain()}
+\item \code{t0.1}: The \code{async_op} ospan is created and activated
+\item \code{t0.2}: Some async work is initiated
+\item \code{t0.3}: \code{then()} is called, capturing the active \code{async_op} ospan (as it
+is called within \code{with_ospan_promise_domain()})
+\item \code{t0.4}: The \code{with_ospan_async()} call exits, but the \code{async_op} ospan is
+not ended as the promise is still pending. The returned promise has a
+\code{finally()} step added to it that will end the ospan \code{async_op} when \code{p}
+is resolved.
+\item \code{t0.5}: Another \code{then()} is called, but there is no active ospan to
+capture
+\item \code{t0.6}: The ospan promise domain call exits
+\item \code{t0.7}: Another \code{then()} is called. No ospan will be captured as there is
+no active ospan / promise domain
+}
+\item At the first followup tick, \code{t1.0}:
+\itemize{
+\item The active \code{async_op} ospan is reactivated during promise domain
+restoration for the duration of the \code{then} callback
+\item The \code{some_async_work} function is called
+}
+\item At tick, \code{t2.0}:
+\itemize{
+\item \code{some_async_work} has resolved
+\item A hidden \code{finally()} step closes the ospan, \code{async_op}
+\item \code{p} is now resolved
+}
+\item At tick, \code{t3.0}:
+\itemize{
+\item There is no active ospan at \code{t0.5}, so no ospan is reactivated during
+promise domain restoration
+\item The \code{more_async_work} function is executed
+}
+\item At tick, \code{t4.0}:
+\itemize{
+\item \code{more_async_work} has resolved, therefore \code{p2} is now resolved
+\item There was no ospan promise domain at \code{t0.7}, so no attempt is made to
+reactivate any ospan
+\item The \code{final_work} function is executed
+}
+\item At tick, \code{t5.0}:
+\itemize{
+\item \code{p_final} has resolved
+}
+}
+}
+
+\section{Complexity}{
+
+
+When reactivating the \code{k}th step in a promise chain, the currently active
+ospan (during the call to \code{then()}) will be reactivated during promise domain
+restoration (\code{O(1)}). To restore a chain of promises, the active ospan will
+be restored at each step (\code{O(n)}) due to the \strong{\code{n}} calls to wrapping each
+\code{onFulfilled} and \code{onRejected} callbacks inside \code{then()}.
+
+If we did NOT have a handoff promise domain for ospan restoration, a regular
+promise domain approach would be needed at each step to restore the active
+ospan. Each step would call \code{with_active_span()} \code{k} times (\code{O(k)}, where as
+handoff domain computes in \code{O(1)}). Taking a step back, to restore each ospan
+at for every step in a promise chain would then take \code{O(n^2)} time, not
+\code{O(n)}. The standard, naive promise domain approach does not scale for
+multiple similar promise domain restorations.
+}
+
+\section{Execution model for \code{with_ospan_promise_domain()}}{
+
+\enumerate{
+\item \code{with_ospan_promise_domain(expr)} is called.
+\itemize{
+\item The following steps all occur within \code{expr}.
+}
+\item Create an ospan object using \code{create_ospan()} or \code{otel::start_span()}.
+\itemize{
+\item We need the ospan to be active during the a followup async operation.
+Therefore, \code{otel::start_local_active_span()} is not appropriate as the
+ospan would be ended when the function exits, not when the promise chain
+resolves.
+}
+\item Be sure your ospan is activated before calling \code{promises::then()}.
+\itemize{
+\item Activate it using \code{with_ospan_async(name, expr)} (which also
+creates/ends the ospan) or \code{otel::with_active_span(span, expr)}.
+}
+\item Call \code{promises::then()}
+}
+\itemize{
+\item When \code{promises::then()} is called, the two methods (\code{onFulfilled} and
+\code{onRejected}) capture the currently active spans. (Performed by the
+initial \code{with_ospan_promise_domain()})
+}
+\enumerate{
+\item During reactivation of the promise chain step, the previously captured
+ospan is reactivated via \code{with_active_span()}. (Performed by the initial
+\code{with_ospan_promise_domain()})
+}
+}
+
+\section{OpenTelemetry span compatibility}{
+
+
+For ospan objects to exist over may async ticks, the ospan must be created
+using \code{create_ospan()} (or \code{otel::start_span()}) and later ended using
+\code{end_ospan()} (or \code{otel::end_span()}). Ending the ospan must occur \strong{after}
+any promise chain work has completed.
+
+If we were to instead use \code{otel::start_local_active_span()}, the ospan would
+be ended when the function exits, not when the promise chain completes. Even
+though the local ospan is created, activated, and eventually ended, the ospan
+will not exist during reactivation of the ospan promise domain.
+
+\code{with_ospan_async()} is a convenience method that creates, activates, and
+ends the ospan only after the returned promise (if any) resolves. It also
+properly handles both synchronous (ending the ospan within \code{on.exit()}) and
+asynchronous operations (ending the ospan within \code{promises::finally()}).
+}
+
 \examples{
 \dontrun{
-# Synchronous operation
-result <- with_ospan_async("my_operation", {
-  # ... do some work ...
-  42
-})
+# Common usage:
+with_ospan_promise_domain({
+  # ... deep inside some code execution ...
 
-# Asynchronous operation
-p <- with_ospan_async("async_operation", {
-  # ... return a promise ...
-  some_async_function()
+  # Many calls to `with_ospan_async()` within `with_ospan_promise_domain()`
+  with_ospan_async("my_operation", {
+    # ... do some work ...
+  })
 })
 }
 \dontrun{
-# Start a span for discontiguous work (uncommon; use with caution)
-spn <- create_ospan("my_operation")
-with_ospan_promise_domain(spn, {
-  # ... do some work ...
-})
-# ...
-# End span when ready
-end_ospan(spn)
-}
+with_ospan_promise_domain({
+  # ... deep inside some code execution ...
 
+  # Synchronous operation
+  # * Creates `my_operation` span
+  result <- with_ospan_async("my_operation", {
+    # ... do some work ...
+    print(otel::get_active_span()$name) # "my_operation"
+
+    # Nest (many) more spans
+    prom_nested <- with_ospan_async("my_nested_operation", {
+      # ... do some more work ...
+      promise_resolve(42) |>
+        then(\(value) {
+          print(otel::get_active_span()$name) # "my_nested_operation"
+          print(value) # 42
+        })
+    })
+
+    # Since `then()` is called during the active `my_operation` span,
+    # the `my_operation` span will be reactivated in the `then()` callback.
+    prom_nested |> then(\(value) {
+      print(otel::get_active_span()$name) # "my_operation"
+      value
+    })
+  })
+
+  # Since `then()` is called where there is no active span,
+  # there is no _active_ span in the `then()` callback.
+  result |> then(\(value) {
+    stopifnot(inherits(otel::get_active_span(), "otel_span_noop"))
+    print(value) # 42
+  })
+})
+}
+}
+\seealso{
+\code{\link[otel:start_span]{otel::start_span()}}, \code{\link[otel:with_active_span]{otel::with_active_span()}},
+\code{\link[otel:end_span]{otel::end_span()}}
 }
 \keyword{internal}
