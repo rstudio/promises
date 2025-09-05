@@ -117,8 +117,9 @@ that was passed as an <code>onRejected</code> argument to <code><a href="then.ht
 <dt id="arg-wrapsync">wrapSync<a class="anchor" aria-label="anchor" href="#arg-wrapsync"></a></dt>
 <dd><p>A function that takes a single argument: a (lazily evaluated)
 expression that the function should <code><a href="https://rdrr.io/r/base/force.html" class="external-link">force()</a></code>. This expression represents
-the <code>expr</code> argument passed to <code>with_promise_domain()</code>; <code>wrapSync</code> allows
-the domain to manipulate the environment before/after <code>expr</code> is evaluated.</p></dd>
+the <code>expr</code> argument passed to <code>with_promise_domain()</code>;
+<code>wrapSync</code> allows the domain to manipulate the environment before/after
+<code>expr</code> is evaluated.</p></dd>
 
 
 <dt id="arg-onerror">onError<a class="anchor" aria-label="anchor" href="#arg-onerror"></a></dt>
@@ -148,13 +149,13 @@ provide <code>wrapOnFinally</code>, even if it's just <code><a href="https://rdr
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>While <code>with_promise_domain</code> is on the call stack, any calls to <code><a href="then.html">then()</a></code> (or
-higher level functions or operators, like <code><a href="then.html">catch()</a></code> or the various <a href="pipes.html">pipes</a>)
-will belong to the promise domain. In addition, when a <code>then</code> callback that
-belongs to a promise domain is invoked, then any new calls to <code>then</code> will
-also belong to that promise domain. In other words, a promise domain
-"infects" not only the immediate calls to <code>then</code>, but also to "nested" calls
-to <code>then</code>.</p>
+    <p>While <code>with_promise_domain</code> is on the call stack, any calls to
+<code><a href="then.html">then()</a></code> (or higher level functions or operators, like
+<code><a href="then.html">catch()</a></code>) will belong to the promise domain. In addition, when a
+<code>then</code> callback that belongs to a promise domain is invoked, then any new
+calls to <code>then</code> will also belong to that promise domain. In other words, a
+promise domain "infects" not only the immediate calls to <code>then</code>, but also to
+"nested" calls to <code>then</code>.</p>
 <p>For more background, read the
 <a href="https://gist.github.com/jcheng5/b1c87bb416f6153643cd0470ac756231" class="external-link">original design doc</a>.</p>
 <p>For examples, see the source code of the Shiny package, which uses promise
