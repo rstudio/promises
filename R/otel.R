@@ -21,13 +21,12 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' \pkg{promises} package, not as a generic replacement.
 #'
 #' Dev note - Barret 2025/09: This ospan handoff promise domain topic is complex
-#' and has been discussed over many hours. As even advanced Shiny/R developers
-#' are not even aware of promise domains, this topic requires more in-depth
-#' documentation and examples.
+#' and has been discussed over many hours. Many advanced Shiny/R developers
+#' are not even aware of promise domains (very reasonable!), therefore this
+#' topic requires more in-depth documentation and examples.
 #'
-#' @section Execution model for with_ospan_promise_domain():
+#' @section Definitions:
 #'
-#' ### Definitions
 #' * Promise domain: An environment in which has setup/teardown methods. These
 #'   environments can be composed together to facilitate execution context for
 #'   promises. In normal R execution, this can be achieved with scope / stack.
@@ -62,7 +61,78 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' capture _just_ the current ospan and reactivate that ospan during promise
 #' domain restoration.
 #'
-#' ### Complexity
+#' @section When promise domains are captured:
+#'
+#' Asynchronous operation
+#' * Creates `async_op` ospan
+#' * Automatically ends the ospan (`async_op`) when the promise (p)
+#'   resolves or rejects
+#'
+#' The code below illustrates an example of when the promise domain are
+#' created/captured/restored and when ospan objects are
+#' created/activated/reactivated/ended.
+#'
+#' ```r
+#' # t0.0
+#' p2 <- with_ospan_promise_domain({
+#'   # t0.1
+#'   p <- with_ospan_async("async_op", {
+#'     # ... return a promise ...
+#'     init_async_work() |> # t0.2
+#'       then( # t0.3
+#'         some_async_work # t1.0
+#'       )
+#'   }) # t0.4, t1.0, t2.0
+#'   p |>
+#'     then( # t0.5
+#'       more_async_work # t3.0
+#'     )
+#' }) # t0.6
+#'
+#' p_final <-
+#'   p2 |> then( # t0.7
+#'     final_work # t4.0
+#'   )
+#' ```
+#'
+#' An in-depth explanation of the execution timeline is below.
+#' * At the first initial tick, `t0.*`:
+#'   * `t0.0`: The code is wrapped in `with_ospan_promise_domain()`
+#'   * `t0.1`: The `async_op` ospan is created and activated
+#'   * `t0.2`: Some async work is initiated
+#'   * `t0.3`: `then()` is called, capturing the active `async_op` ospan (as it
+#'     is called within `with_ospan_promise_domain()`)
+#'   * `t0.4`: The `with_ospan_async()` call exits, but the `async_op` ospan is
+#'     not ended as the promise is still pending. The returned promise has a
+#'     `finally()` step added to it that will end the ospan `async_op` when `p`
+#'     is resolved.
+#'   * `t0.5`: Another `then()` is called, but there is no active ospan to
+#'     capture
+#'   * `t0.6`: The ospan promise domain call exits
+#'   * `t0.7`: Another `then()` is called. No ospan will be captured as there is
+#'     no active ospan / promise domain
+#' * At the first followup tick, `t1.0`:
+#'   * The active `async_op` ospan is reactivated during promise domain
+#'     restoration for the duration of the `then` callback
+#'   * The `some_async_work` function is called
+#' * At tick, `t2.0`:
+#'   * `some_async_work` has resolved
+#'   * A hidden `finally()` step closes the ospan, `async_op`
+#'   * `p` is now resolved
+#' * At tick, `t3.0`:
+#'   * There is no active ospan at `t0.5`, so no ospan is reactivated during
+#'     promise domain restoration
+#'   * The `more_async_work` function is executed
+#' * At tick, `t4.0`:
+#'   * `more_async_work` has resolved, therefore `p2` is now resolved
+#'   * There was no ospan promise domain at `t0.7`, so no attempt is made to
+#'     reactivate any ospan
+#'   * The `final_work` function is executed
+#' * At tick, `t5.0`:
+#'   * `p_final` has resolved
+
+#'
+#' @section Complexity:
 #'
 #' When reactivating the `k`th step in a promise chain, the currently active
 #' ospan (during the call to `then()`) will be reactivated during promise domain
@@ -79,7 +149,7 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' multiple similar promise domain restorations.
 #'
 #'
-#' ### Execution model
+#' @section Execution model for `with_ospan_promise_domain()`:
 #'
 #' 1. `with_ospan_promise_domain(expr)` is called.
 #'    * The following steps all occur within `expr`.
@@ -153,7 +223,7 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' @keywords internal
 #' @examples
 #' \dontrun{
-#' # Set up promise domain to be able to restore active otel span
+#' # Set up (single) promise domain to be able to restore active otel span
 #' # * Makes a small promise domain that will restore the active span from when
 #' #   `promises::then()` is called
 #' # * Does not activate any spans, the author must do that themselves
@@ -166,23 +236,32 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #'   # * Creates `my_operation` span
 #'   result <- with_ospan_async("my_operation", {
 #'     # ... do some work ...
-#'     42
+#'     print(otel::get_active_span()$name) # "my_operation"
+#'
+#'     # Nest (many) more spans
+#'     prom_nested <- with_ospan_async("my_nested_operation", {
+#'       # ... do some more work ...
+#'       promise_resolve(42) |>
+#'         then((value) {
+#'           print(otel::get_active_span()$name) # "my_nested_operation"
+#'           print(value) # 42
+#'         })
+#'     })
+#'
+#'     # Since `then()` is called during the active `my_operation` span,
+#'     # the `my_operation` span will be reactivated in the `then()` callback.
+#'     prom_nested |> then(\(value) {
+#'       print(otel::get_active_span()$name) # "my_operation"
+#'       value
+#'     })
 #'   })
 #'
-#'   # Asynchronous operation
-#'   # * Creates `async_op` ospan
-#'   # * Automatically ends the ospan (`async_op`) when the promise (p)
-#'   #   resolves or rejects
-#'
-#'   # t0.0
-#'   with_ospan_async("async_op", {
-#'     # ... return a promise ...
-#'     p <- # t0.1
-#'       init_async_work() |> # t0.2
-#'       then(some_async_work) # t1.0
-#'   }) # t0.3
-#'   p2 <- p |> # t0.4
-#'     then(more_async_work) # t2.0
+#'   # Since `then()` is called where there is no active span,
+#'   # there is no _active_ span in the `then()` callback.
+#'   result |> then(\(value) {
+#'     stopifnot(inherits(otel::get_active_span(), "otel_span_noop"))
+#'     print(value) # 42
+#'   })
 #' })
 #' }
 with_ospan_async <- function(

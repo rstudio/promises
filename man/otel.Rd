@@ -38,9 +38,9 @@ These methods are intended to enhance the framework to be used with the
 \pkg{promises} package, not as a generic replacement.
 
 Dev note - Barret 2025/09: This ospan handoff promise domain topic is complex
-and has been discussed over many hours. As even advanced Shiny/R developers
-are not even aware of promise domains, this topic requires more in-depth
-documentation and examples.
+and has been discussed over many hours. Many advanced Shiny/R developers
+are not even aware of promise domains (very reasonable!), therefore this
+topic requires more in-depth documentation and examples.
 }
 \section{Functions}{
 \itemize{
@@ -97,9 +97,8 @@ Returns an \pkg{otel} span object.
 Ends an created OpenTelemetry span for discontiguous operations.
 
 }}
-\section{Execution model for with_ospan_promise_domain()}{
+\section{Definitions}{
 
-\subsection{Definitions}{
 \itemize{
 \item Promise domain: An environment in which has setup/teardown methods. These
 environments can be composed together to facilitate execution context for
@@ -137,7 +136,95 @@ capture \emph{just} the current ospan and reactivate that ospan during promise
 domain restoration.
 }
 
-\subsection{Complexity}{
+\section{When promise domains are captured}{
+
+
+Asynchronous operation
+\itemize{
+\item Creates \code{async_op} ospan
+\item Automatically ends the ospan (\code{async_op}) when the promise (p)
+resolves or rejects
+}
+
+The code below illustrates an example of when the promise domain are
+created/captured/restored and when ospan objects are
+created/activated/reactivated/ended.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# t0.0
+p2 <- with_ospan_promise_domain(\{
+  # t0.1
+  p <- with_ospan_async("async_op", \{
+    # ... return a promise ...
+    init_async_work() |> # t0.2
+      then( # t0.3
+        some_async_work # t1.0
+      )
+  \}) # t0.4, t1.0, t2.0
+  p |>
+    then( # t0.5
+      more_async_work # t3.0
+    )
+\}) # t0.6
+
+p_final <-
+  p2 |> then( # t0.7
+    final_work # t4.0
+  )
+}\if{html}{\out{</div>}}
+
+An in-depth explanation of the execution timeline is below.
+\itemize{
+\item At the first initial tick, \verb{t0.*}:
+\itemize{
+\item \code{t0.0}: The code is wrapped in \code{with_ospan_promise_domain()}
+\item \code{t0.1}: The \code{async_op} ospan is created and activated
+\item \code{t0.2}: Some async work is initiated
+\item \code{t0.3}: \code{then()} is called, capturing the active \code{async_op} ospan (as it
+is called within \code{with_ospan_promise_domain()})
+\item \code{t0.4}: The \code{with_ospan_async()} call exits, but the \code{async_op} ospan is
+not ended as the promise is still pending. The returned promise has a
+\code{finally()} step added to it that will end the ospan \code{async_op} when \code{p}
+is resolved.
+\item \code{t0.5}: Another \code{then()} is called, but there is no active ospan to
+capture
+\item \code{t0.6}: The ospan promise domain call exits
+\item \code{t0.7}: Another \code{then()} is called. No ospan will be captured as there is
+no active ospan / promise domain
+}
+\item At the first followup tick, \code{t1.0}:
+\itemize{
+\item The active \code{async_op} ospan is reactivated during promise domain
+restoration for the duration of the \code{then} callback
+\item The \code{some_async_work} function is called
+}
+\item At tick, \code{t2.0}:
+\itemize{
+\item \code{some_async_work} has resolved
+\item A hidden \code{finally()} step closes the ospan, \code{async_op}
+\item \code{p} is now resolved
+}
+\item At tick, \code{t3.0}:
+\itemize{
+\item There is no active ospan at \code{t0.5}, so no ospan is reactivated during
+promise domain restoration
+\item The \code{more_async_work} function is executed
+}
+\item At tick, \code{t4.0}:
+\itemize{
+\item \code{more_async_work} has resolved, therefore \code{p2} is now resolved
+\item There was no ospan promise domain at \code{t0.7}, so no attempt is made to
+reactivate any ospan
+\item The \code{final_work} function is executed
+}
+\item At tick, \code{t5.0}:
+\itemize{
+\item \code{p_final} has resolved
+}
+}
+}
+
+\section{Complexity}{
+
 
 When reactivating the \code{k}th step in a promise chain, the currently active
 ospan (during the call to \code{then()}) will be reactivated during promise domain
@@ -154,7 +241,8 @@ at for every step in a promise chain would then take \code{O(n^2)} time, not
 multiple similar promise domain restorations.
 }
 
-\subsection{Execution model}{
+\section{Execution model for \code{with_ospan_promise_domain()}}{
+
 \enumerate{
 \item \code{with_ospan_promise_domain(expr)} is called.
 \itemize{
@@ -185,7 +273,6 @@ ospan is reactivated via \code{with_active_span()}. (Performed by the initial
 \code{with_ospan_promise_domain()})
 }
 }
-}
 
 \section{OpenTelemetry span compatibility}{
 
@@ -208,7 +295,7 @@ asynchronous operations (ending the ospan within \code{promises::finally()}).
 
 \examples{
 \dontrun{
-# Set up promise domain to be able to restore active otel span
+# Set up (single) promise domain to be able to restore active otel span
 # * Makes a small promise domain that will restore the active span from when
 #   `promises::then()` is called
 # * Does not activate any spans, the author must do that themselves
@@ -221,23 +308,32 @@ with_ospan_promise_domain({
   # * Creates `my_operation` span
   result <- with_ospan_async("my_operation", {
     # ... do some work ...
-    42
+    print(otel::get_active_span()$name) # "my_operation"
+
+    # Nest (many) more spans
+    prom_nested <- with_ospan_async("my_nested_operation", {
+      # ... do some more work ...
+      promise_resolve(42) |>
+        then((value) {
+          print(otel::get_active_span()$name) # "my_nested_operation"
+          print(value) # 42
+        })
+    })
+
+    # Since `then()` is called during the active `my_operation` span,
+    # the `my_operation` span will be reactivated in the `then()` callback.
+    prom_nested |> then(\(value) {
+      print(otel::get_active_span()$name) # "my_operation"
+      value
+    })
   })
 
-  # Asynchronous operation
-  # * Creates `async_op` ospan
-  # * Automatically ends the ospan (`async_op`) when the promise (p)
-  #   resolves or rejects
-
-  # t0.0
-  with_ospan_async("async_op", {
-    # ... return a promise ...
-    p <- # t0.1
-      init_async_work() |> # t0.2
-      then(some_async_work) # t1.0
-  }) # t0.3
-  p2 <- p |> # t0.4
-    then(more_async_work) # t2.0
+  # Since `then()` is called where there is no active span,
+  # there is no _active_ span in the `then()` callback.
+  result |> then(\(value) {
+    stopifnot(inherits(otel::get_active_span(), "otel_span_noop"))
+    print(value) # 42
+  })
 })
 }
 }
