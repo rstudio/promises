@@ -135,18 +135,24 @@ asynchronous operations).</p>
 <p>If OpenTelemetry is not enabled, the expression will be evaluated without any
 tracing context.</p></li>
 <li><p><code>with_ospan_promise_domain()</code>: <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
-<p>Adds a handoff "Active OpenTelemetry promise domain".</p>
+<p>Adds an idempotent handoff Active OpenTelemetry span promise domain.</p>
 <p>Package authors are required to use this function to have otel span context
-persist across asynchronous boundaries. It is important to leverage this
-function only once within the execution domain, not recursively / many times.</p>
-<p>This method adds a <em>handoff</em> "Active OpenTelemetry promise domain" to the
+persist across asynchronous boundaries. This method is only needed once per
+promise domain stack. If you are unsure, feel free to call
+<code>with_ospan_promise_domain()</code> as the underlying promise domain will only be
+added if not found within the current promise domain stack. If your package
+<strong>only</strong> works within Shiny apps, Shiny will have already added the domain so
+no need to add it yourself. If your package works outside of Shiny and you
+use <code>{promises}</code> (i.e. <code>{chromote}</code>), then you'll need to use this wrapper
+method.</p>
+<p>This method adds a <em>handoff</em> Active OpenTelemetry span promise domain to the
 expression evaluation. This <em>handoff</em> promise domain will only run once on
 reactivation. This is critical if there are many layered <code>with_ospan_async()</code>
 calls, such as within Shiny reactivity. For example, if we nested many
-<code>with_ospan_async()</code> that added a domain which reactivated each ospan on
-restore, we'd reactive <code>k</code> ospan objects (<code>O(k)</code>) when we only need to
-activate the <strong>last</strong> span (<code>O(1)</code>).</p>
-<p>Returns the result of evaluating <code>expr</code>.</p></li>
+<code>with_ospan_async()</code> of which each added a promise domain that reactivated
+each ospan on restore, we'd reactivate <code>k</code> ospan objects (<code>O(k)</code>) when we
+only need to activate the <strong>last</strong> span (<code>O(1)</code>).</p>
+<p>Returns the result of evaluating <code>expr</code> within the ospan promise domain.</p></li>
 <li><p><code>create_ospan()</code>: <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
 <p>Creates an OpenTelemetry span for discontiguous operations where you need
 manual control over when the span ends.</p>
