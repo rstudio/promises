@@ -306,25 +306,35 @@ with_ospan_async <- function(
 
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
-#' Adds a handoff "Active OpenTelemetry promise domain".
+#' Adds an idempotent handoff Active OpenTelemetry span promise domain.
 #'
 #' Package authors are required to use this function to have otel span context
-#' persist across asynchronous boundaries. It is important to leverage this
-#' function only once within the execution domain, not recursively / many times.
+#' persist across asynchronous boundaries. This method is only needed once per
+#' promise domain stack. If you are unsure, feel free to call
+#' `with_ospan_promise_domain()` as the underlying promise domain will only be
+#' added if not found within the current promise domain stack. If your package
+#' **only** works within Shiny apps, Shiny will have already added the domain so
+#' no need to add it yourself. If your package works outside of Shiny and you
+#' use `{promises}` (i.e. `{chromote}`), then you'll need to use this wrapper
+#' method.
 #'
-#' This method adds a _handoff_ "Active OpenTelemetry promise domain" to the
+#' This method adds a _handoff_ Active OpenTelemetry span promise domain to the
 #' expression evaluation. This _handoff_ promise domain will only run once on
 #' reactivation. This is critical if there are many layered `with_ospan_async()`
 #' calls, such as within Shiny reactivity. For example, if we nested many
-#' `with_ospan_async()` that added a domain which reactivated each ospan on
-#' restore, we'd reactive `k` ospan objects (`O(k)`) when we only need to
-#' activate the **last** span (`O(1)`).
+#' `with_ospan_async()` of which each added a promise domain that reactivated
+#' each ospan on restore, we'd reactivate `k` ospan objects (`O(k)`) when we
+#' only need to activate the **last** span (`O(1)`).
 #'
-#' Returns the result of evaluating `expr`.
+#' Returns the result of evaluating `expr` within the ospan promise domain.
 #'
 #' @export
 with_ospan_promise_domain <- function(expr) {
-  act_span_pd <- create_otel_ospan_handoff_promise_domain()
+  # Do not add the ospan handoff promise domain twice
+  if (has_ospan_handoff_promise_domain()) {
+    return(force(expr))
+  }
+  act_span_pd <- create_ospan_promise_domain()
   with_promise_domain(act_span_pd, expr)
 }
 
@@ -386,12 +396,25 @@ end_ospan <- function(span) {
 
 # -- Helpers --------------------------------------------------------------
 
-#' Creates a promise domain that activates the given OpenTelemetry span.
+has_ospan_handoff_promise_domain <- function() {
+  pd <- current_promise_domain()
+  if (!is.environment(pd)) {
+    return(FALSE)
+  }
+
+  exists(".ospan_handoff_promise_domain", envir = pd, inherits = FALSE)
+}
+
+#' Create a OpenTelemetry handoff promise domain
+#'
+#' Creates a handoff promise domain captures the currently active span. Upon
+#' promise domain restoration, the previously captured span will be reactivated.
 #'
 #' @param span An OpenTelemetry span object.
 #' @noRd
-create_otel_ospan_handoff_promise_domain <- function() {
+create_ospan_promise_domain <- function() {
   new_promise_domain(
+    .ospan_handoff_promise_domain = TRUE, # set flag for later discovery
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
 

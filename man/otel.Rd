@@ -70,21 +70,27 @@ tracing context.
 
 \item \code{with_ospan_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
-Adds a handoff "Active OpenTelemetry promise domain".
+Adds an idempotent handoff Active OpenTelemetry span promise domain.
 
 Package authors are required to use this function to have otel span context
-persist across asynchronous boundaries. It is important to leverage this
-function only once within the execution domain, not recursively / many times.
+persist across asynchronous boundaries. This method is only needed once per
+promise domain stack. If you are unsure, feel free to call
+\code{with_ospan_promise_domain()} as the underlying promise domain will only be
+added if not found within the current promise domain stack. If your package
+\strong{only} works within Shiny apps, Shiny will have already added the domain so
+no need to add it yourself. If your package works outside of Shiny and you
+use \code{{promises}} (i.e. \code{{chromote}}), then you'll need to use this wrapper
+method.
 
-This method adds a \emph{handoff} "Active OpenTelemetry promise domain" to the
+This method adds a \emph{handoff} Active OpenTelemetry span promise domain to the
 expression evaluation. This \emph{handoff} promise domain will only run once on
 reactivation. This is critical if there are many layered \code{with_ospan_async()}
 calls, such as within Shiny reactivity. For example, if we nested many
-\code{with_ospan_async()} that added a domain which reactivated each ospan on
-restore, we'd reactive \code{k} ospan objects (\code{O(k)}) when we only need to
-activate the \strong{last} span (\code{O(1)}).
+\code{with_ospan_async()} of which each added a promise domain that reactivated
+each ospan on restore, we'd reactivate \code{k} ospan objects (\code{O(k)}) when we
+only need to activate the \strong{last} span (\code{O(1)}).
 
-Returns the result of evaluating \code{expr}.
+Returns the result of evaluating \code{expr} within the ospan promise domain.
 
 \item \code{create_ospan()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 

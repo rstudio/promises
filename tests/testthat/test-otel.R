@@ -248,3 +248,87 @@ with_ospan_promise_domain({
     })
   })
 })
+
+describe("with_ospan_promise_domain() idempotency", {
+  it("is idempotent when called multiple times", {
+    # Track how many times promise domain setup occurs
+    domain_creation_count <- 0
+    reset_count <- function() {
+      domain_creation_count <<- 0
+    }
+    original_copd <- create_ospan_promise_domain
+
+    # Mock the domain creation to count calls
+    with_mocked_bindings(
+      create_ospan_promise_domain = function() {
+        domain_creation_count <<- domain_creation_count + 1
+        original_copd()
+      },
+      {
+        # First call should create the domain
+        result1 <- with_ospan_promise_domain({
+          42
+        })
+        expect_equal(result1, 42)
+        expect_equal(domain_creation_count, 1)
+
+        reset_count()
+
+        result2 <-
+          with_ospan_promise_domain({
+            expect_equal(domain_creation_count, 1)
+
+            # Nested calls should not create additional domains
+            with_ospan_promise_domain({
+              with_ospan_promise_domain({
+                expect_equal(domain_creation_count, 1)
+
+                84
+              })
+            })
+          })
+        expect_equal(result2, 84)
+        # Should still be 1, even with two prom domain calls
+        expect_equal(domain_creation_count, 1)
+      }
+    )
+  })
+
+  it("allows nested calls without duplicate domain setup", {
+    # Test that nested with_ospan_promise_domain calls work correctly
+    # and don't interfere with each other
+
+    records <- otelsdk::with_otel_record({
+      result <- with_ospan_promise_domain({
+        with_ospan_async("outer_span", {
+          # This nested call should be idempotent
+          with_ospan_promise_domain({
+            with_ospan_async("inner_span", {
+              promise_resolve(42) |>
+                then(function(x) {
+                  # Another nested call
+                  with_ospan_promise_domain({
+                    x * 2
+                  })
+                })
+            })
+          })
+        })
+      })
+
+      wait_for_it(result)
+      result
+    })
+
+    expect_true(is.promising(result))
+    expect_equal(extract(result), 84)
+
+    # Verify spans were created correctly
+    expect_true(!is.null(records$traces[["outer_span"]]))
+    expect_true(!is.null(records$traces[["inner_span"]]))
+
+    # Verify parent-child relationship
+    outer_id <- records$traces[["outer_span"]]$span_id
+    expect_equal(records$traces[["inner_span"]]$parent, outer_id)
+  })
+})
