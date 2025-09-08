@@ -2,8 +2,8 @@
 NULL
 
 #' @import R6
-Promise <- R6::R6Class(
-  "Promise",
+PromiseOld <- R6::R6Class(
+  "PromiseOld",
   private = list(
     state = "pending",
     value = NULL,
@@ -157,7 +157,7 @@ Promise <- R6::R6Class(
         onFinally <- NULL
       }
 
-      promise2 <- promise(function(resolve, reject) {
+      promise2 <- promise_old(function(resolve, reject) {
         res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
 
         if (!is.null(res)) {
@@ -342,7 +342,7 @@ normalizeOnRejected <- function(onRejected) {
 #' )
 #'
 #' @export
-promise <- function(action) {
+promise_old <- function(action) {
   if (is.function(action)) {
     if (length(formals(action)) != 2) {
       stop("'action' function must have two arguments")
