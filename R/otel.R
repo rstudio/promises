@@ -331,7 +331,7 @@ with_ospan_async <- function(
 #' @export
 with_ospan_promise_domain <- function(expr) {
   # Do not add the ospan handoff promise domain twice
-  if (has_ospan_handoff_promise_domain()) {
+  if (has_ospan_promise_domain()) {
     return(force(expr))
   }
   act_span_pd <- create_ospan_promise_domain()
@@ -389,6 +389,54 @@ end_ospan <- function(span) {
   end_span(span)
 }
 
+#' @describeIn otel `r lifecycle::badge("experimental")`
+#'
+#' Local OpenTelemetry span promise domain
+#'
+#' Adds an OpenTelemetry span promise domain to the local scope. This is useful
+#' for `{coro}` operations where encapsulating the coro operations inside a
+#' `with_*()` methods is not allowed.
+#'
+#' When not using `{coro}`, please prefer to use `with_ospan_async()` or
+#' `with_ospan_promise_domain()`.
+#' @export
+#' @param envir The "local" environment in which to add the promise domain. When
+#' the environment is exited, the promise domain is removed.
+local_ospan_promise_domain <- function(envir = parent.frame()) {
+  if (has_ospan_promise_domain()) {
+    return(invisible())
+  }
+
+  local_promise_domain(
+    create_ospan_promise_domain(),
+    envir = envir
+  )
+}
+
+# Modifies the current promise domain to include `domain` for the local scope.
+local_promise_domain <- function(
+  domain,
+  envir = parent.frame(),
+  replace = FALSE
+) {
+  oldval <- current_promise_domain()
+  if (replace) {
+    globals$domain <- domain
+  } else {
+    globals$domain <- compose_domains(oldval, domain)
+  }
+
+  # Inspired by `withr::defer()`
+  thunk <- as.call(list(function() {
+    globals$domain <- oldval
+  }))
+  add <- TRUE
+  after <- TRUE
+  do.call(base::on.exit, list(thunk, add, after), envir = envir)
+
+  invisible()
+}
+
 
 # # TODO: Set attributes on the current active span
 # # 5. Set attributes on the current active span
@@ -396,13 +444,12 @@ end_ospan <- function(span) {
 
 # -- Helpers --------------------------------------------------------------
 
-has_ospan_handoff_promise_domain <- function() {
-  pd <- current_promise_domain()
-  if (!is.environment(pd)) {
-    return(FALSE)
-  }
-
-  exists(".ospan_handoff_promise_domain", envir = pd, inherits = FALSE)
+has_ospan_promise_domain <- function(domain = current_promise_domain()) {
+  # Works for:
+  # * `list()` `compose_domains()` result
+  # * `NULL` - current_promise_domain() init value
+  # * environment objects - `new_promise_domain()` result
+  isTRUE(domain[[".ospan_promise_domain"]])
 }
 
 #' Create a OpenTelemetry handoff promise domain
@@ -414,7 +461,7 @@ has_ospan_handoff_promise_domain <- function() {
 #' @noRd
 create_ospan_promise_domain <- function() {
   new_promise_domain(
-    .ospan_handoff_promise_domain = TRUE, # set flag for later discovery
+    .ospan_promise_domain = TRUE, # set flag for later discovery
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
 

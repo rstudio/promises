@@ -5,6 +5,7 @@
 \alias{with_ospan_promise_domain}
 \alias{create_ospan}
 \alias{end_ospan}
+\alias{local_ospan_promise_domain}
 \title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
 \usage{
 with_ospan_async(name, expr, ..., tracer = NULL, attributes = NULL)
@@ -14,6 +15,8 @@ with_ospan_promise_domain(expr)
 create_ospan(name, ..., tracer = NULL, attributes = NULL)
 
 end_ospan(span)
+
+local_ospan_promise_domain(envir = parent.frame())
 }
 \arguments{
 \item{name}{Character string. The name of the ospan.}
@@ -29,6 +32,9 @@ details.}
 
 \item{attributes}{Attributes passed through \code{\link[otel:as_attributes]{otel::as_attributes()}} (when
 not \code{NULL})}
+
+\item{envir}{The "local" environment in which to add the promise domain. When
+the environment is exited, the promise domain is removed.}
 }
 \description{
 \pkg{otel} provides tools for integrating with OpenTelemetry, a framework for
@@ -105,6 +111,17 @@ Returns an \pkg{otel} span object.
 \item \code{end_ospan()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Ends an created OpenTelemetry span for discontiguous operations.
+
+\item \code{local_ospan_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+Local OpenTelemetry span promise domain
+
+Adds an OpenTelemetry span promise domain to the local scope. This is useful
+for \code{{coro}} operations where encapsulating the coro operations inside a
+\verb{with_*()} methods is not allowed.
+
+When not using \code{{coro}}, please prefer to use \code{with_ospan_async()} or
+\code{with_ospan_promise_domain()}.
 
 }}
 \section{Definitions}{
