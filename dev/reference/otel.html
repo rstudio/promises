@@ -21,7 +21,7 @@ therefore this topic requires more in-depth documentation and examples."><meta n
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.3.3.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.3.3.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,9 @@ therefore this topic requires more in-depth documentation and examples.</p>
 <span></span>
 <span><span class="fu">create_ospan</span><span class="op">(</span><span class="va">name</span>, <span class="va">...</span>, tracer <span class="op">=</span> <span class="cn">NULL</span>, attributes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">end_ospan</span><span class="op">(</span><span class="va">span</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">end_ospan</span><span class="op">(</span><span class="va">span</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">local_ospan_promise_domain</span><span class="op">(</span>envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -112,6 +114,11 @@ details.</p></dd>
 <dt id="arg-attributes">attributes<a class="anchor" aria-label="anchor" href="#arg-attributes"></a></dt>
 <dd><p>Attributes passed through <code><a href="https://otel.r-lib.org/reference/as_attributes.html" class="external-link">otel::as_attributes()</a></code> (when
 not <code>NULL</code>)</p></dd>
+
+
+<dt id="arg-envir">envir<a class="anchor" aria-label="anchor" href="#arg-envir"></a></dt>
+<dd><p>The "local" environment in which to add the promise domain. When
+the environment is exited, the promise domain is removed.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -161,6 +168,13 @@ activate it for the supplied expression.</p>
 <p>Returns an <span class="pkg">otel</span> span object.</p></li>
 <li><p><code>end_ospan()</code>: <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
 <p>Ends an created OpenTelemetry span for discontiguous operations.</p></li>
+<li><p><code>local_ospan_promise_domain()</code>: <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
+<p>Local OpenTelemetry span promise domain</p>
+<p>Adds an OpenTelemetry span promise domain to the local scope. This is useful
+for <code>{coro}</code> operations where encapsulating the coro operations inside a
+<code>with_*()</code> methods is not allowed.</p>
+<p>When not using <code>{coro}</code>, please prefer to use <code>with_ospan_async()</code> or
+<code>with_ospan_promise_domain()</code>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="definitions">Definitions<a class="anchor" aria-label="anchor" href="#definitions"></a></h2>
