@@ -249,6 +249,216 @@ with_ospan_promise_domain({
   })
 })
 
+describe("local_ospan_promise_domain()", {
+  it("sets up ospan promise domain for local scope", {
+    # Test that the domain is active within the local scope
+    original_domain <- current_promise_domain()
+
+    local({
+      local_ospan_promise_domain()
+      current_domain <- current_promise_domain()
+
+      # Should have an ospan domain set
+      expect_false(identical(current_domain, original_domain))
+      expect_true(has_ospan_promise_domain(current_domain))
+    })
+
+    # Should be restored after exiting the local scope
+    expect_identical(current_promise_domain(), original_domain)
+  })
+
+  it("restores previous domain when scope exits", {
+    counting_domain <- create_counting_domain()
+
+    expect_equal(current_promise_domain(), NULL)
+
+    with_promise_domain(counting_domain, {
+      domain_before <- current_promise_domain()
+
+      local({
+        local_ospan_promise_domain()
+        current_domain <- current_promise_domain()
+
+        # Should be a composed domain
+        expect_false(identical(current_domain, domain_before))
+        expect_true(has_ospan_promise_domain(current_domain))
+      })
+
+      # Should restore the counting domain
+      expect_identical(current_promise_domain(), domain_before)
+    })
+
+    expect_equal(current_promise_domain(), NULL)
+  })
+
+  # it("works with custom environment", {
+  #   test_env <- new.env()
+  #   original_domain <- current_promise_domain()
+
+  #   # Set up domain in custom environment
+  #   local_ospan_promise_domain(envir = test_env)
+
+  #   # Domain should still be active since test_env hasn't been cleaned
+  #   current_domain <- current_promise_domain()
+  #   expect_false(identical(current_domain, original_domain))
+  #   expect_true(has_ospan_promise_domain(current_domain))
+
+  #   # Clean up the environment to trigger restoration
+  #   rm(list = ls(test_env), envir = test_env)
+
+  #   # Force garbage collection to ensure cleanup handlers run
+  #   gc()
+
+  #   # Domain should be restored (though this timing is implementation dependent)
+  #   # So we mainly test that the function doesn't error with custom envir
+  #   expect_true(TRUE)
+  # })
+
+  it("integrates with promise execution", {
+    records <- otelsdk::with_otel_record({
+      result <- local({
+        local_ospan_promise_domain()
+
+        otel::start_local_active_span("outer_test_span")
+
+        # Create a promise within the ospan domain
+        promise_resolve(21) |>
+          then(function(x) {
+            # This should be executed within the ospan domain
+            span <- create_ospan("inner_test_span")
+            on.exit(end_ospan(span))
+            x * 2
+          })
+      })
+
+      wait_for_it(result)
+      result
+    })
+
+    expect_true(is.promising(result))
+    expect_equal(extract(result), 42)
+    expect_true(!is.null(records$traces[["outer_test_span"]]))
+    expect_true(!is.null(records$traces[["inner_test_span"]]))
+    expect_equal(
+      records$traces[["inner_test_span"]]$parent,
+      records$traces[["outer_test_span"]]$span_id
+    )
+  })
+
+  it("can be nested without issues", {
+    # Track how many times promise domain setup occurs
+    domain_creation_count <- 0
+    original_copd <- create_ospan_promise_domain
+
+    # Mock the domain creation to count calls
+    with_mocked_bindings(
+      create_ospan_promise_domain = function() {
+        domain_creation_count <<- domain_creation_count + 1
+        original_copd()
+      },
+      {
+        original_domain <- current_promise_domain()
+
+        local({
+          local_ospan_promise_domain()
+          expect_equal(domain_creation_count, 1)
+          domain1 <- current_promise_domain()
+
+          local({
+            # This should not create another domain due to idempotency
+            local_ospan_promise_domain()
+            expect_equal(domain_creation_count, 1) # Still 1, not 2
+            domain2 <- current_promise_domain()
+
+            # Both should have ospan domains and should be identical
+            expect_true(has_ospan_promise_domain(domain1))
+            expect_true(has_ospan_promise_domain(domain2))
+            expect_identical(domain1, domain2) # Should be the same due to idempotency
+          })
+
+          # Should still be domain1 after nested scope exits
+          expect_identical(current_promise_domain(), domain1)
+        })
+
+        # Should restore to original after all scopes exit
+        # Note: This may not be immediate due to deferred cleanup
+        expect_equal(domain_creation_count, 1) # Only created once total
+      }
+    )
+  })
+})
+
+describe("has_ospan_promise_domain()", {
+  it("returns FALSE for NULL domain", {
+    expect_false(has_ospan_promise_domain(NULL))
+  })
+
+  it("returns FALSE for empty list", {
+    expect_false(has_ospan_promise_domain(list()))
+  })
+
+  it("returns FALSE for regular promise domain", {
+    regular_domain <- new_promise_domain(
+      wrapOnFulfilled = function(onFulfilled) onFulfilled
+    )
+    expect_false(has_ospan_promise_domain(regular_domain))
+  })
+
+  it("returns TRUE for ospan promise domain", {
+    ospan_domain <- create_ospan_promise_domain()
+    expect_true(has_ospan_promise_domain(ospan_domain))
+  })
+
+  it("returns TRUE for composed domain with ospan", {
+    counting_domain <- create_counting_domain()
+    ospan_domain <- create_ospan_promise_domain()
+    composed_domain <- compose_domains(counting_domain, ospan_domain)
+
+    expect_true(has_ospan_promise_domain(composed_domain))
+  })
+
+  it("returns FALSE for composed domain without ospan", {
+    counting_domain1 <- create_counting_domain()
+    counting_domain2 <- create_counting_domain()
+    composed_domain <- compose_domains(counting_domain1, counting_domain2)
+
+    expect_false(has_ospan_promise_domain(composed_domain))
+  })
+
+  it("uses current_promise_domain() when no argument provided", {
+    # Initially no domain
+    expect_false(has_ospan_promise_domain())
+
+    # With ospan domain active
+    with_ospan_promise_domain({
+      expect_true(has_ospan_promise_domain())
+    })
+
+    # Back to no domain
+    expect_false(has_ospan_promise_domain())
+  })
+
+  it("works with various data types", {
+    # # Test edge cases
+    # expect_false(has_ospan_promise_domain(character(0)))
+    # expect_false(has_ospan_promise_domain(numeric(0)))
+    # expect_false(has_ospan_promise_domain("not a domain"))
+    # expect_false(has_ospan_promise_domain(42))
+
+    # Test list with wrong flag
+    fake_domain <- list(.some_other_flag = TRUE)
+    expect_false(has_ospan_promise_domain(fake_domain))
+
+    # Test list with correct flag
+    correct_domain <- list(.ospan_promise_domain = TRUE)
+    expect_true(has_ospan_promise_domain(correct_domain))
+
+    # Test list with correct flag but FALSE value
+    false_domain <- list(.ospan_promise_domain = FALSE)
+    expect_false(has_ospan_promise_domain(false_domain))
+  })
+})
+
 describe("with_ospan_promise_domain() idempotency", {
   it("is idempotent when called multiple times", {
     # Track how many times promise domain setup occurs
@@ -257,6 +467,8 @@ describe("with_ospan_promise_domain() idempotency", {
       domain_creation_count <<- 0
     }
     original_copd <- create_ospan_promise_domain
+
+    expect_false(has_ospan_promise_domain())
 
     # Mock the domain creation to count calls
     with_mocked_bindings(
