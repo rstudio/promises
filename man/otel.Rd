@@ -8,11 +8,11 @@
 \alias{local_ospan_promise_domain}
 \title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
 \usage{
-with_ospan_async(name, expr, ..., tracer = NULL, attributes = NULL)
+with_ospan_async(name, expr, ..., tracer = get_tracer(), attributes = NULL)
 
 with_ospan_promise_domain(expr)
 
-create_ospan(name, ..., tracer = NULL, attributes = NULL)
+create_ospan(name, ..., tracer = get_tracer(), attributes = NULL)
 
 end_ospan(span)
 
