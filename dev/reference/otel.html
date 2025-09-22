@@ -21,7 +21,7 @@ therefore this topic requires more in-depth documentation and examples."><meta n
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.3.3.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.3.3.9005</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,10 +80,6 @@ therefore this topic requires more in-depth documentation and examples.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">with_ospan_async</span><span class="op">(</span><span class="va">name</span>, <span class="va">expr</span>, <span class="va">...</span>, tracer <span class="op">=</span> <span class="fu">get_tracer</span><span class="op">(</span><span class="op">)</span>, attributes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">with_ospan_promise_domain</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">create_ospan</span><span class="op">(</span><span class="va">name</span>, <span class="va">...</span>, tracer <span class="op">=</span> <span class="fu">get_tracer</span><span class="op">(</span><span class="op">)</span>, attributes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">end_ospan</span><span class="op">(</span><span class="va">span</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">local_ospan_promise_domain</span><span class="op">(</span>envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -160,14 +156,6 @@ calls, such as within Shiny reactivity. For example, if we nested many
 each ospan on restore, we'd reactivate <code>k</code> ospan objects (<code>O(k)</code>) when we
 only need to activate the <strong>last</strong> span (<code>O(1)</code>).</p>
 <p>Returns the result of evaluating <code>expr</code> within the ospan promise domain.</p></li>
-<li><p><code>create_ospan()</code>: <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
-<p>Creates an OpenTelemetry span for discontiguous operations where you need
-manual control over when the span ends.</p>
-<p>Note, the created span is not activated. Please use <code>with_ospan_async</code> to
-activate it for the supplied expression.</p>
-<p>Returns an <span class="pkg">otel</span> span object.</p></li>
-<li><p><code>end_ospan()</code>: <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
-<p>Ends an created OpenTelemetry span for discontiguous operations.</p></li>
 <li><p><code>local_ospan_promise_domain()</code>: <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
 <p>Local OpenTelemetry span promise domain</p>
 <p>Adds an OpenTelemetry span promise domain to the local scope. This is useful
@@ -303,7 +291,7 @@ multiple similar promise domain restorations.</p>
 
 <ol><li><p><code>with_ospan_promise_domain(expr)</code> is called.</p><ul><li><p>The following steps all occur within <code>expr</code>.</p></li>
 </ul></li>
-<li><p>Create an ospan object using <code>create_ospan()</code> or <code><a href="https://otel.r-lib.org/reference/start_span.html" class="external-link">otel::start_span()</a></code>.</p><ul><li><p>We need the ospan to be active during the a followup async operation.
+<li><p>Create an ospan object using <code><a href="https://otel.r-lib.org/reference/start_span.html" class="external-link">otel::start_span()</a></code>.</p><ul><li><p>We need the ospan to be active during the a followup async operation.
 Therefore, <code><a href="https://otel.r-lib.org/reference/start_local_active_span.html" class="external-link">otel::start_local_active_span()</a></code> is not appropriate as the
 ospan would be ended when the function exits, not when the promise chain
 resolves.</p></li>
@@ -325,9 +313,9 @@ ospan is reactivated via <code>with_active_span()</code>. (Performed by the init
 
 
 <p>For ospan objects to exist over may async ticks, the ospan must be created
-using <code>create_ospan()</code> (or <code><a href="https://otel.r-lib.org/reference/start_span.html" class="external-link">otel::start_span()</a></code>) and later ended using
-<code>end_ospan()</code> (or <code><a href="https://otel.r-lib.org/reference/end_span.html" class="external-link">otel::end_span()</a></code>). Ending the ospan must occur <strong>after</strong>
-any promise chain work has completed.</p>
+using <code><a href="https://otel.r-lib.org/reference/start_span.html" class="external-link">otel::start_span()</a></code> and later ended using <code>spn$end()</code> (or
+<code><a href="https://otel.r-lib.org/reference/end_span.html" class="external-link">otel::end_span()</a></code>). Ending the ospan must occur <strong>after</strong> any promise chain
+work has completed.</p>
 <p>If we were to instead use <code><a href="https://otel.r-lib.org/reference/start_local_active_span.html" class="external-link">otel::start_local_active_span()</a></code>, the ospan would
 be ended when the function exits, not when the promise chain completes. Even
 though the local ospan is created, activated, and eventually ended, the ospan
