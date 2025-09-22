@@ -4,24 +4,19 @@ skip_if_not_installed("otelsdk")
 
 with_ospan_promise_domain({
   describe("OpenTelemetry integration", {
-    describe("create_ospan() and end_ospan()", {
+    describe("otel::start_span()", {
       it("creates spans appropriately", {
         records <- otelsdk::with_otel_record({
-          span <- create_ospan("test_span0", tracer = NULL)
+          span <- otel::start_span("test_span0", tracer = NULL)
           expect_true(inherits(span, "otel_span"))
-          end_ospan(span)
+          span$end()
         })
         expect_true(!is.null(records$traces[["test_span0"]]))
 
-        expect_null(create_ospan("test_span_null"))
-      })
-
-      it("end_ospan handles NULL spans gracefully", {
-        expect_invisible(end_ospan(NULL))
-      })
-
-      it("end_ospan returns invisibly when not tracing", {
-        mock_span <- list(name = "test")
+        expect_s3_class(
+          otel::start_span("test_span"),
+          "otel_span_noop"
+        )
       })
     })
 
@@ -142,26 +137,26 @@ with_ospan_promise_domain({
         chain1 <- with_ospan_async("chain_1", {
           promise_resolve("init1") |>
             then(function(x) {
-              spn <- create_ospan("chain1_step1")
-              on.exit(end_ospan(spn))
+              spn <- otel::start_span("chain1_step1")
+              on.exit(spn$end())
               execution_order <<- c(execution_order, "chain1_step1")
               paste0(x, "_step11")
             }) |>
             then(function(x) {
-              spn <- create_ospan("chain1_step2")
-              on.exit(end_ospan(spn))
+              spn <- otel::start_span("chain1_step2")
+              on.exit(spn$end())
               execution_order <<- c(execution_order, "chain1_step2")
               paste0(x, "_step12")
             }) |>
             then(function(x) {
-              spn <- create_ospan("chain1_step3")
-              on.exit(end_ospan(spn))
+              spn <- otel::start_span("chain1_step3")
+              on.exit(spn$end())
               execution_order <<- c(execution_order, "chain1_step3")
               paste0(x, "_step13")
             }) |>
             then(function(x) {
-              spn <- create_ospan("chain1_step4")
-              on.exit(end_ospan(spn))
+              spn <- otel::start_span("chain1_step4")
+              on.exit(spn$end())
               execution_order <<- c(execution_order, "chain1_step4")
               paste0(x, "_final1")
             })
@@ -170,26 +165,26 @@ with_ospan_promise_domain({
         chain2 <- with_ospan_async("chain_2", {
           promise_resolve("init2") |>
             then(function(x) {
-              spn <- create_ospan("chain2_step1")
-              on.exit(end_ospan(spn))
+              spn <- otel::start_span("chain2_step1")
+              on.exit(spn$end())
               execution_order <<- c(execution_order, "chain2_step1")
               paste0(x, "_step12")
             }) |>
             then(function(x) {
-              spn <- create_ospan("chain2_step2")
-              on.exit(end_ospan(spn))
+              spn <- otel::start_span("chain2_step2")
+              on.exit(spn$end())
               execution_order <<- c(execution_order, "chain2_step2")
               paste0(x, "_step22")
             }) |>
             then(function(x) {
-              spn <- create_ospan("chain2_step3")
-              on.exit(end_ospan(spn))
+              spn <- otel::start_span("chain2_step3")
+              on.exit(spn$end())
               execution_order <<- c(execution_order, "chain2_step3")
               paste0(x, "_step23")
             }) |>
             then(function(x) {
-              spn <- create_ospan("chain2_step4")
-              on.exit(end_ospan(spn))
+              spn <- otel::start_span("chain2_step4")
+              on.exit(spn$end())
               execution_order <<- c(execution_order, "chain2_step4")
               paste0(x, "_final2")
             })
@@ -325,8 +320,8 @@ describe("local_ospan_promise_domain()", {
         promise_resolve(21) |>
           then(function(x) {
             # This should be executed within the ospan domain
-            span <- create_ospan("inner_test_span")
-            on.exit(end_ospan(span))
+            span <- otel::start_span("inner_test_span")
+            on.exit(span$end())
             x * 2
           })
       })

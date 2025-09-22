@@ -1,6 +1,12 @@
+# ## Use when otel v0.3.0 is released: https://github.com/r-lib/otel/commit/43e59c45a7de50cfd8af95f73d45f9899f957b44
+# # attributes = as_attributes(attributes)
+# attributes = if (!is.null(attributes)) {
+#   as_attributes(attributes)
+# }
+NULL
+
 #' @importFrom otel
-#'   as_attributes
-#'   end_span
+#'   start_span
 #'   get_active_span
 #'   is_tracing_enabled
 #'   start_span
@@ -153,7 +159,7 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #'
 #' 1. `with_ospan_promise_domain(expr)` is called.
 #'    * The following steps all occur within `expr`.
-#' 2. Create an ospan object using `create_ospan()` or `otel::start_span()`.
+#' 2. Create an ospan object using `otel::start_span()`.
 #'    * We need the ospan to be active during the a followup async operation.
 #'      Therefore, `otel::start_local_active_span()` is not appropriate as the
 #'      ospan would be ended when the function exits, not when the promise chain
@@ -172,9 +178,9 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' @section OpenTelemetry span compatibility:
 #'
 #' For ospan objects to exist over may async ticks, the ospan must be created
-#' using `create_ospan()` (or `otel::start_span()`) and later ended using
-#' `end_ospan()` (or `otel::end_span()`). Ending the ospan must occur **after**
-#' any promise chain work has completed.
+#' using `otel::start_span()` and later ended using `spn$end()` (or
+#' `otel::end_span()`). Ending the ospan must occur **after** any promise chain
+#' work has completed.
 #'
 #' If we were to instead use `otel::start_local_active_span()`, the ospan would
 #' be ended when the function exits, not when the promise chain completes. Even
@@ -281,15 +287,18 @@ with_ospan_async <- function(
   tracer = NULL,
   attributes = NULL
 ) {
-  if (!is_tracing_enabled(tracer)) {
+  # To avoid checking `is_tracing_enabled()` and then creating a span (which takes just as long),
+  # create the span and check if it is a noop span.
+
+  span <- start_span(name, ..., tracer = tracer, attributes = attributes)
+  if (inherits(span, "otel_span_noop")) {
+    # Noop span; just run the expression
     return(force(expr))
   }
 
-  span <- create_ospan(name, ..., tracer = tracer, attributes = attributes)
-
   needs_cleanup <- TRUE
   cleanup <- function() {
-    end_ospan(span) #, tracer = tracer)
+    span$end()
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
@@ -338,56 +347,6 @@ with_ospan_promise_domain <- function(expr) {
   with_promise_domain(act_span_pd, expr)
 }
 
-
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Creates an OpenTelemetry span for discontiguous operations where you need
-#' manual control over when the span ends.
-#'
-#' Note, the created span is not activated. Please use [`promises::with_ospan_async`] to
-#' activate it for the supplied expression.
-#'
-#' Returns an \pkg{otel} span object.
-#' @export
-create_ospan <- function(
-  name,
-  ...,
-  tracer = NULL,
-  attributes = NULL
-) {
-  if (!is_tracing_enabled(tracer)) {
-    return(NULL)
-  }
-
-  span <-
-    start_span(
-      name,
-      ...,
-      tracer = tracer,
-      ## Use when otel v0.3.0 is released: https://github.com/r-lib/otel/commit/43e59c45a7de50cfd8af95f73d45f9899f957b44
-      # attributes = as_attributes(attributes)
-      attributes = if (!is.null(attributes)) {
-        as_attributes(attributes)
-      }
-    )
-  span
-}
-
-
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Ends an created OpenTelemetry span for discontiguous operations.
-#' @export
-end_ospan <- function(span) {
-  if (
-    is.null(span)
-    #  || !is_tracing_enabled(tracer)
-  ) {
-    return(invisible())
-  }
-
-  end_span(span)
-}
 
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'

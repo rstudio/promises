@@ -3,18 +3,12 @@
 \name{with_ospan_async}
 \alias{with_ospan_async}
 \alias{with_ospan_promise_domain}
-\alias{create_ospan}
-\alias{end_ospan}
 \alias{local_ospan_promise_domain}
 \title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
 \usage{
 with_ospan_async(name, expr, ..., tracer = NULL, attributes = NULL)
 
 with_ospan_promise_domain(expr)
-
-create_ospan(name, ..., tracer = NULL, attributes = NULL)
-
-end_ospan(span)
 
 local_ospan_promise_domain(envir = parent.frame())
 }
@@ -97,20 +91,6 @@ each ospan on restore, we'd reactivate \code{k} ospan objects (\code{O(k)}) when
 only need to activate the \strong{last} span (\code{O(1)}).
 
 Returns the result of evaluating \code{expr} within the ospan promise domain.
-
-\item \code{create_ospan()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-Creates an OpenTelemetry span for discontiguous operations where you need
-manual control over when the span ends.
-
-Note, the created span is not activated. Please use \code{\link{with_ospan_async}} to
-activate it for the supplied expression.
-
-Returns an \pkg{otel} span object.
-
-\item \code{end_ospan()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-Ends an created OpenTelemetry span for discontiguous operations.
 
 \item \code{local_ospan_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
@@ -275,7 +255,7 @@ multiple similar promise domain restorations.
 \itemize{
 \item The following steps all occur within \code{expr}.
 }
-\item Create an ospan object using \code{create_ospan()} or \code{otel::start_span()}.
+\item Create an ospan object using \code{otel::start_span()}.
 \itemize{
 \item We need the ospan to be active during the a followup async operation.
 Therefore, \code{otel::start_local_active_span()} is not appropriate as the
@@ -305,9 +285,9 @@ ospan is reactivated via \code{with_active_span()}. (Performed by the initial
 
 
 For ospan objects to exist over may async ticks, the ospan must be created
-using \code{create_ospan()} (or \code{otel::start_span()}) and later ended using
-\code{end_ospan()} (or \code{otel::end_span()}). Ending the ospan must occur \strong{after}
-any promise chain work has completed.
+using \code{otel::start_span()} and later ended using \code{spn$end()} (or
+\code{otel::end_span()}). Ending the ospan must occur \strong{after} any promise chain
+work has completed.
 
 If we were to instead use \code{otel::start_local_active_span()}, the ospan would
 be ended when the function exits, not when the promise chain completes. Even
