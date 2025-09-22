@@ -77,11 +77,11 @@ therefore this topic requires more in-depth documentation and examples.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">with_ospan_async</span><span class="op">(</span><span class="va">name</span>, <span class="va">expr</span>, <span class="va">...</span>, tracer <span class="op">=</span> <span class="cn">NULL</span>, attributes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">with_ospan_async</span><span class="op">(</span><span class="va">name</span>, <span class="va">expr</span>, <span class="va">...</span>, tracer <span class="op">=</span> <span class="fu">get_tracer</span><span class="op">(</span><span class="op">)</span>, attributes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">with_ospan_promise_domain</span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">create_ospan</span><span class="op">(</span><span class="va">name</span>, <span class="va">...</span>, tracer <span class="op">=</span> <span class="cn">NULL</span>, attributes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">create_ospan</span><span class="op">(</span><span class="va">name</span>, <span class="va">...</span>, tracer <span class="op">=</span> <span class="fu">get_tracer</span><span class="op">(</span><span class="op">)</span>, attributes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">end_ospan</span><span class="op">(</span><span class="va">span</span><span class="op">)</span></span>
 <span></span>
