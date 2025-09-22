@@ -25,8 +25,6 @@ jobs:
     uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1
     with:
       cache-version: "regular"
-      extra-packages: |
-        r-lib/otelsdk
 
   R-CMD-check-with-dont-test:
     uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1

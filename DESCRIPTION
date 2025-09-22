@@ -36,6 +36,7 @@ Imports:
     stats
 Suggests:
     future (>= 1.21.0),
+    otelsdk (>= 0.2.0),
     knitr,
     mirai,
     purrr,
