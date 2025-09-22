@@ -284,7 +284,7 @@ with_ospan_async <- function(
   name,
   expr,
   ...,
-  tracer = NULL,
+  tracer = get_tracer(),
   attributes = NULL
 ) {
   # To avoid checking `is_tracing_enabled()` and then creating a span (which takes just as long),
