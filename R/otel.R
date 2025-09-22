@@ -358,6 +358,10 @@ create_ospan <- function(
   tracer = get_tracer(),
   attributes = NULL
 ) {
+  if (!is_tracing_enabled(tracer)) {
+    return(NULL)
+  }
+
   start_span(
     name,
     ...,
