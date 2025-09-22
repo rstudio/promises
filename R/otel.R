@@ -278,14 +278,17 @@ with_ospan_async <- function(
   name,
   expr,
   ...,
-  tracer = NULL,
+  tracer = get_tracer(),
   attributes = NULL
 ) {
-  if (!is_tracing_enabled(tracer)) {
-    return(force(expr))
-  }
+  # To avoid checking `is_tracing_enabled()` and then creating a span (which takes just as long),
+  # create the span and check if it is a noop span.
 
   span <- create_ospan(name, ..., tracer = tracer, attributes = attributes)
+  if (inherits(span, "otel_span_noop")) {
+    # Noop span; just run the expression
+    return(force(expr))
+  }
 
   needs_cleanup <- TRUE
   cleanup <- function() {
@@ -352,25 +355,23 @@ with_ospan_promise_domain <- function(expr) {
 create_ospan <- function(
   name,
   ...,
-  tracer = NULL,
+  tracer = get_tracer(),
   attributes = NULL
 ) {
   if (!is_tracing_enabled(tracer)) {
     return(NULL)
   }
 
-  span <-
-    start_span(
-      name,
-      ...,
-      tracer = tracer,
-      ## Use when otel v0.3.0 is released: https://github.com/r-lib/otel/commit/43e59c45a7de50cfd8af95f73d45f9899f957b44
-      # attributes = as_attributes(attributes)
-      attributes = if (!is.null(attributes)) {
-        as_attributes(attributes)
-      }
-    )
-  span
+  start_span(
+    name,
+    ...,
+    tracer = tracer,
+    ## Use when otel v0.3.0 is released: https://github.com/r-lib/otel/commit/43e59c45a7de50cfd8af95f73d45f9899f957b44
+    # attributes = as_attributes(attributes)
+    attributes = if (!is.null(attributes)) {
+      as_attributes(attributes)
+    }
+  )
 }
 
 
