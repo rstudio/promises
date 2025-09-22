@@ -281,9 +281,6 @@ with_ospan_async <- function(
   tracer = get_tracer(),
   attributes = NULL
 ) {
-  if (!is_tracing_enabled(tracer)) {
-    return(force(expr))
-  }
   # To avoid checking `is_tracing_enabled()` and then creating a span (which takes just as long),
   # create the span and check if it is a noop span.
 
