@@ -222,9 +222,8 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' @param name Character string. The name of the ospan.
 #' @param expr An expression to evaluate within the ospan context.
 #' @param ... Additional arguments passed to [`otel::start_span()`].
-#' @param tracer An `{otel}` tracer. If not provided, code will be executed
-#'   under a `{promises}` package tracer. It is strongly recommended to provide
-#'   your own tracer from your own package. See [`otel::get_tracer()`] for more
+#' @param tracer (Required) An `{otel}` tracer. It is required to provide your
+#'   own tracer from your own package. See [`otel::get_tracer()`] for more
 #'   details.
 #' @param attributes Attributes passed through [`otel::as_attributes()`] (when
 #'   not `NULL`)
@@ -284,17 +283,28 @@ with_ospan_async <- function(
   name,
   expr,
   ...,
-  tracer = get_tracer(),
+  tracer,
   attributes = NULL
 ) {
-  # To avoid checking `is_tracing_enabled()` and then creating a span (which takes just as long),
-  # create the span and check if it is a noop span.
-
-  span <- start_span(name, ..., tracer = tracer, attributes = attributes)
-  if (inherits(span, "otel_span_noop")) {
-    # Noop span; just run the expression
+  # If tracing is not enabled, just run the expression
+  #
+  # ```
+  # tracer <- get_tracer(); bench::mark(check = FALSE, !is_tracing_enabled(tracer), inherits(tracer, "otel_tracer_noop"), !.subset2(tracer, "is_enabled")())[,1:4]
+  # #> A tibble: 3 × 4
+  # #>   expression                                    min   median `itr/sec`
+  # #>   <bch:expr>                               <bch:tm> <bch:tm>     <dbl>
+  # #> 1 "!is_tracing_enabled(tracer)"              2.79µs    3.4µs   278206.
+  # #> 2 "inherits(tracer, \"otel_tracer_noop\")" 205.01ns    287ns  3184760.
+  # #> 3 "!.subset2(tracer, \"is_enabled\")()"     82.02ns    164ns  5716255.
+  # ```
+  #
+  # Speed is important here as to not slow down non-tracing operations.
+  # Therefore, we use the fastest method and require `tracer=` to be provided.
+  if (!.subset2(tracer, "is_enabled")()) {
     return(force(expr))
   }
+
+  span <- start_span(name, ..., tracer = tracer, attributes = attributes)
 
   needs_cleanup <- TRUE
   cleanup <- function() {
@@ -312,6 +322,7 @@ with_ospan_async <- function(
 
   result
 }
+
 
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
