@@ -6,7 +6,7 @@
 \alias{local_ospan_promise_domain}
 \title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
 \usage{
-with_ospan_async(name, expr, ..., tracer = get_tracer(), attributes = NULL)
+with_ospan_async(name, expr, ..., tracer, attributes = NULL)
 
 with_ospan_promise_domain(expr)
 
@@ -19,9 +19,8 @@ local_ospan_promise_domain(envir = parent.frame())
 
 \item{...}{Additional arguments passed to \code{\link[otel:start_span]{otel::start_span()}}.}
 
-\item{tracer}{An \code{{otel}} tracer. If not provided, code will be executed
-under a \code{{promises}} package tracer. It is strongly recommended to provide
-your own tracer from your own package. See \code{\link[otel:get_tracer]{otel::get_tracer()}} for more
+\item{tracer}{(Required) An \code{{otel}} tracer. It is required to provide your
+own tracer from your own package. See \code{\link[otel:get_tracer]{otel::get_tracer()}} for more
 details.}
 
 \item{attributes}{Attributes passed through \code{\link[otel:as_attributes]{otel::as_attributes()}} (when
