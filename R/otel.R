@@ -7,9 +7,9 @@ NULL
 
 #' @importFrom otel
 #'   start_span
+#'   end_span
 #'   get_active_span
 #'   is_tracing_enabled
-#'   start_span
 #'   with_active_span
 NULL
 
@@ -307,7 +307,7 @@ with_ospan_async <- function(
 
   needs_cleanup <- TRUE
   cleanup <- function() {
-    otel::end_span(span)
+    end_span(span)
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
