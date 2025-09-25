@@ -7,9 +7,6 @@ NULL
 
 #' @importFrom otel
 #'   start_span
-#'   get_active_span
-#'   is_tracing_enabled
-#'   start_span
 #'   with_active_span
 NULL
 
