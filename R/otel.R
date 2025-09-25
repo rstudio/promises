@@ -438,7 +438,7 @@ create_ospan_promise_domain <- function() {
       force(onFulfilled)
 
       span <- get_active_span_mem()
-      if (!span$is_recording()) {
+      if (!span_is_recording(span)) {
         return(onFulfilled)
       }
 
@@ -452,7 +452,7 @@ create_ospan_promise_domain <- function() {
       force(onRejected)
 
       span <- get_active_span_mem()
-      if (!span$is_recording()) {
+      if (!span_is_recording(span)) {
         return(onRejected)
       }
 
@@ -474,6 +474,24 @@ otel___errmsg <- function(..., class = "otel_error_message") {
     class = c(class, "message", "condition")
   )
   message(cnd)
+}
+
+
+# ❯❯ bench::mark(span$is_recording(), .subset2(list(is_recording = function() {FALSE}), "is_recording")(), span_is_recording(span))[,1:4]
+# ℹ Loading promises
+# # A tibble: 3 × 4
+#   expression                                                                     min   median `itr/sec`
+#   <bch:expr>                                                                <bch:tm> <bch:tm>     <dbl>
+# 1 "span$is_recording()"                                                        451ns    533ns  1706300.
+# 2 ".subset2(list(is_recording = function() { FALSE }), \"is_recording\")()"    164ns    246ns  3469337.
+# 3 "span_is_recording(span)"                                                    246ns    287ns  2988521.
+span_is_recording <- function(span) {
+  .subset2(span, "is_recording")()
+}
+
+otel__get_active_span <- function() {
+  # Uses promises:::get_tracer()$get_active_span() to get the active span (via a _static_ method)
+  .subset2(get_tracer(), "get_active_span")()
 }
 
 
@@ -514,8 +532,7 @@ get_active_span_mem_factory <- function() {
     # Altered from `otel::get_active_span()`
     tryCatch(
       {
-        # Uses promises:::get_tracer()$get_active_span() to get the active span (via a _static_ method)
-        active_span_val <<- get_tracer()$get_active_span()
+        active_span_val <<- otel__get_active_span()
         active_span_val
       },
       error = function(err) {
