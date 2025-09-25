@@ -178,9 +178,8 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' @section OpenTelemetry span compatibility:
 #'
 #' For ospan objects to exist over may async ticks, the ospan must be created
-#' using `otel::start_span()` and later ended using `spn$end()` (or
-#' `otel::end_span()`). Ending the ospan must occur **after** any promise chain
-#' work has completed.
+#' using `otel::start_span()` and later ended using `otel::end_span()`. Ending
+#' the ospan must occur **after** any promise chain work has completed.
 #'
 #' If we were to instead use `otel::start_local_active_span()`, the ospan would
 #' be ended when the function exits, not when the promise chain completes. Even
@@ -308,7 +307,7 @@ with_ospan_async <- function(
 
   needs_cleanup <- TRUE
   cleanup <- function() {
-    span$end()
+    otel::end_span(span)
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
