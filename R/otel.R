@@ -452,7 +452,7 @@ create_ospan_promise_domain <- function() {
       # the inconsistent behavior.
 
       span <- get_active_span()
-      if (!span$is_recording()) {
+      if (!.subset2(span, "is_recording")()) {
         return(onFulfilled)
       }
 
@@ -466,7 +466,7 @@ create_ospan_promise_domain <- function() {
       force(onRejected)
 
       span <- get_active_span()
-      if (!span$is_recording()) {
+      if (!.subset2(span, "is_recording")()) {
         return(onRejected)
       }
 
