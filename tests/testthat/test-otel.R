@@ -13,6 +13,7 @@ with_ospan_promise_domain({
         })
         expect_true(!is.null(records$traces[["test_span0"]]))
 
+        skip_if(!Sys.getenv("OTEL_TRACES_EXPORTER") %in% c("", "none"))
         expect_s3_class(
           otel::start_span("test_span"),
           "otel_span_noop"
