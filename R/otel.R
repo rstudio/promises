@@ -430,14 +430,12 @@ has_ospan_promise_domain <- function(domain = current_promise_domain()) {
 #' @param span An OpenTelemetry span object.
 #' @noRd
 create_ospan_promise_domain <- function() {
-  get_active_span_mem <- get_active_span_mem_factory()
-
   new_promise_domain(
     .ospan_promise_domain = TRUE, # set flag for later discovery
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
 
-      span <- get_active_span_mem()
+      span <- get_active_ospan()
       if (!span_is_recording(span)) {
         return(onFulfilled)
       }
@@ -451,7 +449,7 @@ create_ospan_promise_domain <- function() {
     wrapOnRejected = function(onRejected) {
       force(onRejected)
 
-      span <- get_active_span_mem()
+      span <- get_active_ospan()
       if (!span_is_recording(span)) {
         return(onRejected)
       }
@@ -491,55 +489,43 @@ span_is_recording <- function(span) {
 
 otel__get_active_span <- function() {
   # Uses promises:::get_tracer()$get_active_span() to get the active span (via a _static_ method)
+  # https://github.com/r-lib/otel/issues/31#issuecomment-3250669840
+  # > They are kind of like static methods of the tracer class.
   .subset2(get_tracer(), "get_active_span")()
 }
 
 
-# Memoize the active span retrieval to remove duplicated work retrieving the
-# same "active span" for both fullfilled and rejected code paths in
-# `create_ospan_promise_domain()`
-#
-# bench::mark({ f <- get_active_span_mem_factory(); list(f(), f())}, list(tryCatch(get_tracer()$get_active_span(), error = function(e) {}), tryCatch(get_tracer()$get_active_span(), error = function(e) {})))[,1:4]
-# #> ℹ Loading promises
-# #> # A tibble: 2 × 4
-# #>   expression                                                                                        min median `itr/sec`
-# #>   <bch:expr>                                                                                    <bch:t> <bch:>     <dbl>
-# #> 1 { f <- get_active_span_mem_factory() list(f(), f()) }                                          9.22µs 10.2µs    90415.
-# #> 2 list(tryCatch(get_tracer()$get_active_span(), error = function(e) { }), tryCatch(get_tracer(… 15.46µs 16.2µs    59898.
-get_active_span_mem_factory <- function() {
-  active_span_val <- NULL
+get_active_ospan <- function() {
+  ## Context on why `otel::get_active_span()` does not take a `tracer=` argument:
+  ## https://github.com/r-lib/otel/issues/31#issuecomment-3250669840
+  ## > They are kind of like static methods of the tracer class.
+  #
+  # bench::mark(otel::get_active_span(), get_tracer()$get_active_span(), tryCatch(otel__get_active_span(), error = function(e) {}), get_active_ospan())[,1:4]
+  #> # A tibble: 4 × 4
+  #>   expression                                                      min   median `itr/sec`
+  #>   <bch:expr>                                                 <bch:tm> <bch:tm>     <dbl>
+  #> 1 otel::get_active_span()                                     14.47µs   16.2µs    57955.
+  #> 2 get_tracer()$get_active_span()                               4.06µs   4.43µs   218453.
+  #> 3 tryCatch(otel__get_active_span(), error = function(e) { })   7.42µs   8.04µs   115958.
+  #> 4 get_active_ospan()                                           7.67µs   8.12µs   118820.
+  #
+  ## While `get_tracer()$get_active_span()` is faster, it can error, so we need to tryCatch it.
+  ## Until `otel::get_active_span()` allows you to pass in a tracer, we need to use the
+  ## tryCatch approach.
+  ##
+  ## I tried using a factory to memoize the active span retrieval when calling compose_domains(),
+  ## but it didn't have a clean mechanism that would clear the cached value.
+  ## Silver lining, using `get_active_ospan()` provides a 2x speedup over `otel::get_active_span()`... so we can call it twice without caching ;-)
 
-  function() {
-    if (!is.null(active_span_val)) {
-      return(active_span_val)
+  # Altered from `otel::get_active_span()`
+  tryCatch(
+    {
+      otel__get_active_span()
+    },
+    error = function(err) {
+      otel___errmsg("OpenTelemetry error: ", conditionMessage(err))
+      # If an error occurs, return an object that mimics a noop span
+      list(is_recording = function() FALSE)
     }
-
-    ## Motivation on why we shouldn't use
-    ## `promises:::get_tracer()$get_active_span()` here to save 10 microseconds:
-    ## https://github.com/r-lib/otel/issues/31#issuecomment-3250669840
-    # bench::mark(otel::get_active_span(), get_tracer()$get_active_span(), tryCatch(get_tracer()$get_active_span(), error = function(e) {}))[,1:4]
-    # #> # A tibble: 3 × 4
-    # #>   expression                                                             min   median `itr/sec`
-    # #>   <bch:expr>                                                        <bch:tm> <bch:tm>     <dbl>
-    # #> 1 otel::get_active_span()                                            14.47µs  15.62µs    57475.
-    # #> 2 get_tracer()$get_active_span()                                      4.06µs   4.51µs   209561.
-    # #> 3 tryCatch(get_tracer()$get_active_span(), error = function(e) { })   7.83µs   8.57µs   107833.
-    #
-    ## While `get_tracer()$get_active_span()` is faster, it can error, so we need to tryCatch it.
-    ## Until `otel::get_active_span()` allows you to pass in a tracer, we need to use the
-    ## tryCatch approach.
-
-    # Altered from `otel::get_active_span()`
-    tryCatch(
-      {
-        active_span_val <<- otel__get_active_span()
-        active_span_val
-      },
-      error = function(err) {
-        otel___errmsg("OpenTelemetry error: ", conditionMessage(err))
-        # If an error occurs, return an object that mimics a noop span
-        list(is_recording = function() FALSE)
-      }
-    )
-  }
+  )
 }
