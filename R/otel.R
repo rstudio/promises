@@ -7,15 +7,37 @@ NULL
 
 #' @importFrom otel
 #'   start_span
+#'   end_span
 #'   get_active_span
 #'   is_tracing_enabled
-#'   start_span
 #'   with_active_span
 NULL
 
 # For `otel::default_tracer_name()`
 otel_tracer_name <- "co.posit.r-package.promises"
 
+# Using local scope avoids an environment object lookup on each call.
+# Inspired by httr2:::get_tracer(). Taken from Shiny
+# Benchmark: https://github.com/rstudio/shiny/pull/4269/files#diff-0cc4a76032b57fcc125d41dfa3fb0f0c39976bb00a1d84bb56a0b77c331ce2d1R42
+testthat__is_testing <- function() {
+  identical(Sys.getenv("TESTTHAT"), "true")
+}
+
+get_tracer <- local({
+  tracer <- NULL
+  function() {
+    if (!is.null(tracer)) {
+      return(tracer)
+    }
+    if (testthat__is_testing()) {
+      # Don't cache the tracer in unit tests. It interferes with tracer provider
+      # injection in otelsdk::with_otel_record().
+      return(otel::get_tracer())
+    }
+    tracer <<- otel::get_tracer()
+    tracer
+  }
+})
 
 #' `r lifecycle::badge("experimental")` OpenTelemetry integration
 #'
@@ -178,9 +200,8 @@ otel_tracer_name <- "co.posit.r-package.promises"
 #' @section OpenTelemetry span compatibility:
 #'
 #' For ospan objects to exist over may async ticks, the ospan must be created
-#' using `otel::start_span()` and later ended using `spn$end()` (or
-#' `otel::end_span()`). Ending the ospan must occur **after** any promise chain
-#' work has completed.
+#' using `otel::start_span()` and later ended using `otel::end_span()`. Ending
+#' the ospan must occur **after** any promise chain work has completed.
 #'
 #' If we were to instead use `otel::start_local_active_span()`, the ospan would
 #' be ended when the function exits, not when the promise chain completes. Even
@@ -300,6 +321,8 @@ with_ospan_async <- function(
   #
   # Speed is important here as to not slow down non-tracing operations.
   # Therefore, we use the fastest method and require `tracer=` to be provided.
+  # The method is safe to call as it just returns either `TRUE` or `FALSE` (if a
+  # noop tracer).
   if (!.subset2(tracer, "is_enabled")()) {
     return(force(expr))
   }
@@ -308,7 +331,7 @@ with_ospan_async <- function(
 
   needs_cleanup <- TRUE
   cleanup <- function() {
-    span$end()
+    end_span(span)
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
@@ -452,8 +475,12 @@ create_ospan_promise_domain <- function() {
       # microseconds is not worth the inconsistent behavior or the time to debug
       # the inconsistent behavior.
 
+      # The `is_recording()` method is deemed safe to call as the underlying C++
+      # method just checks an internal class instance property, is
+      # non-allocating and has been declared noexcept.
+
       span <- get_active_span()
-      if (!span$is_recording()) {
+      if (!.subset2(span, "is_recording")()) {
         return(onFulfilled)
       }
 
@@ -467,7 +494,7 @@ create_ospan_promise_domain <- function() {
       force(onRejected)
 
       span <- get_active_span()
-      if (!span$is_recording()) {
+      if (!.subset2(span, "is_recording")()) {
         return(onRejected)
       }
 
