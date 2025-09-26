@@ -321,6 +321,8 @@ with_ospan_async <- function(
   #
   # Speed is important here as to not slow down non-tracing operations.
   # Therefore, we use the fastest method and require `tracer=` to be provided.
+  # The method is safe to call as it just returns either `TRUE` or `FALSE` (if a
+  # noop tracer).
   if (!.subset2(tracer, "is_enabled")()) {
     return(force(expr))
   }
