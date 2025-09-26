@@ -312,9 +312,8 @@ ospan is reactivated via <code>with_active_span()</code>. (Performed by the init
 
 
 <p>For ospan objects to exist over may async ticks, the ospan must be created
-using <code><a href="https://otel.r-lib.org/reference/start_span.html" class="external-link">otel::start_span()</a></code> and later ended using <code>spn$end()</code> (or
-<code><a href="https://otel.r-lib.org/reference/end_span.html" class="external-link">otel::end_span()</a></code>). Ending the ospan must occur <strong>after</strong> any promise chain
-work has completed.</p>
+using <code><a href="https://otel.r-lib.org/reference/start_span.html" class="external-link">otel::start_span()</a></code> and later ended using <code><a href="https://otel.r-lib.org/reference/end_span.html" class="external-link">otel::end_span()</a></code>. Ending
+the ospan must occur <strong>after</strong> any promise chain work has completed.</p>
 <p>If we were to instead use <code><a href="https://otel.r-lib.org/reference/start_local_active_span.html" class="external-link">otel::start_local_active_span()</a></code>, the ospan would
 be ended when the function exits, not when the promise chain completes. Even
 though the local ospan is created, activated, and eventually ended, the ospan
