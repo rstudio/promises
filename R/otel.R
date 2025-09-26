@@ -475,6 +475,10 @@ create_ospan_promise_domain <- function() {
       # microseconds is not worth the inconsistent behavior or the time to debug
       # the inconsistent behavior.
 
+      # The `is_recording()` method is deemed safe to call as the underlying C++
+      # method just checks an internal class instance property, is
+      # non-allocating and has been declared noexcept.
+
       span <- get_active_span()
       if (!.subset2(span, "is_recording")()) {
         return(onFulfilled)
