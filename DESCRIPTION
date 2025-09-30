@@ -32,8 +32,7 @@ Imports:
     magrittr (>= 1.5),
     otel (>= 0.2.0),
     R6,
-    rlang,
-    stats
+    rlang
 Suggests:
     future (>= 1.21.0),
     knitr,
