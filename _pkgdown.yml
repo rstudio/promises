@@ -16,6 +16,7 @@ reference:
   - title: Handling promises
     contents:
       - then
+      - wait_for
       - pipes
   - title: Combining promises
     contents:
