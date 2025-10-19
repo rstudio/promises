@@ -1,10 +1,11 @@
 #' @importFrom later later
 NULL
 
-# Promise constructor using classed environment
 Promise <- function() {
-  # Create private environment
+
+  self <- new.env(parent = emptyenv())
   private <- new.env(parent = emptyenv())
+
   private$state <- "pending"
   private$value <- NULL
   private$visible <- TRUE
@@ -14,10 +15,6 @@ Promise <- function() {
   private$onFinally <- list()
   private$rejectionHandled <- FALSE
 
-  # Create public environment
-  self <- new.env(parent = emptyenv())
-
-  # Private methods
   private$doResolve <- function(value) {
     val <- withVisible(value)
     value <- val$value
@@ -104,7 +101,6 @@ Promise <- function() {
     })
   }
 
-  # Public methods
   self$status <- function() {
     private$state
   }
