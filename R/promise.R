@@ -1,239 +1,249 @@
 #' @import later
 NULL
 
-#' @import R6
-Promise <- R6::R6Class(
-  "Promise",
-  private = list(
-    state = "pending",
-    value = NULL,
-    visible = TRUE,
-    publicResolveRejectCalled = FALSE,
-    onFulfilled = list(),
-    onRejected = list(),
-    onFinally = list(),
-    rejectionHandled = FALSE,
+# Promise constructor using classed environment
+Promise <- function() {
+  # Create private environment
+  private <- new.env(parent = emptyenv())
+  private$state <- "pending"
+  private$value <- NULL
+  private$visible <- TRUE
+  private$publicResolveRejectCalled <- FALSE
+  private$onFulfilled <- list()
+  private$onRejected <- list()
+  private$onFinally <- list()
+  private$rejectionHandled <- FALSE
 
-    # Private resolve/reject differs from public resolve/reject
-    # in that the private versions are allowed to be called
-    # more than once, whereas public ones no-op after the first
-    # time they are invoked.
-    doResolve = function(value) {
-      val <- withVisible(value)
-      value <- val$value
-      visible <- val$visible
+  # Create public environment
+  self <- new.env(parent = emptyenv())
 
-      if (is.promising(value)) {
-        value <- as.promise(value)
-        if (identical(self, attr(value, "promise_impl", exact = TRUE))) {
-          return(private$doReject(simpleError(
-            "Chaining cycle detected for promise"
-          )))
-        }
-        # This then() call doesn't need promise domains; semantically, it doesn't
-        # really exist, as it's just a convenient way to implement the new promise
-        # inhabiting the old promise's corpse.
-        without_promise_domain({
-          value$then(
-            private$doResolve,
-            private$doReject
-          )
-        })
-      } else {
-        private$doResolveFinalValue(value, visible)
+  # Private methods
+  private$doResolve <- function(value) {
+    val <- withVisible(value)
+    value <- val$value
+    visible <- val$visible
+
+    if (is.promising(value)) {
+      value <- as.promise(value)
+      if (identical(self, attr(value, "promise_impl", exact = TRUE))) {
+        return(private$doReject(simpleError(
+          "Chaining cycle detected for promise"
+        )))
       }
-    },
-    doReject = function(reason) {
-      if (is.promising(reason)) {
-        reason <- as.promise(reason)
-        # This then() call doesn't need promise domains; semantically, it doesn't
-        # really exist, as it's just a convenient way to implement the new promise
-        # inhabiting the old promise's corpse.
-        without_promise_domain({
-          reason$then(
-            private$doResolve,
-            private$doReject
-          )
-        })
-      } else {
-        private$doRejectFinalReason(reason)
-      }
-    },
-    # These "final" versions of resolve/reject are for when we've
-    # established that the value/reason is not itself a promise.
-    doResolveFinalValue = function(value, visible) {
-      private$value <- value
-      private$visible <- visible
-      private$state <- "fulfilled"
-
-      later::later(function() {
-        lapply(private$onFulfilled, function(f) {
-          f(private$value, private$visible)
-        })
-        private$onFulfilled <- list()
-      })
-    },
-    doRejectFinalReason = function(reason) {
-      private$value <- reason
-      private$state <- "rejected"
-
-      later::later(function() {
-        lapply(private$onRejected, function(f) {
-          private$rejectionHandled <- TRUE
-          f(private$value)
-        })
-        private$onRejected <- list()
-
-        later::later(
-          function() {
-            if (!private$rejectionHandled) {
-              # warning() was unreliable here
-              cat(
-                file = stderr(),
-                "Unhandled promise error: ",
-                reason$message,
-                "\n",
-                sep = ""
-              )
-            }
-          }
+      # This then() call doesn't need promise domains; semantically, it doesn't
+      # really exist, as it's just a convenient way to implement the new promise
+      # inhabiting the old promise's corpse.
+      without_promise_domain({
+        value$then(
+          private$doResolve,
+          private$doReject
         )
       })
+    } else {
+      private$doResolveFinalValue(value, visible)
     }
-  ),
-  public = list(
-    # "pending", "fulfilled", "rejected"
-    status = function() {
-      private$state
-    },
-    resolve = function(value) {
-      # Only allow this to be called once, then no-op.
-      if (private$publicResolveRejectCalled) {
-        return(invisible())
-      }
-      private$publicResolveRejectCalled <- TRUE
+  }
 
-      tryCatch(
-        {
-          # Important: Do not trigger evaluation of value before
-          # passing to doResolve. doResolve calls withVisible() on
-          # value, so evaluating it before that point will cause
-          # the visibility to be lost.
-          private$doResolve(value)
-        },
-        error = function(err) {
-          private$doReject(err)
-        }
-      )
-
-      invisible()
-    },
-    reject = function(reason) {
-      # Only allow this to be called once, then no-op.
-      if (private$publicResolveRejectCalled) {
-        return(invisible())
-      }
-      private$publicResolveRejectCalled <- TRUE
-
-      tryCatch(
-        {
-          force(reason)
-          if (is.character(reason)) {
-            reason <- simpleError(reason)
-          }
-          private$doReject(reason)
-        },
-        error = function(err) {
-          private$doReject(err)
-        }
-      )
-
-      invisible()
-    },
-    then = function(onFulfilled = NULL, onRejected = NULL, onFinally = NULL) {
-      onFulfilled <- normalizeOnFulfilled(onFulfilled)
-      onRejected <- normalizeOnRejected(onRejected)
-      if (!is.function(onFinally)) {
-        onFinally <- NULL
-      }
-
-      promise2 <- promise(function(resolve, reject) {
-        res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
-
-        if (!is.null(res)) {
-          onFulfilled <- res$onFulfilled
-          onRejected <- res$onRejected
-        }
-
-        handleFulfill <- function(value, visible) {
-          if (is.function(onFulfilled)) {
-            resolve(onFulfilled(value, visible))
-          } else {
-            resolve(if (visible) value else invisible(value))
-          }
-        }
-
-        handleReject <- function(reason) {
-          if (is.function(onRejected)) {
-            # Yes, resolve, not reject.
-            resolve(onRejected(reason))
-          } else {
-            # Yes, reject, not resolve.
-            reject(reason)
-          }
-        }
-
-        if (private$state == "pending") {
-          private$onFulfilled <- c(
-            private$onFulfilled,
-            list(
-              handleFulfill
-            )
-          )
-          private$onRejected <- c(
-            private$onRejected,
-            list(
-              handleReject
-            )
-          )
-        } else if (private$state == "fulfilled") {
-          later::later(function() {
-            handleFulfill(private$value, private$visible)
-          })
-        } else if (private$state == "rejected") {
-          later::later(function() {
-            private$rejectionHandled <- TRUE
-            handleReject(private$value)
-          })
-        } else {
-          stop("Unexpected state ", private$state)
-        }
+  private$doReject <- function(reason) {
+    if (is.promising(reason)) {
+      reason <- as.promise(reason)
+      # This then() call doesn't need promise domains; semantically, it doesn't
+      # really exist, as it's just a convenient way to implement the new promise
+      # inhabiting the old promise's corpse.
+      without_promise_domain({
+        reason$then(
+          private$doResolve,
+          private$doReject
+        )
       })
-
-      invisible(promise2)
-    },
-    catch = function(onRejected) {
-      invisible(self$then(onRejected = onRejected))
-    },
-    finally = function(onFinally) {
-      invisible(self$then(
-        onFinally = onFinally
-      ))
-    },
-    format = function() {
-      if (private$state == "pending") {
-        "<Promise [pending]>"
-      } else {
-        classname <- class(private$value)[[1]]
-        if (length(classname) == 0) {
-          classname <- ""
-        }
-
-        sprintf("<Promise [%s: %s]>", private$state, classname)
-      }
+    } else {
+      private$doRejectFinalReason(reason)
     }
-  )
-)
+  }
+
+  # These "final" versions of resolve/reject are for when we've
+  # established that the value/reason is not itself a promise.
+  private$doResolveFinalValue <- function(value, visible) {
+    private$value <- value
+    private$visible <- visible
+    private$state <- "fulfilled"
+
+    later::later(function() {
+      lapply(private$onFulfilled, function(f) {
+        f(private$value, private$visible)
+      })
+      private$onFulfilled <- list()
+    })
+  }
+
+  private$doRejectFinalReason <- function(reason) {
+    private$value <- reason
+    private$state <- "rejected"
+
+    later::later(function() {
+      lapply(private$onRejected, function(f) {
+        private$rejectionHandled <- TRUE
+        f(private$value)
+      })
+      private$onRejected <- list()
+
+      later::later(
+        function() {
+          if (!private$rejectionHandled) {
+            # warning() was unreliable here
+            cat(
+              file = stderr(),
+              "Unhandled promise error: ",
+              reason$message,
+              "\n",
+              sep = ""
+            )
+          }
+        }
+      )
+    })
+  }
+
+  # Public methods
+  self$status <- function() {
+    private$state
+  }
+
+  self$resolve <- function(value) {
+    # Only allow this to be called once, then no-op.
+    if (private$publicResolveRejectCalled) {
+      return(invisible())
+    }
+    private$publicResolveRejectCalled <- TRUE
+
+    tryCatch(
+      {
+        # Important: Do not trigger evaluation of value before
+        # passing to doResolve. doResolve calls withVisible() on
+        # value, so evaluating it before that point will cause
+        # the visibility to be lost.
+        private$doResolve(value)
+      },
+      error = function(err) {
+        private$doReject(err)
+      }
+    )
+
+    invisible()
+  }
+
+  self$reject <- function(reason) {
+    # Only allow this to be called once, then no-op.
+    if (private$publicResolveRejectCalled) {
+      return(invisible())
+    }
+    private$publicResolveRejectCalled <- TRUE
+
+    tryCatch(
+      {
+        force(reason)
+        if (is.character(reason)) {
+          reason <- simpleError(reason)
+        }
+        private$doReject(reason)
+      },
+      error = function(err) {
+        private$doReject(err)
+      }
+    )
+
+    invisible()
+  }
+
+  self$then <- function(onFulfilled = NULL, onRejected = NULL, onFinally = NULL) {
+    onFulfilled <- normalizeOnFulfilled(onFulfilled)
+    onRejected <- normalizeOnRejected(onRejected)
+    if (!is.function(onFinally)) {
+      onFinally <- NULL
+    }
+
+    promise2 <- promise(function(resolve, reject) {
+      res <- promiseDomain$onThen(onFulfilled, onRejected, onFinally)
+
+      if (!is.null(res)) {
+        onFulfilled <- res$onFulfilled
+        onRejected <- res$onRejected
+      }
+
+      handleFulfill <- function(value, visible) {
+        if (is.function(onFulfilled)) {
+          resolve(onFulfilled(value, visible))
+        } else {
+          resolve(if (visible) value else invisible(value))
+        }
+      }
+
+      handleReject <- function(reason) {
+        if (is.function(onRejected)) {
+          # Yes, resolve, not reject.
+          resolve(onRejected(reason))
+        } else {
+          # Yes, reject, not resolve.
+          reject(reason)
+        }
+      }
+
+      if (private$state == "pending") {
+        private$onFulfilled <- c(
+          private$onFulfilled,
+          list(
+            handleFulfill
+          )
+        )
+        private$onRejected <- c(
+          private$onRejected,
+          list(
+            handleReject
+          )
+        )
+      } else if (private$state == "fulfilled") {
+        later::later(function() {
+          handleFulfill(private$value, private$visible)
+        })
+      } else if (private$state == "rejected") {
+        later::later(function() {
+          private$rejectionHandled <- TRUE
+          handleReject(private$value)
+        })
+      } else {
+        stop("Unexpected state ", private$state)
+      }
+    })
+
+    invisible(promise2)
+  }
+
+  self$catch <- function(onRejected) {
+    invisible(self$then(onRejected = onRejected))
+  }
+
+  self$finally <- function(onFinally) {
+    invisible(self$then(
+      onFinally = onFinally
+    ))
+  }
+
+  self$format <- function() {
+    if (private$state == "pending") {
+      "<Promise [pending]>"
+    } else {
+      classname <- class(private$value)[[1]]
+      if (length(classname) == 0) {
+        classname <- ""
+      }
+
+      sprintf("<Promise [%s: %s]>", private$state, classname)
+    }
+  }
+
+  class(self) <- "Promise"
+  self
+}
 
 normalizeOnFulfilled <- function(onFulfilled) {
   if (!is.function(onFulfilled)) {
@@ -355,7 +365,7 @@ promise <- function(action) {
     stop("Invalid action argument--should be a function")
   }
 
-  p <- Promise$new()
+  p <- Promise()
 
   tryCatch(
     {
