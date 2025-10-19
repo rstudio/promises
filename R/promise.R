@@ -2,7 +2,6 @@
 NULL
 
 Promise <- function() {
-
   self <- new.env(parent = emptyenv())
   private <- new.env(parent = emptyenv())
 
@@ -151,7 +150,11 @@ Promise <- function() {
     invisible()
   }
 
-  self$then <- function(onFulfilled = NULL, onRejected = NULL, onFinally = NULL) {
+  self$then <- function(
+    onFulfilled = NULL,
+    onRejected = NULL,
+    onFinally = NULL
+  ) {
     onFulfilled <- normalizeOnFulfilled(onFulfilled)
     onRejected <- normalizeOnRejected(onRejected)
     if (!is.function(onFinally)) {
