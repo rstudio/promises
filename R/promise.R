@@ -241,6 +241,7 @@ Promise <- function() {
     }
   }
 
+  self$.__enclos_env__ <- list(private = private)
   class(self) <- "Promise"
   self
 }
