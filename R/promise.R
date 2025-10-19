@@ -1,4 +1,4 @@
-#' @import later
+#' @importFrom later later
 NULL
 
 # Promise constructor using classed environment
@@ -68,7 +68,7 @@ Promise <- function() {
     private$visible <- visible
     private$state <- "fulfilled"
 
-    later::later(function() {
+    later(function() {
       lapply(private$onFulfilled, function(f) {
         f(private$value, private$visible)
       })
@@ -80,14 +80,14 @@ Promise <- function() {
     private$value <- reason
     private$state <- "rejected"
 
-    later::later(function() {
+    later(function() {
       lapply(private$onRejected, function(f) {
         private$rejectionHandled <- TRUE
         f(private$value)
       })
       private$onRejected <- list()
 
-      later::later(
+      later(
         function() {
           if (!private$rejectionHandled) {
             # warning() was unreliable here
@@ -202,11 +202,11 @@ Promise <- function() {
           )
         )
       } else if (private$state == "fulfilled") {
-        later::later(function() {
+        later(function() {
           handleFulfill(private$value, private$visible)
         })
       } else if (private$state == "rejected") {
-        later::later(function() {
+        later(function() {
           private$rejectionHandled <- TRUE
           handleReject(private$value)
         })
@@ -542,7 +542,7 @@ as.promise.Future <- function(x) {
           }
         )
       } else {
-        later::later(check, poll_interval)
+        later(check, poll_interval)
       }
     }
     check()

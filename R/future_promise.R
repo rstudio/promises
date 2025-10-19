@@ -207,7 +207,7 @@ WorkQueue <- R6::R6Class(
       if (is_false(ret)) {
         private$can_proceed_cache_val <- FALSE
         # Reset `$can_proceed()` functionality in the next event loop execution
-        later::later(
+        later(
           loop = private$loop,
           delay = 0,
           function() {
@@ -243,7 +243,7 @@ WorkQueue <- R6::R6Class(
           # Try again later
           private$increase_delay()
           private$cancel_delayed_attempt_work <-
-            later::later(
+            later(
               loop = private$loop,
               delay = private$delay$delay(),
               function() {
