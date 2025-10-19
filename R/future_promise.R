@@ -33,7 +33,7 @@ future_worker_is_free <- function() {
   future::nbrOfFreeWorkers() > 0
 }
 
-
+#' @importFrom R6 R6Class
 Delay <- R6::R6Class(
   "Delay",
   private = list(
