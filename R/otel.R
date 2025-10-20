@@ -420,8 +420,19 @@ local_promise_domain <- function(
   }
 
   # Inspired by `withr::defer()`
+  defer(
+    {
+      globals$domain <- oldval
+    },
+    envir = envir
+  )
+
+  invisible()
+}
+
+defer <- function(expr, envir = parent.frame()) {
   thunk <- as.call(list(function() {
-    globals$domain <- oldval
+    force(expr)
   }))
   add <- TRUE
   after <- TRUE
