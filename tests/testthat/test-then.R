@@ -25,14 +25,18 @@ test_that("complex promise chains with mixed success/failure", {
   expect_equal(counter, 4)
 })
 
-test_that("then() and catch() handle NULL callbacks correctly", {
+test_that("then() handles NULL callbacks correctly", {
   # NULL onFulfilled should pass through value
+  expect_assertions(1)
   promise_resolve(42) |>
     then(NULL, \(err) "error") |>
-    then(\(x) expect_equal(x, 42)) |>
-    wait_for_it()
+    extract() |>
+    expect_equal(42)
+})
 
+test_that("catch() handles NULL callbacks correctly", {
   # NULL onRejected should pass through error
+  expect_assertions(1)
   promise_resolve(stop("boom")) |>
     then(\(x) x, NULL) |>
     catch(\(err) expect_match(err$message, "boom")) |>

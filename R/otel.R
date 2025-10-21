@@ -420,16 +420,15 @@ local_promise_domain <- function(
   }
 
   # Inspired by `withr::defer()`
-  thunk <- as.call(list(function() {
-    globals$domain <- oldval
-  }))
-  add <- TRUE
-  after <- TRUE
-  do.call(base::on.exit, list(thunk, add, after), envir = envir)
+  defer(
+    {
+      globals$domain <- oldval
+    },
+    envir = envir
+  )
 
   invisible()
 }
-
 
 # # TODO: Set attributes on the current active span
 # # 5. Set attributes on the current active span
