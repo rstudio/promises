@@ -8,6 +8,8 @@
 
 * Promoted usage of R's native pipe (`|>`) and function shorthand (`\(x) fn(x)`) syntax over promise pipe methods. The promise pipe methods (`%...>%`, `%...!%`, `%...T>%`) are now superseded in favor of the R syntax supported in R 4.1 or later. Promises now requires R 4.1 or later to access these language features. (#148)
 
+* Added `hybrid_then()` function that will synchronously or asynchronously execute a success/failure callbacks based on whether the input is a promise or a regular value. This function is useful for writing code that can handle both synchronous and asynchronous inputs seamlessly. (#192)
+
 * Added `tee=FALSE` parameter to `then()`. When `tee=TRUE`, `then()` will ignore the return value of the callback, and return the original value instead. This is useful for performing operations with side-effects, particularly logging to the console or a file. Adding this parameter gives parity to `catch(tee=)`. `finally()` does not support `tee=` as the return value is always ignored. (#148)
 
 * Updated `catch()` API from `catch(promise, onRejected, tee = FALSE)` to `catch(promise, onRejected, ..., tee = FALSE)`. It requires that `tee=` be specified as a keyword argument. (#148)
