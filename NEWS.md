@@ -1,4 +1,4 @@
-# promises (development version)
+# promises 1.4.0
 
 ## Breaking changes
 
