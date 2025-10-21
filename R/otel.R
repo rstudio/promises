@@ -249,7 +249,6 @@ get_tracer <- local({
 #' @param attributes Attributes passed through [`otel::as_attributes()`] (when
 #'   not `NULL`)
 #' @export
-#' @keywords internal
 #' @seealso [`otel::start_span()`], [`otel::with_active_span()`],
 #'   [`otel::end_span()`]
 #' @examples
