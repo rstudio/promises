@@ -10,12 +10,17 @@ hybrid_then(expr, on_success = NULL, on_failure = NULL, ..., tee = FALSE)
 \item{expr}{An expression that evaluates to either a promise or a non-promise
 value.}
 
-\item{on_success}{A function to be called if no error occurs. Takes one
-argument: the result value. Can return a value or a promise.}
+\item{on_success}{A function to be called when no error occurs synchronously
+or asynchronously. When invoked, the function will be called with a single
+argument: the resolved value. Optionally, the function can take a second
+parameter \code{.visible} if you care whether the promise was resolved with a
+visible or invisible value. Can return a value or a promise.}
 
 \item{on_failure}{A function to be called if an error occurs synchronously or
 asynchronously. Takes one argument: the error object. Can return a value or
-a promise to recover from the error, or throw a new error.}
+a promise to recover from the error, or throw a new error. If \code{on_failure}
+is provided and doesn't throw an error (or return a promise that fails)
+then this is the async equivalent of catching an error.}
 
 \item{...}{Reserved for future use. Currently must be empty.}
 

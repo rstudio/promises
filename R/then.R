@@ -283,11 +283,16 @@ check_hybrid_callback <- function(callback, name) {
 #'
 #' @param expr An expression that evaluates to either a promise or a non-promise
 #'   value.
-#' @param on_success A function to be called if no error occurs. Takes one
-#'   argument: the result value. Can return a value or a promise.
+#' @param on_success A function to be called when no error occurs synchronously
+#'   or asynchronously. When invoked, the function will be called with a single
+#'   argument: the resolved value. Optionally, the function can take a second
+#'   parameter `.visible` if you care whether the promise was resolved with a
+#'   visible or invisible value. Can return a value or a promise.
 #' @param on_failure A function to be called if an error occurs synchronously or
 #'   asynchronously. Takes one argument: the error object. Can return a value or
-#'   a promise to recover from the error, or throw a new error.
+#'   a promise to recover from the error, or throw a new error. If `on_failure`
+#'   is provided and doesn't throw an error (or return a promise that fails)
+#'   then this is the async equivalent of catching an error.
 #' @param ... Reserved for future use. Currently must be empty.
 #' @param tee If `TRUE`, ignore the return value of the callback, and use the
 #'   original value of `expr` as the result. For `on_failure` with `tee = TRUE`,
@@ -363,52 +368,72 @@ hybrid_then <- function(
   check_hybrid_callback(on_success, "on_success")
   check_hybrid_callback(on_failure, "on_failure")
 
+  # Add support for `.visible`
+  on_success <- normalizeOnFulfilled(on_success)
+  on_failure <- normalizeOnRejected(on_failure)
+
   result_is_sync_error <- FALSE
 
-  result <- tryCatch(
-    expr,
-    error = function(e) {
-      # If no `on_failure` callback, re-throw the error
-      if (is.null(on_failure)) {
-        stop(e)
-      }
+  result_visible <-
+    withVisible(
+      tryCatch(
+        expr,
+        error = function(e) {
+          # If no `on_failure` callback, re-throw the error
+          if (is.null(on_failure)) {
+            stop(e)
+          }
 
-      # Perform synchronous `on_failure` callback now
-      result_on_error <- on_failure(e)
-      if (tee) {
-        # Re-throw the error
-        stop(e)
-      } else {
-        result_is_sync_error <<- TRUE
-        result_on_error
-      }
-    }
-  )
+          # Perform synchronous `on_failure` callback now
+          result_on_error <- withVisible(on_failure(e))
+          if (tee) {
+            # Re-throw the error
+            stop(e)
+          } else {
+            result_is_sync_error <<- TRUE
+            return_with_visible(result_on_error)
+          }
+        }
+      )
+    )
 
   if (result_is_sync_error) {
     # Return synchronous `tee=FALSE` `result_on_error` from above
-    return(result)
+    return(return_with_visible(result_visible))
   }
 
-  if (is.promising(result)) {
+  if (is.promising(result_visible$value)) {
     # Return async result
     # Will handle async success, failure callbacks (and `tee`)
-    result |>
-      then(on_success, on_failure, tee = tee)
+    then(return_with_visible(result_visible), on_success, on_failure, tee = tee)
   } else {
     # If no `on_success` callback, return sync result now
     if (is.null(on_success)) {
-      return(result)
+      return(return_with_visible(result_visible))
     }
 
     # Peform synchronous `on_success` callback now
-    result_on_success <- on_success(result)
+    result_on_success_visible <-
+      withVisible(
+        on_success(
+          result_visible$value,
+          result_visible$visible
+        )
+      )
 
     # Return synchronous result
     if (tee) {
-      result
+      return_with_visible(result_visible)
     } else {
-      result_on_success
+      return_with_visible(result_on_success_visible)
     }
+  }
+}
+
+return_with_visible <- function(visible_info) {
+  if (visible_info$visible) {
+    visible_info$value
+  } else {
+    invisible(visible_info$value)
   }
 }
