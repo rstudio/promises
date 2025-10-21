@@ -228,6 +228,11 @@ check_tee <- function(tee) {
     call = parent.frame()
   )
 }
+check_hybrid_callback <- function(callback, name) {
+  if (!is.null(callback) && !is.function(callback)) {
+    stop(sprintf("`%s=` must be a function or `NULL`", name))
+  }
+}
 
 
 #' Asynchronous or synchronous `then()`
@@ -355,8 +360,8 @@ hybrid_then <- function(
   check_dots(...)
   check_tee(tee)
 
-  force(on_success)
-  force(on_failure)
+  check_hybrid_callback(on_success, "on_success")
+  check_hybrid_callback(on_failure, "on_failure")
 
   result_is_sync_error <- FALSE
 
