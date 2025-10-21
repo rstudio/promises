@@ -1,6 +1,3 @@
-#' @importFrom later later
-NULL
-
 Promise <- function() {
   self <- new.env(parent = emptyenv())
   private <- new.env(parent = emptyenv())
