@@ -284,9 +284,8 @@ ospan is reactivated via \code{with_active_span()}. (Performed by the initial
 
 
 For ospan objects to exist over may async ticks, the ospan must be created
-using \code{otel::start_span()} and later ended using \code{spn$end()} (or
-\code{otel::end_span()}). Ending the ospan must occur \strong{after} any promise chain
-work has completed.
+using \code{otel::start_span()} and later ended using \code{otel::end_span()}. Ending
+the ospan must occur \strong{after} any promise chain work has completed.
 
 If we were to instead use \code{otel::start_local_active_span()}, the ospan would
 be ended when the function exits, not when the promise chain completes. Even

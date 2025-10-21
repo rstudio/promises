@@ -9,10 +9,11 @@ with_ospan_promise_domain({
         records <- otelsdk::with_otel_record({
           span <- otel::start_span("test_span0", tracer = NULL)
           expect_true(inherits(span, "otel_span"))
-          span$end()
+          otel::end_span(span)
         })
         expect_true(!is.null(records$traces[["test_span0"]]))
 
+        skip_if(!Sys.getenv("OTEL_TRACES_EXPORTER") %in% c("", "none"))
         expect_s3_class(
           otel::start_span("test_span"),
           "otel_span_noop"
@@ -154,25 +155,25 @@ with_ospan_promise_domain({
           promise_resolve("init1") |>
             then(function(x) {
               spn <- otel::start_span("chain1_step1")
-              on.exit(spn$end())
+              on.exit(otel::end_span(spn))
               execution_order <<- c(execution_order, "chain1_step1")
               paste0(x, "_step11")
             }) |>
             then(function(x) {
               spn <- otel::start_span("chain1_step2")
-              on.exit(spn$end())
+              on.exit(otel::end_span(spn))
               execution_order <<- c(execution_order, "chain1_step2")
               paste0(x, "_step12")
             }) |>
             then(function(x) {
               spn <- otel::start_span("chain1_step3")
-              on.exit(spn$end())
+              on.exit(otel::end_span(spn))
               execution_order <<- c(execution_order, "chain1_step3")
               paste0(x, "_step13")
             }) |>
             then(function(x) {
               spn <- otel::start_span("chain1_step4")
-              on.exit(spn$end())
+              on.exit(otel::end_span(spn))
               execution_order <<- c(execution_order, "chain1_step4")
               paste0(x, "_final1")
             })
@@ -182,25 +183,25 @@ with_ospan_promise_domain({
           promise_resolve("init2") |>
             then(function(x) {
               spn <- otel::start_span("chain2_step1")
-              on.exit(spn$end())
+              on.exit(otel::end_span(spn))
               execution_order <<- c(execution_order, "chain2_step1")
               paste0(x, "_step12")
             }) |>
             then(function(x) {
               spn <- otel::start_span("chain2_step2")
-              on.exit(spn$end())
+              on.exit(otel::end_span(spn))
               execution_order <<- c(execution_order, "chain2_step2")
               paste0(x, "_step22")
             }) |>
             then(function(x) {
               spn <- otel::start_span("chain2_step3")
-              on.exit(spn$end())
+              on.exit(otel::end_span(spn))
               execution_order <<- c(execution_order, "chain2_step3")
               paste0(x, "_step23")
             }) |>
             then(function(x) {
               spn <- otel::start_span("chain2_step4")
-              on.exit(spn$end())
+              on.exit(otel::end_span(spn))
               execution_order <<- c(execution_order, "chain2_step4")
               paste0(x, "_final2")
             })
@@ -337,7 +338,7 @@ describe("local_ospan_promise_domain()", {
           then(function(x) {
             # This should be executed within the ospan domain
             span <- otel::start_span("inner_test_span")
-            on.exit(span$end())
+            on.exit(otel::end_span(span))
             x * 2
           })
       })

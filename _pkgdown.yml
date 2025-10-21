@@ -16,6 +16,7 @@ reference:
   - title: Handling promises
     contents:
       - then
+      - hybrid_then
       - wait_for
       - pipes
   - title: Combining promises
