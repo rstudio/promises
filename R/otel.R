@@ -430,18 +430,6 @@ local_promise_domain <- function(
   invisible()
 }
 
-defer <- function(expr, envir = parent.frame()) {
-  thunk <- as.call(list(function() {
-    force(expr)
-  }))
-  add <- TRUE
-  after <- TRUE
-  do.call(base::on.exit, list(thunk, add, after), envir = envir)
-
-  invisible()
-}
-
-
 # # TODO: Set attributes on the current active span
 # # 5. Set attributes on the current active span
 # set_ospan_attrs(status = 200L)
