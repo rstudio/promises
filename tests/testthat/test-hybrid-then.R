@@ -260,10 +260,15 @@ test_that("hybrid_then() validates tee parameter", {
   )
 })
 
-test_that("hybrid_then() validates dots parameter", {
-  expect_error(
-    hybrid_then(42, on_success = \(x) x, extra_arg = "invalid"),
-    "must be empty"
+test_that("hybrid_then() validates `on_success` and `on_failure` parameters", {
+  expect_snapshot(
+    hybrid_then(42, on_success = "invalid"),
+    error = TRUE
+  )
+
+  expect_snapshot(
+    hybrid_then(42, on_failure = "invalid"),
+    error = TRUE
   )
 })
 
