@@ -351,4 +351,3 @@ with_ospan_promise_domain({
 \code{\link[otel:start_span]{otel::start_span()}}, \code{\link[otel:with_active_span]{otel::with_active_span()}},
 \code{\link[otel:end_span]{otel::end_span()}}
 }
-\keyword{internal}
