@@ -61,8 +61,13 @@
 <li>
 <code>devtools::test()</code> - Run unit tests using testthat</li>
 <li>
+<code>devtools::test(filter = "then")</code> - Run tests matching pattern (e.g., all tests in test-then.R)</li>
+<li>
+<code>testthat::test_file("tests/testthat/test-*.R")</code> - Run a single test file</li>
+<li>
 <code>spelling::spell_check_test(vignettes = TRUE, error = TRUE, skip_on_cran = TRUE)</code> - Check spelling</li>
-</ul></div>
+</ul><p><strong>Test Helpers</strong> (<code>tests/testthat/helper.R</code>): - <code>wait_for_it(p)</code> - Block until all pending later tasks execute; optionally wait for promise <code>p</code> to resolve/reject - <code>extract(promise)</code> - Block until promise resolves and return value (or throw error if rejected) - <code>ext_promise()</code> - Create externally-controllable promise for testing (returns list with <code>promise</code>, <code>resolve</code>, <code>reject</code>, <code>status</code>) - <code>expect_assertions(n)</code> - Declare expected number of assertions in a test (useful with async tests)</p>
+</div>
 <div class="section level3">
 <h3 id="package-development">Package Development<a class="anchor" aria-label="anchor" href="#package-development"></a></h3>
 <ul><li>
@@ -86,20 +91,26 @@
 <div class="section level3">
 <h3 id="core-promise-implementation">Core Promise Implementation<a class="anchor" aria-label="anchor" href="#core-promise-implementation"></a></h3>
 <p>The promises package implements JavaScript-style promises in R for asynchronous programming. Key architectural components:</p>
-<p><strong>Promise Class (<code>R/promise.R</code>):</strong> - R6 class-based implementation with states: “pending”, “fulfilled”, “rejected” - Private methods <code>doResolve</code>/<code>doReject</code> handle state transitions - Public API through <code><a href="reference/resolve.html">resolve()</a></code>, <code><a href="reference/resolve.html">reject()</a></code>, and <code><a href="reference/then.html">then()</a></code> methods - Chaining cycle detection to prevent infinite loops</p>
-<p><strong>Promise Domains (<code>R/domains.R</code>):</strong> - Context management system for promise execution - Custom error handling and domain-specific behavior - Functions: <code><a href="reference/with_promise_domain.html">new_promise_domain()</a></code>, <code><a href="reference/with_promise_domain.html">with_promise_domain()</a></code></p>
-<p><strong>Core Operations (<code>R/then.R</code>):</strong> - <code><a href="reference/then.html">then()</a></code> - Primary interface for promise chaining and result handling - Supports both fulfillment (<code>onFulfilled</code>) and rejection (<code>onRejected</code>) callbacks - Formula syntax is deprecated in favor of function shorthand <code>\(x) fn(x)</code></p>
+<p><strong>Promise Class (<code>R/promise.R</code>):</strong> - R6 class-based implementation with states: “pending”, “fulfilled”, “rejected” - Private methods <code>doResolve</code>/<code>doReject</code> handle state transitions - Public API through <code><a href="reference/resolve.html">resolve()</a></code>, <code><a href="reference/resolve.html">reject()</a></code>, and <code><a href="reference/then.html">then()</a></code> methods - Chaining cycle detection to prevent infinite loops - Uses <code><a href="https://later.r-lib.org/reference/later.html" class="external-link">later::later()</a></code> to schedule callbacks for fulfillment/rejection - <code>normalizeOnFulfilled()</code>/<code>normalizeOnRejected()</code> - Normalize callbacks to handle 0, 1, or 2 arguments - <code>onFulfilled</code> can take <code>(value, .visible)</code> for visibility detection - Callbacks with 0 args are wrapped to ignore arguments - Used by both <code><a href="reference/then.html">then()</a></code> and <code><a href="reference/hybrid_then.html">hybrid_then()</a></code> for consistent callback handling</p>
+<p><strong>Promise Domains (<code>R/domains.R</code>):</strong> - Context management system for promise execution - Custom error handling and domain-specific behavior - Functions: <code><a href="reference/with_promise_domain.html">new_promise_domain()</a></code>, <code><a href="reference/with_promise_domain.html">with_promise_domain()</a></code> - Domain composition allows layering of contexts - Critical for maintaining execution context across async boundaries (e.g., graphics devices, reactive contexts)</p>
+<p><strong>Core Operations (<code>R/then.R</code>):</strong> - <code><a href="reference/then.html">then()</a></code> - Primary interface for promise chaining and result handling - Supports both fulfillment (<code>onFulfilled</code>) and rejection (<code>onRejected</code>) callbacks - Callbacks support <code><a href="https://rlang.r-lib.org/reference/as_function.html" class="external-link">rlang::as_function()</a></code> conversions (formulas, strings, integers, lists for extraction) - Formula syntax <code>~ fn(.)</code> is deprecated in favor of function shorthand <code>\(x) fn(x)</code> - Returns new promise that chains from the input promise - <code><a href="reference/then.html">catch()</a></code> and <code><a href="reference/then.html">finally()</a></code> - Convenience functions (equivalent to <code><a href="reference/then.html">then()</a></code> with specific callbacks) - <code>tee</code> parameter - Execute callbacks for side-effects while preserving original values - With <code>tee=TRUE</code>, callback result is discarded and original value/error is propagated - Useful for logging, debugging, or other side-effect operations - <code><a href="reference/hybrid_then.html">hybrid_then()</a></code> - Hybrid synchronous/asynchronous execution - If <code>expr</code> evaluates to a promise, delegates to <code><a href="reference/then.html">then()</a></code> for async handling - If <code>expr</code> evaluates to a value, executes <code>on_success</code>/<code>on_failure</code> callbacks synchronously (same tick) - Useful for functions that need to work with both sync and async inputs (e.g., plumber2)</p>
 <p><strong>Combining Operations (<code>R/methods.R</code>):</strong> - <code><a href="reference/promise_all.html">promise_all()</a></code> - Wait for all promises to complete - <code><a href="reference/promise_all.html">promise_race()</a></code> - Wait for first promise to complete - <code><a href="reference/promise_map.html">promise_map()</a></code> - Apply function over list of promises - <code><a href="reference/promise_reduce.html">promise_reduce()</a></code> - Reduce promises sequentially</p>
-<p><strong>Future Integration (<code>R/future_promise.R</code>):</strong> - Bridges promises with the <code>future</code> package for parallel computing - <code><a href="reference/future_promise.html">future_promise()</a></code> - Convert future objects to promises - Work queue system for managing concurrent operations - Requires <code>future &gt;= 1.21.0</code> and <code>fastmap &gt;= 1.1.0</code></p>
+<p><strong>Future Integration (<code>R/future_promise.R</code>):</strong> - Bridges promises with the <code>future</code> package for parallel computing - <code><a href="reference/future_promise.html">future_promise()</a></code> - Convert future objects to promises - Work queue system (<code>WorkQueue</code> R6 class) for managing concurrent operations - Exponential backoff (<code>ExpoDelay</code>) when workers unavailable - Polling mechanism to check <code><a href="https://future.futureverse.org/reference/resolved.html" class="external-link">future::resolved()</a></code> status - Requires <code>future &gt;= 1.21.0</code> and <code>fastmap &gt;= 1.1.0</code></p>
+<p><strong>OpenTelemetry Integration (<code>R/otel.R</code>):</strong> - Experimental integration with <code>otel</code> package for distributed tracing - <code><a href="reference/otel.html">with_ospan_async()</a></code> - Create/manage spans for async operations - <code><a href="reference/otel.html">with_ospan_promise_domain()</a></code> - Handoff promise domain for span context propagation - Critical for observability in complex async workflows - Uses cached tracer via <code>get_tracer()</code> for performance</p>
+</div>
+<div class="section level3">
+<h3 id="integration-points">Integration Points<a class="anchor" aria-label="anchor" href="#integration-points"></a></h3>
+<p><strong>Future Package:</strong> - <code>as.promise.Future()</code> method converts Future objects to promises (R/promise.R:487-543) - Caches converted promise as attribute to avoid duplicate polling - Uses polling loop with 0.1s intervals to check <code><a href="https://future.futureverse.org/reference/resolved.html" class="external-link">future::resolved()</a></code> - <code><a href="reference/future_promise.html">future_promise()</a></code> creates lazy futures and schedules work via WorkQueue</p>
+<p><strong>Mirai Package:</strong> - Promises implements <code>is.promising.Future</code> for Future objects - Mirai package provides its own <code>as.promise.mirai()</code> method - No polling needed - mirai has background process that interrupts main session</p>
 </div>
 <div class="section level3">
 <h3 id="package-structure">Package Structure<a class="anchor" aria-label="anchor" href="#package-structure"></a></h3>
-<p>Standard R package layout: - <code>R/</code> - Core R source code (7 main files) - <code>src/</code> - C++ code using Rcpp for performance-critical operations - <code>tests/testthat/</code> - Unit tests following testthat 3.0 conventions - <code>vignettes/</code> - Comprehensive documentation with 8 vignettes covering motivation, usage patterns, and case studies - <code>inst/</code> - Contains C++ template code (<code>promise_task.cpp</code>) for background tasks</p>
+<p>Standard R package layout: - <code>R/</code> - Core R source code (11 main files) - <code>tests/testthat/</code> - Unit tests following testthat 3.0 conventions - <code>vignettes/</code> - Comprehensive documentation with 9 vignettes covering motivation, usage patterns, and case studies - <code>inst/</code> - Contains C++ template code (<code>promise_task.cpp</code>) for background tasks using <code>later::BackgroundTask</code></p>
 </div>
 <div class="section level3">
 <h3 id="dependencies">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies"></a></h3>
 <ul><li>
-<strong>Core:</strong> <code>fastmap</code>, <code>later</code>, <code>R6</code>, <code>rlang</code>, <code>magrittr</code>
+<strong>Core:</strong> <code>fastmap</code>, <code>later</code>, <code>R6</code>, <code>rlang</code>, <code>magrittr</code>, <code>lifecycle</code>, <code>otel</code>
 </li>
 <li>
 <strong>Integration:</strong> <code>future</code> (optional), <code>mirai</code> (optional)</li>
@@ -114,7 +125,11 @@
 <li>
 <strong>Callback Chaining:</strong> JavaScript-style <code>.then()</code> method chaining</li>
 <li>
-<strong>Domain System:</strong> Context isolation and custom error handling</li>
+<strong>Domain System:</strong> Context isolation and custom error handling via promise domains</li>
+<li>
+<strong>Lazy Evaluation:</strong> <code><a href="https://rdrr.io/r/base/withVisible.html" class="external-link">withVisible()</a></code> to preserve visibility of promise results</li>
+<li>
+<strong>Work Queue Pattern:</strong> FIFO queue with exponential backoff for resource-constrained async operations</li>
 </ul><p>The package follows R package development best practices with comprehensive documentation, extensive testing, and CI/CD automation.</p>
 </div>
 </div>
