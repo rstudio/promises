@@ -17,7 +17,7 @@ which case the second parameter would be a promise)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@ which case the second parameter would be a promise)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Promise-aware version of Reduce</h1>
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/rc-v1.4.0/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
       <div class="d-none name"><code>promise_reduce.Rd</code></div>
     </div>
 
@@ -109,11 +109,14 @@ results in an error or a rejected promise, then the overall
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Returns a promise for the sum of e1 + e2, with a 0.5 sec delay</span></span></span>
 <span class="r-in"><span><span class="va">slowly_add</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">e1</span>, <span class="va">e2</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="promise.html">promise</a></span><span class="op">(</span><span class="op">~</span><span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/later/reference/later.html" class="external-link">later</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="va">e1</span> <span class="op">+</span> <span class="va">e2</span><span class="op">)</span>, delay <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="promise.html">promise</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">resolve</span>, <span class="va">reject</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://later.r-lib.org/reference/later.html" class="external-link">later</a></span><span class="op">(</span>\<span class="op">(</span><span class="op">)</span> <span class="fu"><a href="resolve.html">resolve</a></span><span class="op">(</span><span class="va">e1</span> <span class="op">+</span> <span class="va">e2</span><span class="op">)</span>, delay <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Prints 55 after a little over 5 seconds</span></span></span>
-<span class="r-in"><span><span class="fu">promise_reduce</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="va">slowly_add</span>, .init <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op"><a href="pipes.html">%...&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">promise_reduce</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="va">slowly_add</span>, .init <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="then.html">then</a></span><span class="op">(</span><span class="va">print</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -124,7 +127,7 @@ results in an error or a rejected promise, then the overall
    </div>
   <footer><div class="container">
   <div class="pkgdown-footer-left">
-  <p>Developed by Joe Cheng, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
+  <p>Developed by Joe Cheng, <a href="http://schloerke.com" class="external-link">Barret Schloerke</a>, <a href="https://github.com/wch" class="external-link">Winston Chang</a>, Charlie Gao, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

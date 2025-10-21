@@ -9,7 +9,7 @@ Future promise work queue"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@ Future promise work queue"></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Future promise work queue</h1>
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/R/future_promise.R" class="external-link"><code>R/future_promise.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/rc-v1.4.0/R/future_promise.R" class="external-link"><code>R/future_promise.R</code></a></small>
       <div class="d-none name"><code>WorkQueue.Rd</code></div>
     </div>
 
@@ -60,8 +60,7 @@ Future promise work queue"></head><body>
 
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>#' <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
-<p>An <span class="pkg">R6</span> class to help with scheduling work to be completed. <code>WorkQueue</code> will only execute work if the <code>can_proceed()</code> returns <code>TRUE</code>. For the use case of <code>future</code>, <code>can_proceed()</code> defaults to <code>future::nbrOfFreeWorkers() &gt; 0</code> which will not allow for work to be executed if a <span class="pkg">future</span> worker is not available.</p>
+    <p>An <span class="pkg">R6</span> class to help with scheduling work to be completed. <code>WorkQueue</code> will only execute work if the <code>can_proceed()</code> returns <code>TRUE</code>. For the use case of <code>future</code>, <code>can_proceed()</code> defaults to <code>future::nbrOfFreeWorkers() &gt; 0</code> which will not allow for work to be executed if a <span class="pkg">future</span> worker is not available.</p>
 <p><code>WorkQueue</code> will constantly try to start new work once prior work item finishes.  However, if <code>can_proceed()</code> returns <code>FALSE</code> (no future workers are available) and there is more work to be done, then work is attempted later a random amount of time later using exponential backoff.  The exponential backoff will cap out at 10 seconds to prevent unnecessarily large wait times.</p>
 <p>Each time <code>WorkQueue</code> tries to start more work, it will repeat until <code>can_proceed()</code> returns <code>FALSE</code> or there is no more work in the <code>queue</code>.</p>
     </div>
@@ -95,7 +94,7 @@ This behavior might change in the future, but we are not exactly sure how at thi
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/WorkQueue.html">WorkQueue</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  can_proceed <span class="op">=</span> <span class="va">future_worker_is_free</span>,</span>
 <span>  queue <span class="op">=</span> <span class="fu">fastmap</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/fastmap/reference/fastqueue.html" class="external-link">fastqueue</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  loop <span class="op">=</span> <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://r-lib.github.io/later/reference/create_loop.html" class="external-link">global_loop</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  loop <span class="op">=</span> <span class="fu">later</span><span class="fu">::</span><span class="fu"><a href="https://later.r-lib.org/reference/create_loop.html" class="external-link">global_loop</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -110,7 +109,7 @@ This behavior might change in the future, but we are not exactly sure how at thi
 
 
 <dt><code>loop</code></dt>
-<dd><p><span class="pkg">later</span> loop to use for calculating the next delayed check. Defaults to <code><a href="https://r-lib.github.io/later/reference/create_loop.html" class="external-link">later::global_loop()</a></code>.
+<dd><p><span class="pkg">later</span> loop to use for calculating the next delayed check. Defaults to <code><a href="https://later.r-lib.org/reference/create_loop.html" class="external-link">later::global_loop()</a></code>.
 Schedule work</p></dd>
 
 
@@ -161,7 +160,7 @@ Schedule work</p></dd>
    </div>
   <footer><div class="container">
   <div class="pkgdown-footer-left">
-  <p>Developed by Joe Cheng, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
+  <p>Developed by Joe Cheng, <a href="http://schloerke.com" class="external-link">Barret Schloerke</a>, <a href="https://github.com/wch" class="external-link">Winston Chang</a>, Charlie Gao, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

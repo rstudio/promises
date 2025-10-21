@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
       <h1>Advanced future and promises usage</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/vignettes/promises_05b_future_promise.Rmd" class="external-link"><code>vignettes/promises_05b_future_promise.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/rc-v1.4.0/vignettes/promises_05b_future_promise.Rmd" class="external-link"><code>vignettes/promises_05b_future_promise.Rmd</code></a></small>
       <div class="d-none name"><code>promises_05b_future_promise.Rmd</code></div>
     </div>
 
@@ -105,7 +105,7 @@ two <code>future</code> workers available. Also, let’s assume the
 <code>slow_calc()</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#* @get /slow/&lt;k&gt;</span></span>
-<span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>\<span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="fu">slow_calc</span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
@@ -115,7 +115,7 @@ request does not use any form of <code>future</code> or
 <code>promises</code> and takes almost no time to compute.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#* @get /fast/&lt;k&gt;</span></span>
-<span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>\<span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">fast_calc</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>The figure below depicts the overall timeline of execution of these 7
@@ -152,7 +152,7 @@ jobs exceeds the number of workers).</p>
 <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code> with <code><a href="../reference/future_promise.html">future_promise()</a></code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#* @get /slow/&lt;k&gt;</span></span>
-<span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>\<span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">promises</span><span class="fu">::</span><span class="fu"><a href="../reference/future_promise.html">future_promise</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="fu">slow_calc</span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
@@ -187,7 +187,7 @@ with Shiny</a></p>
    </div>
   <footer><div class="container">
   <div class="pkgdown-footer-left">
-  <p>Developed by Joe Cheng, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
+  <p>Developed by Joe Cheng, <a href="http://schloerke.com" class="external-link">Barret Schloerke</a>, <a href="https://github.com/wch" class="external-link">Winston Chang</a>, Charlie Gao, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

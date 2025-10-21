@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://rstudio.github.io/promises/404.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/CLAUDE.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/CODE_OF_CONDUCT.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/LICENSE-text.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/LICENSE.html</loc></url>
@@ -14,12 +15,15 @@
 <url><loc>https://rstudio.github.io/promises/articles/promises_07_combining.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/articles/promises_08_casestudy.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/authors.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/copilot-instructions.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/index.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/news/index.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/reference/WorkQueue.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/reference/future_promise.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/reference/hybrid_then.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/reference/index.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/reference/is.promise.html</loc></url>
+<url><loc>https://rstudio.github.io/promises/reference/otel.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/reference/pipes.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/reference/promise.html</loc></url>
 <url><loc>https://rstudio.github.io/promises/reference/promise_all.html</loc></url>

@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
       <h1>Launching tasks with mirai</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/vignettes/promises_04_mirai.Rmd" class="external-link"><code>vignettes/promises_04_mirai.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/rc-v1.4.0/vignettes/promises_04_mirai.Rmd" class="external-link"><code>vignettes/promises_04_mirai.Rmd</code></a></small>
       <div class="d-none name"><code>promises_04_mirai.Rmd</code></div>
     </div>
 
@@ -99,7 +99,7 @@ can boost performance by making even shorter tasks async.</li>
 <li>More linear scaling, meaning you get the same relative benefits
 whether running 2 or 200 cores.</li>
 <li>Event-driven promises using <code>mirai</code> vs. promises using
-<code>future</code> which time-poll every 100 ms. Lower latency and
+<code>future</code>, which time-poll every 100 ms. Lower latency and
 response times can help with the user experience.</li>
 </ol>
 <p>The previous guide using <code>future</code> is available <a href="promises_05a_futures.html">here</a>. Using <code>future</code>
@@ -200,7 +200,7 @@ executed.</p>
 and not in a package.</p>
 <p>For example:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">download_data</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="va">download_data</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">file</span>, <span class="st">"libcurl"</span><span class="op">)</span></span>
 <span>  <span class="va">file</span></span>
@@ -248,8 +248,9 @@ loaded by default.</p>
 <p>Alternatively, make a call to load the package inside your mirai code
 chunk, for example by adding <code><a href="https://dplyr.tidyverse.org" class="external-link">library(dplyr)</a></code>. Sometimes this
 may be the most convenient option, especially for for infix operators.
-For example the magrittr pipe <code>%&gt;%</code>, requires a
-<code><a href="https://magrittr.tidyverse.org" class="external-link">library(magrittr)</a></code> to load the package beforehand.</p>
+For example the <a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a> pipe <code>%&gt;%</code>,
+requires a <code><a href="https://magrittr.tidyverse.org" class="external-link">library(magrittr)</a></code> to load the package
+beforehand.</p>
 </div>
 <div class="section level3">
 <h3 id="custom-data-types">Custom Data Types<a class="anchor" aria-label="anchor" href="#custom-data-types"></a>
@@ -324,7 +325,7 @@ with Shiny</a></p>
    </div>
   <footer><div class="container">
   <div class="pkgdown-footer-left">
-  <p>Developed by Joe Cheng, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
+  <p>Developed by Joe Cheng, <a href="http://schloerke.com" class="external-link">Barret Schloerke</a>, <a href="https://github.com/wch" class="external-link">Winston Chang</a>, Charlie Gao, <a href="https://www.posit.co" class="external-link"><img src="https://www.tidyverse.org/posit-logo.svg" alt="Posit" height="16" width="62" style="margin-bottom: 3px;"></a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
