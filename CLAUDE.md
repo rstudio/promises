@@ -7,8 +7,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Testing
 - `devtools::check()` - Run full R CMD check (standard R package check)
 - `devtools::test()` - Run unit tests using testthat
+- `devtools::test(filter = "then")` - Run tests matching pattern (e.g., all tests in test-then.R)
 - `testthat::test_file("tests/testthat/test-*.R")` - Run a single test file
 - `spelling::spell_check_test(vignettes = TRUE, error = TRUE, skip_on_cran = TRUE)` - Check spelling
+
+**Test Helpers** (`tests/testthat/helper.R`):
+- `wait_for_it(p)` - Block until all pending later tasks execute; optionally wait for promise `p` to resolve/reject
+- `extract(promise)` - Block until promise resolves and return value (or throw error if rejected)
+- `ext_promise()` - Create externally-controllable promise for testing (returns list with `promise`, `resolve`, `reject`, `status`)
+- `expect_assertions(n)` - Declare expected number of assertions in a test (useful with async tests)
 
 ### Package Development
 - `devtools::load_all()` - Load package for development
@@ -34,6 +41,10 @@ The promises package implements JavaScript-style promises in R for asynchronous 
 - Public API through `resolve()`, `reject()`, and `then()` methods
 - Chaining cycle detection to prevent infinite loops
 - Uses `later::later()` to schedule callbacks for fulfillment/rejection
+- `normalizeOnFulfilled()`/`normalizeOnRejected()` - Normalize callbacks to handle 0, 1, or 2 arguments
+  - `onFulfilled` can take `(value, .visible)` for visibility detection
+  - Callbacks with 0 args are wrapped to ignore arguments
+  - Used by both `then()` and `hybrid_then()` for consistent callback handling
 
 **Promise Domains (`R/domains.R`):**
 - Context management system for promise execution
@@ -44,10 +55,18 @@ The promises package implements JavaScript-style promises in R for asynchronous 
 
 **Core Operations (`R/then.R`):**
 - `then()` - Primary interface for promise chaining and result handling
-- Supports both fulfillment (`onFulfilled`) and rejection (`onRejected`) callbacks
-- Formula syntax is deprecated in favor of function shorthand `\(x) fn(x)`
-- `catch()` and `finally()` convenience functions
-- `tee` parameter for side-effect operations that preserve original values
+  - Supports both fulfillment (`onFulfilled`) and rejection (`onRejected`) callbacks
+  - Callbacks support `rlang::as_function()` conversions (formulas, strings, integers, lists for extraction)
+  - Formula syntax `~ fn(.)` is deprecated in favor of function shorthand `\(x) fn(x)`
+  - Returns new promise that chains from the input promise
+- `catch()` and `finally()` - Convenience functions (equivalent to `then()` with specific callbacks)
+- `tee` parameter - Execute callbacks for side-effects while preserving original values
+  - With `tee=TRUE`, callback result is discarded and original value/error is propagated
+  - Useful for logging, debugging, or other side-effect operations
+- `hybrid_then()` - Hybrid synchronous/asynchronous execution
+  - If `expr` evaluates to a promise, delegates to `then()` for async handling
+  - If `expr` evaluates to a value, executes `on_success`/`on_failure` callbacks synchronously (same tick)
+  - Useful for functions that need to work with both sync and async inputs (e.g., plumber2)
 
 **Combining Operations (`R/methods.R`):**
 - `promise_all()` - Wait for all promises to complete
@@ -86,7 +105,6 @@ The promises package implements JavaScript-style promises in R for asynchronous 
 ### Package Structure
 Standard R package layout:
 - `R/` - Core R source code (11 main files)
-- `src/` - C++ code using Rcpp for performance-critical operations (currently unused in core)
 - `tests/testthat/` - Unit tests following testthat 3.0 conventions
 - `vignettes/` - Comprehensive documentation with 9 vignettes covering motivation, usage patterns, and case studies
 - `inst/` - Contains C++ template code (`promise_task.cpp`) for background tasks using `later::BackgroundTask`
