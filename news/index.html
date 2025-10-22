@@ -46,11 +46,11 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/rstudio/promises/blob/rc-v1.4.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/rstudio/promises/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.4.0" id="promises-140">promises 1.4.0<a class="anchor" aria-label="anchor" href="#promises-140"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.4.0" id="promises-140">promises 1.4.0<a class="anchor" aria-label="anchor" href="#promises-140"></a></h2><p class="text-muted">CRAN release: 2025-10-22</p>
 <div class="section level3">
 <h3 id="breaking-changes-1-4-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-4-0"></a></h3>
 <ul><li>Nested promise domains now correctly invoke in reverse order. Previously, when promise domains were nested, the outer domain would incorrectly take precedence over the inner domain in <code>wrapOnFulfilled</code>/<code>wrapOnRejected</code> callbacks. The innermost (most recently added) domain now properly wraps the callback first, ensuring that nested promise domains behave consistently with the expected scoping behavior. (<a href="https://github.com/rstudio/promises/issues/165" class="external-link">#165</a>)</li>
