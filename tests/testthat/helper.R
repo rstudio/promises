@@ -27,12 +27,11 @@ wait_for_it <- function(p = NULL, timeout = if (on_ci) 60 else 30) {
     p |> catch(\(reason) err <<- reason)
   }
 
-  while (!loop_empty()) {
+  while (!later::loop_empty()) {
     if (difftime(Sys.time(), start, units = "secs") > timeout) {
       stop("Waited too long")
     }
-    run_now()
-    Sys.sleep(0.01)
+    later::run_now(0.1)
   }
 
   if (!is.null(err)) {
