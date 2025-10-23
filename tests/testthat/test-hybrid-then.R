@@ -12,15 +12,16 @@ test_that("hybrid_then() handles synchronous values without callbacks", {
 })
 
 test_that("hybrid_then() handles synchronous errors with on_failure", {
-  expect_assertions(2)
-  result <- hybrid_then(
-    stop("sync error"),
-    on_failure = \(err) {
-      expect_match(err$message, "sync error")
-      "recovered"
-    }
-  )
-  expect_equal(result, "recovered")
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      stop("sync error"),
+      on_failure = \(err) {
+        expect_match(err$message, "sync error")
+        "recovered"
+      }
+    )
+    expect_equal(result, "recovered")
+  })
 })
 
 test_that("hybrid_then() re-throws synchronous errors without on_failure", {
@@ -31,48 +32,48 @@ test_that("hybrid_then() re-throws synchronous errors without on_failure", {
 })
 
 test_that("hybrid_then() handles asynchronous values with on_success", {
-  expect_assertions(2)
-
-  result <- hybrid_then(
-    promise_resolve(42),
-    on_success = \(x) x + 8
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(50)
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      promise_resolve(42),
+      on_success = \(x) x + 8
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(50)
+  })
 })
 
 test_that("hybrid_then() handles asynchronous values without callbacks", {
-  expect_assertions(2)
-
-  result <- hybrid_then(promise_resolve(42))
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(42)
+  expect_assertions(n = 2, {
+    result <- hybrid_then(promise_resolve(42))
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(42)
+  })
 })
 
 test_that("hybrid_then() handles asynchronous errors with on_failure", {
-  expect_assertions(3)
-
-  result <- hybrid_then(
-    promise_resolve(stop("async error")),
-    on_failure = \(err) {
-      expect_match(err$message, "async error")
-      "recovered"
-    }
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal("recovered")
+  expect_assertions(n = 3, {
+    result <- hybrid_then(
+      promise_resolve(stop("async error")),
+      on_failure = \(err) {
+        expect_match(err$message, "async error")
+        "recovered"
+      }
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal("recovered")
+  })
 })
 
 test_that("hybrid_then() propagates asynchronous errors without on_failure", {
-  expect_assertions(2)
-
-  result <- hybrid_then(promise_resolve(stop("async error")))
-  expect_true(is.promise(result))
-  result |>
-    catch(\(err) {
-      expect_match(err$message, "async error")
-    }) |>
-    wait_for_it()
+  expect_assertions(n = 2, {
+    result <- hybrid_then(promise_resolve(stop("async error")))
+    expect_true(is.promise(result))
+    result |>
+      catch(\(err) {
+        expect_match(err$message, "async error")
+      }) |>
+      wait_for_it()
+  })
 })
 
 test_that("hybrid_then() with tee=TRUE preserves synchronous values", {
@@ -107,41 +108,41 @@ test_that("hybrid_then() with tee=TRUE preserves synchronous errors", {
 
 
 test_that("hybrid_then() with tee=TRUE preserves asynchronous values", {
-  expect_assertions(3)
-
-  counter <- 0
-  result <- hybrid_then(
-    promise_resolve(42),
-    on_success = \(x) {
-      counter <<- counter + 1
-      99
-    },
-    tee = TRUE
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(42)
-  expect_equal(counter, 1)
+  expect_assertions(n = 3, {
+    counter <- 0
+    result <- hybrid_then(
+      promise_resolve(42),
+      on_success = \(x) {
+        counter <<- counter + 1
+        99
+      },
+      tee = TRUE
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(42)
+    expect_equal(counter, 1)
+  })
 })
 
 test_that("hybrid_then() with tee=TRUE preserves asynchronous errors", {
-  expect_assertions(3)
-
-  counter <- 0
-  result <- hybrid_then(
-    promise_resolve(stop("async error")),
-    on_failure = \(err) {
-      counter <<- counter + 1
-      "recovered"
-    },
-    tee = TRUE
-  )
-  expect_true(is.promise(result))
-  result |>
-    catch(\(err) {
-      expect_match(err$message, "async error")
-    }) |>
-    wait_for_it()
-  expect_equal(counter, 1)
+  expect_assertions(n = 3, {
+    counter <- 0
+    result <- hybrid_then(
+      promise_resolve(stop("async error")),
+      on_failure = \(err) {
+        counter <<- counter + 1
+        "recovered"
+      },
+      tee = TRUE
+    )
+    expect_true(is.promise(result))
+    result |>
+      catch(\(err) {
+        expect_match(err$message, "async error")
+      }) |>
+      wait_for_it()
+    expect_equal(counter, 1)
+  })
 })
 
 test_that("hybrid_then() handles both callbacks with synchronous success", {
@@ -307,18 +308,18 @@ test_that("hybrid_then() on_success callback can throw errors synchronously", {
 })
 
 test_that("hybrid_then() on_success callback can throw errors asynchronously", {
-  expect_assertions(2)
-
-  result <- hybrid_then(
-    promise_resolve(42),
-    on_success = \(x) stop("callback error")
-  )
-  expect_true(is.promise(result))
-  result |>
-    catch(\(err) {
-      expect_match(err$message, "callback error")
-    }) |>
-    wait_for_it()
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      promise_resolve(42),
+      on_success = \(x) stop("callback error")
+    )
+    expect_true(is.promise(result))
+    result |>
+      catch(\(err) {
+        expect_match(err$message, "callback error")
+      }) |>
+      wait_for_it()
+  })
 })
 
 test_that("hybrid_then() on_failure callback can throw errors synchronously", {
@@ -332,18 +333,18 @@ test_that("hybrid_then() on_failure callback can throw errors synchronously", {
 })
 
 test_that("hybrid_then() on_failure callback can throw errors asynchronously", {
-  expect_assertions(2)
-
-  result <- hybrid_then(
-    promise_resolve(stop("original error")),
-    on_failure = \(err) stop("callback error")
-  )
-  expect_true(is.promise(result))
-  result |>
-    catch(\(err) {
-      expect_match(err$message, "callback error")
-    }) |>
-    wait_for_it()
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      promise_resolve(stop("original error")),
+      on_failure = \(err) stop("callback error")
+    )
+    expect_true(is.promise(result))
+    result |>
+      catch(\(err) {
+        expect_match(err$message, "callback error")
+      }) |>
+      wait_for_it()
+  })
 })
 
 test_that("hybrid_then() with tee=TRUE and on_success that throws (sync)", {
@@ -363,24 +364,24 @@ test_that("hybrid_then() with tee=TRUE and on_success that throws (sync)", {
 })
 
 test_that("hybrid_then() with tee=TRUE and on_success that throws (async)", {
-  expect_assertions(3)
-
-  counter <- 0
-  result <- hybrid_then(
-    promise_resolve(42),
-    on_success = \(x) {
-      counter <<- counter + 1
-      stop("callback error")
-    },
-    tee = TRUE
-  )
-  expect_true(is.promise(result))
-  result |>
-    catch(\(err) {
-      expect_match(err$message, "callback error")
-    }) |>
-    wait_for_it()
-  expect_equal(counter, 1)
+  expect_assertions(n = 3, {
+    counter <- 0
+    result <- hybrid_then(
+      promise_resolve(42),
+      on_success = \(x) {
+        counter <<- counter + 1
+        stop("callback error")
+      },
+      tee = TRUE
+    )
+    expect_true(is.promise(result))
+    result |>
+      catch(\(err) {
+        expect_match(err$message, "callback error")
+      }) |>
+      wait_for_it()
+    expect_equal(counter, 1)
+  })
 })
 
 test_that("hybrid_then() can chain multiple hybrid_then calls synchronously", {
@@ -392,25 +393,25 @@ test_that("hybrid_then() can chain multiple hybrid_then calls synchronously", {
 })
 
 test_that("hybrid_then() can chain multiple hybrid_then calls asynchronously", {
-  expect_assertions(2)
-
-  result <- promise_resolve(1) |>
-    hybrid_then(on_success = \(x) x + 1) |>
-    hybrid_then(on_success = \(x) x * 2) |>
-    hybrid_then(on_success = \(x) x - 1)
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(3)
+  expect_assertions(n = 2, {
+    result <- promise_resolve(1) |>
+      hybrid_then(on_success = \(x) x + 1) |>
+      hybrid_then(on_success = \(x) x * 2) |>
+      hybrid_then(on_success = \(x) x - 1)
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(3)
+  })
 })
 
 test_that("hybrid_then() can chain with mix of sync and async results", {
-  expect_assertions(2)
-
-  result <- 1 |>
-    hybrid_then(on_success = \(x) promise_resolve(x + 1)) |>
-    hybrid_then(on_success = \(x) x * 2) |>
-    hybrid_then(on_success = \(x) promise_resolve(x - 1))
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(3)
+  expect_assertions(n = 2, {
+    result <- 1 |>
+      hybrid_then(on_success = \(x) promise_resolve(x + 1)) |>
+      hybrid_then(on_success = \(x) x * 2) |>
+      hybrid_then(on_success = \(x) promise_resolve(x - 1))
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(3)
+  })
 })
 
 test_that("hybrid_then() handles invisible values synchronously", {
@@ -438,25 +439,25 @@ test_that("hybrid_then() handles NULL return from on_failure callback", {
 })
 
 test_that("hybrid_then() handles on_success returning a promise (sync to async)", {
-  expect_assertions(2)
-
-  result <- hybrid_then(
-    42,
-    on_success = \(x) promise_resolve(x * 2)
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(84)
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      42,
+      on_success = \(x) promise_resolve(x * 2)
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(84)
+  })
 })
 
 test_that("hybrid_then() handles on_failure returning a promise (sync to async)", {
-  expect_assertions(2)
-
-  result <- hybrid_then(
-    stop("error"),
-    on_failure = \(err) promise_resolve("recovered via promise")
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal("recovered via promise")
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      stop("error"),
+      on_failure = \(err) promise_resolve("recovered via promise")
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal("recovered via promise")
+  })
 })
 
 test_that("hybrid_then() with only on_failure and synchronous success", {
@@ -468,32 +469,32 @@ test_that("hybrid_then() with only on_failure and synchronous success", {
 })
 
 test_that("hybrid_then() with only on_failure and asynchronous success", {
-  expect_assertions(2)
-
-  result <- hybrid_then(
-    promise_resolve(42),
-    on_failure = \(err) "should not be called"
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(42)
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      promise_resolve(42),
+      on_failure = \(err) "should not be called"
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(42)
+  })
 })
 
 test_that("hybrid_then() preserves error class information", {
-  expect_assertions(2)
+  expect_assertions(n = 2, {
+    custom_error <- structure(
+      list(message = "custom error"),
+      class = c("custom_error", "error", "condition")
+    )
 
-  custom_error <- structure(
-    list(message = "custom error"),
-    class = c("custom_error", "error", "condition")
-  )
-
-  result <- hybrid_then(
-    stop(custom_error),
-    on_failure = \(err) {
-      expect_s3_class(err, "custom_error")
-      "recovered"
-    }
-  )
-  expect_equal(result, "recovered")
+    result <- hybrid_then(
+      stop(custom_error),
+      on_failure = \(err) {
+        expect_s3_class(err, "custom_error")
+        "recovered"
+      }
+    )
+    expect_equal(result, "recovered")
+  })
 })
 
 test_that("hybrid_then() works with complex expressions", {

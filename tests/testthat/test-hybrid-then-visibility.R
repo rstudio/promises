@@ -135,43 +135,43 @@ test_that("hybrid_then() on_success with .visible conditionally returning", {
 })
 
 test_that("hybrid_then() async with visible promise and on_success returning visible", {
-  expect_assertions(2)
-
-  result <- hybrid_then(
-    promise_resolve(42),
-    on_success = \(x) x + 8
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(50)
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      promise_resolve(42),
+      on_success = \(x) x + 8
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(50)
+  })
 })
 
 test_that("hybrid_then() async with visible promise and on_success returning invisible", {
-  expect_assertions(2)
-
-  result <- hybrid_then(
-    promise_resolve(42),
-    on_success = \(x) invisible(x + 8)
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(50)
+  expect_assertions(n = 2, {
+    result <- hybrid_then(
+      promise_resolve(42),
+      on_success = \(x) invisible(x + 8)
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(50)
+  })
 })
 
 test_that("hybrid_then() async visibility is handled by underlying then()", {
-  expect_assertions(3)
-
-  # The visibility semantics for async are handled by then()
-  # Just verify the values work correctly
-  visible_captured <- NULL
-  result <- hybrid_then(
-    promise_resolve(42),
-    on_success = \(x, .visible) {
-      visible_captured <<- .visible
-      x * 2
-    }
-  )
-  expect_true(is.promise(result))
-  result |> extract() |> expect_equal(84)
-  expect_true(visible_captured)
+  expect_assertions(n = 3, {
+    # The visibility semantics for async are handled by then()
+    # Just verify the values work correctly
+    visible_captured <- NULL
+    result <- hybrid_then(
+      promise_resolve(42),
+      on_success = \(x, .visible) {
+        visible_captured <<- .visible
+        x * 2
+      }
+    )
+    expect_true(is.promise(result))
+    result |> extract() |> expect_equal(84)
+    expect_true(visible_captured)
+  })
 })
 
 test_that("hybrid_then() with tee=TRUE and visible expr", {

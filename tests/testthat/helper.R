@@ -143,64 +143,23 @@ create_counting_domain <- function(trackFinally = FALSE) {
   pd
 }
 
+expect_assertions <- function(expr, n) {
+  assertion_count <- 0
 
-expect_assertions <- function(n, ..., envir = parent.frame()) {
-  force(n)
-  rlang::check_dots_empty0(...)
-
-  if (isTRUE(envir$`_has_expect_assertion`)) {
-    stop("expect_assertions() has already been called for this test block")
-  }
-
-  cur_reporter <- NULL
-
-  get_cur_reporter <- function(reporter) {
-    if (!is.null(cur_reporter)) {
-      return()
-    }
-
-    if (
-      inherits(reporter, "CheckReporter") ||
-        inherits(reporter, "ProgressReporter")
-    ) {
-      cur_reporter <<- reporter
-    } else if (inherits(reporter, "MultiReporter")) {
-      lapply(reporter$reporters, get_cur_reporter)
-    }
-  }
-  get_cur_reporter(testthat::get_reporter())
-
-  if (is.null(cur_reporter)) {
-    warning("Proper reporter could not be found for assertion check. Skipping")
-    return()
-  }
-
-  get_count <- function() {
-    if (inherits(cur_reporter, "CheckReporter")) {
-      cur_reporter$n_ok + cur_reporter$problems$size()
-    } else if (inherits(cur_reporter, "ProgressReporter")) {
-      cur_reporter$n_ok + cur_reporter$n_fail
-    } else {
-      stop("Missing implementation for reporter")
-    }
-  }
-
-  init_count <- get_count()
-  envir$`_has_expect_assertion` <- TRUE
-
-  # When `envir` exits...
-  defer(
+  withCallingHandlers(
     {
-      envir$`_has_expect_assertion` <- NULL
-      assertion_count <- get_count() - init_count
-      testthat::expect_equal(
-        assertion_count,
-        n,
-        label = "Expected assertion count"
-      )
+      force(expr)
     },
-    envir = envir
+    expectation = function(e) {
+      if (
+        inherits(e, "expectation_success") || inherits(e, "expectation_failure")
+      ) {
+        assertion_count <<- assertion_count + 1L
+      }
+      # Continue propagating the signal
+      testthat::exp_signal(e)
+    }
   )
 
-  invisible()
+  expect_equal(assertion_count, n, label = "Expected assertion count")
 }
