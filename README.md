@@ -1,4 +1,4 @@
-# promises
+# promises <a href="https://rstudio.github.io/promises/"><img src="man/figures/logo.svg" align="right" height="139" alt="promises website" /></a>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/rstudio/promises/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rstudio/promises/actions/workflows/R-CMD-check.yaml)

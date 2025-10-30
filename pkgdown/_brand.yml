@@ -1,0 +1,28 @@
+meta:
+  name: promises
+  link:
+    home: https://rstudio.github.io/promises
+    github: https://github.com/rstudio/promises
+
+color:
+  palette:
+    dark: "#323330"
+    gold: "#f0db4f"
+    link-blue: "#19475a" # a diff shade of #323330
+  # info: "#e6f2fd"
+
+
+typography:
+  fonts:
+    - family: Nunito
+      source: google
+      weight: [300, 400, 700]
+  base: Nunito
+  link:
+    color: "#19475a"
+
+defaults:
+  bootstrap:
+    defaults:
+      link-color-dark: "#f0db4f"
+      navbar-dark-bg: "#2c2c29"
