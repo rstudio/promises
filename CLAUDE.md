@@ -84,7 +84,7 @@ The promises package implements JavaScript-style promises in R for asynchronous 
 
 **OpenTelemetry Integration (`R/otel.R`):**
 - Experimental integration with `otel` package for distributed tracing
-- `with_hybrid_ospan()` - Create/manage spans for async operations
+- `with_hybrid_otel_span()` - Create/manage spans for async operations
 - `with_ospan_promise_domain()` - Handoff promise domain for span context propagation
 - Critical for observability in complex async workflows
 - Uses cached tracer via `get_tracer()` for performance
