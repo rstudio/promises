@@ -36,7 +36,7 @@ reference:
       - with_promise_domain
   - title: OpenTelemetry
     contents:
-      - with_ospan_async
+      - with_hybrid_ospan
 
 navbar:
   components:
