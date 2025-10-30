@@ -104,7 +104,7 @@ get_tracer <- local({
 #' # t0.0
 #' p2 <- with_ospan_promise_domain({
 #'   # t0.1
-#'   p <- with_ospan_async("async_op", {
+#'   p <- with_hybrid_ospan("async_op", {
 #'     # ... return a promise ...
 #'     init_async_work() |> # t0.2
 #'       then( # t0.3
@@ -130,7 +130,7 @@ get_tracer <- local({
 #'   * `t0.2`: Some async work is initiated
 #'   * `t0.3`: `then()` is called, capturing the active `async_op` ospan (as it
 #'     is called within `with_ospan_promise_domain()`)
-#'   * `t0.4`: The `with_ospan_async()` call exits, but the `async_op` ospan is
+#'   * `t0.4`: The `with_hybrid_ospan()` call exits, but the `async_op` ospan is
 #'     not ended as the promise is still pending. The returned promise has a
 #'     `finally()` step added to it that will end the ospan `async_op` when `p`
 #'     is resolved.
@@ -187,7 +187,7 @@ get_tracer <- local({
 #'      ospan would be ended when the function exits, not when the promise chain
 #'      resolves.
 #' 2. Be sure your ospan is activated before calling `promises::then()`.
-#'    * Activate it using `with_ospan_async(name, expr)` (which also
+#'    * Activate it using `with_hybrid_ospan(name, expr)` (which also
 #'      creates/ends the ospan) or `otel::with_active_span(span, expr)`.
 #' 3. Call `promises::then()`
 #'   * When `promises::then()` is called, the two methods (`onFulfilled` and
@@ -208,7 +208,7 @@ get_tracer <- local({
 #' though the local ospan is created, activated, and eventually ended, the ospan
 #' will not exist during reactivation of the ospan promise domain.
 #'
-#' `with_ospan_async()` is a convenience method that creates, activates, and
+#' `with_hybrid_ospan()` is a convenience method that creates, activates, and
 #' ends the ospan only after the returned promise (if any) resolves. It also
 #' properly handles both synchronous (ending the ospan within `on.exit()`) and
 #' asynchronous operations (ending the ospan within `promises::finally()`).
@@ -257,8 +257,8 @@ get_tracer <- local({
 #' with_ospan_promise_domain({
 #'   # ... deep inside some code execution ...
 #'
-#'   # Many calls to `with_ospan_async()` within `with_ospan_promise_domain()`
-#'   with_ospan_async("my_operation", {
+#'   # Many calls to `with_hybrid_ospan()` within `with_ospan_promise_domain()`
+#'   with_hybrid_ospan("my_operation", {
 #'     # ... do some work ...
 #'   })
 #' })
@@ -269,12 +269,12 @@ get_tracer <- local({
 #'
 #'   # Synchronous operation
 #'   # * Creates `my_operation` span
-#'   result <- with_ospan_async("my_operation", {
+#'   result <- with_hybrid_ospan("my_operation", {
 #'     # ... do some work ...
 #'     print(otel::get_active_span()$name) # "my_operation"
 #'
 #'     # Nest (many) more spans
-#'     prom_nested <- with_ospan_async("my_nested_operation", {
+#'     prom_nested <- with_hybrid_ospan("my_nested_operation", {
 #'       # ... do some more work ...
 #'       promise_resolve(42) |>
 #'         then(\(value) {
@@ -299,7 +299,7 @@ get_tracer <- local({
 #'   })
 #' })
 #' }
-with_ospan_async <- function(
+with_hybrid_ospan <- function(
   name,
   expr,
   ...,
@@ -345,6 +345,31 @@ with_ospan_async <- function(
   result
 }
 
+#' `r lifecycle::badge("deprecated")`: Use `with_hybrid_ospan()` instead
+#'
+#' @keywords internal
+#' @export
+with_ospan_async <- function(
+  name,
+  expr,
+  ...,
+  tracer,
+  attributes = NULL
+) {
+  lifecycle::deprecate_warn(
+    "1.5.0",
+    "with_ospan_async()",
+    "with_hybrid_ospan()"
+  )
+  with_hybrid_ospan(
+    name = name,
+    expr = expr,
+    ...,
+    tracer = tracer,
+    attributes = attributes
+  )
+}
+
 
 #' @describeIn otel `r lifecycle::badge("experimental")`
 #'
@@ -362,11 +387,11 @@ with_ospan_async <- function(
 #'
 #' This method adds a _handoff_ Active OpenTelemetry span promise domain to the
 #' expression evaluation. This _handoff_ promise domain will only run once on
-#' reactivation. This is critical if there are many layered `with_ospan_async()`
-#' calls, such as within Shiny reactivity. For example, if we nested many
-#' `with_ospan_async()` of which each added a promise domain that reactivated
-#' each ospan on restore, we'd reactivate `k` ospan objects (`O(k)`) when we
-#' only need to activate the **last** span (`O(1)`).
+#' reactivation. This is critical if there are many layered
+#' `with_hybrid_ospan()` calls, such as within Shiny reactivity. For example, if
+#' we nested many `with_hybrid_ospan()` of which each added a promise domain
+#' that reactivated each ospan on restore, we'd reactivate `k` ospan objects
+#' (`O(k)`) when we only need to activate the **last** span (`O(1)`).
 #'
 #' Returns the result of evaluating `expr` within the ospan promise domain.
 #'
