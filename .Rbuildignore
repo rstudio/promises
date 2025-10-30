@@ -18,3 +18,4 @@
 ^.claude$
 ^CLAUDE.md$
 ^.vscode$
+^logo$
