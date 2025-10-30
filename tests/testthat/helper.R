@@ -143,23 +143,14 @@ create_counting_domain <- function(trackFinally = FALSE) {
   pd
 }
 
-expect_assertions <- function(expr, n) {
-  assertion_count <- 0
+expect_assertions <- function(code, n_expected) {
+  n <- 0
 
   withCallingHandlers(
-    {
-      force(expr)
-    },
-    expectation = function(e) {
-      if (
-        inherits(e, "expectation_success") || inherits(e, "expectation_failure")
-      ) {
-        assertion_count <<- assertion_count + 1L
-      }
-      # Continue propagating the signal
-      testthat::exp_signal(e)
-    }
+    code,
+    expectation_success = \(e) n <<- n + 1L,
+    expectation_failure = \(e) n <<- n + 1L
   )
 
-  expect_equal(assertion_count, n, label = "Expected assertion count")
+  expect_equal(n, n_expected, label = "Expected assertion count")
 }
