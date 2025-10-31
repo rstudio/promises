@@ -1,4 +1,4 @@
-# promises (development version)
+# promises 1.5.0
 
 * A promise is now a simple classed environment rather than an R6 class. This reduces their creation overhead by up to 10x, thereby substantially improving performance. (#191)
 
