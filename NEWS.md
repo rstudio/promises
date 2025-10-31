@@ -2,7 +2,18 @@
 
 * A promise is now a simple classed environment rather than an R6 class. This reduces their creation overhead by up to 10x, thereby substantially improving performance. (#191)
 
-* Renamed `with_ospan_async()` to `with_hybrid_otel_span()` to better reflect its behavior of handling both synchronous and asynchronous operations, similar to `hybrid_then()`. Updated documentation and examples accordingly. `with_ospan_async()` is now deprecated and will be removed in a future release. (#198)
+* `with_hybrid_otel_span()` creates an OpenTelemetry span, executes the given expression within it, and ends the span. This function handles both synchronous and asynchronous (promise-based) operations. For promises, the span is automatically ended when the promise resolves or rejects. To access the OpenTelemetry span within your expression, use `otel::get_current_span()`. (#198)
+
+* `with_otel_span_promise_domain()` creates a promise domain that restores the currently active OpenTelemetry span from when a call to `then()` is executed. This enables proper tracing context across asynchronous operations. (#173)
+
+* `local_otel_span_promise_domain()` adds an OpenTelemetry span promise domain to the local scope. This is useful for `{coro}` operations where encapsulating the coro operations inside `with_*()` methods is not allowed. (#179)
+
+* Deprecated OpenTelemetry functions to use consistent naming and better reflect their behavior:
+  * `with_ospan_async()` - Please use `with_hybrid_otel_span()` instead. This name change reflects handling of both synchronous and asynchronous operations, similar to `hybrid_then()`
+  * `with_ospan_promise_domain()` - Please use `with_otel_span_promise_domain()` instead.
+  * `local_ospan_promise_domain()` - Please use `local_otel_span_promise_domain()` instead.
+
+  The old function names are now deprecated and will be removed in a future release. (#198)
 
 # promises 1.4.0
 
