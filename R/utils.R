@@ -275,7 +275,7 @@ wait_for <- function(promise, loop = later::current_loop()) {
     later::run_now(Inf, all = FALSE, loop = loop)
   }
   if (private$state == "rejected") {
-    stop(private$value$message)
+    stop(conditionMessage(private$value))
   }
   if (private$visible) {
     return(private$value)
