@@ -2,7 +2,7 @@
 
 * A promise is now a simple classed environment rather than an R6 class. This reduces their creation overhead by up to 10x, thereby substantially improving performance. (#191)
 
-* Renamed `with_ospan_async()` to `with_hybrid_otel_span()` to better reflect its behavior of handling both synchronous and asynchronous operations, similar to `hybrid_then()`. Updated documentation and examples accordingly. `with_ospan_async()` is now deprecated. (#198)
+* Renamed `with_ospan_async()` to `with_hybrid_otel_span()` to better reflect its behavior of handling both synchronous and asynchronous operations, similar to `hybrid_then()`. Updated documentation and examples accordingly. `with_ospan_async()` is now deprecated and will be removed in a future release. (#198)
 
 # promises 1.4.0
 
