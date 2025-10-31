@@ -2,11 +2,11 @@
 % Please edit documentation in R/otel.R
 \name{with_ospan_async}
 \alias{with_ospan_async}
-\title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}: Use \code{with_hybrid_ospan()} instead}
+\title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}: Use \code{with_hybrid_otel_span()} instead}
 \usage{
 with_ospan_async(name, expr, ..., tracer, attributes = NULL)
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}: Use \code{with_hybrid_ospan()} instead
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}: Use \code{with_hybrid_otel_span()} instead
 }
 \keyword{internal}
