@@ -25,7 +25,7 @@
   reduces their creation overhead by up to 10x, thereby substantially
   improving performance. (#191)
 
-## Lifecycle changes
+## Life cycle changes
 
 * `local_ospan_promise_domain()`, `with_ospan_async()`, and
   `with_ospan_promise_domain()` are deprecated in favor of
