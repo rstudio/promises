@@ -33,8 +33,7 @@ future_worker_is_free <- function() {
   future::nbrOfFreeWorkers() > 0
 }
 
-
-Delay <- R6::R6Class(
+Delay <- R6Class(
   "Delay",
   private = list(
     delay_count = 0
@@ -62,7 +61,7 @@ Delay <- R6::R6Class(
   )
 )
 
-ExpoDelay <- R6::R6Class(
+ExpoDelay <- R6Class(
   "ExpoDelay",
   inherit = Delay,
   private = list(
@@ -134,7 +133,7 @@ ExpoDelay <- R6::R6Class(
 #'
 #' @seealso [`promises::future_promise_queue()`] which returns a `WorkQueue` which is cached per R session.
 #' @keywords internal
-WorkQueue <- R6::R6Class(
+WorkQueue <- R6Class(
   "WorkQueue",
 
   # TODO - private loop proposal:
@@ -207,7 +206,7 @@ WorkQueue <- R6::R6Class(
       if (is_false(ret)) {
         private$can_proceed_cache_val <- FALSE
         # Reset `$can_proceed()` functionality in the next event loop execution
-        later::later(
+        later(
           loop = private$loop,
           delay = 0,
           function() {
@@ -243,7 +242,7 @@ WorkQueue <- R6::R6Class(
           # Try again later
           private$increase_delay()
           private$cancel_delayed_attempt_work <-
-            later::later(
+            later(
               loop = private$loop,
               delay = private$delay$delay(),
               function() {

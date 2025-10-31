@@ -5,12 +5,13 @@ development:
   mode: auto
 
 template:
-  package: tidytemplate
+  # package: tidytemplate
+  light-switch: true
   bootstrap: 5
+  theme: github-light
+  theme-dark: github-dark
   bslib:
-    primary: "#0088DA" # Shiny blue
-    # https://github.com/rstudio/bslib/issues/1190
-    navbar-bg: "#e8f6ff !important" # Shiny blue @ 92% ; https://mdigi.tools/lighten-color/#0088da
+    brand: pkgdown/_brand.yml
 
 reference:
   - title: Handling promises
@@ -35,6 +36,9 @@ reference:
   - title: Domains
     contents:
       - with_promise_domain
+  - title: OpenTelemetry
+    contents:
+      - with_ospan_async
 
 navbar:
   components:

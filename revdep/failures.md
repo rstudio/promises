@@ -40,7 +40,7 @@ Run `revdepcheck::cloud_details(, "GSVA")` for more info
 * Version: NA
 * GitHub: NA
 * Source code: https://github.com/cran/Prostar
-* Number of recursive dependencies: 188
+* Number of recursive dependencies: 187
 
 Run `revdepcheck::cloud_details(, "Prostar")` for more info
 

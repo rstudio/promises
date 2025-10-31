@@ -27,12 +27,11 @@ wait_for_it <- function(p = NULL, timeout = if (on_ci) 60 else 30) {
     p |> catch(\(reason) err <<- reason)
   }
 
-  while (!loop_empty()) {
+  while (!later::loop_empty()) {
     if (difftime(Sys.time(), start, units = "secs") > timeout) {
       stop("Waited too long")
     }
-    run_now()
-    Sys.sleep(0.01)
+    later::run_now(0.1)
   }
 
   if (!is.null(err)) {
@@ -144,64 +143,14 @@ create_counting_domain <- function(trackFinally = FALSE) {
   pd
 }
 
+expect_assertions <- function(code, n_expected) {
+  n <- 0
 
-expect_assertions <- function(n, ..., envir = parent.frame()) {
-  force(n)
-  rlang::check_dots_empty0(...)
-
-  if (isTRUE(envir$`_has_expect_assertion`)) {
-    stop("expect_assertions() has already been called for this test block")
-  }
-
-  cur_reporter <- NULL
-
-  get_cur_reporter <- function(reporter) {
-    if (!is.null(cur_reporter)) {
-      return()
-    }
-
-    if (
-      inherits(reporter, "CheckReporter") ||
-        inherits(reporter, "ProgressReporter")
-    ) {
-      cur_reporter <<- reporter
-    } else if (inherits(reporter, "MultiReporter")) {
-      lapply(reporter$reporters, get_cur_reporter)
-    }
-  }
-  get_cur_reporter(testthat::get_reporter())
-
-  if (is.null(cur_reporter)) {
-    warning("Proper reporter could not be found for assertion check. Skipping")
-    return()
-  }
-
-  get_count <- function() {
-    if (inherits(cur_reporter, "CheckReporter")) {
-      cur_reporter$n_ok + cur_reporter$problems$size()
-    } else if (inherits(cur_reporter, "ProgressReporter")) {
-      cur_reporter$n_ok + cur_reporter$n_fail
-    } else {
-      stop("Missing implementation for reporter")
-    }
-  }
-
-  init_count <- get_count()
-  envir$`_has_expect_assertion` <- TRUE
-
-  # When `envir` exits...
-  defer(
-    {
-      envir$`_has_expect_assertion` <- NULL
-      assertion_count <- get_count() - init_count
-      testthat::expect_equal(
-        assertion_count,
-        n,
-        label = "Expected assertion count"
-      )
-    },
-    envir = envir
+  withCallingHandlers(
+    code,
+    expectation_success = \(e) n <<- n + 1L,
+    expectation_failure = \(e) n <<- n + 1L
   )
 
-  invisible()
+  expect_equal(n, n_expected, label = "Expected assertion count")
 }
