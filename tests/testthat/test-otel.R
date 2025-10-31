@@ -2,7 +2,7 @@ skip_on_cran()
 
 skip_if_not_installed("otelsdk")
 
-with_ospan_promise_domain({
+with_otel_promise_domain({
   describe("OpenTelemetry integration", {
     describe("otel::start_span()", {
       it("creates spans appropriately", {
@@ -21,26 +21,57 @@ with_ospan_promise_domain({
       })
     })
 
-    describe("with_ospan_async()", {
+    describe("Deprecated functions", {
+      it("with_ospan_async() is deprecated", {
+        expect_snapshot({
+          with_ospan_async(
+            "test_span_deprecated",
+            {
+              42
+            },
+            tracer = promises_otel_tracer()
+          )
+        })
+      })
+
+      it("with_ospan_promise_domain() is deprecated", {
+        expect_snapshot({
+          with_ospan_promise_domain({
+            42
+          })
+        })
+      })
+
+      it("local_ospan_promise_domain() is deprecated", {
+        expect_snapshot({
+          local({
+            local_ospan_promise_domain()
+            42
+          })
+        })
+      })
+    })
+
+    describe("with_otel_span()", {
       it("executes synchronous expressions without otel", {
         # When recording is off, should still execute expression
-        result <- with_ospan_async(
+        result <- with_otel_span(
           "test_span1",
           {
             42
           },
-          tracer = get_tracer()
+          tracer = promises_otel_tracer()
         )
         expect_equal(result, 42)
       })
       it("executes synchronous expressions", {
         records <- otelsdk::with_otel_record({
-          result <- with_ospan_async(
+          result <- with_otel_span(
             "test_span1",
             {
               42
             },
-            tracer = get_tracer()
+            tracer = promises_otel_tracer()
           )
           expect_equal(result, 42)
         })
@@ -48,12 +79,12 @@ with_ospan_promise_domain({
       })
       it("executes asynchronous expressions without otel", {
         # When recording is off, should still execute expression
-        result <- with_ospan_async(
+        result <- with_otel_span(
           "test_span1",
           {
             promise_resolve(42)
           },
-          tracer = get_tracer()
+          tracer = promises_otel_tracer()
         )
         expect_true(is.promising(result))
         expect_equal(extract(result), 42)
@@ -61,12 +92,12 @@ with_ospan_promise_domain({
 
       it("handles promise results", {
         records <- otelsdk::with_otel_record({
-          result <- with_ospan_async(
+          result <- with_otel_span(
             "test_span2",
             {
               promise_resolve(42)
             },
-            tracer = get_tracer()
+            tracer = promises_otel_tracer()
           )
 
           expect_true(is.promising(result))
@@ -82,7 +113,7 @@ with_ospan_promise_domain({
         counting_domain <- create_counting_domain()
 
         p <- with_promise_domain(counting_domain, {
-          with_ospan_async("test_operation", tracer = get_tracer(), {
+          with_otel_span("test_operation", tracer = promises_otel_tracer(), {
             promise_resolve(42) |>
               then(function(x) x * 2)
           })
@@ -100,10 +131,10 @@ with_ospan_promise_domain({
       it("handles promise rejections gracefully", {
         # Should handle rejected promises without errors
         records <- otelsdk::with_otel_record({
-          p <- with_ospan_async("test_span3", tracer = get_tracer(), {
+          p <- with_otel_span("test_span3", tracer = promises_otel_tracer(), {
             promise_reject("test error") |>
               catch(function(reason) {
-                with_ospan_async("catch_span3", tracer = get_tracer(), {
+                with_otel_span("catch_span3", tracer = promises_otel_tracer(), {
                   42
                 })
 
@@ -114,7 +145,7 @@ with_ospan_promise_domain({
               }) |>
               then(function(result) {
                 expect_equal(result, "caught")
-                with_ospan_async("then_span3", tracer = get_tracer(), {
+                with_otel_span("then_span3", tracer = promises_otel_tracer(), {
                   42
                 })
               })
@@ -134,7 +165,7 @@ with_ospan_promise_domain({
       it("propagates regular errors", {
         # Regular errors should still propagate
         expect_error(
-          with_ospan_async("test_span4", tracer = get_tracer(), {
+          with_otel_span("test_span4", tracer = promises_otel_tracer(), {
             stop("regular error")
           }),
           "regular error"
@@ -151,7 +182,7 @@ with_ospan_promise_domain({
 
       recording <- otelsdk::with_otel_record({
         # Create two parallel promise chains, each with their own span
-        chain1 <- with_ospan_async("chain_1", tracer = get_tracer(), {
+        chain1 <- with_otel_span("chain_1", tracer = promises_otel_tracer(), {
           promise_resolve("init1") |>
             then(function(x) {
               spn <- otel::start_span("chain1_step1")
@@ -179,7 +210,7 @@ with_ospan_promise_domain({
             })
         })
 
-        chain2 <- with_ospan_async("chain_2", tracer = get_tracer(), {
+        chain2 <- with_otel_span("chain_2", tracer = promises_otel_tracer(), {
           promise_resolve("init2") |>
             then(function(x) {
               spn <- otel::start_span("chain2_step1")
@@ -261,18 +292,18 @@ with_ospan_promise_domain({
   })
 })
 
-describe("local_ospan_promise_domain()", {
-  it("sets up ospan promise domain for local scope", {
+describe("local_otel_promise_domain()", {
+  it("sets up otel span promise domain for local scope", {
     # Test that the domain is active within the local scope
     original_domain <- current_promise_domain()
 
     local({
-      local_ospan_promise_domain()
+      local_otel_promise_domain()
       current_domain <- current_promise_domain()
 
-      # Should have an ospan domain set
+      # Should have an otel span domain set
       expect_false(identical(current_domain, original_domain))
-      expect_true(has_ospan_promise_domain(current_domain))
+      expect_true(has_otel_promise_domain(current_domain))
     })
 
     # Should be restored after exiting the local scope
@@ -288,12 +319,12 @@ describe("local_ospan_promise_domain()", {
       domain_before <- current_promise_domain()
 
       local({
-        local_ospan_promise_domain()
+        local_otel_promise_domain()
         current_domain <- current_promise_domain()
 
-        # Should be a composed domain
+        # Should be a composed domain with otel span support
         expect_false(identical(current_domain, domain_before))
-        expect_true(has_ospan_promise_domain(current_domain))
+        expect_true(has_otel_promise_domain(current_domain))
       })
 
       # Should restore the counting domain
@@ -308,12 +339,12 @@ describe("local_ospan_promise_domain()", {
   #   original_domain <- current_promise_domain()
 
   #   # Set up domain in custom environment
-  #   local_ospan_promise_domain(envir = test_env)
+  #   local_otel_promise_domain(envir = test_env)
 
   #   # Domain should still be active since test_env hasn't been cleaned
   #   current_domain <- current_promise_domain()
   #   expect_false(identical(current_domain, original_domain))
-  #   expect_true(has_ospan_promise_domain(current_domain))
+  #   expect_true(has_otel_promise_domain(current_domain))
 
   #   # Clean up the environment to trigger restoration
   #   rm(list = ls(test_env), envir = test_env)
@@ -329,14 +360,14 @@ describe("local_ospan_promise_domain()", {
   it("integrates with promise execution", {
     records <- otelsdk::with_otel_record({
       result <- local({
-        local_ospan_promise_domain()
+        local_otel_promise_domain()
 
         otel::start_local_active_span("outer_test_span")
 
-        # Create a promise within the ospan domain
+        # Create a promise within the otel span domain
         promise_resolve(21) |>
           then(function(x) {
-            # This should be executed within the ospan domain
+            # This should be executed within the otel span domain
             span <- otel::start_span("inner_test_span")
             on.exit(otel::end_span(span))
             x * 2
@@ -360,11 +391,11 @@ describe("local_ospan_promise_domain()", {
   it("can be nested without issues", {
     # Track how many times promise domain setup occurs
     domain_creation_count <- 0
-    original_copd <- create_ospan_promise_domain
+    original_copd <- create_otel_promise_domain
 
     # Mock the domain creation to count calls
     with_mocked_bindings(
-      create_ospan_promise_domain = function() {
+      create_otel_promise_domain = function() {
         domain_creation_count <<- domain_creation_count + 1
         original_copd()
       },
@@ -372,19 +403,19 @@ describe("local_ospan_promise_domain()", {
         original_domain <- current_promise_domain()
 
         local({
-          local_ospan_promise_domain()
+          local_otel_promise_domain()
           expect_equal(domain_creation_count, 1)
           domain1 <- current_promise_domain()
 
           local({
             # This should not create another domain due to idempotency
-            local_ospan_promise_domain()
+            local_otel_promise_domain()
             expect_equal(domain_creation_count, 1) # Still 1, not 2
             domain2 <- current_promise_domain()
 
-            # Both should have ospan domains and should be identical
-            expect_true(has_ospan_promise_domain(domain1))
-            expect_true(has_ospan_promise_domain(domain2))
+            # Both should have otel span domains and should be identical
+            expect_true(has_otel_promise_domain(domain1))
+            expect_true(has_otel_promise_domain(domain2))
             expect_identical(domain1, domain2) # Should be the same due to idempotency
           })
 
@@ -400,97 +431,97 @@ describe("local_ospan_promise_domain()", {
   })
 })
 
-describe("has_ospan_promise_domain()", {
+describe("has_otel_promise_domain()", {
   it("returns FALSE for NULL domain", {
-    expect_false(has_ospan_promise_domain(NULL))
+    expect_false(has_otel_promise_domain(NULL))
   })
 
   it("returns FALSE for empty list", {
-    expect_false(has_ospan_promise_domain(list()))
+    expect_false(has_otel_promise_domain(list()))
   })
 
   it("returns FALSE for regular promise domain", {
     regular_domain <- new_promise_domain(
       wrapOnFulfilled = function(onFulfilled) onFulfilled
     )
-    expect_false(has_ospan_promise_domain(regular_domain))
+    expect_false(has_otel_promise_domain(regular_domain))
   })
 
-  it("returns TRUE for ospan promise domain", {
-    ospan_domain <- create_ospan_promise_domain()
-    expect_true(has_ospan_promise_domain(ospan_domain))
+  it("returns TRUE for otel span promise domain", {
+    otel_span_domain <- create_otel_promise_domain()
+    expect_true(has_otel_promise_domain(otel_span_domain))
   })
 
-  it("returns TRUE for composed domain with ospan", {
+  it("returns TRUE for composed domain with otel span", {
     counting_domain <- create_counting_domain()
-    ospan_domain <- create_ospan_promise_domain()
-    composed_domain <- compose_domains(counting_domain, ospan_domain)
+    otel_span_domain <- create_otel_promise_domain()
+    composed_domain <- compose_domains(counting_domain, otel_span_domain)
 
-    expect_true(has_ospan_promise_domain(composed_domain))
+    expect_true(has_otel_promise_domain(composed_domain))
   })
 
-  it("returns FALSE for composed domain without ospan", {
+  it("returns FALSE for composed domain without otel span", {
     counting_domain1 <- create_counting_domain()
     counting_domain2 <- create_counting_domain()
     composed_domain <- compose_domains(counting_domain1, counting_domain2)
 
-    expect_false(has_ospan_promise_domain(composed_domain))
+    expect_false(has_otel_promise_domain(composed_domain))
   })
 
   it("uses current_promise_domain() when no argument provided", {
     # Initially no domain
-    expect_false(has_ospan_promise_domain())
+    expect_false(has_otel_promise_domain())
 
-    # With ospan domain active
-    with_ospan_promise_domain({
-      expect_true(has_ospan_promise_domain())
+    # With otel span domain active
+    with_otel_promise_domain({
+      expect_true(has_otel_promise_domain())
     })
 
     # Back to no domain
-    expect_false(has_ospan_promise_domain())
+    expect_false(has_otel_promise_domain())
   })
 
   it("works with various data types", {
     # # Test edge cases
-    # expect_false(has_ospan_promise_domain(character(0)))
-    # expect_false(has_ospan_promise_domain(numeric(0)))
-    # expect_false(has_ospan_promise_domain("not a domain"))
-    # expect_false(has_ospan_promise_domain(42))
+    # expect_false(has_otel_promise_domain(character(0)))
+    # expect_false(has_otel_promise_domain(numeric(0)))
+    # expect_false(has_otel_promise_domain("not a domain"))
+    # expect_false(has_otel_promise_domain(42))
 
     # Test list with wrong flag
     fake_domain <- list(.some_other_flag = TRUE)
-    expect_false(has_ospan_promise_domain(fake_domain))
+    expect_false(has_otel_promise_domain(fake_domain))
 
     # Test list with correct flag
-    correct_domain <- list(.ospan_promise_domain = TRUE)
-    expect_true(has_ospan_promise_domain(correct_domain))
+    correct_domain <- list(.otel_promise_domain = TRUE)
+    expect_true(has_otel_promise_domain(correct_domain))
 
     # Test list with correct flag but FALSE value
-    false_domain <- list(.ospan_promise_domain = FALSE)
-    expect_false(has_ospan_promise_domain(false_domain))
+    false_domain <- list(.otel_promise_domain = FALSE)
+    expect_false(has_otel_promise_domain(false_domain))
   })
 })
 
-describe("with_ospan_promise_domain() idempotency", {
+describe("with_otel_promise_domain() idempotency", {
   it("is idempotent when called multiple times", {
     # Track how many times promise domain setup occurs
     domain_creation_count <- 0
     reset_count <- function() {
       domain_creation_count <<- 0
     }
-    original_copd <- create_ospan_promise_domain
+    original_copd <- create_otel_promise_domain
 
-    expect_false(has_ospan_promise_domain())
+    expect_false(has_otel_promise_domain())
 
     # Mock the domain creation to count calls
     with_mocked_bindings(
-      create_ospan_promise_domain = function() {
+      create_otel_promise_domain = function() {
         domain_creation_count <<- domain_creation_count + 1
         original_copd()
       },
       {
         # First call should create the domain
-        result1 <- with_ospan_promise_domain({
+        result1 <- with_otel_promise_domain({
           42
         })
         expect_equal(result1, 42)
@@ -499,12 +530,12 @@ describe("with_ospan_promise_domain() idempotency", {
         reset_count()
 
         result2 <-
-          with_ospan_promise_domain({
+          with_otel_promise_domain({
             expect_equal(domain_creation_count, 1)
 
             # Nested calls should not create additional domains
-            with_ospan_promise_domain({
-              with_ospan_promise_domain({
+            with_otel_promise_domain({
+              with_otel_promise_domain({
                 expect_equal(domain_creation_count, 1)
 
                 84
@@ -519,19 +550,19 @@ describe("with_ospan_promise_domain() idempotency", {
   })
 
   it("allows nested calls without duplicate domain setup", {
-    # Test that nested with_ospan_promise_domain calls work correctly
+    # Test that nested with_otel_promise_domain calls work correctly
     # and don't interfere with each other
 
     records <- otelsdk::with_otel_record({
-      result <- with_ospan_promise_domain({
-        with_ospan_async("outer_span", tracer = get_tracer(), {
+      result <- with_otel_promise_domain({
+        with_otel_span("outer_span", tracer = promises_otel_tracer(), {
           # This nested call should be idempotent
-          with_ospan_promise_domain({
-            with_ospan_async("inner_span", tracer = get_tracer(), {
+          with_otel_promise_domain({
+            with_otel_span("inner_span", tracer = promises_otel_tracer(), {
               promise_resolve(42) |>
                 then(function(x) {
                   # Another nested call
-                  with_ospan_promise_domain({
+                  with_otel_promise_domain({
                     x * 2
                   })
                 })

@@ -264,9 +264,9 @@ compose_domains <- function(base, new) {
 
   list(
     # The `...` of `new_promise_domain` are not automatically composed here.
-    # For now, pass through the ospan promise domain flag
-    .ospan_promise_domain = has_ospan_promise_domain(base) ||
-      has_ospan_promise_domain(new),
+    # For now, pass through the otel span promise domain flag
+    .otel_promise_domain = has_otel_promise_domain(base) ||
+      has_otel_promise_domain(new),
     wrapOnFulfilled = function(onFulfilled) {
       # Wrap new domain first (innermost), then base domain (outermost)
       # This ensures that the new domain wraps most closely to the callback
