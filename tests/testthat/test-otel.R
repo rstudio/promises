@@ -52,10 +52,10 @@ with_otel_span_promise_domain({
       })
     })
 
-    describe("with_hybrid_otel_span()", {
+    describe("with_otel_span()", {
       it("executes synchronous expressions without otel", {
         # When recording is off, should still execute expression
-        result <- with_hybrid_otel_span(
+        result <- with_otel_span(
           "test_span1",
           {
             42
@@ -66,7 +66,7 @@ with_otel_span_promise_domain({
       })
       it("executes synchronous expressions", {
         records <- otelsdk::with_otel_record({
-          result <- with_hybrid_otel_span(
+          result <- with_otel_span(
             "test_span1",
             {
               42
@@ -79,7 +79,7 @@ with_otel_span_promise_domain({
       })
       it("executes asynchronous expressions without otel", {
         # When recording is off, should still execute expression
-        result <- with_hybrid_otel_span(
+        result <- with_otel_span(
           "test_span1",
           {
             promise_resolve(42)
@@ -92,7 +92,7 @@ with_otel_span_promise_domain({
 
       it("handles promise results", {
         records <- otelsdk::with_otel_record({
-          result <- with_hybrid_otel_span(
+          result <- with_otel_span(
             "test_span2",
             {
               promise_resolve(42)
@@ -113,7 +113,7 @@ with_otel_span_promise_domain({
         counting_domain <- create_counting_domain()
 
         p <- with_promise_domain(counting_domain, {
-          with_hybrid_otel_span("test_operation", tracer = get_tracer(), {
+          with_otel_span("test_operation", tracer = get_tracer(), {
             promise_resolve(42) |>
               then(function(x) x * 2)
           })
@@ -131,10 +131,10 @@ with_otel_span_promise_domain({
       it("handles promise rejections gracefully", {
         # Should handle rejected promises without errors
         records <- otelsdk::with_otel_record({
-          p <- with_hybrid_otel_span("test_span3", tracer = get_tracer(), {
+          p <- with_otel_span("test_span3", tracer = get_tracer(), {
             promise_reject("test error") |>
               catch(function(reason) {
-                with_hybrid_otel_span("catch_span3", tracer = get_tracer(), {
+                with_otel_span("catch_span3", tracer = get_tracer(), {
                   42
                 })
 
@@ -145,7 +145,7 @@ with_otel_span_promise_domain({
               }) |>
               then(function(result) {
                 expect_equal(result, "caught")
-                with_hybrid_otel_span("then_span3", tracer = get_tracer(), {
+                with_otel_span("then_span3", tracer = get_tracer(), {
                   42
                 })
               })
@@ -165,7 +165,7 @@ with_otel_span_promise_domain({
       it("propagates regular errors", {
         # Regular errors should still propagate
         expect_error(
-          with_hybrid_otel_span("test_span4", tracer = get_tracer(), {
+          with_otel_span("test_span4", tracer = get_tracer(), {
             stop("regular error")
           }),
           "regular error"
@@ -182,7 +182,7 @@ with_otel_span_promise_domain({
 
       recording <- otelsdk::with_otel_record({
         # Create two parallel promise chains, each with their own span
-        chain1 <- with_hybrid_otel_span("chain_1", tracer = get_tracer(), {
+        chain1 <- with_otel_span("chain_1", tracer = get_tracer(), {
           promise_resolve("init1") |>
             then(function(x) {
               spn <- otel::start_span("chain1_step1")
@@ -210,7 +210,7 @@ with_otel_span_promise_domain({
             })
         })
 
-        chain2 <- with_hybrid_otel_span("chain_2", tracer = get_tracer(), {
+        chain2 <- with_otel_span("chain_2", tracer = get_tracer(), {
           promise_resolve("init2") |>
             then(function(x) {
               spn <- otel::start_span("chain2_step1")
@@ -555,10 +555,10 @@ describe("with_otel_span_promise_domain() idempotency", {
 
     records <- otelsdk::with_otel_record({
       result <- with_otel_span_promise_domain({
-        with_hybrid_otel_span("outer_span", tracer = get_tracer(), {
+        with_otel_span("outer_span", tracer = get_tracer(), {
           # This nested call should be idempotent
           with_otel_span_promise_domain({
-            with_hybrid_otel_span("inner_span", tracer = get_tracer(), {
+            with_otel_span("inner_span", tracer = get_tracer(), {
               promise_resolve(42) |>
                 then(function(x) {
                   # Another nested call

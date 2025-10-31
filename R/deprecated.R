@@ -7,7 +7,7 @@
 #' @keywords internal
 NULL
 
-#' @describeIn promises-deprecated Use `with_hybrid_otel_span()` instead
+#' @describeIn promises-deprecated Use `with_otel_span()` instead
 #' @export
 with_ospan_async <- function(
   name,
@@ -19,9 +19,9 @@ with_ospan_async <- function(
   lifecycle::deprecate_warn(
     "1.5.0",
     "with_ospan_async()",
-    "with_hybrid_otel_span()"
+    "with_otel_span()"
   )
-  with_hybrid_otel_span(
+  with_otel_span(
     name = name,
     expr = expr,
     ...,

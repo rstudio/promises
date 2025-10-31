@@ -7,7 +7,7 @@
     Condition
       Warning:
       `with_ospan_async()` was deprecated in promises 1.5.0.
-      i Please use `with_hybrid_otel_span()` instead.
+      i Please use `with_otel_span()` instead.
     Output
       [1] 42
 

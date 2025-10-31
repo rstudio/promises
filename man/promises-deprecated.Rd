@@ -19,7 +19,7 @@ Please use the suggested alternatives instead.
 }
 \section{Functions}{
 \itemize{
-\item \code{with_ospan_async()}: Use \code{with_hybrid_otel_span()} instead
+\item \code{with_ospan_async()}: Use \code{with_otel_span()} instead
 
 \item \code{with_ospan_promise_domain()}: Use \code{with_otel_span_promise_domain()} instead
 

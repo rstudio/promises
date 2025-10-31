@@ -104,7 +104,7 @@ get_tracer <- local({
 #' # t0.0
 #' p2 <- with_otel_span_promise_domain({
 #'   # t0.1
-#'   p <- with_hybrid_otel_span("async_op", {
+#'   p <- with_otel_span("async_op", {
 #'     # ... return a promise ...
 #'     init_async_work() |> # t0.2
 #'       then( # t0.3
@@ -130,7 +130,7 @@ get_tracer <- local({
 #'   * `t0.2`: Some async work is initiated
 #'   * `t0.3`: `then()` is called, capturing the active `async_op` otel span (as it
 #'     is called within `with_otel_span_promise_domain()`)
-#'   * `t0.4`: The `with_hybrid_otel_span()` call exits, but the `async_op` otel span is
+#'   * `t0.4`: The `with_otel_span()` call exits, but the `async_op` otel span is
 #'     not ended as the promise is still pending. The returned promise has a
 #'     `finally()` step added to it that will end the otel span `async_op` when `p`
 #'     is resolved.
@@ -187,7 +187,7 @@ get_tracer <- local({
 #'      otel span would be ended when the function exits, not when the promise chain
 #'      resolves.
 #' 2. Be sure your otel span is activated before calling `promises::then()`.
-#'    * Activate it using `with_hybrid_otel_span(name, expr)` (which also
+#'    * Activate it using `with_otel_span(name, expr)` (which also
 #'      creates/ends the otel span) or `otel::with_active_span(span, expr)`.
 #' 3. Call `promises::then()`
 #'   * When `promises::then()` is called, the two methods (`onFulfilled` and
@@ -208,7 +208,7 @@ get_tracer <- local({
 #' though the local otel span is created, activated, and eventually ended, the otel span
 #' will not exist during reactivation of the otel span promise domain.
 #'
-#' `with_hybrid_otel_span()` is a convenience method that creates, activates, and
+#' `with_otel_span()` is a convenience method that creates, activates, and
 #' ends the otel span only after the returned promise (if any) resolves. It also
 #' properly handles both synchronous (ending the otel span within `on.exit()`) and
 #' asynchronous operations (ending the otel span within `promises::finally()`).
@@ -257,8 +257,8 @@ get_tracer <- local({
 #' with_otel_span_promise_domain({
 #'   # ... deep inside some code execution ...
 #'
-#'   # Many calls to `with_hybrid_otel_span()` within `with_otel_span_promise_domain()`
-#'   with_hybrid_otel_span("my_operation", {
+#'   # Many calls to `with_otel_span()` within `with_otel_span_promise_domain()`
+#'   with_otel_span("my_operation", {
 #'     # ... do some work ...
 #'   })
 #' })
@@ -269,12 +269,12 @@ get_tracer <- local({
 #'
 #'   # Synchronous operation
 #'   # * Creates `my_operation` span
-#'   result <- with_hybrid_otel_span("my_operation", {
+#'   result <- with_otel_span("my_operation", {
 #'     # ... do some work ...
 #'     print(otel::get_active_span()$name) # "my_operation"
 #'
 #'     # Nest (many) more spans
-#'     prom_nested <- with_hybrid_otel_span("my_nested_operation", {
+#'     prom_nested <- with_otel_span("my_nested_operation", {
 #'       # ... do some more work ...
 #'       promise_resolve(42) |>
 #'         then(\(value) {
@@ -299,7 +299,7 @@ get_tracer <- local({
 #'   })
 #' })
 #' }
-with_hybrid_otel_span <- function(
+with_otel_span <- function(
   name,
   expr,
   ...,
@@ -363,8 +363,8 @@ with_hybrid_otel_span <- function(
 #' This method adds a _handoff_ Active OpenTelemetry span promise domain to the
 #' expression evaluation. This _handoff_ promise domain will only run once on
 #' reactivation. This is critical if there are many layered
-#' `with_hybrid_otel_span()` calls, such as within Shiny reactivity. For example, if
-#' we nested many `with_hybrid_otel_span()` of which each added a promise domain
+#' `with_otel_span()` calls, such as within Shiny reactivity. For example, if
+#' we nested many `with_otel_span()` of which each added a promise domain
 #' that reactivated each otel span on restore, we'd reactivate `k` otel span objects
 #' (`O(k)`) when we only need to activate the **last** span (`O(1)`).
 #'
@@ -389,7 +389,7 @@ with_otel_span_promise_domain <- function(expr) {
 #' for `{coro}` operations where encapsulating the coro operations inside a
 #' `with_*()` methods is not allowed.
 #'
-#' When not using `{coro}`, please prefer to use `with_hybrid_otel_span()` or
+#' When not using `{coro}`, please prefer to use `with_otel_span()` or
 #' `with_otel_span_promise_domain()`.
 #' @export
 #' @param envir The "local" environment in which to add the promise domain. When
