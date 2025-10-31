@@ -2,6 +2,8 @@
 
 ## OpenTelemetry
 
+promises now integrates with the otel package to provide observability and tracing for asynchronous operations.
+
 * `local_otel_promise_domain()` adds an OpenTelemetry span promise domain
   to the local scope. This is useful for `{coro}` operations where
   encapsulating the coro operations inside `with_*()` methods is not allowed.
