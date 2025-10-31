@@ -13,7 +13,8 @@ NULL
 #'   with_active_span
 NULL
 
-# For `otel::default_tracer_name()`
+# Fixed variable named required for `otel::default_tracer_name()`
+# which is used in `otel::get_tracer()` within `promises_otel_tracer()`
 otel_tracer_name <- "co.posit.r-package.promises"
 
 # Using local scope avoids an environment object lookup on each call.
@@ -23,7 +24,7 @@ testthat__is_testing <- function() {
   identical(Sys.getenv("TESTTHAT"), "true")
 }
 
-get_tracer <- local({
+promises_otel_tracer <- local({
   tracer <- NULL
   function() {
     if (!is.null(tracer)) {
@@ -64,7 +65,7 @@ get_tracer <- local({
 #'   graphics device at each stage will only ever print to the most recently
 #'   created graphics device, not the associated graphics device. These promise
 #'   domains are not automatically created, they must be manually added to the
-#'   execution stack, for example `with_otel_span_promise_domain()` does this for
+#'   execution stack, for example `with_otel_promise_domain()` does this for
 #'   OpenTelemetry spans.
 #' * Promise domain restoration: When switching from one promise chain to
 #'   another, the execution context is torn down and then re-established. This
@@ -82,7 +83,7 @@ get_tracer <- local({
 #'   objects. The only way the promise domain is captured is exactly when the
 #'   `then()` method is called.
 #'
-#' `with_otel_span_promise_domain()` creates a promise domain that restores the
+#' `with_otel_promise_domain()` creates a promise domain that restores the
 #' currently active OpenTelemetry span from when a call to `promises::then()` is
 #' executed. Given the special circumstance where only the current otel span is
 #' needed to continue recording (not a full ancestry tree of otel spans), we can
@@ -102,7 +103,7 @@ get_tracer <- local({
 #'
 #' ```r
 #' # t0.0
-#' p2 <- with_otel_span_promise_domain({
+#' p2 <- with_otel_promise_domain({
 #'   # t0.1
 #'   p <- with_otel_span("async_op", {
 #'     # ... return a promise ...
@@ -125,11 +126,11 @@ get_tracer <- local({
 #'
 #' An in-depth explanation of the execution timeline is below.
 #' * At the first initial tick, `t0.*`:
-#'   * `t0.0`: The code is wrapped in `with_otel_span_promise_domain()`
+#'   * `t0.0`: The code is wrapped in `with_otel_promise_domain()`
 #'   * `t0.1`: The `async_op` otel span is created and activated
 #'   * `t0.2`: Some async work is initiated
 #'   * `t0.3`: `then()` is called, capturing the active `async_op` otel span (as it
-#'     is called within `with_otel_span_promise_domain()`)
+#'     is called within `with_otel_promise_domain()`)
 #'   * `t0.4`: The `with_otel_span()` call exits, but the `async_op` otel span is
 #'     not ended as the promise is still pending. The returned promise has a
 #'     `finally()` step added to it that will end the otel span `async_op` when `p`
@@ -177,9 +178,9 @@ get_tracer <- local({
 #' multiple similar promise domain restorations.
 #'
 #'
-#' @section Execution model for `with_otel_span_promise_domain()`:
+#' @section Execution model for `with_otel_promise_domain()`:
 #'
-#' 1. `with_otel_span_promise_domain(expr)` is called.
+#' 1. `with_otel_promise_domain(expr)` is called.
 #'    * The following steps all occur within `expr`.
 #' 2. Create an otel span object using `otel::start_span()`.
 #'    * We need the otel span to be active during the a followup async operation.
@@ -192,10 +193,10 @@ get_tracer <- local({
 #' 3. Call `promises::then()`
 #'   * When `promises::then()` is called, the two methods (`onFulfilled` and
 #'     `onRejected`) capture the currently active spans. (Performed by the
-#'     initial `with_otel_span_promise_domain()`)
+#'     initial `with_otel_promise_domain()`)
 #' 4. During reactivation of the promise chain step, the previously captured
 #'    otel span is reactivated via `with_active_span()`. (Performed by the initial
-#'    `with_otel_span_promise_domain()`)
+#'    `with_otel_promise_domain()`)
 #'
 #' @section OpenTelemetry span compatibility:
 #'
@@ -221,7 +222,7 @@ get_tracer <- local({
 #' Creates an OpenTelemetry span, executes the given expression within it, and
 #' ends the span.
 #'
-#' This method **requires** the use of `with_otel_span_promise_domain()`
+#' This method **requires** the use of `with_otel_promise_domain()`
 #' to be within the execution stack.
 #'
 #' This function is designed to handle both synchronous and asynchronous
@@ -254,17 +255,17 @@ get_tracer <- local({
 #' @examples
 #' \dontrun{
 #' # Common usage:
-#' with_otel_span_promise_domain({
+#' with_otel_promise_domain({
 #'   # ... deep inside some code execution ...
 #'
-#'   # Many calls to `with_otel_span()` within `with_otel_span_promise_domain()`
+#'   # Many calls to `with_otel_span()` within `with_otel_promise_domain()`
 #'   with_otel_span("my_operation", {
 #'     # ... do some work ...
 #'   })
 #' })
 #' }
 #' \dontrun{
-#' with_otel_span_promise_domain({
+#' with_otel_promise_domain({
 #'   # ... deep inside some code execution ...
 #'
 #'   # Synchronous operation
@@ -353,7 +354,7 @@ with_otel_span <- function(
 #' Package authors are required to use this function to have otel span context
 #' persist across asynchronous boundaries. This method is only needed once per
 #' promise domain stack. If you are unsure, feel free to call
-#' `with_otel_span_promise_domain()` as the underlying promise domain will only be
+#' `with_otel_promise_domain()` as the underlying promise domain will only be
 #' added if not found within the current promise domain stack. If your package
 #' **only** works within Shiny apps, Shiny will have already added the domain so
 #' no need to add it yourself. If your package works outside of Shiny and you
@@ -364,19 +365,21 @@ with_otel_span <- function(
 #' expression evaluation. This _handoff_ promise domain will only run once on
 #' reactivation. This is critical if there are many layered
 #' `with_otel_span()` calls, such as within Shiny reactivity. For example, if
-#' we nested many `with_otel_span()` of which each added a promise domain
-#' that reactivated each otel span on restore, we'd reactivate `k` otel span objects
-#' (`O(k)`) when we only need to activate the **last** span (`O(1)`).
+#' we nested many `with_otel_span()` calls of which each call added a promise
+#' domain that reactivated each otel span on restore, we'd reactivate `k` otel
+#' span objects (`O(k)`) when we only need to activate the **last** span
+#' (`O(1)`).
 #'
 #' Returns the result of evaluating `expr` within the otel span promise domain.
 #'
 #' @export
-with_otel_span_promise_domain <- function(expr) {
+with_otel_promise_domain <- function(expr) {
+  # with_otel_promise_domain <- function(expr) {
   # Do not add the otel span handoff promise domain twice
-  if (has_otel_span_promise_domain()) {
+  if (has_otel_promise_domain()) {
     return(force(expr))
   }
-  act_span_pd <- create_otel_span_promise_domain()
+  act_span_pd <- create_otel_promise_domain()
   with_promise_domain(act_span_pd, expr)
 }
 
@@ -390,17 +393,18 @@ with_otel_span_promise_domain <- function(expr) {
 #' `with_*()` methods is not allowed.
 #'
 #' When not using `{coro}`, please prefer to use `with_otel_span()` or
-#' `with_otel_span_promise_domain()`.
+#' `with_otel_promise_domain()`.
 #' @export
 #' @param envir The "local" environment in which to add the promise domain. When
 #' the environment is exited, the promise domain is removed.
-local_otel_span_promise_domain <- function(envir = parent.frame()) {
-  if (has_otel_span_promise_domain()) {
+local_otel_promise_domain <- function(envir = parent.frame()) {
+  # local_otel_promise_domain <- function(envir = parent.frame()) {
+  if (has_otel_promise_domain()) {
     return(invisible())
   }
 
   local_promise_domain(
-    create_otel_span_promise_domain(),
+    create_otel_promise_domain(),
     envir = envir
   )
 }
@@ -435,12 +439,12 @@ local_promise_domain <- function(
 
 # -- Helpers --------------------------------------------------------------
 
-has_otel_span_promise_domain <- function(domain = current_promise_domain()) {
+has_otel_promise_domain <- function(domain = current_promise_domain()) {
   # Works for:
   # * `list()` `compose_domains()` result
   # * `NULL` - current_promise_domain() init value
   # * environment objects - `new_promise_domain()` result
-  isTRUE(domain[[".otel_span_promise_domain"]])
+  isTRUE(domain[[".otel_promise_domain"]])
 }
 
 #' Create a OpenTelemetry handoff promise domain
@@ -450,9 +454,9 @@ has_otel_span_promise_domain <- function(domain = current_promise_domain()) {
 #'
 #' @param span An OpenTelemetry span object.
 #' @noRd
-create_otel_span_promise_domain <- function() {
+create_otel_promise_domain <- function() {
   new_promise_domain(
-    .otel_span_promise_domain = TRUE, # set flag for later discovery
+    .otel_promise_domain = TRUE, # set flag for later discovery
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
 

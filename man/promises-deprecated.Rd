@@ -21,9 +21,9 @@ Please use the suggested alternatives instead.
 \itemize{
 \item \code{with_ospan_async()}: Use \code{with_otel_span()} instead
 
-\item \code{with_ospan_promise_domain()}: Use \code{with_otel_span_promise_domain()} instead
+\item \code{with_ospan_promise_domain()}: Use \code{with_otel_promise_domain()} instead
 
-\item \code{local_ospan_promise_domain()}: Use \code{local_otel_span_promise_domain()} instead
+\item \code{local_ospan_promise_domain()}: Use \code{local_otel_promise_domain()} instead
 
 }}
 \keyword{internal}

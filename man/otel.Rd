@@ -2,15 +2,15 @@
 % Please edit documentation in R/otel.R
 \name{with_otel_span}
 \alias{with_otel_span}
-\alias{with_otel_span_promise_domain}
-\alias{local_otel_span_promise_domain}
+\alias{with_otel_promise_domain}
+\alias{local_otel_promise_domain}
 \title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
 \usage{
 with_otel_span(name, expr, ..., tracer, attributes = NULL)
 
-with_otel_span_promise_domain(expr)
+with_otel_promise_domain(expr)
 
-local_otel_span_promise_domain(envir = parent.frame())
+local_otel_promise_domain(envir = parent.frame())
 }
 \arguments{
 \item{name}{Character string. The name of the otel span.}
@@ -48,7 +48,7 @@ therefore this topic requires more in-depth documentation and examples.
 Creates an OpenTelemetry span, executes the given expression within it, and
 ends the span.
 
-This method \strong{requires} the use of \code{with_otel_span_promise_domain()}
+This method \strong{requires} the use of \code{with_otel_promise_domain()}
 to be within the execution stack.
 
 This function is designed to handle both synchronous and asynchronous
@@ -67,14 +67,14 @@ asynchronous operations).
 If OpenTelemetry is not enabled, the expression will be evaluated without any
 tracing context.
 
-\item \code{with_otel_span_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\item \code{with_otel_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Adds an idempotent handoff Active OpenTelemetry span promise domain.
 
 Package authors are required to use this function to have otel span context
 persist across asynchronous boundaries. This method is only needed once per
 promise domain stack. If you are unsure, feel free to call
-\code{with_otel_span_promise_domain()} as the underlying promise domain will only be
+\code{with_otel_promise_domain()} as the underlying promise domain will only be
 added if not found within the current promise domain stack. If your package
 \strong{only} works within Shiny apps, Shiny will have already added the domain so
 no need to add it yourself. If your package works outside of Shiny and you
@@ -85,13 +85,14 @@ This method adds a \emph{handoff} Active OpenTelemetry span promise domain to th
 expression evaluation. This \emph{handoff} promise domain will only run once on
 reactivation. This is critical if there are many layered
 \code{with_otel_span()} calls, such as within Shiny reactivity. For example, if
-we nested many \code{with_otel_span()} of which each added a promise domain
-that reactivated each otel span on restore, we'd reactivate \code{k} otel span objects
-(\code{O(k)}) when we only need to activate the \strong{last} span (\code{O(1)}).
+we nested many \code{with_otel_span()} calls of which each call added a promise
+domain that reactivated each otel span on restore, we'd reactivate \code{k} otel
+span objects (\code{O(k)}) when we only need to activate the \strong{last} span
+(\code{O(1)}).
 
 Returns the result of evaluating \code{expr} within the otel span promise domain.
 
-\item \code{local_otel_span_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\item \code{local_otel_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Local OpenTelemetry span promise domain
 
@@ -100,7 +101,7 @@ for \code{{coro}} operations where encapsulating the coro operations inside a
 \verb{with_*()} methods is not allowed.
 
 When not using \code{{coro}}, please prefer to use \code{with_otel_span()} or
-\code{with_otel_span_promise_domain()}.
+\code{with_otel_promise_domain()}.
 
 }}
 \section{Definitions}{
@@ -115,7 +116,7 @@ to function properly. Otherwise a multi-stage promise that adds to the
 graphics device at each stage will only ever print to the most recently
 created graphics device, not the associated graphics device. These promise
 domains are not automatically created, they must be manually added to the
-execution stack, for example \code{with_otel_span_promise_domain()} does this for
+execution stack, for example \code{with_otel_promise_domain()} does this for
 OpenTelemetry spans.
 \item Promise domain restoration: When switching from one promise chain to
 another, the execution context is torn down and then re-established. This
@@ -134,7 +135,7 @@ objects. The only way the promise domain is captured is exactly when the
 \code{then()} method is called.
 }
 
-\code{with_otel_span_promise_domain()} creates a promise domain that restores the
+\code{with_otel_promise_domain()} creates a promise domain that restores the
 currently active OpenTelemetry span from when a call to \code{promises::then()} is
 executed. Given the special circumstance where only the current otel span is
 needed to continue recording (not a full ancestry tree of otel spans), we can
@@ -157,7 +158,7 @@ created/captured/restored and when otel span objects are
 created/activated/reactivated/ended.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{# t0.0
-p2 <- with_otel_span_promise_domain(\{
+p2 <- with_otel_promise_domain(\{
   # t0.1
   p <- with_otel_span("async_op", \{
     # ... return a promise ...
@@ -182,11 +183,11 @@ An in-depth explanation of the execution timeline is below.
 \itemize{
 \item At the first initial tick, \verb{t0.*}:
 \itemize{
-\item \code{t0.0}: The code is wrapped in \code{with_otel_span_promise_domain()}
+\item \code{t0.0}: The code is wrapped in \code{with_otel_promise_domain()}
 \item \code{t0.1}: The \code{async_op} otel span is created and activated
 \item \code{t0.2}: Some async work is initiated
 \item \code{t0.3}: \code{then()} is called, capturing the active \code{async_op} otel span (as it
-is called within \code{with_otel_span_promise_domain()})
+is called within \code{with_otel_promise_domain()})
 \item \code{t0.4}: The \code{with_otel_span()} call exits, but the \code{async_op} otel span is
 not ended as the promise is still pending. The returned promise has a
 \code{finally()} step added to it that will end the otel span \code{async_op} when \code{p}
@@ -247,10 +248,10 @@ at for every step in a promise chain would then take \code{O(n^2)} time, not
 multiple similar promise domain restorations.
 }
 
-\section{Execution model for \code{with_otel_span_promise_domain()}}{
+\section{Execution model for \code{with_otel_promise_domain()}}{
 
 \enumerate{
-\item \code{with_otel_span_promise_domain(expr)} is called.
+\item \code{with_otel_promise_domain(expr)} is called.
 \itemize{
 \item The following steps all occur within \code{expr}.
 }
@@ -271,12 +272,12 @@ creates/ends the otel span) or \code{otel::with_active_span(span, expr)}.
 \itemize{
 \item When \code{promises::then()} is called, the two methods (\code{onFulfilled} and
 \code{onRejected}) capture the currently active spans. (Performed by the
-initial \code{with_otel_span_promise_domain()})
+initial \code{with_otel_promise_domain()})
 }
 \enumerate{
 \item During reactivation of the promise chain step, the previously captured
 otel span is reactivated via \code{with_active_span()}. (Performed by the initial
-\code{with_otel_span_promise_domain()})
+\code{with_otel_promise_domain()})
 }
 }
 
@@ -301,17 +302,17 @@ asynchronous operations (ending the otel span within \code{promises::finally()})
 \examples{
 \dontrun{
 # Common usage:
-with_otel_span_promise_domain({
+with_otel_promise_domain({
   # ... deep inside some code execution ...
 
-  # Many calls to `with_otel_span()` within `with_otel_span_promise_domain()`
+  # Many calls to `with_otel_span()` within `with_otel_promise_domain()`
   with_otel_span("my_operation", {
     # ... do some work ...
   })
 })
 }
 \dontrun{
-with_otel_span_promise_domain({
+with_otel_promise_domain({
   # ... deep inside some code execution ...
 
   # Synchronous operation
