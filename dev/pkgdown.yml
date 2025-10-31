@@ -11,7 +11,7 @@ articles:
   promises_06_shiny: promises_06_shiny.html
   promises_07_combining: promises_07_combining.html
   promises_08_casestudy: promises_08_casestudy.html
-last_built: 2025-10-31T19:18Z
+last_built: 2025-10-31T19:24Z
 urls:
   reference: https://rstudio.github.io/promises/reference
   article: https://rstudio.github.io/promises/articles

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">promises</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.4.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.4.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,12 +51,26 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/rstudio/promises/blob/rc-v1.5.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/rstudio/promises/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="promises-development-version">promises (development version)<a class="anchor" aria-label="anchor" href="#promises-development-version"></a></h2>
-<ul><li>A promise is now a simple classed environment rather than an R6 class. This reduces their creation overhead by up to 10x, thereby substantially improving performance. (<a href="https://github.com/rstudio/promises/issues/191" class="external-link">#191</a>)</li>
+<ul><li><p>A promise is now a simple classed environment rather than an R6 class. This reduces their creation overhead by up to 10x, thereby substantially improving performance. (<a href="https://github.com/rstudio/promises/issues/191" class="external-link">#191</a>)</p></li>
+<li><p><code><a href="../reference/otel.html">with_otel_span()</a></code> creates an OpenTelemetry span, executes the given expression within it, and ends the span. This function handles both synchronous and asynchronous (promise-based) operations. For promises, the span is automatically ended when the promise resolves or rejects. To access the OpenTelemetry span within your expression, use <code>otel::get_current_span()</code>. (<a href="https://github.com/rstudio/promises/issues/198" class="external-link">#198</a>)</p></li>
+<li><p><code><a href="../reference/otel.html">with_otel_promise_domain()</a></code> creates a promise domain that restores the currently active OpenTelemetry span from when a call to <code><a href="../reference/then.html">then()</a></code> is executed. This enables proper tracing context across asynchronous operations. (<a href="https://github.com/rstudio/promises/issues/173" class="external-link">#173</a>)</p></li>
+<li><p><code><a href="../reference/otel.html">local_otel_promise_domain()</a></code> adds an OpenTelemetry span promise domain to the local scope. This is useful for <a href="https://github.com/r-lib/coro" class="external-link">coro</a> operations where encapsulating the coro operations inside <code>with_*()</code> methods is not allowed. (<a href="https://github.com/rstudio/promises/issues/179" class="external-link">#179</a>)</p></li>
+<li>
+<p>Deprecated OpenTelemetry functions to use consistent naming and better reflect their behavior:</p>
+<ul><li>
+<code><a href="../reference/promises-deprecated.html">with_ospan_async()</a></code> - Please use <code><a href="../reference/otel.html">with_otel_span()</a></code> instead. This name change reflects handling of both synchronous and asynchronous operations, similar to <code><a href="../reference/hybrid_then.html">hybrid_then()</a></code>
+</li>
+<li>
+<code><a href="../reference/promises-deprecated.html">with_ospan_promise_domain()</a></code> - Please use <code><a href="../reference/otel.html">with_otel_promise_domain()</a></code> instead.</li>
+<li>
+<code><a href="../reference/promises-deprecated.html">local_ospan_promise_domain()</a></code> - Please use <code><a href="../reference/otel.html">local_otel_promise_domain()</a></code> instead.</li>
+</ul><p>The old function names are now deprecated and will be removed in a future release. (<a href="https://github.com/rstudio/promises/issues/198" class="external-link">#198</a>)</p>
+</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.4.0" id="promises-140">promises 1.4.0<a class="anchor" aria-label="anchor" href="#promises-140"></a></h2><p class="text-muted">CRAN release: 2025-10-22</p>
@@ -71,9 +85,9 @@
 </ul><div class="section level4">
 <h4 id="opentelemetry-integration-1-4-0">OpenTelemetry integration<a class="anchor" aria-label="anchor" href="#opentelemetry-integration-1-4-0"></a></h4>
 <p>promises now integrates with the otel package to provide observability and tracing for asynchronous operations. OpenTelemetry integration is experimental and subject to change.</p>
-<ul><li><p><code><a href="../reference/otel.html">with_ospan_async()</a></code> creates an OpenTelemetry span, executes the given expression within it, and ends the span. This function handles both synchronous and asynchronous (promise-based) operations. For promises, the span is automatically ended when the promise resolves or rejects. To access the OpenTelemetry span within your expression, use <code>otel::get_current_span()</code>. (<a href="https://github.com/rstudio/promises/issues/173" class="external-link">#173</a>)</p></li>
-<li><p><code><a href="../reference/otel.html">with_ospan_promise_domain()</a></code> creates a promise domain that restores the currently active OpenTelemetry span from when a call to <code><a href="../reference/then.html">then()</a></code> is executed. This enables proper tracing context across asynchronous operations. (<a href="https://github.com/rstudio/promises/issues/173" class="external-link">#173</a>)</p></li>
-<li><p><code><a href="../reference/otel.html">local_ospan_promise_domain()</a></code> adds an OpenTelemetry span promise domain to the local scope. This is useful for <a href="https://github.com/r-lib/coro" class="external-link">coro</a> operations where encapsulating the coro operations inside <code>with_*()</code> methods is not allowed. (<a href="https://github.com/rstudio/promises/issues/179" class="external-link">#179</a>)</p></li>
+<ul><li><p><code><a href="../reference/promises-deprecated.html">with_ospan_async()</a></code> creates an OpenTelemetry span, executes the given expression within it, and ends the span. This function handles both synchronous and asynchronous (promise-based) operations. For promises, the span is automatically ended when the promise resolves or rejects. To access the OpenTelemetry span within your expression, use <code>otel::get_current_span()</code>. (<a href="https://github.com/rstudio/promises/issues/173" class="external-link">#173</a>)</p></li>
+<li><p><code><a href="../reference/promises-deprecated.html">with_ospan_promise_domain()</a></code> creates a promise domain that restores the currently active OpenTelemetry span from when a call to <code><a href="../reference/then.html">then()</a></code> is executed. This enables proper tracing context across asynchronous operations. (<a href="https://github.com/rstudio/promises/issues/173" class="external-link">#173</a>)</p></li>
+<li><p><code><a href="../reference/promises-deprecated.html">local_ospan_promise_domain()</a></code> adds an OpenTelemetry span promise domain to the local scope. This is useful for <a href="https://github.com/r-lib/coro" class="external-link">coro</a> operations where encapsulating the coro operations inside <code>with_*()</code> methods is not allowed. (<a href="https://github.com/rstudio/promises/issues/179" class="external-link">#179</a>)</p></li>
 </ul></div>
 </div>
 <div class="section level3">

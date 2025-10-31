@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">promises</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.4.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.4.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="logo.svg" class="logo" alt=""><h1>CLAUDE.md</h1>
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/rc-v1.5.0/CLAUDE.md" class="external-link"><code>CLAUDE.md</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/CLAUDE.md" class="external-link"><code>CLAUDE.md</code></a></small>
     </div>
 
 <div id="claudemd" class="section level1">
@@ -101,7 +101,7 @@
 <p><strong>Core Operations (<code>R/then.R</code>):</strong> - <code><a href="reference/then.html">then()</a></code> - Primary interface for promise chaining and result handling - Supports both fulfillment (<code>onFulfilled</code>) and rejection (<code>onRejected</code>) callbacks - Callbacks support <code><a href="https://rlang.r-lib.org/reference/as_function.html" class="external-link">rlang::as_function()</a></code> conversions (formulas, strings, integers, lists for extraction) - Formula syntax <code>~ fn(.)</code> is deprecated in favor of function shorthand <code>\(x) fn(x)</code> - Returns new promise that chains from the input promise - <code><a href="reference/then.html">catch()</a></code> and <code><a href="reference/then.html">finally()</a></code> - Convenience functions (equivalent to <code><a href="reference/then.html">then()</a></code> with specific callbacks) - <code>tee</code> parameter - Execute callbacks for side-effects while preserving original values - With <code>tee=TRUE</code>, callback result is discarded and original value/error is propagated - Useful for logging, debugging, or other side-effect operations - <code><a href="reference/hybrid_then.html">hybrid_then()</a></code> - Hybrid synchronous/asynchronous execution - If <code>expr</code> evaluates to a promise, delegates to <code><a href="reference/then.html">then()</a></code> for async handling - If <code>expr</code> evaluates to a value, executes <code>on_success</code>/<code>on_failure</code> callbacks synchronously (same tick) - Useful for functions that need to work with both sync and async inputs (e.g., plumber2)</p>
 <p><strong>Combining Operations (<code>R/methods.R</code>):</strong> - <code><a href="reference/promise_all.html">promise_all()</a></code> - Wait for all promises to complete - <code><a href="reference/promise_all.html">promise_race()</a></code> - Wait for first promise to complete - <code><a href="reference/promise_map.html">promise_map()</a></code> - Apply function over list of promises - <code><a href="reference/promise_reduce.html">promise_reduce()</a></code> - Reduce promises sequentially</p>
 <p><strong>Future Integration (<code>R/future_promise.R</code>):</strong> - Bridges promises with the <code>future</code> package for parallel computing - <code><a href="reference/future_promise.html">future_promise()</a></code> - Convert future objects to promises - Work queue system (<code>WorkQueue</code> R6 class) for managing concurrent operations - Exponential backoff (<code>ExpoDelay</code>) when workers unavailable - Polling mechanism to check <code><a href="https://future.futureverse.org/reference/resolved.html" class="external-link">future::resolved()</a></code> status - Requires <code>future &gt;= 1.21.0</code> and <code>fastmap &gt;= 1.1.0</code></p>
-<p><strong>OpenTelemetry Integration (<code>R/otel.R</code>):</strong> - Experimental integration with <code>otel</code> package for distributed tracing - <code><a href="reference/otel.html">with_ospan_async()</a></code> - Create/manage spans for async operations - <code><a href="reference/otel.html">with_ospan_promise_domain()</a></code> - Handoff promise domain for span context propagation - Critical for observability in complex async workflows - Uses cached tracer via <code>get_tracer()</code> for performance</p>
+<p><strong>OpenTelemetry Integration (<code>R/otel.R</code>):</strong> - Experimental integration with <code>otel</code> package for distributed tracing - <code><a href="reference/otel.html">with_otel_span()</a></code> - Create/manage spans for async operations - <code><a href="reference/otel.html">with_otel_promise_domain()</a></code> - Handoff promise domain for span context propagation - Critical for observability in complex async workflows - Uses cached tracer via <code>promises_otel_tracer()</code> for performance</p>
 </div>
 <div class="section level3">
 <h3 id="integration-points">Integration Points<a class="anchor" aria-label="anchor" href="#integration-points"></a></h3>
