@@ -240,3 +240,45 @@ function() {
 is_false <- function(x) {
   is.logical(x) && length(x) == 1L && !is.na(x) && !x
 }
+
+#' Wait for a Promise
+#'
+#' Synchronizes a promise by waiting for it to complete and then retrieving its
+#' value.
+#'
+#' @inheritParams then
+#' @param loop the \pkg{later} loop on which the promise has been scheduled.
+#'   Defaults to [later::current_loop()].
+#'
+#' @return The value of the resolved promise. An error will be thrown if the
+#'   promise is rejected.
+#'
+#' @examples
+#' # Returns a promise for the sum of e1 + e2, with a 1 sec delay
+#' slowly_add <- function(e1, e2) {
+#'   promise(\(resolve, reject) {
+#'     later::later(\() resolve(e1 + e2), delay = 1)
+#'   })
+#' }
+#'
+#' # Returns 3 after 1 second
+#' res <- wait_for(slowly_add(1, 2))
+#' res
+#'
+#' @export
+wait_for <- function(promise, loop = later::current_loop()) {
+  if (!is.promise(promise)) {
+    stop("wait_for() requires a promise object")
+  }
+  private <- attr(promise, "promise_impl")$.__enclos_env__$private
+  while (private$state == "pending") {
+    later::run_now(Inf, all = FALSE, loop = loop)
+  }
+  if (private$state == "rejected") {
+    stop(conditionMessage(private$value))
+  }
+  if (private$visible) {
+    return(private$value)
+  }
+  invisible(private$value)
+}
