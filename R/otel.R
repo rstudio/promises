@@ -40,7 +40,7 @@ promises_otel_tracer <- local({
   }
 })
 
-#' `r lifecycle::badge("experimental")` OpenTelemetry integration
+#' OpenTelemetry integration
 #'
 #' @description
 #' \pkg{otel} provides tools for integrating with OpenTelemetry, a framework for
@@ -217,9 +217,7 @@ promises_otel_tracer <- local({
 #'
 #'
 #'
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Creates an OpenTelemetry span, executes the given expression within it, and
+#' @describeIn otel Creates an OpenTelemetry span, executes the given expression within it, and
 #' ends the span.
 #'
 #' This method **requires** the use of `with_otel_promise_domain()`
@@ -347,9 +345,7 @@ with_otel_span <- function(
 }
 
 
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Adds an idempotent handoff Active OpenTelemetry span promise domain.
+#' @describeIn otel Adds an idempotent handoff Active OpenTelemetry span promise domain.
 #'
 #' Package authors are required to use this function to have otel span context
 #' persist across asynchronous boundaries. This method is only needed once per
@@ -384,9 +380,7 @@ with_otel_promise_domain <- function(expr) {
 }
 
 
-#' @describeIn otel `r lifecycle::badge("experimental")`
-#'
-#' Local OpenTelemetry span promise domain
+#' @describeIn otel Local OpenTelemetry span promise domain
 #'
 #' Adds an OpenTelemetry span promise domain to the local scope. This is useful
 #' for `{coro}` operations where encapsulating the coro operations inside a

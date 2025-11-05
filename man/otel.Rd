@@ -4,7 +4,7 @@
 \alias{with_otel_span}
 \alias{with_otel_promise_domain}
 \alias{local_otel_promise_domain}
-\title{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} OpenTelemetry integration}
+\title{OpenTelemetry integration}
 \usage{
 with_otel_span(name, expr, ..., tracer, attributes = NULL)
 
@@ -43,9 +43,7 @@ therefore this topic requires more in-depth documentation and examples.
 }
 \section{Functions}{
 \itemize{
-\item \code{with_otel_span()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-Creates an OpenTelemetry span, executes the given expression within it, and
+\item \code{with_otel_span()}: Creates an OpenTelemetry span, executes the given expression within it, and
 ends the span.
 
 This method \strong{requires} the use of \code{with_otel_promise_domain()}
@@ -67,9 +65,7 @@ asynchronous operations).
 If OpenTelemetry is not enabled, the expression will be evaluated without any
 tracing context.
 
-\item \code{with_otel_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-Adds an idempotent handoff Active OpenTelemetry span promise domain.
+\item \code{with_otel_promise_domain()}: Adds an idempotent handoff Active OpenTelemetry span promise domain.
 
 Package authors are required to use this function to have otel span context
 persist across asynchronous boundaries. This method is only needed once per
@@ -92,9 +88,7 @@ span objects (\code{O(k)}) when we only need to activate the \strong{last} span
 
 Returns the result of evaluating \code{expr} within the otel span promise domain.
 
-\item \code{local_otel_promise_domain()}: \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-
-Local OpenTelemetry span promise domain
+\item \code{local_otel_promise_domain()}: Local OpenTelemetry span promise domain
 
 Adds an OpenTelemetry span promise domain to the local scope. This is useful
 for \code{{coro}} operations where encapsulating the coro operations inside a
