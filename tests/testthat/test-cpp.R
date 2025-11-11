@@ -1,6 +1,6 @@
 describe("C++ interface", {
   env <- new.env()
-  Rcpp::sourceCpp(
+  cpp11::cpp_source(
     system.file("promise_task.cpp", package = "promises"),
     env = env
   )
