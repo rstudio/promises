@@ -1,13 +1,7 @@
 describe("C++ interface", {
   # `cpp11::cpp_source()` errors if these packages are not installed:
-  skip_if_not_installed("brio")
-  skip_if_not_installed("callr")
-  skip_if_not_installed("cli")
-  skip_if_not_installed("decor")
-  skip_if_not_installed("desc")
-  skip_if_not_installed("glue")
-  skip_if_not_installed("tibble")
-  skip_if_not_installed("vctrs")
+  # brio, callr, cli, decor, desc, glue, tibble, vctrs
+  skip_on_cran()
 
   env <- new.env()
   cpp11::cpp_source(
