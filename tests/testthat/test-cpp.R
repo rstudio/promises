@@ -1,9 +1,9 @@
-print(library())
-
 describe("C++ interface", {
+  skip_on_cran()
   # `cpp11::cpp_source()` errors if these packages are not installed:
   # brio, callr, cli, decor, desc, glue, tibble, vctrs
-  skip_on_cran()
+  skip_if_not_installed("decor")
+  skip_if_not_installed("tibble")
 
   env <- new.env()
   cpp11::cpp_source(
