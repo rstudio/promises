@@ -1,3 +1,5 @@
+print(library())
+
 describe("C++ interface", {
   # `cpp11::cpp_source()` errors if these packages are not installed:
   # brio, callr, cli, decor, desc, glue, tibble, vctrs
