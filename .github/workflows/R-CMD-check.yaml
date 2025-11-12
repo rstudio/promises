@@ -31,3 +31,23 @@ jobs:
     with:
       extra-check-args: '"--run-donttest"'
       cache-version: "donttest-1"
+
+  cpp-extra-test:
+    name: cpp-extra-test
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout GitHub repo
+        uses: rstudio/shiny-workflows/.github/internal/checkout@v1
+
+      - name: Install R, system dependencies, and package dependencies
+        uses: rstudio/shiny-workflows/setup-r-package@v1
+        with:
+          needs: check
+          extra-packages: any::pkgload
+      - name: Run testthat on test-cpp.R
+        run: |
+          pkgload::load_all()
+          testthat::test_file(file.path("tests", "testthat", "test-cpp.R"))
+        shell: Rscript {0}

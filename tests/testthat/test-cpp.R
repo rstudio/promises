@@ -1,6 +1,12 @@
 describe("C++ interface", {
+  skip_on_cran()
+  # `cpp11::cpp_source()` errors if these packages are not installed:
+  # brio, callr, cli, decor, desc, glue, tibble, vctrs
+  skip_if_not_installed("decor")
+  skip_if_not_installed("tibble")
+
   env <- new.env()
-  Rcpp::sourceCpp(
+  cpp11::cpp_source(
     system.file("promise_task.cpp", package = "promises"),
     env = env
   )

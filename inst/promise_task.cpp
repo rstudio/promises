@@ -1,24 +1,24 @@
-#include <Rcpp.h>
+#include <cpp11.hpp>
 #include <later_api.h>
 
 class PromiseTask : public later::BackgroundTask {
 public:
-  PromiseTask(Rcpp::Function resolve, Rcpp::Function reject)
+  PromiseTask(cpp11::function resolve, cpp11::function reject)
       : resolve(resolve), reject(reject) {
   }
 
 protected:
   virtual void execute() = 0;
-  virtual Rcpp::RObject get_result() = 0;
+  virtual cpp11::sexp get_result() = 0;
 
   void complete() {
-    Rcpp::RObject result = get_result();
+    cpp11::sexp result = get_result();
     resolve(result);
   }
 
 private:
-  Rcpp::Function resolve;
-  Rcpp::Function reject;
+  cpp11::function resolve;
+  cpp11::function reject;
 };
 
 long fib(long x) {
@@ -30,7 +30,7 @@ long fib(long x) {
 
 class FibonacciTask : public PromiseTask {
 public:
-  FibonacciTask(Rcpp::Function resolve, Rcpp::Function reject, double x)
+  FibonacciTask(cpp11::function resolve, cpp11::function reject, double x)
       : PromiseTask(resolve, reject), x(x) {
   }
 
@@ -38,8 +38,8 @@ public:
     result = fib((long)x);
   }
 
-  Rcpp::RObject get_result() {
-    Rcpp::NumericVector res(1);
+  cpp11::sexp get_result() {
+    cpp11::writable::doubles res(1);
     res[0] = (double)result;
     return res;
   }
@@ -49,9 +49,9 @@ private:
   long result;
 };
 
-// [[Rcpp::depends(later)]]
-// [[Rcpp::export]]
-void asyncFib(Rcpp::Function resolve, Rcpp::Function reject, double x) {
+[[cpp11::linking_to("later")]]
+[[cpp11::register]]
+void asyncFib(cpp11::function resolve, cpp11::function reject, double x) {
   FibonacciTask* fib = new FibonacciTask(resolve, reject, x);
   fib->begin();
 }
@@ -59,8 +59,8 @@ void asyncFib(Rcpp::Function resolve, Rcpp::Function reject, double x) {
 /* R
 library(promises)
 library(later)
-library(Rcpp)
-Rcpp::sourceCpp(system.file("promise_task.cpp", package = "promises"))
+library(cpp11)
+cpp11::cpp_source(system.file("promise_task.cpp", package = "promises"))
 
 promise(function(resolve, reject) {
   asyncFib(resolve, reject, 45)
