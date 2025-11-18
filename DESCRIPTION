@@ -39,7 +39,6 @@ Suggests:
     mirai,
     otelsdk (>= 0.2.0),
     purrr,
-    Rcpp,
     rmarkdown,
     spelling,
     testthat (>= 3.0.0),
