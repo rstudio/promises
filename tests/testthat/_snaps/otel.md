@@ -1,4 +1,4 @@
-# Deprecated functions: with_ospan_async() is deprecated
+# OpenTelemetry integration / Deprecated functions / with_ospan_async() is deprecated
 
     Code
       with_ospan_async("test_span_deprecated", {
@@ -11,7 +11,7 @@
     Output
       [1] 42
 
-# Deprecated functions: with_ospan_promise_domain() is deprecated
+# OpenTelemetry integration / Deprecated functions / with_ospan_promise_domain() is deprecated
 
     Code
       with_ospan_promise_domain({
@@ -24,7 +24,7 @@
     Output
       [1] 42
 
-# Deprecated functions: local_ospan_promise_domain() is deprecated
+# OpenTelemetry integration / Deprecated functions / local_ospan_promise_domain() is deprecated
 
     Code
       local({
