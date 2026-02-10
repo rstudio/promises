@@ -165,6 +165,7 @@ describe("finally()", {
 })
 
 describe("future", {
+  skip_if_not_installed("future")
   it("is treated as promise when used as resolution", {
     p <- promise_resolve(future::future(1))
     expect_identical(extract(p), 1)
