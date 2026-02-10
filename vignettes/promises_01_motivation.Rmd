@@ -33,8 +33,3 @@ While promises can make a huge difference in the scalability of a Shiny app, the
 Next: [An informal intro to async programming](promises_02_intro.html)
 </div>
 
-
-```{r}
-# Debug; Do not merge in PR
-1 + 1
-```
