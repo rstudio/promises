@@ -44,7 +44,8 @@ Suggests:
     testthat (>= 3.0.0),
     vembedr
 VignetteBuilder:
-    knitr
+    knitr,
+    rmarkdown
 Config/Needs/website: rsconnect, tidyverse/tidytemplate
 Config/testthat/edition: 3
 Config/usethis/last-upkeep: 2025-05-27
