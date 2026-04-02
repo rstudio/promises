@@ -272,7 +272,7 @@ wait_for <- function(promise, loop = later::current_loop()) {
   }
   private <- attr(promise, "promise_impl")$.__enclos_env__$private
   while (private$state == "pending") {
-    later::run_now(Inf, all = FALSE, loop = loop)
+    later::run_now(Inf, loop = loop)
   }
   if (private$state == "rejected") {
     stop(private$value)
