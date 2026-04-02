@@ -39,7 +39,10 @@ test_that("wait_for() preserves custom condition class", {
 
 test_that("wait_for() preserves rlang error class", {
   skip_if_not_installed("rlang")
-  p <- promise_resolve(rlang::abort("rlang error", class = "custom_rlang_error"))
+  p <- promise_resolve(rlang::abort(
+    "rlang error",
+    class = "custom_rlang_error"
+  ))
   squelch_unhandled_promise_error(p)
   cnd <- tryCatch(wait_for(p), error = identity)
   expect_s3_class(cnd, "custom_rlang_error")
@@ -93,4 +96,45 @@ test_that("wait_for() errors on non-promise input", {
   expect_error(wait_for(42), "wait_for\\(\\) requires a promise object")
   expect_error(wait_for("hello"), "wait_for\\(\\) requires a promise object")
   expect_error(wait_for(NULL), "wait_for\\(\\) requires a promise object")
+})
+
+test_that("wait_for() works with mirai promise that resolves", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  p <- as.promise(mirai::mirai(42))
+  expect_equal(wait_for(p), 42)
+})
+
+test_that("wait_for() works with mirai promise that rejects", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  p <- as.promise(mirai::mirai(stop("there was an error")))
+  squelch_unhandled_promise_error(p)
+  expect_snapshot(wait_for(p), error = TRUE)
+})
+
+test_that("wait_for() works with mirai promise chained via then()", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  p <- as.promise(mirai::mirai(10)) |>
+    then(\(x) x + 5) |>
+    then(\(x) x * 2)
+  expect_equal(wait_for(p), 30)
+})
+
+test_that("wait_for() works with mirai promise caught via catch()", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  p <- as.promise(mirai::mirai(stop("oops"))) |>
+    catch(\(e) "recovered")
+  expect_equal(wait_for(p), "recovered")
+})
+
+test_that("wait_for() throws when mirai then() callback errors", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  p <- as.promise(mirai::mirai(1)) |>
+    then(\(x) stop("chain error"))
+  squelch_unhandled_promise_error(p)
+  expect_snapshot(wait_for(p), error = TRUE)
 })
