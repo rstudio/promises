@@ -1,5 +1,10 @@
 # promises (development version)
 
+## New features
+
+* New `wait_for()` synchronizes a promise by blocking until it resolves or
+  rejects, then returns the value or raises the error. (#190)
+
 ## Bug fixes
 
 * Primitive functions such as `sum` and `abs` now receive the value when
@@ -43,7 +48,6 @@
   and `hybrid_then()` now pass a non-condition rejection reason (such as
   `promise_reject(42)`) on unchanged. Before, it became a `simpleError`.
   (#212)
-
 # promises 1.5.0
 
 ## OpenTelemetry
