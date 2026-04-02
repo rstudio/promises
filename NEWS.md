@@ -1,5 +1,8 @@
 # promises (development version)
 
+* New `wait_for()` synchronizes a promise by blocking until it resolves or
+  rejects, then returns the value or raises the error. (#190)
+
 # promises 1.5.0
 
 ## OpenTelemetry
