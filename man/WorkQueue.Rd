@@ -4,11 +4,6 @@
 \alias{WorkQueue}
 \title{Future promise work queue}
 \description{
-Future promise work queue
-
-Future promise work queue
-}
-\details{
 An \pkg{R6} class to help with scheduling work to be completed. \code{WorkQueue} will only execute work if the \code{can_proceed()} returns \code{TRUE}. For the use case of \code{future}, \code{can_proceed()} defaults to \code{future::nbrOfFreeWorkers() > 0} which will not allow for work to be executed if a \pkg{future} worker is not available.
 
 \code{WorkQueue} will constantly try to start new work once prior work item finishes.  However, if \code{can_proceed()} returns \code{FALSE} (no future workers are available) and there is more work to be done, then work is attempted later a random amount of time later using exponential backoff.  The exponential backoff will cap out at 10 seconds to prevent unnecessarily large wait times.
@@ -32,69 +27,73 @@ However, it is possible to use a private loop inside a user-defined \code{WorkQu
 \keyword{internal}
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-WorkQueue-new}{\code{WorkQueue$new()}}
-\item \href{#method-WorkQueue-schedule_work}{\code{WorkQueue$schedule_work()}}
-\item \href{#method-WorkQueue-clone}{\code{WorkQueue$clone()}}
-}
+  \itemize{
+    \item \href{#method-WorkQueue-initialize}{\code{WorkQueue$new()}}
+    \item \href{#method-WorkQueue-schedule_work}{\code{WorkQueue$schedule_work()}}
+    \item \href{#method-WorkQueue-clone}{\code{WorkQueue$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-WorkQueue-new"></a>}}
-\if{latex}{\out{\hypertarget{method-WorkQueue-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new \code{WorkQueue}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WorkQueue$new(
+\if{html}{\out{<a id="method-WorkQueue-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-WorkQueue-initialize}{}}}
+\subsection{\code{WorkQueue$new()}}{
+  Create a new \code{WorkQueue}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WorkQueue$new(
   can_proceed = future_worker_is_free,
   queue = fastmap::fastqueue(),
   loop = later::global_loop()
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{can_proceed}}{Function that should return a logical value. If \code{TRUE} is returned, then the next scheduled work will be executed. By default, this function checks if \code{\link[future:nbrOfWorkers]{future::nbrOfFreeWorkers()} > 0}}
-
-\item{\code{queue}}{Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using \code{\link[fastmap:fastqueue]{fastmap::fastqueue()}}. If using your own queue, it should have the methods \verb{$add(x)}, \verb{$remove()}, \verb{$size()}.}
-
-\item{\code{loop}}{\pkg{later} loop to use for calculating the next delayed check. Defaults to \code{\link[later:create_loop]{later::global_loop()}}.
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{can_proceed}}{Function that should return a logical value. If \code{TRUE} is returned, then the next scheduled work will be executed. By default, this function checks if \code{\link[future:nbrOfWorkers]{future::nbrOfFreeWorkers()} > 0}}
+      \item{\code{queue}}{Queue object to use to store the scheduled work. By default, this is a "First In, First Out" queue using \code{\link[fastmap:fastqueue]{fastmap::fastqueue()}}. If using your own queue, it should have the methods \verb{$add(x)}, \verb{$remove()}, \verb{$size()}.}
+      \item{\code{loop}}{\pkg{later} loop to use for calculating the next delayed check. Defaults to \code{\link[later:global_loop]{later::global_loop()}}.
 Schedule work}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WorkQueue-schedule_work"></a>}}
 \if{latex}{\out{\hypertarget{method-WorkQueue-schedule_work}{}}}
-\subsection{Method \code{schedule_work()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WorkQueue$schedule_work(fn)}\if{html}{\out{</div>}}
+\subsection{\code{WorkQueue$schedule_work()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WorkQueue$schedule_work(fn)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{fn}}{function to execute when \code{can_proceed()} returns \code{TRUE}.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{fn}}{function to execute when \code{can_proceed()} returns \code{TRUE}.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WorkQueue-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-WorkQueue-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WorkQueue$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{WorkQueue$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WorkQueue$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

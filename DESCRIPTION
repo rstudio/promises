@@ -47,9 +47,9 @@ VignetteBuilder:
     knitr,
     rmarkdown
 Config/Needs/website: brand.yml, rsconnect, tidyverse/tidytemplate
+Config/roxygen2/markdown: TRUE
+Config/roxygen2/version: 8.0.0
 Config/testthat/edition: 3
 Config/usethis/last-upkeep: 2025-05-27
 Encoding: UTF-8
 Language: en-US
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3

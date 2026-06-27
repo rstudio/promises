@@ -5,12 +5,7 @@
 # }
 NULL
 
-#' @importFrom otel
-#'   start_span
-#'   end_span
-#'   get_active_span
-#'   is_tracing_enabled
-#'   with_active_span
+#' @importFrom otel start_span end_span get_active_span is_tracing_enabled with_active_span
 NULL
 
 # Fixed variable named required for `otel::default_tracer_name()`

@@ -24,7 +24,7 @@ identified.}
 \item{...}{extra parameters provided to \code{\link[future:future]{future::future()}}}
 
 \item{substitute}{If TRUE, argument \code{expr} is
-\code{\link[base]{substitute}()}:ed, otherwise not.}
+\code{\link[base]{substitute}()}:d, otherwise not.}
 
 \item{queue}{A queue that is used to schedule work to be done using \code{\link[future:future]{future::future()}}.  This queue defaults to \code{\link[=future_promise_queue]{future_promise_queue()}} and requires that method \code{queue$schedule_work(fn)} exist.  This method should take in a function that will execute the promised \pkg{future} work.}
 }
