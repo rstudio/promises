@@ -46,7 +46,7 @@ future_promise(
 - substitute:
 
   If TRUE, argument `expr` is
-  [`substitute()`](https://rdrr.io/r/base/substitute.html):ed, otherwise
+  [`substitute()`](https://rdrr.io/r/base/substitute.html):d, otherwise
   not.
 
 - queue:

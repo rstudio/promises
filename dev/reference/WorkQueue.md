@@ -1,11 +1,5 @@
 # Future promise work queue
 
-Future promise work queue
-
-Future promise work queue
-
-## Details
-
 An R6 class to help with scheduling work to be completed. `WorkQueue`
 will only execute work if the `can_proceed()` returns `TRUE`. For the
 use case of `future`, `can_proceed()` defaults to
@@ -50,7 +44,7 @@ which returns a `WorkQueue` which is cached per R session.
 
 ### Public methods
 
-- [`WorkQueue$new()`](#method-WorkQueue-new)
+- [`WorkQueue$new()`](#method-WorkQueue-initialize)
 
 - [`WorkQueue$schedule_work()`](#method-WorkQueue-schedule_work)
 
@@ -58,7 +52,7 @@ which returns a `WorkQueue` which is cached per R session.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `WorkQueue$new()`
 
 Create a new `WorkQueue`
 
@@ -95,7 +89,7 @@ Create a new `WorkQueue`
 
 ------------------------------------------------------------------------
 
-### Method `schedule_work()`
+### `WorkQueue$schedule_work()`
 
 #### Usage
 
@@ -109,7 +103,7 @@ Create a new `WorkQueue`
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `WorkQueue$clone()`
 
 The objects of this class are cloneable with this method.
 
