@@ -32,5 +32,5 @@ Use \code{is.promise} to determine whether an R object is a promise. Use
 promise, and \code{is.promising} (another S3 generic method) to test whether
 \code{as.promise} is supported. \link[mirai:mirai]{mirai::mirai} objects have an \code{as.promise} method
 defined in the mirai package, and this package provides one for converting
-\link[future:Future-class]{future::Future} objects into promises.
+\link[future:Future]{future::Future} objects into promises.
 }
