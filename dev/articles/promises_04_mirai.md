@@ -44,6 +44,7 @@ The main API that `mirai` provides couldn’t be simpler. You call
 the code that you want executed asynchronously:
 
 ``` r
+
 m <- mirai({
   # expensive operations go here...
   df <- download_lots_of_data()
@@ -52,12 +53,12 @@ m <- mirai({
 ```
 
 The object that’s returned is a mirai, which for all intents and
-purposes is a promise object[¹](#fn1), which will eventually resolve to
-the return value of the code block (i.e. the last expression) or an
-error if the code does not complete executing successfully. The
-important thing is that no matter how long the expensive operation
-takes, these lines will execute almost instantly, while the operation
-continues in the background.
+purposes is a promise object[^1], which will eventually resolve to the
+return value of the code block (i.e. the last expression) or an error if
+the code does not complete executing successfully. The important thing
+is that no matter how long the expensive operation takes, these lines
+will execute almost instantly, while the operation continues in the
+background.
 
 But we know that R is single-threaded, so how does `mirai` accomplish
 this? The answer: by utilizing another R process. `mirai` delegates the
@@ -129,6 +130,7 @@ and not in a package.
 For example:
 
 ``` r
+
 download_data <- \(url) {
   file <- tempfile()
   download.file(url, file, "libcurl")
@@ -152,6 +154,7 @@ convenience feature to pass an environment instead of individual `...`
 pairs. The above call would then look like this instead:
 
 ``` r
+
 m <- mirai(
   {
     file <- download_data(url)
@@ -251,7 +254,5 @@ return a database connection for the parent to use.
 Next: [Using `promises` with
 Shiny](https://rstudio.github.io/promises/dev/articles/promises_06_shiny.md)
 
-------------------------------------------------------------------------
-
-1.  (The `mirai` package provides several functions for working with
+[^1]: (The `mirai` package provides several functions for working with
     mirai objects, but they are not relevant for our purposes.)

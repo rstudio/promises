@@ -30,6 +30,7 @@ requests use
 and take ~10s to compute `slow_calc()`:
 
 ``` r
+
 #* @get /slow/<k>
 \() {
   future::future({
@@ -43,6 +44,7 @@ use any form of `future` or `promises` and takes almost no time to
 compute.
 
 ``` r
+
 #* @get /fast/<k>
 \() {
   fast_calc()
@@ -65,10 +67,6 @@ longer than necessary to process that last request because the main R
 session must wait for a `future` worker to become available. The video
 below animates this behavior:
 
-# Sorry
-
-This video does not exist.
-
 ## The solution: `future_promise()`
 
 The advantage of using
@@ -89,6 +87,7 @@ with
 [`future_promise()`](https://rstudio.github.io/promises/dev/reference/future_promise.md).
 
 ``` r
+
 #* @get /slow/<k>
 \() {
   promises::future_promise({
@@ -111,10 +110,6 @@ the main R session is actually busy. Outside of these gray areas, the R
 session is free to do other things, for example, executing other
 `promises` or, more generally, non-`future` work. The video below
 animates this behavior:
-
-# Sorry
-
-This video does not exist.
 
 Next: [Using `promises` with
 Shiny](https://rstudio.github.io/promises/dev/articles/promises_06_shiny.md)

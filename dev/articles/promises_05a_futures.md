@@ -25,6 +25,7 @@ The main API that `future` provides couldn’t be simpler. You call
 pass it the code that you want executed asynchronously:
 
 ``` r
+
 f <- future({
   # expensive operations go here...
   df <- download_lots_of_data()
@@ -33,12 +34,12 @@ f <- future({
 ```
 
 The object that’s returned is a future, which for all intents and
-purposes is a promise object[¹](#fn1), which will eventually resolve to
-the return value of the code block (i.e. the last expression) or an
-error if the code does not complete executing successfully. The
-important thing is that no matter how long the expensive operation
-takes, these lines will execute almost instantly, while the operation
-continues in the background.
+purposes is a promise object[^1], which will eventually resolve to the
+return value of the code block (i.e. the last expression) or an error if
+the code does not complete executing successfully. The important thing
+is that no matter how long the expensive operation takes, these lines
+will execute almost instantly, while the operation continues in the
+background.
 
 But we know that R is single-threaded, so how does `future` accomplish
 this? The answer: by utilizing another R process. `future` delegates the
@@ -201,7 +202,5 @@ Next:
 - [Using `promises` with
   Shiny](https://rstudio.github.io/promises/dev/articles/promises_06_shiny.md)
 
-------------------------------------------------------------------------
-
-1.  (The `future` package provides several functions for working with
+[^1]: (The `future` package provides several functions for working with
     future objects, but they are not relevant for our purposes.)

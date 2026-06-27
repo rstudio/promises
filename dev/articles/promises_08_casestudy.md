@@ -143,6 +143,7 @@ many** of the most prolific downloaders to look at. We’ll put these two
 controls in the dashboard sidebar.
 
 ``` r
+
 dashboardSidebar(
   dateInput("date", "Date", value = Sys.Date() - 2),
   numericInput("count", "Show top N downloaders:", 6)
@@ -160,6 +161,7 @@ module](https://shiny.posit.co/r/articles/improve/modules/) that just
 contains more of the same (value boxes and plots).
 
 ``` r
+
   dashboardBody(
     fluidRow(
       tabBox(width = 12,
@@ -325,6 +327,7 @@ The first thing we’ll do is load the basic libraries of async
 programming.
 
 ``` r
+
 library(promises)
 library(mirai)
 daemons(6)
@@ -340,6 +343,7 @@ The next thing we’ll do is convert the `data` event reactive to use
 `mirai` for the expensive bits. The original code looks lke this:
 
 ``` r
+
 # SYNCHRONOUS version
 
 data <- eventReactive(input$date, {
@@ -374,6 +378,7 @@ doing that correctly requires some more advanced techniques that we’ll
 talk about later. We’ll come back and fix this code later, but for now:
 
 ``` r
+
 # ASYNCHRONOUS version
 
 data <- eventReactive(input$date, {
@@ -417,6 +422,7 @@ The `whales` reactive takes the data frame from `data`, and uses dplyr
 to find the top `input$count` most prolific downloaders.
 
 ``` r
+
 # SYNCHRONOUS version
 
 whales <- reactive({
@@ -441,6 +447,7 @@ literally as easy as wrapping each line in an anonymous function inside
 [`then()`](https://rstudio.github.io/promises/dev/reference/then.md):
 
 ``` r
+
 # ASYNCHRONOUS version
 
 whales <- reactive({
@@ -481,6 +488,7 @@ expected to access reactive values and expressions from these handlers.
 The `whale_downloads` reactive is a bit more complicated case.
 
 ``` r
+
 # SYNCHRONOUS version
 
 whale_downloads <- reactive({
@@ -494,6 +502,7 @@ Looks simple, but we can’t just do a simple replacement this time. Can
 you see why?
 
 ``` r
+
 # BAD VERSION DOESN'T WORK
 
 whale_downloads <- reactive({
@@ -553,6 +562,7 @@ pattern, which combines `promises_all`, `then`, and `with`.
   yields a list of those results.
 
 ``` r
+
 promise_all(a = mirai("Hello"), b = mirai("World")) |> then(print)
 #> $a
 #> [1] "Hello"
@@ -568,6 +578,7 @@ promise_all(a = mirai("Hello"), b = mirai("World")) |> then(print)
   block you pass it.
 
 ``` r
+
 x + y
 #> Error: object 'x' not found
 
@@ -581,6 +592,7 @@ Let’s once again combine the three, with the simplest possible example
 of the gathering pattern:
 
 ``` r
+
 promise_all(x = mirai("Hello"), y = mirai("World")) |>
   then(\(values) with(values, {
     paste(x, y)
@@ -607,6 +619,7 @@ Over 52 thousand unique downloaders
 All of the value boxes in this app ended up looking a lot like this:
 
 ``` r
+
 # SYNCHRONOUS version
 
 output$total_downloaders <- renderValueBox({
@@ -627,6 +640,7 @@ a `valueBox` to whom you have passed a promise.
 Meaning, you *don’t* do this:
 
 ``` r
+
 # BAD VERSION DOESN'T WORK
 
 output$total_downloaders <- renderValueBox({
@@ -644,6 +658,7 @@ output$total_downloaders <- renderValueBox({
 Instead, you do this:
 
 ``` r
+
 # ASYNCHRONOUS version
 
 output$total_downloaders <- renderValueBox({
@@ -668,6 +683,7 @@ In a cruel twist of API design fate, one of the cornerstone packages of
 the tidyverse lacks a tidy API. I’m referring, of course, to `ggplot2`:
 
 ``` r
+
 # SYNCHRONOUS version
 
 output$downloaders <- renderPlot({
@@ -691,6 +707,7 @@ perform a multi-line code block inside a
 wrapper.
 
 ``` r
+
 # ASYNCHRONOUS version
 
 output$downloaders <- renderPlot({
@@ -721,6 +738,7 @@ functionality of the original.
 Again, here’s the original sync code:
 
 ``` r
+
 # SYNCHRONOUS version
 
 data <- eventReactive(input$date, {
@@ -778,6 +796,7 @@ parsing mirai.
 The regrettably complicated solution is below.
 
 ``` r
+
 # ASYNCHRONOUS version
 
 data <- eventReactive(input$date, {

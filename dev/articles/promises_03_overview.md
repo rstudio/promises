@@ -103,6 +103,7 @@ promise is what lets you know:
 So if a regular, synchronous function call generally looks like this:
 
 ``` r
+
 value <- read.csv("http://example.com/data/data.csv")
 ```
 
@@ -111,6 +112,7 @@ package](https://rstudio.github.io/promises/dev/articles/promises_04_mirai.md))
 will look instead like:
 
 ``` r
+
 promise <- as.promise(mirai(read.csv("http://example.com/data/data.csv")))
 ```
 
@@ -133,6 +135,7 @@ register success and failure handlers on a promise. Its signature looks
 like:
 
 ``` r
+
 then(promise, onFulfilled = NULL, onRejected = NULL, ..., tee = FALSE)
 ```
 
@@ -157,6 +160,7 @@ The following example shows a simple example of printing out a success
 message and the value.
 
 ``` r
+
 then(promise,
   \(value) {
     cat("The operation completed!\n")
@@ -172,6 +176,7 @@ To help reduce the amount of in/out reading, we can use the R pipe
 operator (`|>`):
 
 ``` r
+
 promise |>
   then(\(value) {
     cat("The operation completed!\n")
@@ -200,6 +205,7 @@ promise.
 For example:
 
 ``` r
+
 p <- promise_resolve(palmerpenguins::penguins)
 p2 <- p |>
   then(nrow)
@@ -215,6 +221,7 @@ uses promises for both input and output, you can chain multiple
 calls together directly:
 
 ``` r
+
 p |>
   then(\(df) filter(df, year == 2008)) |>
   then(\(df) group_by(df, species)) |>
@@ -232,6 +239,7 @@ p |>
 Or, equivalently:
 
 ``` r
+
 p |>
   then(\(df) {
     df |>
@@ -253,6 +261,7 @@ to downstream stages. For example, you may want to log the number of
 rows in a data frame for diagnostic purposes:
 
 ``` r
+
 # Incorrect!
 promise |>
   then(\(df) df |> filter(year == 2008)) |>
@@ -283,6 +292,7 @@ preceding `print(nrow(df))` has changed from
 `then(tee = TRUE)`.
 
 ``` r
+
 # Correct.
 promise |>
   then(\(df) df |> filter(year == 2008)) |>
@@ -312,6 +322,7 @@ promise’s operation fails, then `onRejected` (if provided) will be
 invoked with an error object.
 
 ``` r
+
 promise2 <- promise1 |>
   then(
     onFulfilled = \(value) {
@@ -350,6 +361,7 @@ you go out of your way to do so by re-throwing it using `stop(err)`.
 So the equivalent to this (synchronous) code:
 
 ``` r
+
 value <- tryCatch(
   somepkg::operation(),
   error = \(err) {
@@ -363,6 +375,7 @@ value <- tryCatch(
 would be this, when the operation is performed asynchronously:
 
 ``` r
+
 promise <- mirai(somepkg::operation()) |>
   then(onRejected = \(err) {
     warning("An error occurred: ", err)
@@ -385,6 +398,7 @@ is rejected with an error, but the caller has not provided an explicit
 `onRejected` callback?
 
 ``` r
+
 promise2 <- promise1 |>
   then(head) |>
   then(print)
@@ -413,6 +427,7 @@ available for error handling code as well. You can use formulas in
 `onRejected()`:
 
 ``` r
+
 mirai(somepkg::operation()) |>
   then(onRejected = \(err) warning(err))
 ```
@@ -423,6 +438,7 @@ function that is just a shorthand for `then(onRejected)`. It saves a
 little typing, but more importantly, is easier to read:
 
 ``` r
+
 mirai(somepkg::operation()) |>
   catch(warning)
 ```
@@ -435,6 +451,7 @@ additional shorthands for doing so without having to explicitly call
 `stop(err)`. For example:
 
 ``` r
+
 promise |> catch(print)
 ```
 
@@ -442,6 +459,7 @@ will print the error, but also eat it. To print the error without eating
 it, you’d have to do this:
 
 ``` r
+
 promise |>
   catch(\(err) {
     print(err)
@@ -454,6 +472,7 @@ That’s a fair amount of boilerplate. Instead, you can either add
 previous code chunk:
 
 ``` r
+
 promise |>
   catch(print, tee = TRUE)
 ```
@@ -474,6 +493,7 @@ it only takes a single callback that executes on both success and
 failure, and its return value is ignored.
 
 ``` r
+
 file_path <- tempfile(fileext = ".png")
 png_bytes_promise <-
   mirai(

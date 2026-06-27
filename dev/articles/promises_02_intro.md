@@ -44,6 +44,7 @@ operation, but then return immediately, long before the real work has
 actually completed.
 
 ``` r
+
 library(mirai)
 
 read.csv.async <- \(file, header = TRUE, stringsAsFactors = FALSE) {
@@ -109,6 +110,7 @@ with the incoming promise resolves. So whereas you might do this to a
 regular data frame:
 
 ``` r
+
 library(dplyr)
 read.csv("https://rstudio.github.io/promises/data.csv") |>
   filter(state == "NY") |>
@@ -118,6 +120,7 @@ read.csv("https://rstudio.github.io/promises/data.csv") |>
 The async version would look like:
 
 ``` r
+
 library(dplyr)
 read.csv.async("https://rstudio.github.io/promises/data.csv") |>
   then(\(df) df |> filter(state == "NY")) |>
@@ -160,6 +163,7 @@ OK, let’s slow down and take this step by step. We’ll generate a promise
 by calling an async function:
 
 ``` r
+
 df_promise <- read.csv.async("https://rstudio.github.io/promises/data.csv")
 ```
 
@@ -172,6 +176,7 @@ One thing we definitely *can’t* do is treat `df_promise` as if it’s
 simply a data frame:
 
 ``` r
+
 # Doesn't work!
 dplyr::filter(df_promise, state == "NY")
 ```
@@ -187,6 +192,7 @@ and `df_promise` isn’t a data frame.**
 Exactly. Now let’s try something that actually works:
 
 ``` r
+
 df_promise |>
   then(\(df) df |> filter(state == "NY"))
 ```
@@ -209,6 +215,7 @@ When you use a regular `|>`, the result you get back is the return value
 from the right-hand side:
 
 ``` r
+
 df_filtered <- df |> filter(state == "NY")
 ```
 
@@ -218,6 +225,7 @@ the result you get back is a promise, whose *eventual* result will be
 the return value from the right-hand side:
 
 ``` r
+
 df_filtered_promise <- df_promise |> then(\(df) df |> filter(state == "NY"))
 ```
 
@@ -253,6 +261,7 @@ async-compatible version of Shiny (version \>=1.1), all of the built-in
 An example of the latter:
 
 ``` r
+
 output$table <- renderTable({
   read.csv.async("https://rstudio.github.io/promises/data.csv") |>
     then(\(df) df |> filter(state == "NY"))
@@ -269,6 +278,7 @@ expressions treat promises about the same as they treat other values,
 actually. But this works perfectly fine:
 
 ``` r
+
 # A reactive expression that returns a promise
 filtered_df <- reactive({
   read.csv.async("https://rstudio.github.io/promises/data.csv") |>
@@ -293,6 +303,7 @@ Third, you can use promises in reactive observers. Use them to perform
 asynchronous tasks in response to reactivity.
 
 ``` r
+
 observeEvent(input$save, {
   filtered_df() |>
     then(\(df) write.csv(df, "ny_data.csv"))

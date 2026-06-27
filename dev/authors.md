@@ -19,14 +19,14 @@
 Source:
 [`DESCRIPTION`](https://github.com/rstudio/promises/blob/main/DESCRIPTION)
 
-Cheng J, Schloerke B, Chang W, Gao C (2025). *promises: Abstractions for
+Cheng J, Schloerke B, Chang W, Gao C (2026). *promises: Abstractions for
 Promise-Based Asynchronous Programming*. R package version 1.5.0.9000,
 <https://rstudio.github.io/promises/>.
 
     @Manual{,
       title = {promises: Abstractions for Promise-Based Asynchronous Programming},
       author = {Joe Cheng and Barret Schloerke and Winston Chang and Charlie Gao},
-      year = {2025},
+      year = {2026},
       note = {R package version 1.5.0.9000},
       url = {https://rstudio.github.io/promises/},
     }

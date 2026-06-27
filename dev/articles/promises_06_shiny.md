@@ -31,6 +31,7 @@ We’ll get into details for all these steps, but first, an example.
 Consider the following synchronous server code:
 
 ``` r
+
 function(input, output, session) {
   output$plot <- renderPlot({
     result <- expensive_operation()
@@ -43,6 +44,7 @@ function(input, output, session) {
 We’d convert it to async like this:
 
 ``` r
+
 library(promises)
 library(mirai)
 daemons(6)
@@ -117,6 +119,7 @@ talk about the actual work of converting them to mirai.
 Conceptually, mirai works like this:
 
 ``` r
+
 mirai({
   # Expensive code goes here
 }) |>
@@ -130,6 +133,7 @@ mirai runs in a totally separate child R process, and then the result is
 collected up and returned to the main R process:
 
 ``` r
+
 # Code here runs in process A
 mirai({
   # Code here runs in (child) process B
@@ -163,6 +167,7 @@ way for readers to be notified about invalidation.
 This code, for example, will not work:
 
 ``` r
+
 function(input, output, session) {
   r1 <- reactive({ ... })
 
@@ -183,6 +188,7 @@ you must read any reactive values/expressions you need in advance of
 launching the mirai:
 
 ``` r
+
 function(input, output, session) {
   r1 <- reactive({ ... })
 
@@ -203,6 +209,7 @@ inside a promise *handler*. Handlers run in the original process, not a
 child process, so reactive operations are allowed.
 
 ``` r
+
 function(input, output, session) {
   r1 <- reactive({ ... })
 
@@ -230,6 +237,7 @@ promise for such a value instead.
 So this:
 
 ``` r
+
 output$table <- renderTable({
   read.csv(url) |>
     filter(date == input$date)
@@ -239,6 +247,7 @@ output$table <- renderTable({
 could become:
 
 ``` r
+
 output$table <- renderTable({
   mirai(read.csv(url), url = url) |>
     then(\(df) df |> filter(date == input$date))
@@ -248,6 +257,7 @@ output$table <- renderTable({
 or, trading elegance for efficiency:
 
 ``` r
+
 output$table <- renderTable({
   input_date <- input$date
   mirai(
@@ -281,6 +291,7 @@ process won’t have any effect on the Shiny output in the original
 process. These examples, then, are incorrect:
 
 ``` r
+
 output$summary <- renderPrint({
   mirai(
     {
@@ -307,6 +318,7 @@ Instead, do printing and plotting after control returns back to the
 original process, via a promise handler:
 
 ``` r
+
 output$summary <- renderPrint({
   mirai(read.csv(url), url = url) |>
     then(summary) |>
@@ -341,6 +353,7 @@ saved to disk as `cached.rds` and also used to update the reactive value
 `data`.
 
 ``` r
+
 data <- reactiveVal(readRDS("cached.rds"))
 
 function(input, output, session) {
@@ -355,6 +368,7 @@ function(input, output, session) {
 And the async version:
 
 ``` r
+
 data <- reactiveVal(readRDS("cached.rds"))
 
 function(input, output, session) {
@@ -399,6 +413,7 @@ expression, call it like a function like you would a regular reactive
 expression, and treat the value that’s returned like any other promise.
 
 ``` r
+
 function(input, output, session) {
   data <- eventReactive(input$refresh_data, {
     read.csv(url)
@@ -417,6 +432,7 @@ function(input, output, session) {
 And now in async:
 
 ``` r
+
 function(input, output, session) {
   data <- eventReactive(input$refresh_data, {
     mirai(read.csv(url), url = url)
@@ -441,6 +457,7 @@ levels beneath `shiny::runApp()` was a piece of code that looked a bit
 like this:
 
 ``` r
+
 while (TRUE) {
   # Do nothing until a browser sends some data
   input <- receiveInputFromBrowser()
@@ -477,6 +494,7 @@ after all of the async outputs/observers have resolved). The new,
 async-aware event loop is conceptually more like this:
 
 ``` r
+
 doEventLoop <- function() {
   # Do nothing until a browser sends some data
   input <- receiveInputFromBrowser()

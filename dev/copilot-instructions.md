@@ -97,6 +97,7 @@ R -e "rmarkdown::render('vignettes/promises_01_motivation.Rmd')"
 1.  **Basic Package Loading**: Verify the package loads without errors
 
     ``` r
+
     library(promises)
     # Should load successfully with all dependencies
     ```
@@ -104,6 +105,7 @@ R -e "rmarkdown::render('vignettes/promises_01_motivation.Rmd')"
 2.  **Basic Promise Functionality**: Test core promise operations
 
     ``` r
+
     library(promises)
     promise_resolve("hello") %>%
       then(function(x) paste(x, "world")) %>%
@@ -113,6 +115,7 @@ R -e "rmarkdown::render('vignettes/promises_01_motivation.Rmd')"
 3.  **Promise Creation**: Test manual promise creation
 
     ``` r
+
     p <- promise(function(resolve, reject) resolve(42))
     # Promise should be created successfully
     ```
@@ -120,6 +123,7 @@ R -e "rmarkdown::render('vignettes/promises_01_motivation.Rmd')"
 4.  **Integration Testing**: Verify core dependencies work together
 
     ``` r
+
     library(later)
     library(promises) 
     library(fastmap)

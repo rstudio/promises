@@ -23,6 +23,7 @@ results in a computation. The `promise_all` function is designed for
 this. Its signature looks like:
 
 ``` r
+
 promise_all(..., .list = NULL)
 ```
 
@@ -34,6 +35,7 @@ Here’s an example using `promise_all` to combine the results of two
 async `read.csv` operations:
 
 ``` r
+
 library(promises)
 library(mirai)
 
@@ -55,6 +57,7 @@ base R function `with`, which lets you skip the prefix. Here’s the same
 example, with `with`:
 
 ``` r
+
 library(promises)
 library(mirai)
 
@@ -88,6 +91,7 @@ hand, you can pass the list as a single argument using
 `do.call(promise_all, x)`).
 
 ``` r
+
 proms <-
   lapply(c(a = "a.csv", b = "b.csv"), \(file) {
     mirai(read.csv(file))
@@ -109,6 +113,7 @@ launch a second async task, whose result you then use in combination
 with the result of `a`.
 
 ``` r
+
 library(promises)
 library(mirai)
 
@@ -133,6 +138,7 @@ programming jargon this is referred to as the “pyramid of doom”).
 ## Racing
 
 ``` r
+
 library(promises)
 library(mirai)
 
@@ -166,6 +172,7 @@ For each package name, we launch an async task to download the package’s
 description file from CRAN pick out the last published date.
 
 ``` r
+
 library(promises)
 library(mirai)
 
@@ -211,6 +218,7 @@ combination of a regular
 `promise_all`:
 
 ``` r
+
 pkg_dates <- purrr::map(packages, get_pub_date) |>
   promise_all(.list = _)
 
@@ -228,6 +236,7 @@ terminate early when your search succeeds.
 The signature of `promise_reduce` is as follows:
 
 ``` r
+
 promise_reduce(x, func, init = NULL)
 ```
 
@@ -249,6 +258,7 @@ returning the first one that passes whatever check `http::http_error`
 performs.
 
 ``` r
+
 library(promises)
 library(mirai)
 
