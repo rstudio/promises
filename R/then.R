@@ -108,7 +108,7 @@
 #'
 #' @section Visibility:
 #'
-#' `onFulfilled` functions can optionally have a second parameter `visible`,
+#' `onFulfilled` functions can optionally have a second parameter `.visible`,
 #' which will be `FALSE` if the result value is [invisible][base::invisible()].
 #'
 #' @param promise A promise object. The object can be in any state.

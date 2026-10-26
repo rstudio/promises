@@ -155,7 +155,7 @@ in the same tick that creates the promise to avoid the message.
 \section{Visibility}{
 
 
-\code{onFulfilled} functions can optionally have a second parameter \code{visible},
+\code{onFulfilled} functions can optionally have a second parameter \code{.visible},
 which will be \code{FALSE} if the result value is \link[base:invisible]{invisible}.
 }
 
