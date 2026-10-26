@@ -17,7 +17,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/rstudio/promises/blob/schloerke/fix-212/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/rstudio/promises/blob/schloerke/memory-bank/DESCRIPTION)
 
 Cheng J, Schloerke B, Chang W, Gao C (2026). *promises: Abstractions for
 Promise-Based Asynchronous Programming*. R package version 1.5.0.9000,
