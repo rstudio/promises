@@ -219,6 +219,7 @@ promise_map <- function(.x, .f, ...) {
 #'
 #' @export
 promise_reduce <- function(.x, .f, ..., .init) {
+  .f <- match.fun(.f)
   p <- promise_resolve(.init)
   lapply(.x, function(item) {
     p <<- then(p, function(x) {

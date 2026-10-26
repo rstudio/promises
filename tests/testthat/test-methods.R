@@ -212,3 +212,7 @@ test_that("handlers attached in the same tick prevent the unhandled message", {
   })
   expect_length(out, 0)
 })
+
+test_that("promise_reduce() accepts a function name for .f", {
+  promise_reduce(1:3, "+", .init = 0) |> extract() |> expect_equal(6)
+})
