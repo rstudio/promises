@@ -7,6 +7,10 @@
   `formals()` returned `NULL` for them, so they were called with no
   arguments. (#212)
 
+* Calling `with_promise_domain(NULL, expr)` inside another promise domain no
+  longer breaks `then()` calls made in `expr`; the outer domain stays
+  active. (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry

@@ -300,3 +300,14 @@ describe("Promise domains", {
     expect_identical(test_env$activations[2], "x=2")
   })
 })
+
+test_that("a NULL domain nested in another domain keeps the outer domain", {
+  cd <- create_counting_domain()
+  with_promise_domain(cd, {
+    with_promise_domain(NULL, {
+      p <- promise_resolve(1) |> then(\(x) x + 1)
+    })
+  })
+  expect_identical(cd$counts$onFulfilledBound, 1L)
+  p |> extract() |> expect_equal(2)
+})

@@ -261,6 +261,9 @@ compose_domains <- function(base, new) {
   if (is.null(base)) {
     return(new)
   }
+  if (is.null(new)) {
+    return(base)
+  }
 
   list(
     # The `...` of `new_promise_domain` are not automatically composed here.
