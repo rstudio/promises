@@ -65,7 +65,7 @@ The package uses RStudio's shiny-workflows for CI/CD:
 **Core Operations (`R/then.R`):**
 - `then()` - Primary interface for promise chaining and result handling
   - Supports both fulfillment (`onFulfilled`) and rejection (`onRejected`) callbacks
-  - Callbacks support `rlang::as_function()` conversions (formulas, strings, integers, lists for extraction)
+  - Callbacks support `rlang::as_function()` conversions (functions, formulas, and function-name strings)
   - Formula syntax `~ fn(.)` is deprecated in favor of function shorthand `\(x) fn(x)`
   - Returns new promise that chains from the input promise
 - `catch()` and `finally()` - Convenience functions (equivalent to `then()` with specific callbacks)
