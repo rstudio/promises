@@ -117,11 +117,6 @@ Standard R package layout:
 - `vignettes/` - Comprehensive documentation with 9 vignettes covering motivation, usage patterns, and case studies
 - `inst/` - Only `WORDLIST` for spelling; the C++ `promise_task.cpp` template / interface test was moved to the `later` package (#204)
 
-### Dependencies
-- **Core (Imports):** `fastmap` (>= 1.1.0), `later`, `lifecycle`, `magrittr` (>= 1.5), `otel` (>= 0.2.0), `R6`, `rlang`; requires R >= 4.1.0
-- **Integration (Suggests):** `future` (>= 1.21.0), `mirai`, `otelsdk` (>= 0.2.0)
-- **Development:** `testthat` (>= 3.0.0), `knitr`, `rmarkdown`, `spelling`, `purrr`, `vembedr`; roxygen2 8.0.0 with markdown enabled
-
 ### Key Design Patterns
 - **Classed Environments:** Promises are environments with closures (not R6) for fast construction; R6 remains only for `WorkQueue`/`Delay`/`ExpoDelay` in `future_promise.R`
 - **Callback Chaining:** JavaScript-style `.then()` method chaining
