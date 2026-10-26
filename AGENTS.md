@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Project context and guidance for AI coding assistants working in this repository.
+This file provides guidance to coding agents when working with code in this repository.
 
 ## Project Overview
 
@@ -77,15 +77,16 @@ The package uses RStudio's shiny-workflows for CI/CD:
   - If `expr` evaluates to a value, executes `on_success`/`on_failure` callbacks synchronously (same tick)
   - Useful for functions that need to work with both sync and async inputs (e.g., plumber2)
 
-**Combining Operations (`R/methods.R`):**
+**Combining Operations (`R/utils.R`):**
 - `promise_all()` - Wait for all promises to complete
 - `promise_race()` - Wait for first promise to complete
 - `promise_map()` - Apply function over list of promises
 - `promise_reduce()` - Reduce promises sequentially
 
 **Future Integration (`R/future_promise.R`):**
-- `future_promise()` - Convert future objects to promises
-- Work queue system (`WorkQueue` R6 class) for managing concurrent operations
+- `future_promise()` - Run an expression in a future once a worker is free, and return a promise for the result
+- `future_promise_queue()` - The default `WorkQueue` used by `future_promise()`
+- Work queue system (`WorkQueue` R6 class) that holds work until a future worker is free
 - Exponential backoff (`ExpoDelay`) when workers unavailable
 - Polling mechanism to check `future::resolved()` status
 
@@ -100,7 +101,7 @@ The package uses RStudio's shiny-workflows for CI/CD:
 ### Integration Points
 
 **Future Package:**
-- `as.promise.Future()` method converts Future objects to promises (R/promise.R:494)
+- `as.promise.Future()` (in `R/promise.R`) converts Future objects to promises and caches the promise on the Future
 - Uses polling loop with 0.1s intervals to check `future::resolved()`
 - `future_promise()` creates lazy futures and schedules work via WorkQueue
 
@@ -122,7 +123,7 @@ Standard R package layout:
 - **Development:** `testthat` (>= 3.0.0), `knitr`, `rmarkdown`, `spelling`, `purrr`, `vembedr`; roxygen2 8.0.0 with markdown enabled
 
 ### Key Design Patterns
-- **Classed Environments:** Promises are environments with closures (not R6) for fast construction; R6 remains only for `WorkQueue`/`ExpoDelay` in `future_promise.R`
+- **Classed Environments:** Promises are environments with closures (not R6) for fast construction; R6 remains only for `WorkQueue`/`Delay`/`ExpoDelay` in `future_promise.R`
 - **Callback Chaining:** JavaScript-style `.then()` method chaining
 - **Domain System:** Context isolation and custom error handling via promise domains; nested domains invoke in reverse (innermost-first) order
 - **Lazy Evaluation:** `withVisible()` to preserve visibility of promise results
