@@ -64,6 +64,10 @@ Promise <- function() {
     private$value <- value
     private$visible <- visible
     private$state <- "fulfilled"
+    # The cycle check only needs this link while pending. Keeping it would make
+    # a settled promise hold every promise it followed (such as each step of a
+    # recursive async loop) in memory.
+    private$following <- NULL
 
     later(function() {
       lapply(private$onFulfilled, function(f) {
@@ -76,6 +80,8 @@ Promise <- function() {
   private$doRejectFinalReason <- function(reason) {
     private$value <- reason
     private$state <- "rejected"
+    # See `doResolveFinalValue()`
+    private$following <- NULL
 
     later(function() {
       lapply(private$onRejected, function(f) {

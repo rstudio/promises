@@ -60,7 +60,9 @@ All callbacks run later, through `later::later()`, never at the moment you call
 - `onFinally` - set to `list()` but never used.
 - `rejectionHandled` - used for the unhandled error message.
 - `following` - the inner object of the promise this one is waiting on, or
-  `NULL`. Set by `adopt()` and used to find chaining cycles.
+  `NULL`. Set by `adopt()` and used to find chaining cycles. Cleared when the
+  promise settles, so a settled promise does not keep the chain it followed
+  in memory.
 
 `self` gets the public functions `status()`, `resolve()`, `reject()`,
 `then()`, `catch()`, `finally()`, and `format()`. It also gets

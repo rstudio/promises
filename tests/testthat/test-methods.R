@@ -204,6 +204,19 @@ test_that("promises that resolve to each other reject with a cycle error", {
   }
 })
 
+test_that("a settled promise drops its link to the promise it followed", {
+  following <- function(p) {
+    attr(p, "promise_impl", exact = TRUE)$.__enclos_env__$private$following
+  }
+  inner <- ext_promise()
+  outer <- promise(\(resolve, reject) resolve(inner$promise))
+  expect_false(is.null(following(outer)))
+
+  inner$resolve(1)
+  expect_identical(extract(outer), 1)
+  expect_null(following(outer))
+})
+
 test_that("handlers attached in the same tick prevent the unhandled message", {
   out <- capture.output(type = "message", {
     p <- promise_reject("boom")
