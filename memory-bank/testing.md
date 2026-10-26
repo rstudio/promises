@@ -31,6 +31,7 @@ Promises/A+ spec sections.
 - `tests/testthat/test-otel.R` - OpenTelemetry; see `otel.md`.
 - `tests/testthat/_snaps/` - `hybrid-then.md`, `otel.md`, `then.md`.
 - Other files: `test-combining.R`, `test-domains.R`, `test-hybrid-then.R`,
+  `test-expo-delay.R` (the 2 second `ExpoDelay` cap),
   `test-hybrid-then-visibility.R`, `test-methods.R`, `test-ordering.R`,
   `test-promise-map.R`, `test-then.R`, `test-visibility.R`.
 
@@ -44,7 +45,7 @@ Promises/A+ spec sections.
 | `extract(promise)` | `then()` to store the value, then `wait_for_it()`. Returns the value or throws the rejection. |
 | `resolve_later(value, delaySecs)` | Promise that resolves to `value` after `delaySecs` using `later::later()`. |
 | `squelch_unhandled_promise_error(promise)` | Adds a `catch()` so a rejection does not print "Unhandled promise error". Re-throws testthat `failure` conditions so failed expectations still fail. |
-| `create_counting_domain(trackFinally = FALSE)` | A promise domain that counts, in `pd$counts`, how many callbacks were bound (`*Bound`), called (`*Called`), and are running now (`*Active`). With `trackFinally = TRUE` it also sets `wrapOnFinally` and `onFinally*` counters. |
+| `create_counting_domain(trackFinally = FALSE)` | A promise domain that counts, in `pd$counts`, how many callbacks were bound (`*Bound`), called (`*Called`), and are running now (`*Active`). With `trackFinally = TRUE` it also sets `wrapOnFinally` and `onFinally*` counters; `onFinallyActive` goes up while the callback runs and back down after. |
 | `expect_assertions(code, n_expected)` | Counts `expectation_success` and `expectation_failure` signals while running `code`, then checks the count. Proves that expectations inside callbacks actually ran. |
 | `.GlobalEnv$.Last` | Set to call `wait_for_it()` when R exits, so stray unhandled rejections still print. |
 
@@ -64,7 +65,7 @@ Promises/A+ spec sections.
 - Unhandled rejections print "Unhandled promise error: ..." to `stderr` two
   ticks after rejection (see `doRejectFinalReason()` in `R/promise.R`). Tests
   for this use `capture.output(type = "message", ...)`
-  (`test-zzz-future_promise.R`).
+  (`test-methods.R`, `test-zzz-future_promise.R`).
 
 ## Promises/A+ and legacy tests
 
@@ -128,12 +129,6 @@ devtools::check()                                  # full R CMD check
 
 ## Pitfalls
 
-- **`create_counting_domain(trackFinally = TRUE)` never decrements
-  `onFinallyActive`.** Its `on.exit()` calls `incr(onFinallyActive)` instead
-  of `decr()`. Checked by running: after two `finally()` calls finish,
-  `onFinallyActive` is 4, not 0. Tests only read it *inside* the first
-  callback (where it is 1), so they pass. Do not trust it after a callback
-  ends.
 - **`expect_assertions()` takes `(code, n_expected)`.** Tests call it as
   `expect_assertions(n = 2, { ... })`, which works only through partial
   argument matching of `n` to `n_expected`.

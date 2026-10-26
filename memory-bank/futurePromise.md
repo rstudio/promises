@@ -116,8 +116,7 @@ Checked by running: five `schedule_work()` calls in one tick with a
 
 ### ExpoDelay
 
-`ExpoDelay$delay()` returns seconds (not milliseconds, despite the code
-comment):
+`ExpoDelay$delay()` returns seconds:
 
 ```
 expo_val   <- base * (2^count - 1)              # base = 0.01
@@ -128,7 +127,9 @@ max(min_seconds, random_val)                    # min 0.01, max 2
 `increase()` runs before `delay()`, so the first retry waits about 0.01 s.
 The upper bound doubles each time and reaches the 2 second cap at about the
 8th retry. Any successful start calls `reset_delay()` and the count goes back
-to 0.
+to 0. The `WorkQueue` roxygen docs also say the cap is 2 seconds.
+`tests/testthat/test-expo-delay.R` checks that, after many `increase()` calls,
+every `delay()` is between 0 and 2 and some are above 1.
 
 ### as.promise.Future()
 
@@ -154,9 +155,6 @@ queue here; `WorkQueue` and `future_promise()` are only for future.
 
 ## Pitfalls
 
-- **The roxygen docs for `WorkQueue` say the backoff caps at 10 seconds.** The
-  code in `ExpoDelay` caps at `max_seconds = 2`. The comment on
-  `ExpoDelay$delay()` says "milliseconds"; it is seconds. Trust the code.
 - **The work function must return something promising.** `do_work()` calls
   `then()` on whatever the work function returns. A custom queue or custom
   `schedule_work()` caller that returns a plain value gets "Don't know how to

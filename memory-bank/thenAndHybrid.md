@@ -54,7 +54,8 @@ They are marked superseded by `|>` plus `then()`.
 
 1. `check_dots(...)` errors if anything is passed in `...` (via
    `rlang::check_dots_empty()`).
-2. `check_tee(tee)` errors unless `tee` is logical.
+2. `check_tee(tee)` errors with "`tee` must be `TRUE` or `FALSE`" unless
+   `rlang::is_bool(tee)` is `TRUE`. So `NA` and `c(TRUE, FALSE)` are rejected.
 3. `promise <- as.promise(promise)`. A non-promise, non-Future value errors
    at once with "Don't know how to convert object of class ...".
 4. Any non-`NULL`, non-function callback goes through `rlang::as_function()`.
@@ -76,7 +77,9 @@ There is no runtime deprecation warning.
 
 `catch(promise, onRejected, ..., tee = FALSE)` works like `then()` with only
 `onRejected`. Note that `onRejected` has no default. The `tee = TRUE` path
-wraps the callback the same way as in `then()`.
+wraps the callback the same way as in `then()`. A `NULL` `onRejected` always
+takes the plain `promise$catch(NULL)` path, so `catch(p, NULL, tee = TRUE)`
+passes the original error through.
 
 `finally(promise, onFinally)` has no `tee` and no `...`. It converts
 `onFinally` with `rlang::as_function()` if needed and calls
@@ -114,8 +117,10 @@ Then one of these paths runs:
   Returns its result, or the original value when `tee = TRUE`.
 
 If a callback returns a promise on a sync path with `tee = FALSE`, that promise
-is returned, so the result turns async. `return_with_visible()` rebuilds
-visibility from a `withVisible()` list.
+is returned, so the result turns async. With `tee = TRUE` the callback's return
+value is dropped, even if it is a promise, so a sync input gives a sync result.
+The roxygen docs say this. `return_with_visible()` rebuilds visibility from a
+`withVisible()` list.
 
 ### Pipe operators
 
@@ -162,23 +167,21 @@ in `tests/testthat/test-otel.R`.
   non-functions to `rlang::as_function()`, which errors. The method uses
   `normalizeOnFulfilled()`, which warns and ignores. Pinned by
   `tests/testthat/test-methods.R`.
-- **Primitive functions get zero arguments.** Because `formals(sum)` is
-  `NULL`, `then(p, sum)` resolves to `0`, `then(p, abs)` rejects, and
-  `hybrid_then(c(1, 2), sum)` returns `0`. See `normalizeOnFulfilled()` in
-  `R/promise.R`. Pipes are not affected because `pipeify_rhs()` builds a real
-  closure.
-- **`.visible` must be the exact name of the second formal.** The `then()` docs
-  ("Visibility" section in `R/then.R`) say `visible`, but a callback written
-  as `function(value, visible)` fails with a missing argument.
-- **`tee` only checks `is.logical()`.** `check_tee()` in `R/then.R` lets
-  `NA` and `c(TRUE, FALSE)` through, and `if (!tee)` then fails with a base R
-  error instead of the clear message.
-- **`catch(p, NULL, tee = TRUE)` breaks.** `normalizeOnRejected(NULL)` returns
-  `NULL`, and the wrapper then calls it, so the promise rejects with "could not
-  find function "onRejected"". The `tee = FALSE` path handles `NULL` fine.
-- **`tee` re-throw can change the error.** The rejected `tee` wrapper calls
-  `stop(reason)`. If the reason is not a condition (for example a number from
-  a custom `reject(42)`), it becomes a new `simpleError`.
+- **Primitive callbacks get the value.** `callback_formals()` in
+  `R/promise.R` reads a primitive's formals with `formals(args(f))`, so
+  `then(p, sum)` and `hybrid_then(c(1, 2), sum)` work as expected. Pinned by
+  "primitive functions receive the value as callbacks" in
+  `tests/testthat/test-then.R`.
+- **`.visible` must be the exact name of the second formal.** A callback
+  written as `function(value, visible)` fails with a missing argument. The
+  "Visibility" section in `R/then.R` names `.visible`.
+- **`finally()` and the `tee = TRUE` rejected path change non-condition
+  reasons.** `finallyToRejected()` in `R/domains.R` and the rejected `tee`
+  wrappers in `then()` and `catch()` pass the error on with `stop(reason)`. If
+  the reason is not a condition (for example `promise_reject(42)`), the next
+  handler gets a new `simpleError` with message `"42"`, not `42` (checked by
+  running). `with_otel_span()` uses `catch(tee = TRUE)` and `finally()`, so it
+  does the same. This is still open.
 - **`hybrid_then()` does not catch errors from `on_success`.** On the sync path
   an error in `on_success` is thrown straight out; `on_failure` only covers
   `expr`. This matches `then()`, where `onRejected` does not see errors from
@@ -187,8 +190,8 @@ in `tests/testthat/test-otel.R`.
 - **`hybrid_then(tee = TRUE)` does not wait for promises returned by
   callbacks on the sync path.** `on_success` or `on_failure` may return a
   promise; with `tee = TRUE` it is dropped and the plain value is returned
-  (or the error re-thrown). The roxygen text "If a callback returns a promise,
-  the result is always a promise" is only true for `tee = FALSE`.
+  (or the error re-thrown). This is on purpose and documented in
+  `R/hybrid-then.R`; pinned by `tests/testthat/test-hybrid-then.R`.
 - **`hybrid_then()` sync errors still reach domain `onError`.** Because the
   package `tryCatch()` runs `promiseDomain$onError()` as a calling handler, a
   domain sees the error even when `on_failure` recovers from it.
