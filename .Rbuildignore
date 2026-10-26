@@ -15,7 +15,8 @@
 ^LICENSE\.md$
 ^CRAN-SUBMISSION$
 ^_dev$
-^.claude$
-^CLAUDE.md$
-^.vscode$
+^\.claude$
+^\.posit$
+^AGENTS\.md$
+^\.vscode$
 ^logo$
