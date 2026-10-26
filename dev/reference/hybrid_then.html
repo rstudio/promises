@@ -55,7 +55,7 @@ immediately."><meta property="og:image" content="https://rstudio.github.io/promi
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Asynchronous or synchronous <code>then()</code></h1>
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/R/hybrid-then.R" class="external-link"><code>R/hybrid-then.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/schloerke/fix-212/R/hybrid-then.R" class="external-link"><code>R/hybrid-then.R</code></a></small>
       <div class="d-none name"><code>hybrid_then.Rd</code></div>
     </div>
 
@@ -112,7 +112,8 @@ the callback executes but the original error is re-thrown afterward.</p></dd>
 promise to handle the <code>on_success</code> or <code>on_failure</code> callbacks.</p></li>
 <li><p>If <code>expr</code> evaluates to a non-promise value, the result of the synchronous
 operation after being processed by <code>on_success</code> or <code>on_failure</code>.</p></li>
-<li><p>If a callback returns a promise, the result is always a promise.</p></li>
+<li><p>If a callback returns a promise (and <code>tee = FALSE</code>), the result is
+always a promise.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -146,6 +147,9 @@ for items that may be either synchronous or asynchronous, such as within
 <p>If no <code>on_failure</code> callback is provided and an error occurs, the error is
 re-thrown immediately (for synchronous errors) or propagated through the
 returned promise (for asynchronous errors).</p>
+<p><code>on_failure</code> only handles a failure of <code>expr</code>. An error thrown by
+<code>on_success</code> is not passed to <code>on_failure</code>; it is re-thrown (sync) or rejects
+the returned promise (async), like <code><a href="then.html">then()</a></code>.</p>
 <p>If an <code>on_failure</code> callback is provided but it throws an error, that new
 error replaces the original error. With <code>tee = TRUE</code>, even if <code>on_failure</code>
 executes successfully, the original error is still re-thrown.</p>
@@ -159,6 +163,9 @@ executes successfully, the original error is still re-thrown.</p>
 promise, the entire <code>hybrid_then()</code> call will return a promise, even if the
 input was synchronous. This allows seamless transitions between synchronous
 and asynchronous execution.</p>
+<p>With <code>tee = TRUE</code>, the callback's return value is ignored, even if it is a
+promise: it is not waited on, and its result or error does not change the
+result. A synchronous input still gives a synchronous result.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -230,7 +237,7 @@ and asynchronous execution.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -2,6 +2,82 @@
 
 ## promises (development version)
 
+### Bug fixes
+
+- Primitive functions such as `sum` and `abs` now receive the value when
+  used as
+  [`then()`](https://rstudio.github.io/promises/dev/reference/then.md),
+  [`catch()`](https://rstudio.github.io/promises/dev/reference/then.md),
+  or
+  [`hybrid_then()`](https://rstudio.github.io/promises/dev/reference/hybrid_then.md)
+  callbacks. Before, [`formals()`](https://rdrr.io/r/base/formals.html)
+  returned `NULL` for them, so they were called with no arguments.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- Calling `with_promise_domain(NULL, expr)` inside another promise
+  domain no longer breaks
+  [`then()`](https://rstudio.github.io/promises/dev/reference/then.md)
+  calls made in `expr`; the outer domain stays active.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- Nested promise domains no longer drop `wrapOnFinally`. When one of the
+  nested domains has a `wrapOnFinally`, each domain now wraps
+  [`finally()`](https://rstudio.github.io/promises/dev/reference/then.md)
+  callbacks once; a domain without one wraps them with its
+  `wrapOnFulfilled`.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- The “Unhandled promise error” message no longer errors inside the
+  event loop when a promise is rejected with a value that is not a
+  condition, such as `promise_reject(42)`.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- `catch(promise, NULL, tee = TRUE)` now passes the original error
+  through instead of rejecting with “could not find function”.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- [`then()`](https://rstudio.github.io/promises/dev/reference/then.md),
+  [`catch()`](https://rstudio.github.io/promises/dev/reference/then.md),
+  and
+  [`hybrid_then()`](https://rstudio.github.io/promises/dev/reference/hybrid_then.md)
+  now give a clear error when `tee` is `NA` or has more than one value.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- Promises that resolve to each other (directly or through a longer
+  chain) now reject with “Chaining cycle detected for promise” instead
+  of staying pending forever.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- [`with_otel_span()`](https://rstudio.github.io/promises/dev/reference/otel.md)
+  now sets the span status to `"error"` when the expression throws or
+  the returned promise rejects.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- The internal tracer cache no longer keeps a no-op tracer, so a tracer
+  provider set up after the first call is used.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- [`promise_reduce()`](https://rstudio.github.io/promises/dev/reference/promise_reduce.md)
+  now accepts a function name for `.f` (such as `"+"`), like
+  [`promise_map()`](https://rstudio.github.io/promises/dev/reference/promise_map.md)
+  does. ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- [`promise_reduce()`](https://rstudio.github.io/promises/dev/reference/promise_reduce.md)
+  without `.init` now starts from the first element of `.x`, like
+  [`purrr::reduce()`](https://purrr.tidyverse.org/reference/reduce.html).
+  Before, it rejected.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
+- [`finally()`](https://rstudio.github.io/promises/dev/reference/then.md)
+  and the `tee = TRUE` rejection paths of
+  [`then()`](https://rstudio.github.io/promises/dev/reference/then.md),
+  [`catch()`](https://rstudio.github.io/promises/dev/reference/then.md),
+  and
+  [`hybrid_then()`](https://rstudio.github.io/promises/dev/reference/hybrid_then.md)
+  now pass a non-condition rejection reason (such as
+  `promise_reject(42)`) on unchanged. Before, it became a `simpleError`.
+  ([\#212](https://github.com/rstudio/promises/issues/212))
+
 ## promises 1.5.0
 
 CRAN release: 2025-11-01
@@ -30,7 +106,8 @@ and tracing for asynchronous operations.
   handles both synchronous and asynchronous (promise-based) operations.
   For promises, the span is automatically ended when the promise
   resolves or rejects. To access the OpenTelemetry span within your
-  expression, use `otel::get_current_span()`.
+  expression, use
+  [`otel::get_active_span()`](https://otel.r-lib.org/reference/get_active_span.html).
   ([\#198](https://github.com/rstudio/promises/issues/198))
 
 ### New features
@@ -100,7 +177,7 @@ experimental and subject to change.
   asynchronous (promise-based) operations. For promises, the span is
   automatically ended when the promise resolves or rejects. To access
   the OpenTelemetry span within your expression, use
-  `otel::get_current_span()`.
+  [`otel::get_active_span()`](https://otel.r-lib.org/reference/get_active_span.html).
   ([\#173](https://github.com/rstudio/promises/issues/173))
 
 - [`with_ospan_promise_domain()`](https://rstudio.github.io/promises/dev/reference/promises-deprecated.md)
