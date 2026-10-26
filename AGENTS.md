@@ -1,6 +1,10 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Project context and guidance for AI coding assistants working in this repository.
+
+## Project Overview
+
+`promises` implements JavaScript-style promises in R for asynchronous programming. It is an R package following standard R package development practices (devtools, roxygen2, testthat, pkgdown).
 
 ## Development Commands
 
@@ -15,7 +19,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `wait_for_it(p)` - Block until all pending later tasks execute; optionally wait for promise `p` to resolve/reject
 - `extract(promise)` - Block until promise resolves and return value (or throw error if rejected)
 - `ext_promise()` - Create externally-controllable promise for testing (returns list with `promise`, `resolve`, `reject`, `status`)
-- `expect_assertions(n)` - Declare expected number of assertions in a test (useful with async tests)
+- `expect_assertions(code, n_expected)` - Run `code` and assert it produces exactly `n_expected` testthat expectations (useful with async tests)
+- `resolve_later(value, delaySecs)` - Create a promise that resolves with `value` after a delay
+- `squelch_unhandled_promise_error(promise)` - Suppress "Unhandled promise error" warnings (but rethrow test failures)
+- `create_counting_domain(trackFinally)` - Promise domain that counts callback bind/call/active events for domain tests
 
 ### Package Development
 - `devtools::load_all()` - Load package for development
@@ -33,10 +40,12 @@ The package uses RStudio's shiny-workflows for CI/CD:
 ## Architecture Overview
 
 ### Core Promise Implementation
-The promises package implements JavaScript-style promises in R for asynchronous programming. Key architectural components:
 
 **Promise Class (`R/promise.R`):**
-- R6 class-based implementation with states: "pending", "fulfilled", "rejected"
+- Promises are simple classed environments (not R6) created by the `Promise()` factory function; this reduces creation overhead by up to 10x (#191)
+  - Internal state and methods live in a `private` environment inside the closure; the public promise object exposes `$then()`, `$catch()`, `$finally()`, and `$status`
+  - Internals are reachable via `attr(p, "promise_impl", exact = TRUE)` (used by tests and `as.promise()` methods)
+- States: "pending", "fulfilled", "rejected"
 - Private methods `doResolve`/`doReject` handle state transitions
 - Public API through `resolve()`, `reject()`, and `then()` methods
 - Chaining cycle detection to prevent infinite loops
@@ -75,50 +84,46 @@ The promises package implements JavaScript-style promises in R for asynchronous 
 - `promise_reduce()` - Reduce promises sequentially
 
 **Future Integration (`R/future_promise.R`):**
-- Bridges promises with the `future` package for parallel computing
 - `future_promise()` - Convert future objects to promises
 - Work queue system (`WorkQueue` R6 class) for managing concurrent operations
 - Exponential backoff (`ExpoDelay`) when workers unavailable
 - Polling mechanism to check `future::resolved()` status
-- Requires `future >= 1.21.0` and `fastmap >= 1.1.0`
 
 **OpenTelemetry Integration (`R/otel.R`):**
-- Experimental integration with `otel` package for distributed tracing
-- `with_otel_span()` - Create/manage spans for async operations
-- `with_otel_promise_domain()` - Handoff promise domain for span context propagation
-- Critical for observability in complex async workflows
+- Integration with `otel` package (>= 0.2.0, in Imports) for distributed tracing; `otelsdk` (>= 0.2.0) in Suggests for span collection in tests
+- `with_otel_span()` - Create a span, execute an expression within it, end it on completion (handles both sync values and promises)
+- `with_otel_promise_domain()` - Handoff promise domain that restores the active span from when `then()` was called
+- `local_otel_promise_domain()` - Add the span promise domain to the local scope (for `{coro}` where `with_*()` wrappers are not allowed)
+- Earlier `with_ospan_async()`/`with_ospan_promise_domain()`/`local_ospan_promise_domain()` names are deprecated (#198)
 - Uses cached tracer via `promises_otel_tracer()` for performance
 
 ### Integration Points
 
 **Future Package:**
-- `as.promise.Future()` method converts Future objects to promises (R/promise.R:487-543)
-- Caches converted promise as attribute to avoid duplicate polling
+- `as.promise.Future()` method converts Future objects to promises (R/promise.R:494)
 - Uses polling loop with 0.1s intervals to check `future::resolved()`
 - `future_promise()` creates lazy futures and schedules work via WorkQueue
 
 **Mirai Package:**
-- Promises implements `is.promising.Future` for Future objects
 - Mirai package provides its own `as.promise.mirai()` method
-- No polling needed - mirai has background process that interrupts main session
+- Newer generation event-driven promises
+- No polling needed - mirai handles completions on a thread pool, and calls into the later event loop directly
 
 ### Package Structure
 Standard R package layout:
-- `R/` - Core R source code (11 main files)
-- `tests/testthat/` - Unit tests following testthat 3.0 conventions
+- `R/` - Core R source code (15 files; includes `hybrid-then.R`, `deprecated.R`, `pipe.R`, `first_type.R`, `is_something.R`, `promises-package.R`, and standalone imports in `staticimports.R` / `import-standalone-defer.R`)
+- `tests/testthat/` - Unit tests following testthat 3.0 conventions; includes Promises/A+ spec tests (`test-aplus-*.R`), legacy behavior tests (`test-legacy-*.R`), and `_snaps/` snapshots
 - `vignettes/` - Comprehensive documentation with 9 vignettes covering motivation, usage patterns, and case studies
-- `inst/` - Contains C++ template code (`promise_task.cpp`) for background tasks using `later::BackgroundTask`
+- `inst/` - Only `WORDLIST` for spelling; the C++ `promise_task.cpp` template / interface test was moved to the `later` package (#204)
 
 ### Dependencies
-- **Core:** `fastmap`, `later`, `R6`, `rlang`, `magrittr`, `lifecycle`, `otel`
-- **Integration:** `future` (optional), `mirai` (optional)
-- **Development:** `testthat`, `knitr`, `rmarkdown`, `spelling`
+- **Core (Imports):** `fastmap` (>= 1.1.0), `later`, `lifecycle`, `magrittr` (>= 1.5), `otel` (>= 0.2.0), `R6`, `rlang`; requires R >= 4.1.0
+- **Integration (Suggests):** `future` (>= 1.21.0), `mirai`, `otelsdk` (>= 0.2.0)
+- **Development:** `testthat` (>= 3.0.0), `knitr`, `rmarkdown`, `spelling`, `purrr`, `vembedr`; roxygen2 8.0.0 with markdown enabled
 
 ### Key Design Patterns
-- **R6 Classes:** Object-oriented design for promise state management
+- **Classed Environments:** Promises are environments with closures (not R6) for fast construction; R6 remains only for `WorkQueue`/`ExpoDelay` in `future_promise.R`
 - **Callback Chaining:** JavaScript-style `.then()` method chaining
-- **Domain System:** Context isolation and custom error handling via promise domains
+- **Domain System:** Context isolation and custom error handling via promise domains; nested domains invoke in reverse (innermost-first) order
 - **Lazy Evaluation:** `withVisible()` to preserve visibility of promise results
 - **Work Queue Pattern:** FIFO queue with exponential backoff for resource-constrained async operations
-
-The package follows R package development best practices with comprehensive documentation, extensive testing, and CI/CD automation.

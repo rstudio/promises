@@ -12,6 +12,7 @@ _dev
 /doc/
 /Meta/
 /.claude/
+/.posit/
 ..Rcheck/
 *.Rcheck/
 *.tar.gz

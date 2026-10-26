@@ -16,6 +16,7 @@
 ^CRAN-SUBMISSION$
 ^_dev$
 ^.claude$
-^CLAUDE.md$
+^.posit$
+^AGENTS.md$
 ^.vscode$
 ^logo$
