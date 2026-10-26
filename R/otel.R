@@ -30,8 +30,12 @@ promises_otel_tracer <- local({
       # injection in otelsdk::with_otel_record().
       return(otel::get_tracer())
     }
-    tracer <<- otel::get_tracer()
-    tracer
+    new_tracer <- otel::get_tracer()
+    # Only cache an enabled tracer, so a tracer provider set up later is used
+    if (.subset2(new_tracer, "is_enabled")()) {
+      tracer <<- new_tracer
+    }
+    new_tracer
   }
 })
 

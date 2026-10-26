@@ -52,6 +52,25 @@ with_otel_promise_domain({
       })
     })
 
+    describe("promises_otel_tracer()", {
+      it("does not cache a no-op tracer", {
+        skip_if(!Sys.getenv("OTEL_TRACES_EXPORTER") %in% c("", "none"))
+        tracer_env <- environment(promises_otel_tracer)
+        old_testthat <- Sys.getenv("TESTTHAT")
+        on.exit({
+          Sys.setenv(TESTTHAT = old_testthat)
+          tracer_env$tracer <- NULL
+        })
+        Sys.setenv(TESTTHAT = "false")
+        tracer_env$tracer <- NULL
+
+        expect_false(promises_otel_tracer()$is_enabled())
+        otelsdk::with_otel_record({
+          expect_true(promises_otel_tracer()$is_enabled())
+        })
+      })
+    })
+
     describe("with_otel_span()", {
       it("executes synchronous expressions without otel", {
         # When recording is off, should still execute expression
