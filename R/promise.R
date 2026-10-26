@@ -8,7 +8,6 @@ Promise <- function() {
   private$publicResolveRejectCalled <- FALSE
   private$onFulfilled <- list()
   private$onRejected <- list()
-  private$onFinally <- list()
   private$rejectionHandled <- FALSE
   private$following <- NULL
 
@@ -169,6 +168,19 @@ Promise <- function() {
     onRejected = NULL,
     onFinally = NULL
   ) {
+    if (is.null(current_promise_domain())) {
+      # Fast path: no promise domain is active, so the domain machinery
+      # (promiseDomain$onThen(), domain callback wrappers) can be skipped
+      # entirely, and the derived promise can be built directly without the
+      # promise() constructor's validation and tryCatch.
+      return(invisible(then_no_domain(
+        private,
+        onFulfilled,
+        onRejected,
+        onFinally
+      )))
+    }
+
     onFulfilled <- normalizeOnFulfilled(onFulfilled)
     onRejected <- normalizeOnRejected(onRejected)
     if (!is.function(onFinally)) {
@@ -283,6 +295,176 @@ callback_formals <- function(f) {
   if (is.primitive(f)) formals(args(f)) else formals(f)
 }
 
+# Domain-free fast path for `self$then()`: builds the derived promise directly
+# (no promise() constructor, no tryCatch, no promiseDomain$onThen()). The
+# NULL-domain reentry branch is fused into the handle closures, and each
+# callback's calling convention is computed once from callback_formals()
+# instead of allocating normalizeOn*() wrapper closures. Semantics match the
+# domain path, except that an error thrown by later() itself (e.g. a destroyed
+# event loop) now propagates to the then() caller instead of silently rejecting
+# the derived promise.
+then_no_domain <- function(private, onFulfilled, onRejected, onFinally) {
+  fulfilled_code <- fulfilled_convention(onFulfilled)
+  rejected_code <- rejected_convention(onRejected)
+  if (!is.function(onFinally)) {
+    onFinally <- NULL
+  }
+
+  pub <- new_promise()
+  p <- attr(pub, "promise_impl", exact = TRUE)
+  resolve <- p$resolve
+  reject <- p$reject
+
+  # The same misuse check as promiseDomain$onThen(), preserving its async
+  # behavior: the derived promise rejects rather than then() throwing.
+  if (!is.null(onFinally) && (!is.null(onFulfilled) || !is.null(onRejected))) {
+    reject(simpleError(
+      "A single `then` call cannot combine `onFinally` with `onFulfilled`/`onRejected`"
+    ))
+    return(invisible(pub))
+  }
+
+  if (!is.null(onFinally)) {
+    spliced <- spliceOnFinally(onFinally)
+    onFulfilled <- spliced$onFulfilled
+    onRejected <- spliced$onRejected
+    # finallyToFulfilled() takes (value, .visible); finallyToRejected() takes
+    # (reason).
+    fulfilled_code <- 2L
+    rejected_code <- 1L
+  }
+
+  if (is.null(fulfilled_code)) {
+    handleFulfill <- function(value, visible) {
+      resolve(if (visible) value else invisible(value))
+    }
+  } else if (fulfilled_code == 2L) {
+    handleFulfill <- function(value, visible) {
+      resolve(
+        if (is.null(globals$domain)) {
+          onFulfilled(value, visible)
+        } else {
+          reenter_promise_domain(
+            NULL,
+            onFulfilled(value, visible),
+            replace = TRUE
+          )
+        }
+      )
+    }
+  } else if (fulfilled_code == 1L) {
+    handleFulfill <- function(value, visible) {
+      resolve(
+        if (is.null(globals$domain)) {
+          if (visible) onFulfilled(value) else onFulfilled(invisible(value))
+        } else {
+          reenter_promise_domain(
+            NULL,
+            if (visible) onFulfilled(value) else onFulfilled(invisible(value)),
+            replace = TRUE
+          )
+        }
+      )
+    }
+  } else {
+    handleFulfill <- function(value, visible) {
+      resolve(
+        if (is.null(globals$domain)) {
+          onFulfilled()
+        } else {
+          reenter_promise_domain(NULL, onFulfilled(), replace = TRUE)
+        }
+      )
+    }
+  }
+
+  if (is.null(rejected_code)) {
+    handleReject <- function(reason) {
+      reject(reason)
+    }
+  } else if (rejected_code == 1L) {
+    handleReject <- function(reason) {
+      resolve(
+        if (is.null(globals$domain)) {
+          onRejected(reason)
+        } else {
+          reenter_promise_domain(NULL, onRejected(reason), replace = TRUE)
+        }
+      )
+    }
+  } else {
+    handleReject <- function(reason) {
+      resolve(
+        if (is.null(globals$domain)) {
+          onRejected()
+        } else {
+          reenter_promise_domain(NULL, onRejected(), replace = TRUE)
+        }
+      )
+    }
+  }
+
+  if (private$state == "pending") {
+    private$onFulfilled <- c(private$onFulfilled, list(handleFulfill))
+    private$onRejected <- c(private$onRejected, list(handleReject))
+  } else if (private$state == "fulfilled") {
+    later(function() {
+      handleFulfill(private$value, private$visible)
+    })
+  } else if (private$state == "rejected") {
+    later(function() {
+      private$rejectionHandled <- TRUE
+      handleReject(private$value)
+    })
+  } else {
+    stop("Unexpected state ", private$state)
+  }
+
+  invisible(pub)
+}
+
+# Calling conventions for then() callbacks, as an integer code: 0L (call with
+# no arguments), 1L (call with the value/reason, respecting visibility for
+# fulfilled values), or 2L (call with (value, .visible)). NULL means the
+# callback is absent (or not a function) and the value passes through. These
+# encode the same cases as normalizeOnFulfilled()/normalizeOnRejected(), for
+# the domain-free fast path, which inlines the calls instead of allocating
+# wrapper closures.
+fulfilled_convention <- function(onFulfilled) {
+  if (!is.function(onFulfilled)) {
+    if (!is.null(onFulfilled)) {
+      warning("`onFulfilled` must be a function or `NULL`")
+    }
+    return(NULL)
+  }
+
+  args <- callback_formals(onFulfilled)
+  arg_count <- length(args)
+
+  if (arg_count >= 2 && names(args)[[2]] == ".visible") {
+    2L
+  } else if (arg_count > 0) {
+    1L
+  } else {
+    0L
+  }
+}
+
+rejected_convention <- function(onRejected) {
+  if (!is.function(onRejected)) {
+    if (!is.null(onRejected)) {
+      warning("`onRejected` must be a function or `NULL`")
+    }
+    return(NULL)
+  }
+
+  if (length(callback_formals(onRejected)) >= 1) {
+    1L
+  } else {
+    0L
+  }
+}
+
 normalizeOnFulfilled <- function(onFulfilled) {
   if (!is.function(onFulfilled)) {
     if (!is.null(onFulfilled)) {
@@ -334,6 +516,22 @@ normalizeOnRejected <- function(onRejected) {
   } else {
     onRejected
   }
+}
+
+# Internal constructor: a Promise() impl plus its public "promise"-classed
+# wrapper, without promise()'s action validation and tryCatch. Shared by
+# promise(), promise_resolve()/promise_reject(), and then_no_domain().
+new_promise <- function() {
+  p <- Promise()
+  structure(
+    list(
+      then = p$then,
+      catch = p$catch,
+      finally = p$finally
+    ),
+    class = "promise",
+    promise_impl = p
+  )
 }
 
 #' Create a new promise object
@@ -408,7 +606,8 @@ promise <- function(action) {
     stop("Invalid action argument--should be a function")
   }
 
-  p <- Promise()
+  pub <- new_promise()
+  p <- attr(pub, "promise_impl", exact = TRUE)
 
   tryCatch(
     {
@@ -437,15 +636,7 @@ promise <- function(action) {
       }
     }
   )
-  structure(
-    list(
-      then = p$then,
-      catch = p$catch,
-      finally = p$finally
-    ),
-    class = "promise",
-    promise_impl = p
-  )
+  pub
 }
 
 #' Create a resolved or rejected promise
@@ -469,13 +660,19 @@ promise <- function(action) {
 #'
 #' @export
 promise_resolve <- function(value) {
-  promise(function(resolve, reject) resolve(value))
+  pub <- new_promise()
+  # self$resolve() forces the lazily evaluated `value` inside its own
+  # tryCatch, so the promise() constructor is not needed here.
+  attr(pub, "promise_impl", exact = TRUE)$resolve(value)
+  pub
 }
 
 #' @rdname promise_resolve
 #' @export
 promise_reject <- function(reason) {
-  promise(function(resolve, reject) reject(reason))
+  pub <- new_promise()
+  attr(pub, "promise_impl", exact = TRUE)$reject(reason)
+  pub
 }
 
 #' Coerce to a promise
