@@ -255,14 +255,19 @@ Promise <- function() {
 
 # Re-throw a rejection reason from inside a callback. `stop()` would turn a
 # non-condition reason (like `42`) into a `simpleError`, so wrap it in a
-# condition that `resolve()` unwraps.
+# condition that `resolve()` unwraps. Domain `onError` handlers see the wrapper
+# before it is unwrapped, so it looks like the `simpleError` `stop()` would give.
 rethrow_reason <- function(reason) {
   if (inherits(reason, "condition")) {
     stop(reason)
   }
   stop(structure(
-    class = c("promises_rethrow", "error", "condition"),
-    list(message = "Re-thrown promise rejection", call = NULL, reason = reason)
+    class = c("promises_rethrow", "simpleError", "error", "condition"),
+    list(
+      message = paste(format(reason), collapse = " "),
+      call = NULL,
+      reason = reason
+    )
   ))
 }
 

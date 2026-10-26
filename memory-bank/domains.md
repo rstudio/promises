@@ -196,6 +196,9 @@ surface), in `hybrid_then()`, and in `as.promise.Future()`.
   callbacks that were bound earlier.
 - **`onError` sees handled errors too.** It runs as a calling handler, before
   any `catch()` or `on_failure` gets the error. It is a notice, not a catch.
+  For a re-thrown non-condition reason it sees the `promises_rethrow` wrapper,
+  a `simpleError` whose message is the formatted reason (`"42"`), with the
+  raw value in `$reason`. Pinned in `tests/testthat/test-then.R`.
 - **`onThen()` errors become rejections.** `promiseDomain$onThen()` runs inside
   the action of the new promise, so an error from it, or from a domain's
   `wrapOn*` function, rejects the returned promise instead of being thrown

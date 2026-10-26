@@ -257,3 +257,16 @@ test_that("finally() and tee callbacks keep non-condition rejection reasons", {
     extract() |>
     expect_identical(err)
 })
+
+test_that("domain onError sees the reason when a non-condition is re-thrown", {
+  seen <- NULL
+  d <- new_promise_domain(onError = function(e) seen <<- e)
+  with_promise_domain(d, {
+    p <- promise_reject(42) |> finally(\() NULL)
+  })
+  p |> catch(\(reason) reason) |> extract() |> expect_identical(42)
+
+  # Same message `stop(42)` gave before non-condition reasons were kept
+  expect_s3_class(seen, "simpleError")
+  expect_identical(conditionMessage(seen), "42")
+})
