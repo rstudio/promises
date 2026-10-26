@@ -16,6 +16,8 @@
 ^CRAN-SUBMISSION$
 ^_dev$
 ^\.claude$
+^\.agents$
+^memory-bank$
 ^\.posit$
 ^AGENTS\.md$
 ^\.vscode$
