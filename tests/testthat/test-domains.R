@@ -123,6 +123,7 @@ describe("Promise domains", {
       expect_identical(cd1$counts$onFinallyCalled, 1L)
       expect_identical(cd1$counts$onFulfilledCalled, 0L)
       expect_identical(cd1$counts$onRejectedCalled, 0L)
+      expect_identical(cd1$counts$onFinallyActive, 0L)
     })
 
     cd2 <- create_counting_domain(trackFinally = TRUE)
