@@ -142,6 +142,16 @@ of \code{finally} is ignored; however, if an error is thrown in \code{finally}, 
 error will be propagated forward into the returned promise.
 }
 
+\section{Unhandled errors}{
+
+
+If a promise rejects and no \code{onRejected} handler is attached by the time the
+event loop has run twice after the rejection, promises prints
+\verb{Unhandled promise error: <message>} to standard error. A handler attached
+later still runs, but the message has already been printed. Attach handlers
+in the same tick that creates the promise to avoid the message.
+}
+
 \section{Visibility}{
 
 

@@ -203,3 +203,12 @@ test_that("promises that resolve to each other reject with a cycle error", {
       expect_match("Chaining cycle detected")
   }
 })
+
+test_that("handlers attached in the same tick prevent the unhandled message", {
+  out <- capture.output(type = "message", {
+    p <- promise_reject("boom")
+    catch(p, \(reason) NULL)
+    wait_for_it()
+  })
+  expect_length(out, 0)
+})
