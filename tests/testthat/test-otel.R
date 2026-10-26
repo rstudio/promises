@@ -29,7 +29,7 @@ with_otel_promise_domain({
             {
               42
             },
-            tracer = promises_otel_tracer()
+            tracer = otel::get_tracer()
           )
         })
       })
@@ -52,25 +52,6 @@ with_otel_promise_domain({
       })
     })
 
-    describe("promises_otel_tracer()", {
-      it("does not cache a no-op tracer", {
-        skip_if(!Sys.getenv("OTEL_TRACES_EXPORTER") %in% c("", "none"))
-        tracer_env <- environment(promises_otel_tracer)
-        old_testthat <- Sys.getenv("TESTTHAT")
-        on.exit({
-          Sys.setenv(TESTTHAT = old_testthat)
-          tracer_env$tracer <- NULL
-        })
-        Sys.setenv(TESTTHAT = "false")
-        tracer_env$tracer <- NULL
-
-        expect_false(promises_otel_tracer()$is_enabled())
-        otelsdk::with_otel_record({
-          expect_true(promises_otel_tracer()$is_enabled())
-        })
-      })
-    })
-
     describe("with_otel_span()", {
       it("executes synchronous expressions without otel", {
         # When recording is off, should still execute expression
@@ -79,7 +60,7 @@ with_otel_promise_domain({
           {
             42
           },
-          tracer = promises_otel_tracer()
+          tracer = otel::get_tracer()
         )
         expect_equal(result, 42)
       })
@@ -90,7 +71,7 @@ with_otel_promise_domain({
             {
               42
             },
-            tracer = promises_otel_tracer()
+            tracer = otel::get_tracer()
           )
           expect_equal(result, 42)
         })
@@ -103,7 +84,7 @@ with_otel_promise_domain({
           {
             promise_resolve(42)
           },
-          tracer = promises_otel_tracer()
+          tracer = otel::get_tracer()
         )
         expect_true(is.promising(result))
         expect_equal(extract(result), 42)
@@ -116,7 +97,7 @@ with_otel_promise_domain({
             {
               promise_resolve(42)
             },
-            tracer = promises_otel_tracer()
+            tracer = otel::get_tracer()
           )
 
           expect_true(is.promising(result))
@@ -131,7 +112,7 @@ with_otel_promise_domain({
             with_otel_span(
               "test_span_sync_error",
               stop("sync boom"),
-              tracer = promises_otel_tracer()
+              tracer = otel::get_tracer()
             ),
             "sync boom"
           )
@@ -146,7 +127,7 @@ with_otel_promise_domain({
           with_otel_span(
             "test_span_async_error",
             promise_reject("async boom"),
-            tracer = promises_otel_tracer()
+            tracer = otel::get_tracer()
           ) |>
             extract() |>
             expect_error("async boom")
@@ -161,7 +142,7 @@ with_otel_promise_domain({
           with_otel_span(
             "test_span_value_error",
             promise_reject(42),
-            tracer = promises_otel_tracer()
+            tracer = otel::get_tracer()
           ) |>
             catch(\(reason) reason) |>
             extract() |>
@@ -178,7 +159,7 @@ with_otel_promise_domain({
         counting_domain <- create_counting_domain()
 
         p <- with_promise_domain(counting_domain, {
-          with_otel_span("test_operation", tracer = promises_otel_tracer(), {
+          with_otel_span("test_operation", tracer = otel::get_tracer(), {
             promise_resolve(42) |>
               then(function(x) x * 2)
           })
@@ -196,10 +177,10 @@ with_otel_promise_domain({
       it("handles promise rejections gracefully", {
         # Should handle rejected promises without errors
         records <- otelsdk::with_otel_record({
-          p <- with_otel_span("test_span3", tracer = promises_otel_tracer(), {
+          p <- with_otel_span("test_span3", tracer = otel::get_tracer(), {
             promise_reject("test error") |>
               catch(function(reason) {
-                with_otel_span("catch_span3", tracer = promises_otel_tracer(), {
+                with_otel_span("catch_span3", tracer = otel::get_tracer(), {
                   42
                 })
 
@@ -210,7 +191,7 @@ with_otel_promise_domain({
               }) |>
               then(function(result) {
                 expect_equal(result, "caught")
-                with_otel_span("then_span3", tracer = promises_otel_tracer(), {
+                with_otel_span("then_span3", tracer = otel::get_tracer(), {
                   42
                 })
               })
@@ -230,7 +211,7 @@ with_otel_promise_domain({
       it("propagates regular errors", {
         # Regular errors should still propagate
         expect_error(
-          with_otel_span("test_span4", tracer = promises_otel_tracer(), {
+          with_otel_span("test_span4", tracer = otel::get_tracer(), {
             stop("regular error")
           }),
           "regular error"
@@ -247,7 +228,7 @@ with_otel_promise_domain({
 
       recording <- otelsdk::with_otel_record({
         # Create two parallel promise chains, each with their own span
-        chain1 <- with_otel_span("chain_1", tracer = promises_otel_tracer(), {
+        chain1 <- with_otel_span("chain_1", tracer = otel::get_tracer(), {
           promise_resolve("init1") |>
             then(function(x) {
               spn <- otel::start_span("chain1_step1")
@@ -275,7 +256,7 @@ with_otel_promise_domain({
             })
         })
 
-        chain2 <- with_otel_span("chain_2", tracer = promises_otel_tracer(), {
+        chain2 <- with_otel_span("chain_2", tracer = otel::get_tracer(), {
           promise_resolve("init2") |>
             then(function(x) {
               spn <- otel::start_span("chain2_step1")
@@ -620,10 +601,10 @@ describe("with_otel_promise_domain() idempotency", {
 
     records <- otelsdk::with_otel_record({
       result <- with_otel_promise_domain({
-        with_otel_span("outer_span", tracer = promises_otel_tracer(), {
+        with_otel_span("outer_span", tracer = otel::get_tracer(), {
           # This nested call should be idempotent
           with_otel_promise_domain({
-            with_otel_span("inner_span", tracer = promises_otel_tracer(), {
+            with_otel_span("inner_span", tracer = otel::get_tracer(), {
               promise_resolve(42) |>
                 then(function(x) {
                   # Another nested call

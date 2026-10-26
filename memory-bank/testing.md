@@ -144,6 +144,3 @@ devtools::check()                                  # full R CMD check
   or the spans are missing (see `otel.md`).
 - **Running only `test-zzz-future_promise.R` on macOS does nothing**: the
   whole file is skipped there.
-- **`promises_otel_tracer()` changes behavior under testthat** (no cache when
-  `TESTTHAT=true`). Running otel code from a plain `Rscript` will act
-  differently from the tests.

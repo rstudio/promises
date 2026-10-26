@@ -9,35 +9,8 @@ NULL
 NULL
 
 # Fixed variable named required for `otel::default_tracer_name()`
-# which is used in `otel::get_tracer()` within `promises_otel_tracer()`
+# which is used in `otel::get_tracer()`
 otel_tracer_name <- "co.posit.r-package.promises"
-
-# Using local scope avoids an environment object lookup on each call.
-# Inspired by httr2:::get_tracer(). Taken from Shiny
-# Benchmark: https://github.com/rstudio/shiny/pull/4269/files#diff-0cc4a76032b57fcc125d41dfa3fb0f0c39976bb00a1d84bb56a0b77c331ce2d1R42
-testthat__is_testing <- function() {
-  identical(Sys.getenv("TESTTHAT"), "true")
-}
-
-promises_otel_tracer <- local({
-  tracer <- NULL
-  function() {
-    if (!is.null(tracer)) {
-      return(tracer)
-    }
-    if (testthat__is_testing()) {
-      # Don't cache the tracer in unit tests. It interferes with tracer provider
-      # injection in otelsdk::with_otel_record().
-      return(otel::get_tracer())
-    }
-    new_tracer <- otel::get_tracer()
-    # Only cache an enabled tracer, so a tracer provider set up later is used
-    if (.subset2(new_tracer, "is_enabled")()) {
-      tracer <<- new_tracer
-    }
-    new_tracer
-  }
-})
 
 #' OpenTelemetry integration
 #'
@@ -464,7 +437,8 @@ create_otel_promise_domain <- function() {
       force(onFulfilled)
 
       ## Motivation on why we can't use
-      ## `promises_otel_tracer()$get_active_span()` here to save 10 microseconds:
+      ## a cached tracer's `$get_active_span()` here to save 10 microseconds
+      ## (benchmarked with the since-removed `promises_otel_tracer()` cache):
       ## https://github.com/r-lib/otel/issues/31#issuecomment-3250669840
       #> ❯❯ bench::mark(promises_otel_tracer()$get_active_span(), get_active_span())
       #> # A tibble: 2 × 13

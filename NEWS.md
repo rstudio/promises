@@ -33,9 +33,6 @@
 * `with_otel_span()` now sets the span status to `"error"` when the
   expression throws or the returned promise rejects. (#212)
 
-* The internal tracer cache no longer keeps a no-op tracer, so a tracer
-  provider set up after the first call is used. (#212)
-
 * `promise_reduce()` now accepts a function name for `.f` (such as `"+"`),
   like `promise_map()` does. (#212)
 

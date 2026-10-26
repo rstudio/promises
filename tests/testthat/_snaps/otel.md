@@ -3,7 +3,7 @@
     Code
       with_ospan_async("test_span_deprecated", {
         42
-      }, tracer = promises_otel_tracer())
+      }, tracer = otel::get_tracer())
     Condition
       Warning:
       `with_ospan_async()` was deprecated in promises 1.5.0.

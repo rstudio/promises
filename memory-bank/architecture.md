@@ -62,7 +62,7 @@ description: "Map of how promises fits together: the promise object, chaining, d
 - `with_otel_promise_domain()` - Handoff promise domain that restores the active span from when `then()` was called
 - `local_otel_promise_domain()` - Add the span promise domain to the local scope (for `{coro}` where `with_*()` wrappers are not allowed)
 - Earlier `with_ospan_async()`/`with_ospan_promise_domain()`/`local_ospan_promise_domain()` names are deprecated (#198)
-- `promises_otel_tracer()` caches the tracer for speed, but only once it is enabled (never under testthat)
+- `with_otel_span()` needs a `tracer`; promises keeps no tracer cache of its own
 
 ## Integration Points
 

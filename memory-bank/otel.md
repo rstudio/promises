@@ -34,11 +34,8 @@ pass their own tracer.
   - `has_otel_promise_domain(domain = current_promise_domain())` - checks the
     `.otel_promise_domain` flag.
   - `create_otel_promise_domain()` - builds the handoff domain.
-  - `promises_otel_tracer()` - `otel::get_tracer()`, cached once it is
-    enabled; used by tests.
   - `otel_tracer_name` - `"co.posit.r-package.promises"`. `otel` looks up this
     variable name to pick the default tracer name for the package.
-  - `testthat__is_testing()` - `Sys.getenv("TESTTHAT") == "true"`.
 - `R/domains.R` - `compose_domains()` carries the `.otel_promise_domain` flag
   through composition. It is the only extra field it carries.
 - `R/deprecated.R` - `with_ospan_async()`, `with_ospan_promise_domain()`,
@@ -120,14 +117,11 @@ with_otel_promise_domain({
 `step1` runs with `async_op` active. `async_op` ends after `step1`'s promise
 settles. `step2` runs with no active span.
 
-### promises_otel_tracer()
+### Tracers
 
-Caches the first *enabled* `otel::get_tracer()` result in a closure. A no-op
-tracer (`is_enabled()` is `FALSE`) is returned but not cached, so a tracer
-provider set up later is still picked up. When `TESTTHAT=true` it never
-caches, because `otelsdk::with_otel_record()` swaps the tracer provider for
-each recording. No package code calls it; only
-tests do. `with_otel_span()` has no default tracer, so callers must pass one.
+promises keeps no tracer of its own. `with_otel_span()` has no default
+tracer, so callers must pass one. Shiny passes its own cached tracer
+(`shiny_otel_tracer()`); the tests pass `otel::get_tracer()`.
 
 ## Tests
 
@@ -171,11 +165,10 @@ Run: `devtools::test(filter = "otel")`.
 - **`tracer` is required and has no default.** A missing tracer fails with
   "argument "tracer" is missing, with no default". A `NULL` tracer fails too,
   since `.subset2(NULL, "is_enabled")` is `NULL`.
-- **`promises_otel_tracer()` caches an enabled tracer outside tests.** Once
-  an enabled tracer is cached, a later tracer provider swap (as
-  `otelsdk::with_otel_record()` does) is not seen. This is why tests set no
-  cache when `TESTTHAT=true`. Do not "simplify" that branch away. Pinned by
-  "does not cache a no-op tracer" in `tests/testthat/test-otel.R`.
+- **Tests must get a fresh tracer inside each recording.** A tracer cached
+  before `otelsdk::with_otel_record()` swaps the tracer provider is not
+  seen by the recording. That is why the tests call `otel::get_tracer()`
+  inline rather than caching it.
 - **`compose_domains()` only copies `.otel_promise_domain`.** Any other
   `...` field given to `new_promise_domain()` is lost when domains are
   composed. If you add a new flag to the otel domain, update
