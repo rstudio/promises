@@ -30,7 +30,7 @@ finallyToRejected <- function(onFinally) {
   force(onFinally)
   function(reason) {
     onFinally()
-    stop(reason)
+    rethrow_reason(reason)
   }
 }
 

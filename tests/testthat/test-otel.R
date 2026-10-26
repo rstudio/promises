@@ -163,8 +163,9 @@ with_otel_promise_domain({
             promise_reject(42),
             tracer = promises_otel_tracer()
           ) |>
-            catch(\(reason) NULL) |>
-            wait_for_it()
+            catch(\(reason) reason) |>
+            extract() |>
+            expect_identical(42)
         })
         span <- records$traces[["test_span_value_error"]]
         expect_identical(span$status, "error")

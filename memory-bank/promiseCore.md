@@ -254,10 +254,11 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
   `p$then(10)` warns and ignores the value (`normalizeOnFulfilled()`), while
   `then(p, 10)` errors via `rlang::as_function()`. Pinned by
   `tests/testthat/test-methods.R`.
-- **`finally()` and `tee = TRUE` turn a non-condition reason into an error.**
-  They pass the error on with `stop(reason)`. A reason such as `42` from
-  `promise_reject(42)` becomes a `simpleError` with message `"42"`. See
-  `thenAndHybrid.md`.
+- **Callbacks that pass a rejection on must use `rethrow_reason()`.**
+  `stop(reason)` turns a non-condition reason such as `42` into a
+  `simpleError`. `rethrow_reason()` wraps it in a `promises_rethrow`
+  condition, and the error handler in `self$resolve()` unwraps it, so the
+  promise rejects with the original value.
 - **There is no public way to read the state.** Code that needs it must use `attr(p, "promise_impl")$status()`, as
   `ext_promise()` in `tests/testthat/helper.R` does. There is no exported
   status function.

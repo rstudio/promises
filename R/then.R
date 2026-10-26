@@ -171,7 +171,7 @@ then <- function(
         onRejected <- normalizeOnRejected(onRejected)
         onRejectedTee <- function(reason) {
           onRejected(reason)
-          stop(reason) # Re-throw the error to propagate it
+          rethrow_reason(reason)
         }
       }
 
@@ -201,7 +201,7 @@ catch <- function(promise, onRejected, ..., tee = FALSE) {
     onRejected <- normalizeOnRejected(onRejected)
     promise$catch(function(reason) {
       onRejected(reason)
-      stop(reason)
+      rethrow_reason(reason)
     })
   }
 }

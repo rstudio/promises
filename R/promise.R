@@ -125,6 +125,9 @@ Promise <- function() {
         private$doResolve(value)
       },
       error = function(err) {
+        if (inherits(err, "promises_rethrow")) {
+          err <- err$reason
+        }
         private$doReject(err)
       }
     )
@@ -248,6 +251,19 @@ Promise <- function() {
   self$.__enclos_env__ <- list(private = private)
   class(self) <- "Promise"
   self
+}
+
+# Re-throw a rejection reason from inside a callback. `stop()` would turn a
+# non-condition reason (like `42`) into a `simpleError`, so wrap it in a
+# condition that `resolve()` unwraps.
+rethrow_reason <- function(reason) {
+  if (inherits(reason, "condition")) {
+    stop(reason)
+  }
+  stop(structure(
+    class = c("promises_rethrow", "error", "condition"),
+    list(message = "Re-thrown promise rejection", call = NULL, reason = reason)
+  ))
 }
 
 # `formals()` is `NULL` for primitives like `sum`; `args()` recovers their

@@ -233,3 +233,27 @@ test_that("`tee` must be a single TRUE or FALSE", {
     expect_error(hybrid_then(1, identity, tee = bad), "`tee` must be")
   }
 })
+
+test_that("finally() and tee callbacks keep non-condition rejection reasons", {
+  keeps_reason <- function(p) {
+    p |>
+      catch(\(reason) reason) |>
+      extract() |>
+      expect_identical(42)
+  }
+  promise_reject(42) |> finally(\() NULL) |> keeps_reason()
+  promise_reject(42) |>
+    then(onRejected = \(e) NULL, tee = TRUE) |>
+    keeps_reason()
+  promise_reject(42) |> catch(\(e) NULL, tee = TRUE) |> keeps_reason()
+  hybrid_then(promise_reject(42), on_failure = \(e) NULL, tee = TRUE) |>
+    keeps_reason()
+
+  # Conditions are passed through as the same object
+  err <- simpleError("boom")
+  promise_reject(err) |>
+    finally(\() NULL) |>
+    catch(\(reason) reason) |>
+    extract() |>
+    expect_identical(err)
+})

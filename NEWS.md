@@ -42,6 +42,11 @@
 * `promise_reduce()` without `.init` now starts from the first element of
   `.x`, like `purrr::reduce()`. Before, it rejected. (#212)
 
+* `finally()` and the `tee = TRUE` rejection paths of `then()`, `catch()`,
+  and `hybrid_then()` now pass a non-condition rejection reason (such as
+  `promise_reject(42)`) on unchanged. Before, it became a `simpleError`.
+  (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry

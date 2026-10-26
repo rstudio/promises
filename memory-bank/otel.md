@@ -165,11 +165,9 @@ Run: `devtools::test(filter = "otel")`.
   span is still open (see `step2` above).
 - **`with_otel_span()` returns a new promise** (from `catch()` and
   `finally()`), not the one `expr` returned. Do not compare by identity.
-- **`with_otel_span()` turns a non-condition rejection into an error.** Its
-  `catch(tee = TRUE)` and `finally()` re-throw with `stop(reason)`, so a
-  promise that rejects with `42` comes out rejecting with a `simpleError`.
-  The span status is still set to `"error"`. Still open; see
-  `thenAndHybrid.md`.
+- **Non-condition rejections pass through unchanged.** If `expr` rejects
+  with `42`, the span status is `"error"` with no description, and the
+  returned promise still rejects with `42`.
 - **`tracer` is required and has no default.** A missing tracer fails with
   "argument "tracer" is missing, with no default". A `NULL` tracer fails too,
   since `.subset2(NULL, "is_enabled")` is `NULL`.

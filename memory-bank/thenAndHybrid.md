@@ -66,7 +66,8 @@ They are marked superseded by `|>` plus `then()`.
 6. With `tee = TRUE`, it normalizes the callbacks first and wraps them:
    - fulfilled: call the callback, then return the original value with its
      original visibility;
-   - rejected: call the callback, then `stop(reason)` to pass the error on.
+   - rejected: call the callback, then `rethrow_reason(reason)` to pass the
+     original reason on.
    If the callback itself throws, that new error wins.
 7. Returns the new promise invisibly.
 
@@ -175,13 +176,11 @@ in `tests/testthat/test-otel.R`.
 - **`.visible` must be the exact name of the second formal.** A callback
   written as `function(value, visible)` fails with a missing argument. The
   "Visibility" section in `R/then.R` names `.visible`.
-- **`finally()` and the `tee = TRUE` rejected path change non-condition
-  reasons.** `finallyToRejected()` in `R/domains.R` and the rejected `tee`
-  wrappers in `then()` and `catch()` pass the error on with `stop(reason)`. If
-  the reason is not a condition (for example `promise_reject(42)`), the next
-  handler gets a new `simpleError` with message `"42"`, not `42` (checked by
-  running). `with_otel_span()` uses `catch(tee = TRUE)` and `finally()`, so it
-  does the same. This is still open.
+- **Pass rejections on with `rethrow_reason()`, not `stop(reason)`.**
+  `finallyToRejected()` in `R/domains.R` and the rejected `tee` wrappers in
+  `then()` and `catch()` use it, so a non-condition reason such as `42` reaches
+  the next handler unchanged. `stop(reason)` would turn it into a
+  `simpleError`. Pinned in `tests/testthat/test-then.R`.
 - **`hybrid_then()` does not catch errors from `on_success`.** On the sync path
   an error in `on_success` is thrown straight out; `on_failure` only covers
   `expr`. This matches `then()`, where `onRejected` does not see errors from

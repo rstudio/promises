@@ -183,9 +183,9 @@ surface), in `hybrid_then()`, and in `as.promise.Future()`.
   `replace = FALSE`, `compose_domains(old, NULL)` returns `old`, so the outer
   domain stays active. To run with no domain, use `replace = TRUE` (as
   `without_promise_domain()` does).
-- **`finally()` turns a non-condition rejection into an error.**
-  `finallyToRejected()` re-throws with `stop(reason)`, so a reason of `42`
-  reaches the next handler as a `simpleError`. Still open; see
+- **Re-throw with `rethrow_reason()`, not `stop()`.** `finallyToRejected()`
+  passes the rejection on with `rethrow_reason()` (in `R/promise.R`) so a
+  non-condition reason such as `42` reaches the next handler unchanged. See
   `thenAndHybrid.md`.
 - **The domain is captured when `then()` is called.** Wrapping the event loop
   (for example `with_promise_domain(d, later::run_now())`) has no effect on
