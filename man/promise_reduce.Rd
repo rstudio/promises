@@ -16,7 +16,8 @@ recent call to \code{func}), and the second parameter will be an element of \cod
 \item{...}{Other arguments to pass to \code{.f}}
 
 \item{.init}{The initial result value of the fold, passed into \code{.f} when it
-is first executed.}
+is first executed. If missing, the first element of \code{.x} is used and the
+fold starts with the second element.}
 }
 \value{
 A promise that will resolve to the result of calling \code{.f} on the last

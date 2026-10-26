@@ -198,7 +198,8 @@ promise_map <- function(.x, .f, ...) {
 #'   recent call to `func`), and the second parameter will be an element of `.x`.
 #' @param ... Other arguments to pass to `.f`
 #' @param .init The initial result value of the fold, passed into `.f` when it
-#'   is first executed.
+#'   is first executed. If missing, the first element of `.x` is used and the
+#'   fold starts with the second element.
 #'
 #' @return A promise that will resolve to the result of calling `.f` on the last
 #'   element (or `.init` if `.x` had no elements). If any invocation of `.f`
@@ -220,6 +221,13 @@ promise_map <- function(.x, .f, ...) {
 #' @export
 promise_reduce <- function(.x, .f, ..., .init) {
   .f <- match.fun(.f)
+  if (missing(.init)) {
+    if (length(.x) == 0) {
+      stop("`.init` must be supplied when `.x` is empty")
+    }
+    .init <- .x[[1]]
+    .x <- .x[-1]
+  }
   p <- promise_resolve(.init)
   lapply(.x, function(item) {
     p <<- then(p, function(x) {

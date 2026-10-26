@@ -216,3 +216,9 @@ test_that("handlers attached in the same tick prevent the unhandled message", {
 test_that("promise_reduce() accepts a function name for .f", {
   promise_reduce(1:3, "+", .init = 0) |> extract() |> expect_equal(6)
 })
+
+test_that("promise_reduce() without .init starts from the first element", {
+  promise_reduce(1:3, `+`) |> extract() |> expect_equal(6)
+  promise_reduce(list("a"), paste0) |> extract() |> expect_equal("a")
+  expect_error(promise_reduce(list(), `+`), "`.init`")
+})

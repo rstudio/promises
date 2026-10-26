@@ -39,6 +39,9 @@
 * `promise_reduce()` now accepts a function name for `.f` (such as `"+"`),
   like `promise_map()` does. (#212)
 
+* `promise_reduce()` without `.init` now starts from the first element of
+  `.x`, like `purrr::reduce()`. Before, it rejected. (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry
