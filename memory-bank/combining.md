@@ -30,7 +30,9 @@ apply: callbacks run later, and the first `resolve`/`reject` wins.
 - Tests: `tests/testthat/test-combining.R` (`promise_all` order, `NULL`
   values, duplicate names), `test-promise-map.R` and
   `test-legacy-promise-map.R` (`NULL` results), `test-aplus-2-2.R` (uses
-  `promise_all(.list = ...)` to wait on many promises).
+  `promise_all(.list = ...)` to wait on many promises), `test-methods.R`
+  (`promise_reduce()` with a function name or no `.init`, empty
+  `promise_race()`).
 
 ## How it works
 
@@ -81,14 +83,20 @@ Work is serial: `.f` for element 2 is not called until the result for element
 
 ### promise_reduce(.x, .f, ..., .init)
 
-1. `p <- promise_resolve(.init)`.
-2. For each item, in order, `p <- then(p, function(x) .f(x, item, ...))`.
-3. Returns `p`.
+1. `.f <- match.fun(.f)`, so a function name such as `"+"` works.
+2. If `.init` is missing, it uses `.x[[1]]` as `.init` and drops it from `.x`,
+   like `Reduce()` and `purrr::reduce()`. If `.x` is also empty, it throws
+   "`.init` must be supplied when `.x` is empty" right away (a real error, not
+   a rejected promise).
+3. `p <- promise_resolve(.init)`.
+4. For each item, in order, `p <- then(p, function(x) .f(x, item, ...))`.
+5. Returns `p`.
 
 The whole chain is built at once, at call time, but each `.f` runs only after
 the previous step resolves. If `.f` returns a promise, the next step waits for
-it. Empty `.x` resolves to `.init`. If any step fails, the later steps have no
-`onRejected`, so the error passes straight to the returned promise.
+it. Empty `.x` with `.init` resolves to `.init`. If any step fails, the later
+steps have no `onRejected`, so the error passes straight to the returned
+promise.
 
 ## Pitfalls
 
@@ -102,17 +110,15 @@ it. Empty `.x` resolves to `.init`. If any step fails, the later steps have no
 - **Named empty input loses its names.** `promise_all(.list = setNames(list(),
   character()))` resolves to plain `list()`.
 - **`promise_race()` with no inputs never settles.** There is no special case
-  for empty input, so the returned promise stays pending forever.
+  for empty input, so the returned promise stays pending forever. This matches
+  JavaScript and is now in the docs; pinned by "promise_race() with no
+  promises stays pending" in `tests/testthat/test-methods.R`.
 - **`promise_map()` calls `.f` for the first element right away.** `do_next(1)`
   runs inside the `promise()` action, which runs at once. Only the later
   elements wait for the event loop. An error from that first call becomes a
   rejection, not a thrown error.
-- **`promise_reduce()` requires `.init`.** With no `.init`, `promise_resolve()`
-  forces a missing argument and the result rejects with "argument ".init" is
-  missing, with no default". It does not use the first element as the start,
-  unlike `Reduce()` or `purrr::reduce()`.
-- **`promise_reduce()` does not use `match.fun()`.** Unlike `promise_map()`,
-  `.f = "+"` fails (rejects with "could not find function ".f"").
+- **`promise_reduce()` with empty `.x` and no `.init` throws.** The check runs
+  before any promise is made, so it is a normal R error at call time.
 - **`promise_map()` and `promise_reduce()` take values, not promises, as
   `.x`.** A promise passed as `.x` is a classed list, so `promise_map()` turns
   it into a list of its three functions. If `.x` holds promises, `.f` gets the

@@ -182,3 +182,62 @@ describe("future", {
     expect_error(extract(p2))
   })
 })
+
+test_that("unhandled rejection message works for non-condition reasons", {
+  out <- capture.output(type = "message", {
+    promise_reject(42)
+    wait_for_it()
+  })
+  expect_identical(out, "Unhandled promise error: 42")
+})
+
+test_that("promises that resolve to each other reject with a cycle error", {
+  a <- ext_promise()
+  b <- ext_promise()
+  a$resolve(b$promise)
+  b$resolve(a$promise)
+  for (p in list(a$promise, b$promise)) {
+    p |>
+      catch(conditionMessage) |>
+      extract() |>
+      expect_match("Chaining cycle detected")
+  }
+})
+
+test_that("a settled promise drops its link to the promise it followed", {
+  following <- function(p) {
+    attr(p, "promise_impl", exact = TRUE)$.__enclos_env__$private$following
+  }
+  inner <- ext_promise()
+  outer <- promise(\(resolve, reject) resolve(inner$promise))
+  expect_false(is.null(following(outer)))
+
+  inner$resolve(1)
+  expect_identical(extract(outer), 1)
+  expect_null(following(outer))
+})
+
+test_that("handlers attached in the same tick prevent the unhandled message", {
+  out <- capture.output(type = "message", {
+    p <- promise_reject("boom")
+    catch(p, \(reason) NULL)
+    wait_for_it()
+  })
+  expect_length(out, 0)
+})
+
+test_that("promise_reduce() accepts a function name for .f", {
+  promise_reduce(1:3, "+", .init = 0) |> extract() |> expect_equal(6)
+})
+
+test_that("promise_reduce() without .init starts from the first element", {
+  promise_reduce(1:3, `+`) |> extract() |> expect_equal(6)
+  promise_reduce(list("a"), paste0) |> extract() |> expect_equal("a")
+  expect_error(promise_reduce(list(), `+`), "`.init`")
+})
+
+test_that("promise_race() with no promises stays pending", {
+  p <- promise_race()
+  wait_for_it()
+  expect_identical(attr(p, "promise_impl", exact = TRUE)$status(), "pending")
+})

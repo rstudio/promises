@@ -1,5 +1,49 @@
 # promises (development version)
 
+## Bug fixes
+
+* Primitive functions such as `sum` and `abs` now receive the value when
+  used as `then()`, `catch()`, or `hybrid_then()` callbacks. Before,
+  `formals()` returned `NULL` for them, so they were called with no
+  arguments. (#212)
+
+* Calling `with_promise_domain(NULL, expr)` inside another promise domain no
+  longer breaks `then()` calls made in `expr`; the outer domain stays
+  active. (#212)
+
+* Nested promise domains no longer drop `wrapOnFinally`. When one of the
+  nested domains has a `wrapOnFinally`, each domain now wraps `finally()`
+  callbacks once; a domain without one wraps them with its
+  `wrapOnFulfilled`. (#212)
+
+* The "Unhandled promise error" message no longer errors inside the event
+  loop when a promise is rejected with a value that is not a condition, such
+  as `promise_reject(42)`. (#212)
+
+* `catch(promise, NULL, tee = TRUE)` now passes the original error through
+  instead of rejecting with "could not find function". (#212)
+
+* `then()`, `catch()`, and `hybrid_then()` now give a clear error when `tee`
+  is `NA` or has more than one value. (#212)
+
+* Promises that resolve to each other (directly or through a longer chain)
+  now reject with "Chaining cycle detected for promise" instead of staying
+  pending forever. (#212)
+
+* `with_otel_span()` now sets the span status to `"error"` when the
+  expression throws or the returned promise rejects. (#212)
+
+* `promise_reduce()` now accepts a function name for `.f` (such as `"+"`),
+  like `promise_map()` does. (#212)
+
+* `promise_reduce()` without `.init` now starts from the first element of
+  `.x`, like `purrr::reduce()`. Before, it rejected. (#212)
+
+* `finally()` and the `tee = TRUE` rejection paths of `then()`, `catch()`,
+  and `hybrid_then()` now pass a non-condition rejection reason (such as
+  `promise_reject(42)`) on unchanged. Before, it became a `simpleError`.
+  (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry
@@ -21,7 +65,7 @@ promises now integrates with the otel package to provide observability and traci
   function handles both synchronous and asynchronous (promise-based)
   operations. For promises, the span is automatically ended when the promise
   resolves or rejects. To access the OpenTelemetry span within your
-  expression, use `otel::get_current_span()`. (#198)
+  expression, use `otel::get_active_span()`. (#198)
 
 ## New features
 
@@ -53,7 +97,7 @@ promises now integrates with the otel package to provide observability and traci
 
 promises now integrates with the otel package to provide observability and tracing for asynchronous operations. OpenTelemetry integration is experimental and subject to change.
 
-* `with_ospan_async()` creates an OpenTelemetry span, executes the given expression within it, and ends the span. This function handles both synchronous and asynchronous (promise-based) operations. For promises, the span is automatically ended when the promise resolves or rejects. To access the OpenTelemetry span within your expression, use `otel::get_current_span()`. (#173)
+* `with_ospan_async()` creates an OpenTelemetry span, executes the given expression within it, and ends the span. This function handles both synchronous and asynchronous (promise-based) operations. For promises, the span is automatically ended when the promise resolves or rejects. To access the OpenTelemetry span within your expression, use `otel::get_active_span()`. (#173)
 
 * `with_ospan_promise_domain()` creates a promise domain that restores the currently active OpenTelemetry span from when a call to `then()` is executed. This enables proper tracing context across asynchronous operations. (#173)
 

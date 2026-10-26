@@ -174,5 +174,3 @@ Style (from the current file):
   `@keywords internal`, so they do not need an entry.
 - **Vignette chunks must stay non-evaluated or guarded.** `mirai`, `future`,
   and `vembedr` are only `Suggests`; an unguarded chunk breaks CRAN builds.
-- **`NEWS.md` points users to `otel::get_current_span()`**, which does not
-  exist; the function is `otel::get_active_span()`.

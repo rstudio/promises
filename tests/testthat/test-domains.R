@@ -123,6 +123,7 @@ describe("Promise domains", {
       expect_identical(cd1$counts$onFinallyCalled, 1L)
       expect_identical(cd1$counts$onFulfilledCalled, 0L)
       expect_identical(cd1$counts$onRejectedCalled, 0L)
+      expect_identical(cd1$counts$onFinallyActive, 0L)
     })
 
     cd2 <- create_counting_domain(trackFinally = TRUE)
@@ -297,5 +298,70 @@ describe("Promise domains", {
     expect_length(test_env$activations, 2)
     expect_identical(test_env$activations[1], "x=1")
     expect_identical(test_env$activations[2], "x=2")
+  })
+})
+
+test_that("a NULL domain nested in another domain keeps the outer domain", {
+  cd <- create_counting_domain()
+  with_promise_domain(cd, {
+    with_promise_domain(NULL, {
+      p <- promise_resolve(1) |> then(\(x) x + 1)
+    })
+  })
+  expect_identical(cd$counts$onFulfilledBound, 1L)
+  p |> extract() |> expect_equal(2)
+})
+
+test_that("nested domains each wrap finally with wrapOnFinally", {
+  cd1 <- create_counting_domain(trackFinally = TRUE)
+  cd2 <- create_counting_domain(trackFinally = TRUE)
+  with_promise_domain(cd1, {
+    with_promise_domain(cd2, {
+      p <- promise_resolve(1) |> finally(\() NULL)
+    })
+  })
+  p |> wait_for_it()
+  for (cd in list(cd1, cd2)) {
+    expect_identical(cd$counts$onFinallyBound, 1L)
+    expect_identical(cd$counts$onFinallyCalled, 1L)
+    expect_identical(cd$counts$onFulfilledBound, 0L)
+  }
+})
+
+test_that("a nested domain without wrapOnFinally still sees finally", {
+  outer <- create_counting_domain(trackFinally = FALSE)
+  inner <- create_counting_domain(trackFinally = TRUE)
+  with_promise_domain(outer, {
+    with_promise_domain(inner, {
+      p <- promise_resolve(1) |> finally(\() NULL)
+    })
+  })
+  p |> wait_for_it()
+  expect_identical(inner$counts$onFinallyCalled, 1L)
+  expect_identical(outer$counts$onFulfilledCalled, 1L)
+})
+
+test_that("nested domains drop custom fields (known limitation)", {
+  # `compose_domains()` does not merge the `...` fields of
+  # `new_promise_domain()`; only the otel flag is passed through. If this test
+  # starts failing, the limitation was fixed: update the comment in
+  # `compose_domains()` and memory-bank/domains.md.
+  outer <- new_promise_domain(outer_field = "outer")
+  inner <- new_promise_domain(inner_field = "inner")
+
+  with_promise_domain(outer, {
+    expect_identical(current_promise_domain()$outer_field, "outer")
+    with_promise_domain(inner, {
+      expect_null(current_promise_domain()$outer_field)
+      expect_null(current_promise_domain()$inner_field)
+    })
+  })
+})
+
+test_that("nested domains keep the otel flag", {
+  with_otel_promise_domain({
+    with_promise_domain(new_promise_domain(), {
+      expect_true(has_otel_promise_domain())
+    })
   })
 })

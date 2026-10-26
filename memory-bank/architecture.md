@@ -14,9 +14,9 @@ description: "Map of how promises fits together: the promise object, chaining, d
 - States: "pending", "fulfilled", "rejected"
 - Private methods `doResolve`/`doReject` handle state transitions
 - Public API through `resolve()`, `reject()`, and `then()` methods
-- Chaining cycle detection to prevent infinite loops
+- Chaining cycle detection (`private$adopt()` walks `private$following`) so promises that wait on each other reject instead of hanging
 - Uses `later::later()` to schedule callbacks for fulfillment/rejection
-- `normalizeOnFulfilled()`/`normalizeOnRejected()` - Normalize callbacks to handle 0, 1, or 2 arguments
+- `normalizeOnFulfilled()`/`normalizeOnRejected()` - Normalize callbacks to handle 0, 1, or 2 arguments (`callback_formals()` lets primitives like `sum` get the value)
   - `onFulfilled` can take `(value, .visible)` for visibility detection
   - Callbacks with 0 args are wrapped to ignore arguments
   - Used by both `then()` and `hybrid_then()` for consistent callback handling
@@ -58,11 +58,11 @@ description: "Map of how promises fits together: the promise object, chaining, d
 
 **OpenTelemetry Integration (`R/otel.R`):**
 - Integration with `otel` package (>= 0.2.0, in Imports) for distributed tracing; `otelsdk` (>= 0.2.0) in Suggests for span collection in tests
-- `with_otel_span()` - Create a span, execute an expression within it, end it on completion (handles both sync values and promises)
+- `with_otel_span()` - Create a span, execute an expression within it, end it on completion (handles both sync values and promises); marks the span status `"error"` on a sync error or a rejection
 - `with_otel_promise_domain()` - Handoff promise domain that restores the active span from when `then()` was called
 - `local_otel_promise_domain()` - Add the span promise domain to the local scope (for `{coro}` where `with_*()` wrappers are not allowed)
 - Earlier `with_ospan_async()`/`with_ospan_promise_domain()`/`local_ospan_promise_domain()` names are deprecated (#198)
-- Uses cached tracer via `promises_otel_tracer()` for performance
+- `with_otel_span()` needs a `tracer`; promises keeps no tracer cache of its own
 
 ## Integration Points
 

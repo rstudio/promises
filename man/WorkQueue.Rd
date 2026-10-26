@@ -6,7 +6,7 @@
 \description{
 An \pkg{R6} class to help with scheduling work to be completed. \code{WorkQueue} will only execute work if the \code{can_proceed()} returns \code{TRUE}. For the use case of \code{future}, \code{can_proceed()} defaults to \code{future::nbrOfFreeWorkers() > 0} which will not allow for work to be executed if a \pkg{future} worker is not available.
 
-\code{WorkQueue} will constantly try to start new work once prior work item finishes.  However, if \code{can_proceed()} returns \code{FALSE} (no future workers are available) and there is more work to be done, then work is attempted later a random amount of time later using exponential backoff.  The exponential backoff will cap out at 10 seconds to prevent unnecessarily large wait times.
+\code{WorkQueue} will constantly try to start new work once prior work item finishes.  However, if \code{can_proceed()} returns \code{FALSE} (no future workers are available) and there is more work to be done, then work is attempted later a random amount of time later using exponential backoff.  The exponential backoff will cap out at 2 seconds to prevent unnecessarily large wait times.
 
 Each time \code{WorkQueue} tries to start more work, it will repeat until \code{can_proceed()} returns \code{FALSE} or there is no more work in the \code{queue}.
 }

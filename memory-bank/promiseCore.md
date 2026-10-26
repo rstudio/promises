@@ -28,7 +28,7 @@ All callbacks run later, through `later::later()`, never at the moment you call
 - `R/promise.R`
   - `Promise()` - internal factory for the inner object.
   - `normalizeOnFulfilled()`, `normalizeOnRejected()` - make callbacks take a
-    fixed set of arguments.
+    fixed set of arguments. `callback_formals()` reads the formals they use.
   - `promise()` - public constructor.
   - `promise_resolve()`, `promise_reject()` - helpers for an already settled
     promise.
@@ -59,12 +59,16 @@ All callbacks run later, through `later::later()`, never at the moment you call
 - `onFulfilled`, `onRejected` - lists of waiting handlers.
 - `onFinally` - set to `list()` but never used.
 - `rejectionHandled` - used for the unhandled error message.
+- `following` - the inner object of the promise this one is waiting on, or
+  `NULL`. Set by `adopt()` and used to find chaining cycles. Cleared when the
+  promise settles, so a settled promise does not keep the chain it followed
+  in memory.
 
 `self` gets the public functions `status()`, `resolve()`, `reject()`,
 `then()`, `catch()`, `finally()`, and `format()`. It also gets
 `self$.__enclos_env__ <- list(private = private)` so code that expects the R6
-layout can still reach `private`. Nothing in `R/` or `tests/` reads it. The
-class is set to `"Promise"`.
+layout can still reach `private`. `private$adopt()` reads it to walk the
+`following` chain of other promises. The class is set to `"Promise"`.
 
 ### Resolve and reject
 
@@ -81,17 +85,24 @@ do nothing after the first call to either one.
 `doResolve()`:
 
 1. Runs `withVisible(value)`.
-2. If the value `is.promising()`, it converts it with `as.promise()`.
-   - If the inner object of that promise is `self`, it rejects with
-     `"Chaining cycle detected for promise"`.
-   - Otherwise it calls `value$then(private$doResolve, private$doReject)`
-     inside `without_promise_domain()`, so this internal `then()` is not seen
-     by any domain. The promise now follows the other promise.
+2. If the value `is.promising()`, it calls `private$adopt(as.promise(value))`.
 3. Otherwise it calls `doResolveFinalValue(value, visible)`.
 
-`doReject()` does the same check: if the reason `is.promising()`, it follows
-that promise (with `doResolve` and `doReject`), so the final state comes from
-that promise. Otherwise it calls `doRejectFinalReason()`.
+`doReject()` does the same check: if the reason `is.promising()`, it calls
+`adopt()` on it, so the final state comes from that promise. Otherwise it
+calls `doRejectFinalReason()`.
+
+`private$adopt(p)` makes this promise follow `p`:
+
+1. It walks the chain of promises that `p` is waiting on, starting at the inner
+   object of `p` and moving through each `private$following`. If the walk
+   reaches `self`, it rejects with `"Chaining cycle detected for promise"`.
+   This finds direct cycles (resolving with yourself) and longer ones (`a`
+   waits on `b`, `b` waits on `a`).
+2. It sets `private$following` to the inner object of `p`.
+3. It calls `p$then(private$doResolve, private$doReject)` inside
+   `without_promise_domain()`, so this internal `then()` is not seen by any
+   domain.
 
 ### Settling and scheduling
 
@@ -106,8 +117,10 @@ one `later()` task that:
 1. Calls every waiting `onRejected` handler in order, setting
    `rejectionHandled <- TRUE` before each one.
 2. Schedules a second `later()` task. If `rejectionHandled` is still `FALSE`,
-   it writes `Unhandled promise error: <reason$message>` to `stderr()` with
-   `cat()`. The code comment says `warning()` was not reliable here.
+   it writes `Unhandled promise error: <message>` to `stderr()` with `cat()`.
+   For a condition, `<message>` is `conditionMessage(reason)`. For any other
+   value (for example `reject(42)`), it is `paste(format(reason), collapse =
+   " ")`. The code comment says `warning()` was not reliable here.
 
 Because state changes at once, `status()` reports `"fulfilled"` right after
 `promise_resolve(1)`, even though no handler has run yet.
@@ -141,6 +154,11 @@ caught inside `resolve()` and rejects the new promise.
 
 ### Callback normalization
 
+Both functions count formals with `callback_formals(f)`. For most functions
+this is `formals(f)`. For a primitive such as `sum` or `abs`, `formals()` is
+`NULL`, so it uses `formals(args(f))` instead. This way a primitive is called
+with the value, not with no arguments.
+
 `normalizeOnFulfilled(f)` always returns `NULL` or a function of
 `(value, .visible)`:
 
@@ -151,9 +169,11 @@ caught inside `resolve()` and rejects the new promise.
   `value` or `invisible(value)`.
 - Zero formals: wrapped so it is called with no arguments.
 
-`normalizeOnRejected(f)` returns `NULL` (warning if not `NULL`), the function as
-is when it has one or more formals, or a wrapper that calls it with no
-arguments.
+`normalizeOnRejected(f)` returns `NULL` (warning if not `NULL`), a wrapper that
+calls it with no arguments when it has zero formals, a `function(reason)`
+wrapper for a primitive, or the function as is otherwise. Primitives need the
+wrapper because domain code copies the callback's formals
+(`wrap_with_signature()` in `R/domains.R`), and a primitive has none.
 
 ### Visibility
 
@@ -215,30 +235,32 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
   `promise_reject(promise_resolve(5))` *fulfills* with `5`. This differs from
   JavaScript. `tests/testthat/test-methods.R` ("future" block) pins it with a
   Future as the reason: `promise_reject(future::future(1))` fulfills with `1`.
-- **Only direct cycles are found.** `doResolve()` compares the new value with
-  `self` only. Two promises that resolve to each other stay pending forever
-  with no error.
+- **Cycle checks only follow `adopt()` links.** `adopt()` walks
+  `private$following`, which is set only when a promise is resolved with
+  another promise. A link made by `then()` is not tracked. So
+  `p2 <- then(p1, \(x) p3); p3 <- then(p2, identity)` stays pending forever
+  with no error (checked by running). Resolving with yourself and promises
+  that resolve to each other are found. Pinned by
+  `tests/testthat/test-aplus-2-3.R` and "promises that resolve to each other
+  reject with a cycle error" in `tests/testthat/test-methods.R`.
 - **The unhandled error message can fire too early.** It is checked two
   `later()` ticks after rejection. A `catch()` added after that still runs, but
-  the message is already printed. A `then()` with only `onFulfilled` counts as
-  handling the parent; the error moves to the child promise, which then reports
-  it if nothing handles it.
-- **The unhandled error message assumes a condition.** It uses
-  `reason$message`. If a promise is rejected with a non-string, non-condition
-  value (for example `reject(42)`) and is not handled, `$` fails inside the
-  `later()` task and the error escapes from the event loop.
-- **Primitive functions are called with no arguments.** `normalizeOnFulfilled()`
-  counts `formals()`, which is `NULL` for primitives such as `sum` or `abs`. So
-  `then(p, sum)` resolves to `0` and `then(p, abs)` fails with "0 arguments
-  passed". Wrap them: `then(p, \(x) sum(x))`.
+  the message is already printed. Attach handlers in the same tick (the
+  "Unhandled errors" section of the `then()` docs says this). A `then()` with
+  only `onFulfilled` counts as handling the parent; the error moves to the
+  child promise, which then reports it if nothing handles it.
 - **The `.visible` name must be exact.** Only a second formal named `.visible`
   gets the flag. `function(value, visible)` is called with one argument and
-  fails with "argument "visible" is missing". The `then()` docs in
-  `R/then.R` say `visible`, which is wrong.
+  fails with "argument "visible" is missing".
 - **The method and the function treat bad callbacks differently.**
   `p$then(10)` warns and ignores the value (`normalizeOnFulfilled()`), while
   `then(p, 10)` errors via `rlang::as_function()`. Pinned by
   `tests/testthat/test-methods.R`.
+- **Callbacks that pass a rejection on must use `rethrow_reason()`.**
+  `stop(reason)` turns a non-condition reason such as `42` into a
+  `simpleError`. `rethrow_reason()` wraps it in a `promises_rethrow`
+  condition, and the error handler in `self$resolve()` unwraps it, so the
+  promise rejects with the original value.
 - **There is no public way to read the state.** Code that needs it must use `attr(p, "promise_impl")$status()`, as
   `ext_promise()` in `tests/testthat/helper.R` does. There is no exported
   status function.

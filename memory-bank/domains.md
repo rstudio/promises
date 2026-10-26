@@ -30,7 +30,7 @@ an environment made by `new_promise_domain()`, or a list made by
   - `globals`, `current_promise_domain()`.
   - `with_promise_domain()` (exported), `reenter_promise_domain()`,
     `without_promise_domain()`.
-  - `new_promise_domain()` (exported), `compose_domains()`.
+  - `new_promise_domain()` (exported), `compose_domains()`, `wrap_finally()`.
 - `R/promise.R` - `self$then()` inside `Promise()` calls
   `promiseDomain$onThen()`; `doResolve()`/`doReject()` use
   `without_promise_domain()`.
@@ -131,13 +131,22 @@ callback joins that domain too. "are reentered during handlers" in
 
 ### Composition (nesting)
 
-`compose_domains(base, new)` returns `new` if `base` is `NULL`. Otherwise it
-returns a plain list with:
+`compose_domains(base, new)` returns `new` if `base` is `NULL`, and `base` if
+`new` is `NULL`. So `with_promise_domain(NULL, expr)` inside another domain
+keeps the outer domain active. Otherwise it returns a plain list with:
 
 - `wrapOnFulfilled` / `wrapOnRejected` that call `new$wrap...` first and then
   `base$wrap...` on the result. The inner (newer) domain sits closest to the
   callback. Pinned by "apply nested domains in reverse order" in
   `tests/testthat/test-domains.R`.
+- `wrapOnFinally`, only if either side has one. It calls
+  `wrap_finally(base, wrap_finally(new, onFinally))`, so again `new` is
+  innermost. `wrap_finally(domain, f)` uses the domain's `wrapOnFinally`, or
+  its `wrapOnFulfilled` if it has none (the finally callback runs once either
+  way). Since the composed domain then has a `wrapOnFinally`, `onThen()` does
+  not also wrap the spliced pair with `wrapOnFulfilled`/`wrapOnRejected`. If
+  neither side has one, the field is `NULL` and the normal pair wrapping is
+  used.
 - `wrapSync = new$wrapSync`.
 - `onError` that calls `base$onError(e)` then `new$onError(e)`.
 - `.otel_promise_domain` set if either side has it, so
@@ -160,24 +169,36 @@ surface), in `hybrid_then()`, and in `as.promise.Future()`.
   called with two arguments. A wrapper that returns `function(value)` fails
   with "unused argument". Return `function(...)` and pass `...` on, as
   `create_counting_domain()` and `create_otel_promise_domain()` do.
-- **Nested domains lose `wrapOnFinally`.** `compose_domains()` in
-  `R/domains.R` does not copy `wrapOnFinally`. Inside two nested domains,
-  `finally()` callbacks go through `wrapOnFulfilled`/`wrapOnRejected` of both
-  domains, and neither domain's `wrapOnFinally` is called.
+- **In a nested stack, a domain without `wrapOnFinally` sees `finally()`
+  through `wrapOnFulfilled` only.** Once any domain in the stack has
+  `wrapOnFinally`, `wrap_finally()` wraps the finally callback with
+  `wrapOnFulfilled` for the domains that lack it, and their `wrapOnRejected` is
+  not used for it. Pinned by "a nested domain without wrapOnFinally still sees
+  finally" in `tests/testthat/test-domains.R`.
 - **Composed domains drop extra fields.** Named values passed in `...` to
   `new_promise_domain()` are not copied by `compose_domains()`, except the
   `.otel_promise_domain` flag. Code that reads custom fields from
   `current_promise_domain()` will not find them once domains are nested.
-- **`with_promise_domain(NULL, ...)` inside another domain breaks `then()`.**
-  With `replace = FALSE`, `compose_domains(old, NULL)` builds wrappers that call
-  `NULL$wrapOnFulfilled`. The next `then()` in that block gets a promise that
-  rejects with "attempt to apply non-function". Use `replace = TRUE` (as
+  Known limitation, not yet fixed; pinned by "nested domains drop custom
+  fields (known limitation)" in `tests/testthat/test-domains.R`. The flag only
+  marks that an otel domain is active; the active span is carried by the otel
+  domain's `wrapOnFulfilled`/`wrapOnRejected`, which composition still calls.
+- **`with_promise_domain(NULL, expr)` does not clear the domain.** With
+  `replace = FALSE`, `compose_domains(old, NULL)` returns `old`, so the outer
+  domain stays active. To run with no domain, use `replace = TRUE` (as
   `without_promise_domain()` does).
+- **Re-throw with `rethrow_reason()`, not `stop()`.** `finallyToRejected()`
+  passes the rejection on with `rethrow_reason()` (in `R/promise.R`) so a
+  non-condition reason such as `42` reaches the next handler unchanged. See
+  `thenAndHybrid.md`.
 - **The domain is captured when `then()` is called.** Wrapping the event loop
   (for example `with_promise_domain(d, later::run_now())`) has no effect on
   callbacks that were bound earlier.
 - **`onError` sees handled errors too.** It runs as a calling handler, before
   any `catch()` or `on_failure` gets the error. It is a notice, not a catch.
+  For a re-thrown non-condition reason it sees the `promises_rethrow` wrapper,
+  a `simpleError` whose message is the formatted reason (`"42"`), with the
+  raw value in `$reason`. Pinned in `tests/testthat/test-then.R`.
 - **`onThen()` errors become rejections.** `promiseDomain$onThen()` runs inside
   the action of the new promise, so an error from it, or from a domain's
   `wrapOn*` function, rejects the returned promise instead of being thrown
@@ -185,8 +206,3 @@ surface), in `hybrid_then()`, and in `as.promise.Future()`.
 - **`local_promise_domain()` skips `wrapSync`.** It is only used for the otel
   domain, which has no `wrapSync`, but a general domain would behave
   differently from `with_promise_domain()`.
-- **Test helper bug.** In `tests/testthat/helper.R`,
-  `create_counting_domain(trackFinally = TRUE)` uses
-  `on.exit(incr(onFinallyActive))` where `decr` was meant, so
-  `onFinallyActive` only goes up. Current tests only check it during the
-  callback, so they pass.

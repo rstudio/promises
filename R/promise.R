@@ -10,6 +10,7 @@ Promise <- function() {
   private$onRejected <- list()
   private$onFinally <- list()
   private$rejectionHandled <- FALSE
+  private$following <- NULL
 
   private$doResolve <- function(value) {
     val <- withVisible(value)
@@ -17,21 +18,7 @@ Promise <- function() {
     visible <- val$visible
 
     if (is.promising(value)) {
-      value <- as.promise(value)
-      if (identical(self, attr(value, "promise_impl", exact = TRUE))) {
-        return(private$doReject(simpleError(
-          "Chaining cycle detected for promise"
-        )))
-      }
-      # This then() call doesn't need promise domains; semantically, it doesn't
-      # really exist, as it's just a convenient way to implement the new promise
-      # inhabiting the old promise's corpse.
-      without_promise_domain({
-        value$then(
-          private$doResolve,
-          private$doReject
-        )
-      })
+      private$adopt(as.promise(value))
     } else {
       private$doResolveFinalValue(value, visible)
     }
@@ -39,19 +26,36 @@ Promise <- function() {
 
   private$doReject <- function(reason) {
     if (is.promising(reason)) {
-      reason <- as.promise(reason)
-      # This then() call doesn't need promise domains; semantically, it doesn't
-      # really exist, as it's just a convenient way to implement the new promise
-      # inhabiting the old promise's corpse.
-      without_promise_domain({
-        reason$then(
-          private$doResolve,
-          private$doReject
-        )
-      })
+      private$adopt(as.promise(reason))
     } else {
       private$doRejectFinalReason(reason)
     }
+  }
+
+  # Settle this promise with the outcome of promise `p`.
+  private$adopt <- function(p) {
+    # Walk the chain of promises that `p` is waiting on. If it leads back to
+    # this promise, nothing in the chain can ever settle.
+    impl <- attr(p, "promise_impl", exact = TRUE)
+    while (!is.null(impl)) {
+      if (identical(impl, self)) {
+        return(private$doRejectFinalReason(simpleError(
+          "Chaining cycle detected for promise"
+        )))
+      }
+      impl <- impl$.__enclos_env__$private$following
+    }
+    private$following <- attr(p, "promise_impl", exact = TRUE)
+
+    # This then() call doesn't need promise domains; semantically, it doesn't
+    # really exist, as it's just a convenient way to implement the new promise
+    # inhabiting the old promise's corpse.
+    without_promise_domain({
+      p$then(
+        private$doResolve,
+        private$doReject
+      )
+    })
   }
 
   # These "final" versions of resolve/reject are for when we've
@@ -60,6 +64,10 @@ Promise <- function() {
     private$value <- value
     private$visible <- visible
     private$state <- "fulfilled"
+    # The cycle check only needs this link while pending. Keeping it would make
+    # a settled promise hold every promise it followed (such as each step of a
+    # recursive async loop) in memory.
+    private$following <- NULL
 
     later(function() {
       lapply(private$onFulfilled, function(f) {
@@ -72,6 +80,8 @@ Promise <- function() {
   private$doRejectFinalReason <- function(reason) {
     private$value <- reason
     private$state <- "rejected"
+    # See `doResolveFinalValue()`
+    private$following <- NULL
 
     later(function() {
       lapply(private$onRejected, function(f) {
@@ -87,7 +97,11 @@ Promise <- function() {
             cat(
               file = stderr(),
               "Unhandled promise error: ",
-              reason$message,
+              if (inherits(reason, "condition")) {
+                conditionMessage(reason)
+              } else {
+                paste(format(reason), collapse = " ")
+              },
               "\n",
               sep = ""
             )
@@ -117,6 +131,9 @@ Promise <- function() {
         private$doResolve(value)
       },
       error = function(err) {
+        if (inherits(err, "promises_rethrow")) {
+          err <- err$reason
+        }
         private$doReject(err)
       }
     )
@@ -242,6 +259,30 @@ Promise <- function() {
   self
 }
 
+# Re-throw a rejection reason from inside a callback. `stop()` would turn a
+# non-condition reason (like `42`) into a `simpleError`, so wrap it in a
+# condition that `resolve()` unwraps. Domain `onError` handlers see the wrapper
+# before it is unwrapped, so it looks like the `simpleError` `stop()` would give.
+rethrow_reason <- function(reason) {
+  if (inherits(reason, "condition")) {
+    stop(reason)
+  }
+  stop(structure(
+    class = c("promises_rethrow", "simpleError", "error", "condition"),
+    list(
+      message = paste(format(reason), collapse = " "),
+      call = NULL,
+      reason = reason
+    )
+  ))
+}
+
+# `formals()` is `NULL` for primitives like `sum`; `args()` recovers their
+# signature so they are called with the value.
+callback_formals <- function(f) {
+  if (is.primitive(f)) formals(args(f)) else formals(f)
+}
+
 normalizeOnFulfilled <- function(onFulfilled) {
   if (!is.function(onFulfilled)) {
     if (!is.null(onFulfilled)) {
@@ -250,7 +291,7 @@ normalizeOnFulfilled <- function(onFulfilled) {
     return(NULL)
   }
 
-  args <- formals(onFulfilled)
+  args <- callback_formals(onFulfilled)
   arg_count <- length(args)
 
   if (arg_count >= 2 && names(args)[[2]] == ".visible") {
@@ -278,15 +319,20 @@ normalizeOnRejected <- function(onRejected) {
     return(NULL)
   }
 
-  args <- formals(onRejected)
+  args <- callback_formals(onRejected)
   arg_count <- length(args)
 
-  if (arg_count >= 1) {
-    onRejected
-  } else if (arg_count == 0) {
+  if (arg_count == 0) {
     function(reason) {
       onRejected()
     }
+  } else if (is.primitive(onRejected)) {
+    # Domains copy the callback's formals, so primitives need a closure
+    function(reason) {
+      onRejected(reason)
+    }
+  } else {
+    onRejected
   }
 }
 

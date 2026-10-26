@@ -206,3 +206,67 @@ test_that("catch(tee=TRUE) functions are normalized", {
     wait_for_it()
   expect_equal(error_counter, 3)
 })
+
+test_that("primitive functions receive the value as callbacks", {
+  promise_resolve(c(1, 2)) |> then(sum) |> extract() |> expect_equal(3)
+  promise_resolve(-1) |> then(abs) |> extract() |> expect_equal(1)
+  promise_reject("boom") |>
+    catch(class) |>
+    extract() |>
+    expect_equal(c("simpleError", "error", "condition"))
+  hybrid_then(c(1, 2), sum) |> expect_equal(3)
+})
+
+test_that("catch(NULL, tee = TRUE) passes the original error through", {
+  promise_reject("boom") |>
+    catch(NULL, tee = TRUE) |>
+    catch(conditionMessage) |>
+    extract() |>
+    expect_equal("boom")
+})
+
+test_that("`tee` must be a single TRUE or FALSE", {
+  p <- promise_resolve(1)
+  for (bad in list(NA, c(TRUE, FALSE), "yes")) {
+    expect_error(then(p, identity, tee = bad), "`tee` must be")
+    expect_error(catch(p, identity, tee = bad), "`tee` must be")
+    expect_error(hybrid_then(1, identity, tee = bad), "`tee` must be")
+  }
+})
+
+test_that("finally() and tee callbacks keep non-condition rejection reasons", {
+  keeps_reason <- function(p) {
+    p |>
+      catch(\(reason) reason) |>
+      extract() |>
+      expect_identical(42)
+  }
+  promise_reject(42) |> finally(\() NULL) |> keeps_reason()
+  promise_reject(42) |>
+    then(onRejected = \(e) NULL, tee = TRUE) |>
+    keeps_reason()
+  promise_reject(42) |> catch(\(e) NULL, tee = TRUE) |> keeps_reason()
+  hybrid_then(promise_reject(42), on_failure = \(e) NULL, tee = TRUE) |>
+    keeps_reason()
+
+  # Conditions are passed through as the same object
+  err <- simpleError("boom")
+  promise_reject(err) |>
+    finally(\() NULL) |>
+    catch(\(reason) reason) |>
+    extract() |>
+    expect_identical(err)
+})
+
+test_that("domain onError sees the reason when a non-condition is re-thrown", {
+  seen <- NULL
+  d <- new_promise_domain(onError = function(e) seen <<- e)
+  with_promise_domain(d, {
+    p <- promise_reject(42) |> finally(\() NULL)
+  })
+  p |> catch(\(reason) reason) |> extract() |> expect_identical(42)
+
+  # Same message `stop(42)` gave before non-condition reasons were kept
+  expect_s3_class(seen, "simpleError")
+  expect_identical(conditionMessage(seen), "42")
+})

@@ -98,9 +98,17 @@
 #' of `finally` is ignored; however, if an error is thrown in `finally`, that
 #' error will be propagated forward into the returned promise.
 #'
+#' @section Unhandled errors:
+#'
+#' If a promise rejects and no `onRejected` handler is attached by the time the
+#' event loop has run twice after the rejection, promises prints
+#' `Unhandled promise error: <message>` to standard error. A handler attached
+#' later still runs, but the message has already been printed. Attach handlers
+#' in the same tick that creates the promise to avoid the message.
+#'
 #' @section Visibility:
 #'
-#' `onFulfilled` functions can optionally have a second parameter `visible`,
+#' `onFulfilled` functions can optionally have a second parameter `.visible`,
 #' which will be `FALSE` if the result value is [invisible][base::invisible()].
 #'
 #' @param promise A promise object. The object can be in any state.
@@ -163,7 +171,7 @@ then <- function(
         onRejected <- normalizeOnRejected(onRejected)
         onRejectedTee <- function(reason) {
           onRejected(reason)
-          stop(reason) # Re-throw the error to propagate it
+          rethrow_reason(reason)
         }
       }
 
@@ -187,13 +195,13 @@ catch <- function(promise, onRejected, ..., tee = FALSE) {
     onRejected <- rlang::as_function(onRejected)
   }
 
-  if (!tee) {
+  if (!tee || is.null(onRejected)) {
     promise$catch(onRejected)
   } else {
     onRejected <- normalizeOnRejected(onRejected)
     promise$catch(function(reason) {
       onRejected(reason)
-      stop(reason)
+      rethrow_reason(reason)
     })
   }
 }
@@ -219,7 +227,7 @@ check_dots <- function(..., call = parent.frame()) {
 }
 
 check_tee <- function(tee) {
-  if (is.logical(tee)) {
+  if (rlang::is_bool(tee)) {
     return()
   }
 

@@ -20,7 +20,8 @@
 #'   returned promise.
 #'
 #'   For `promise_race`, the first of the promises to either fulfill or reject
-#'   will be passed through to the returned promise.
+#'   will be passed through to the returned promise. As in JavaScript, racing
+#'   no promises returns a promise that never settles.
 #'
 #' @examples
 #' p1 <- promise(\(resolve, reject) later::later(\() resolve(1), delay = 1))
@@ -198,7 +199,10 @@ promise_map <- function(.x, .f, ...) {
 #'   recent call to `func`), and the second parameter will be an element of `.x`.
 #' @param ... Other arguments to pass to `.f`
 #' @param .init The initial result value of the fold, passed into `.f` when it
-#'   is first executed.
+#'   is first executed. If missing, the first element of `.x` is used and the
+#'   fold starts with the second element. If `.init` is missing and `.x` is
+#'   empty, `promise_reduce()` throws an error right away instead of returning a
+#'   rejected promise, as this is a mistake in the call itself.
 #'
 #' @return A promise that will resolve to the result of calling `.f` on the last
 #'   element (or `.init` if `.x` had no elements). If any invocation of `.f`
@@ -219,6 +223,14 @@ promise_map <- function(.x, .f, ...) {
 #'
 #' @export
 promise_reduce <- function(.x, .f, ..., .init) {
+  .f <- match.fun(.f)
+  if (missing(.init)) {
+    if (length(.x) == 0) {
+      stop("`.init` must be supplied when `.x` is empty")
+    }
+    .init <- .x[[1]]
+    .x <- .x[-1]
+  }
   p <- promise_resolve(.init)
   lapply(.x, function(item) {
     p <<- then(p, function(x) {

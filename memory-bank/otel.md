@@ -34,10 +34,8 @@ pass their own tracer.
   - `has_otel_promise_domain(domain = current_promise_domain())` - checks the
     `.otel_promise_domain` flag.
   - `create_otel_promise_domain()` - builds the handoff domain.
-  - `promises_otel_tracer()` - cached `otel::get_tracer()`; used by tests.
   - `otel_tracer_name` - `"co.posit.r-package.promises"`. `otel` looks up this
     variable name to pick the default tracer name for the package.
-  - `testthat__is_testing()` - `Sys.getenv("TESTTHAT") == "true"`.
 - `R/domains.R` - `compose_domains()` carries the `.otel_promise_domain` flag
   through composition. It is the only extra field it carries.
 - `R/deprecated.R` - `with_ospan_async()`, `with_ospan_promise_domain()`,
@@ -65,7 +63,9 @@ Each wrapper runs when `then()` is called (inside `promiseDomain$onThen()`):
 It calls `otel::get_active_span()` instead of a tracer method on purpose. It
 is slower, but it follows changes to the tracer provider at run time (see the
 comments in the function). There is no `wrapOnFinally`, so `finally()`
-callbacks are wrapped by both wrappers, as with any domain.
+callbacks are wrapped by both wrappers, as with any domain. If it is nested
+with a domain that has `wrapOnFinally`, `compose_domains()` wraps the finally
+callback with this domain's `wrapOnFulfilled` instead (see `domains.md`).
 
 ### with_otel_promise_domain() / local_otel_promise_domain()
 
@@ -88,11 +88,18 @@ add it (the roxygen text names chromote as an example).
    instead of `otel::is_tracing_enabled()`.
 2. `span <- start_span(name, ..., tracer = tracer, attributes = attributes)`.
 3. Registers `on.exit(if (needs_cleanup) end_span(span))`.
-4. `result <- with_active_span(span, expr)`. Any `then()` called inside `expr`
-   (with the handoff domain present) captures `span`.
-5. Sync result: `on.exit` ends the span when the function returns or errors.
-6. Promise result (`is.promising(result)`): sets `needs_cleanup <- FALSE` and
-   returns `finally(result, cleanup)`. The span ends when the promise settles.
+4. Defines `set_error(e)`, which calls `span$set_status("error",
+   description)`. `description` is `conditionMessage(e)` for a condition and
+   `NULL` for any other value (a promise may reject with, say, `42`).
+5. `result <- withCallingHandlers(with_active_span(span, expr), error =
+   set_error)`. Any `then()` called inside `expr` (with the handoff domain
+   present) captures `span`. A sync error marks the span as an error and keeps
+   going up.
+6. Sync result: `on.exit` ends the span when the function returns or errors.
+7. Promise result (`is.promising(result)`): sets `needs_cleanup <- FALSE` and
+   returns `result |> catch(set_error, tee = TRUE) |> finally(cleanup)`. A
+   rejection marks the span as an error, and the span ends when the promise
+   settles.
 
 ### Timeline example
 
@@ -110,12 +117,11 @@ with_otel_promise_domain({
 `step1` runs with `async_op` active. `async_op` ends after `step1`'s promise
 settles. `step2` runs with no active span.
 
-### promises_otel_tracer()
+### Tracers
 
-Caches the first `otel::get_tracer()` result in a closure. When
-`TESTTHAT=true` it does not cache, because `otelsdk::with_otel_record()`
-swaps the tracer provider for each recording. No package code calls it; only
-tests do. `with_otel_span()` has no default tracer, so callers must pass one.
+promises keeps no tracer of its own. `with_otel_span()` has no default
+tracer, so callers must pass one. Shiny passes its own cached tracer
+(`shiny_otel_tracer()`); the tests pass `otel::get_tracer()`.
 
 ## Tests
 
@@ -133,6 +139,8 @@ tests do. `with_otel_span()` has no default tracer, so callers must pass one.
 - Parent checks such as
   `expect_equal(records$traces[["child"]]$parent, records$traces[["outer"]]$span_id)`
   are the main way to prove the handoff works.
+- Error status is checked with `expect_identical(span$status, "error")` for a
+  sync error, a rejected promise, and a non-condition rejection.
 - Deprecated names are covered by `expect_snapshot()`; the warning text lives
   in `tests/testthat/_snaps/otel.md`.
 - One test skips if `OTEL_TRACES_EXPORTER` is set to something other than
@@ -149,25 +157,23 @@ Run: `devtools::test(filter = "otel")`.
 - **Capture happens at `then()` call time**, not at resolve time. A `then()`
   added after `with_otel_span()` returns sees no active span, even though the
   span is still open (see `step2` above).
-- **`with_otel_span()` returns a new promise** (`finally(result, cleanup)`),
-  not the one `expr` returned. Do not compare by identity.
+- **`with_otel_span()` returns a new promise** (from `catch()` and
+  `finally()`), not the one `expr` returned. Do not compare by identity.
+- **Non-condition rejections pass through unchanged.** If `expr` rejects
+  with `42`, the span status is `"error"` with no description, and the
+  returned promise still rejects with `42`.
 - **`tracer` is required and has no default.** A missing tracer fails with
   "argument "tracer" is missing, with no default". A `NULL` tracer fails too,
   since `.subset2(NULL, "is_enabled")` is `NULL`.
-- **`promises_otel_tracer()` caches outside tests.** Checked by running: if it
-  is called once before `otelsdk::with_otel_record()`, later spans made with
-  it are not recorded. This is why tests set no cache when `TESTTHAT=true`.
-  Do not "simplify" that branch away.
-- **Spans are not marked as errors.** When `expr` throws or the promise
-  rejects, the span is ended but its status stays `"unset"` (checked by
-  running with otelsdk).
+- **Tests must get a fresh tracer inside each recording.** A tracer cached
+  before `otelsdk::with_otel_record()` swaps the tracer provider is not
+  seen by the recording. That is why the tests call `otel::get_tracer()`
+  inline rather than caching it.
 - **`compose_domains()` only copies `.otel_promise_domain`.** Any other
   `...` field given to `new_promise_domain()` is lost when domains are
   composed. If you add a new flag to the otel domain, update
   `compose_domains()` too.
 - **`local_promise_domain()` skips `wrapSync`.** That is fine for the otel
   domain (its `wrapSync` is `force`) but not for a general domain.
-- **`NEWS.md` tells users to call `otel::get_current_span()`**, which does not
-  exist in otel 0.2.0. The real function is `otel::get_active_span()`.
 - **Deprecation version is "1.5.0"** in `R/deprecated.R`. If you change the
   warning text, re-run the snapshot tests and review `_snaps/otel.md`.

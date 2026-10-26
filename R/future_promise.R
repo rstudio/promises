@@ -90,7 +90,7 @@ ExpoDelay <- R6Class(
       self
     },
 
-    # return number of milliseconds until next attempt
+    # return number of seconds until next attempt
     # will randomly backoff to avoid extra work on long poll times
     delay = function() {
       # calculate expo backoff value
@@ -118,7 +118,7 @@ ExpoDelay <- R6Class(
 #'
 #' An \pkg{R6} class to help with scheduling work to be completed. `WorkQueue` will only execute work if the `can_proceed()` returns `TRUE`. For the use case of `future`, `can_proceed()` defaults to `future::nbrOfFreeWorkers() > 0` which will not allow for work to be executed if a \pkg{future} worker is not available.
 #'
-#' `WorkQueue` will constantly try to start new work once prior work item finishes.  However, if `can_proceed()` returns `FALSE` (no future workers are available) and there is more work to be done, then work is attempted later a random amount of time later using exponential backoff.  The exponential backoff will cap out at 10 seconds to prevent unnecessarily large wait times.
+#' `WorkQueue` will constantly try to start new work once prior work item finishes.  However, if `can_proceed()` returns `FALSE` (no future workers are available) and there is more work to be done, then work is attempted later a random amount of time later using exponential backoff.  The exponential backoff will cap out at 2 seconds to prevent unnecessarily large wait times.
 #'
 #' Each time `WorkQueue` tries to start more work, it will repeat until `can_proceed()` returns `FALSE` or there is no more work in the `queue`.
 #'

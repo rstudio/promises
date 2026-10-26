@@ -508,3 +508,66 @@ test_that("hybrid_then() works with complex expressions", {
   )
   expect_equal(result, 60)
 })
+
+test_that("hybrid_then(tee = TRUE) returns the original sync value", {
+  # Like `then(tee = TRUE)`, a promise returned by the callback is ignored
+  expect_identical(
+    hybrid_then(1, \(x) promise_resolve(2), tee = TRUE),
+    1
+  )
+})
+
+test_that("hybrid_then() on_failure does not handle on_success errors", {
+  # `on_failure` handles a failure of `expr` only, like `then(onRejected)`
+  # handles the input promise only. An error thrown by `on_success` is passed on.
+  failure_calls <- 0
+  on_failure <- \(e) {
+    failure_calls <<- failure_calls + 1
+    "recovered"
+  }
+
+  # Sync: the error is thrown straight out
+  expect_error(
+    hybrid_then(42, on_success = \(x) stop("success boom"), on_failure),
+    "success boom"
+  )
+  expect_identical(failure_calls, 0)
+
+  # Async: the returned promise rejects with the error
+  hybrid_then(
+    promise_resolve(42),
+    on_success = \(x) stop("success boom"),
+    on_failure = on_failure
+  ) |>
+    extract() |>
+    expect_error("success boom")
+  expect_identical(failure_calls, 0)
+})
+
+test_that("hybrid_then(tee = TRUE) ignores a promise returned by the callback", {
+  never <- function(...) promise(\(resolve, reject) NULL)
+  rejects <- function(...) promise_reject("ignored")
+
+  # Sync input: the original value comes back right away, not a promise
+  expect_identical(hybrid_then(1, never, tee = TRUE), 1)
+  expect_identical(
+    hybrid_then(
+      1,
+      \(x) squelch_unhandled_promise_error(rejects()),
+      tee = TRUE
+    ),
+    1
+  )
+
+  # Async input: the result does not wait for or follow the returned promise
+  hybrid_then(promise_resolve(1), never, tee = TRUE) |>
+    extract() |>
+    expect_identical(1)
+  hybrid_then(
+    promise_resolve(1),
+    \(x) squelch_unhandled_promise_error(rejects()),
+    tee = TRUE
+  ) |>
+    extract() |>
+    expect_identical(1)
+})

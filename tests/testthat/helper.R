@@ -133,7 +133,7 @@ create_counting_domain <- function(trackFinally = FALSE) {
       function() {
         incr(onFinallyCalled)
         incr(onFinallyActive)
-        on.exit(incr(onFinallyActive))
+        on.exit(decr(onFinallyActive))
 
         onFinally()
       }

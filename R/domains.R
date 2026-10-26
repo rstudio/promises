@@ -30,7 +30,7 @@ finallyToRejected <- function(onFinally) {
   force(onFinally)
   function(reason) {
     onFinally()
-    stop(reason)
+    rethrow_reason(reason)
   }
 }
 
@@ -261,10 +261,18 @@ compose_domains <- function(base, new) {
   if (is.null(base)) {
     return(new)
   }
+  if (is.null(new)) {
+    return(base)
+  }
 
   list(
-    # The `...` of `new_promise_domain` are not automatically composed here.
-    # For now, pass through the otel span promise domain flag
+    # Known limitation: custom fields passed through the `...` of
+    # `new_promise_domain()` are dropped here, so `current_promise_domain()$x`
+    # is `NULL` once domains are nested. Only the otel flag is passed through,
+    # so `has_otel_promise_domain()` can tell an otel domain is already active.
+    # (The active span itself is carried by the otel domain's wrapOnFulfilled /
+    # wrapOnRejected, which the composed wrappers below still call.)
+    # Pinned in tests/testthat/test-domains.R.
     .otel_promise_domain = has_otel_promise_domain(base) ||
       has_otel_promise_domain(new),
     wrapOnFulfilled = function(onFulfilled) {
@@ -279,6 +287,13 @@ compose_domains <- function(base, new) {
       new_wrapped <- new$wrapOnRejected(onRejected)
       base$wrapOnRejected(new_wrapped)
     },
+    wrapOnFinally = if (
+      !is.null(base$wrapOnFinally) || !is.null(new$wrapOnFinally)
+    ) {
+      function(onFinally) {
+        wrap_finally(base, wrap_finally(new, onFinally))
+      }
+    },
     # Only include the new wrapSync, assuming that we've already applied the
     # base domain's wrapSync. This assumption won't hold if we either export
     # compose_domains in the future, or if we use it in cases where the base
@@ -289,6 +304,16 @@ compose_domains <- function(base, new) {
       new$onError(e)
     }
   )
+}
+
+# A domain without `wrapOnFinally` wraps the finally callback with
+# `wrapOnFulfilled`, as the callback runs once either way.
+wrap_finally <- function(domain, onFinally) {
+  if (is.null(domain$wrapOnFinally)) {
+    domain$wrapOnFulfilled(onFinally)
+  } else {
+    domain$wrapOnFinally(onFinally)
+  }
 }
 
 without_promise_domain <- function(expr) {
