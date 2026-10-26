@@ -10,6 +10,7 @@ Promise <- function() {
   private$onRejected <- list()
   private$onFinally <- list()
   private$rejectionHandled <- FALSE
+  private$following <- NULL
 
   private$doResolve <- function(value) {
     val <- withVisible(value)
@@ -17,21 +18,7 @@ Promise <- function() {
     visible <- val$visible
 
     if (is.promising(value)) {
-      value <- as.promise(value)
-      if (identical(self, attr(value, "promise_impl", exact = TRUE))) {
-        return(private$doReject(simpleError(
-          "Chaining cycle detected for promise"
-        )))
-      }
-      # This then() call doesn't need promise domains; semantically, it doesn't
-      # really exist, as it's just a convenient way to implement the new promise
-      # inhabiting the old promise's corpse.
-      without_promise_domain({
-        value$then(
-          private$doResolve,
-          private$doReject
-        )
-      })
+      private$adopt(as.promise(value))
     } else {
       private$doResolveFinalValue(value, visible)
     }
@@ -39,19 +26,36 @@ Promise <- function() {
 
   private$doReject <- function(reason) {
     if (is.promising(reason)) {
-      reason <- as.promise(reason)
-      # This then() call doesn't need promise domains; semantically, it doesn't
-      # really exist, as it's just a convenient way to implement the new promise
-      # inhabiting the old promise's corpse.
-      without_promise_domain({
-        reason$then(
-          private$doResolve,
-          private$doReject
-        )
-      })
+      private$adopt(as.promise(reason))
     } else {
       private$doRejectFinalReason(reason)
     }
+  }
+
+  # Settle this promise with the outcome of promise `p`.
+  private$adopt <- function(p) {
+    # Walk the chain of promises that `p` is waiting on. If it leads back to
+    # this promise, nothing in the chain can ever settle.
+    impl <- attr(p, "promise_impl", exact = TRUE)
+    while (!is.null(impl)) {
+      if (identical(impl, self)) {
+        return(private$doRejectFinalReason(simpleError(
+          "Chaining cycle detected for promise"
+        )))
+      }
+      impl <- impl$.__enclos_env__$private$following
+    }
+    private$following <- attr(p, "promise_impl", exact = TRUE)
+
+    # This then() call doesn't need promise domains; semantically, it doesn't
+    # really exist, as it's just a convenient way to implement the new promise
+    # inhabiting the old promise's corpse.
+    without_promise_domain({
+      p$then(
+        private$doResolve,
+        private$doReject
+      )
+    })
   }
 
   # These "final" versions of resolve/reject are for when we've

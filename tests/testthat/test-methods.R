@@ -190,3 +190,16 @@ test_that("unhandled rejection message works for non-condition reasons", {
   })
   expect_identical(out, "Unhandled promise error: 42")
 })
+
+test_that("promises that resolve to each other reject with a cycle error", {
+  a <- ext_promise()
+  b <- ext_promise()
+  a$resolve(b$promise)
+  b$resolve(a$promise)
+  for (p in list(a$promise, b$promise)) {
+    p |>
+      catch(conditionMessage) |>
+      extract() |>
+      expect_match("Chaining cycle detected")
+  }
+})
