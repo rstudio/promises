@@ -1,5 +1,12 @@
 # promises (development version)
 
+## Bug fixes
+
+* Primitive functions such as `sum` and `abs` now receive the value when
+  used as `then()`, `catch()`, or `hybrid_then()` callbacks. Before,
+  `formals()` returned `NULL` for them, so they were called with no
+  arguments. (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry

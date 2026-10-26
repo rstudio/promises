@@ -242,6 +242,12 @@ Promise <- function() {
   self
 }
 
+# `formals()` is `NULL` for primitives like `sum`; `args()` recovers their
+# signature so they are called with the value.
+callback_formals <- function(f) {
+  if (is.primitive(f)) formals(args(f)) else formals(f)
+}
+
 normalizeOnFulfilled <- function(onFulfilled) {
   if (!is.function(onFulfilled)) {
     if (!is.null(onFulfilled)) {
@@ -250,7 +256,7 @@ normalizeOnFulfilled <- function(onFulfilled) {
     return(NULL)
   }
 
-  args <- formals(onFulfilled)
+  args <- callback_formals(onFulfilled)
   arg_count <- length(args)
 
   if (arg_count >= 2 && names(args)[[2]] == ".visible") {
@@ -278,15 +284,20 @@ normalizeOnRejected <- function(onRejected) {
     return(NULL)
   }
 
-  args <- formals(onRejected)
+  args <- callback_formals(onRejected)
   arg_count <- length(args)
 
-  if (arg_count >= 1) {
-    onRejected
-  } else if (arg_count == 0) {
+  if (arg_count == 0) {
     function(reason) {
       onRejected()
     }
+  } else if (is.primitive(onRejected)) {
+    # Domains copy the callback's formals, so primitives need a closure
+    function(reason) {
+      onRejected(reason)
+    }
+  } else {
+    onRejected
   }
 }
 

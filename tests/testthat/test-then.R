@@ -206,3 +206,13 @@ test_that("catch(tee=TRUE) functions are normalized", {
     wait_for_it()
   expect_equal(error_counter, 3)
 })
+
+test_that("primitive functions receive the value as callbacks", {
+  promise_resolve(c(1, 2)) |> then(sum) |> extract() |> expect_equal(3)
+  promise_resolve(-1) |> then(abs) |> extract() |> expect_equal(1)
+  promise_reject("boom") |>
+    catch(class) |>
+    extract() |>
+    expect_equal(c("simpleError", "error", "condition"))
+  hybrid_then(c(1, 2), sum) |> expect_equal(3)
+})
