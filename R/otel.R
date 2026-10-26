@@ -328,12 +328,22 @@ with_otel_span <- function(
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
-  result <- with_active_span(span, expr)
+  set_error <- function(e) {
+    # Promises may reject with values that are not conditions
+    description <- if (inherits(e, "condition")) conditionMessage(e)
+    span$set_status("error", description)
+  }
+  result <- withCallingHandlers(
+    with_active_span(span, expr),
+    error = set_error
+  )
 
   if (is.promising(result)) {
     needs_cleanup <- FALSE
 
-    result <- finally(result, cleanup)
+    result <- result |>
+      catch(set_error, tee = TRUE) |>
+      finally(cleanup)
   }
 
   result

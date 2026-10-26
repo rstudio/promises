@@ -30,6 +30,9 @@
   now reject with "Chaining cycle detected for promise" instead of staying
   pending forever. (#212)
 
+* `with_otel_span()` now sets the span status to `"error"` when the
+  expression throws or the returned promise rejects. (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry

@@ -105,6 +105,51 @@ with_otel_promise_domain({
         })
         expect_true(!is.null(records$traces[["test_span2"]]))
       })
+
+      it("marks the span as an error on a sync error", {
+        records <- otelsdk::with_otel_record({
+          expect_error(
+            with_otel_span(
+              "test_span_sync_error",
+              stop("sync boom"),
+              tracer = promises_otel_tracer()
+            ),
+            "sync boom"
+          )
+        })
+        span <- records$traces[["test_span_sync_error"]]
+        expect_identical(span$status, "error")
+        expect_identical(span$description, "sync boom")
+      })
+
+      it("marks the span as an error when the promise rejects", {
+        records <- otelsdk::with_otel_record({
+          with_otel_span(
+            "test_span_async_error",
+            promise_reject("async boom"),
+            tracer = promises_otel_tracer()
+          ) |>
+            extract() |>
+            expect_error("async boom")
+        })
+        span <- records$traces[["test_span_async_error"]]
+        expect_identical(span$status, "error")
+        expect_identical(span$description, "async boom")
+      })
+
+      it("marks the span as an error for a non-condition rejection", {
+        records <- otelsdk::with_otel_record({
+          with_otel_span(
+            "test_span_value_error",
+            promise_reject(42),
+            tracer = promises_otel_tracer()
+          ) |>
+            catch(\(reason) NULL) |>
+            wait_for_it()
+        })
+        span <- records$traces[["test_span_value_error"]]
+        expect_identical(span$status, "error")
+      })
     })
 
     describe("promise domain integration", {
