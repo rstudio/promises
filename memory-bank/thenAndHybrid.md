@@ -41,8 +41,9 @@ They are marked superseded by `|>` plus `then()`.
   both `then()` and `hybrid_then()`).
 - Tests: `tests/testthat/test-then.R`, `test-methods.R`, `test-visibility.R`,
   `test-hybrid-then.R`, `test-hybrid-then-visibility.R`,
-  `test-legacy-aplus-2-2.R` (pipe-based version of the A+ tests),
-  `test-otel.R` ("Deprecated functions" block). Snapshots for `tee` errors live
+  `test-legacy-aplus-2-2.R` (formula-callback version of the A+ tests),
+  `test-legacy-domains.R` and `test-legacy-promise-map.R` (the `%...>%`
+  promise pipes), `test-otel.R` ("Deprecated functions" block). Snapshots for `tee` errors live
   in `tests/testthat/_snaps/`.
 
 ## How it works
@@ -59,7 +60,7 @@ They are marked superseded by `|>` plus `then()`.
 4. Any non-`NULL`, non-function callback goes through `rlang::as_function()`.
    This accepts a formula (`~ .x + 1`) or a string naming a function. Numbers
    and lists are not accepted (that is `purrr::as_mapper()`, not
-   `rlang::as_function()`), and fail at call time.
+   `rlang::as_function()`), and `then()` errors at once.
 5. With `tee = FALSE`, it calls `promise$then(onFulfilled, onRejected)`.
 6. With `tee = TRUE`, it normalizes the callbacks first and wraps them:
    - fulfilled: call the callback, then return the original value with its

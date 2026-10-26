@@ -80,8 +80,8 @@ package had C++ code.
   `NAMESPACE` and `man/`. Never edit those by hand.
 - CI also runs `devtools::document()` and commits the result, so a PR that
   forgets will get a bot commit (or a failure on fork PRs).
-- `@keywords internal` is used for `WorkQueue`, the package doc, and
-  `promises-deprecated`.
+- `@keywords internal` is used for `WorkQueue`, `resolve()`, `reject()`,
+  the package doc, and `promises-deprecated`.
 
 ### staticimports
 
@@ -140,7 +140,6 @@ Style (from the current file):
   with the PR number: `(#191)`. Thanks look like
   `(Thank you, @RLesur! #47)`.
 - Newer entries wrap at about 80 columns; older ones are one long line.
-- The `release-update-news` skill can polish bullets.
 
 ### Release files
 
@@ -162,8 +161,6 @@ Style (from the current file):
   `promises/.context/...`. In a git worktree it also contains the `.git`
   *file*. Both would show up as hidden files in `R CMD check`. Add
   `^\.context$` (and similar) before release builds from a worktree.
-- **Some `.Rbuildignore` patterns have unescaped dots** (`^.claude$`,
-  `^.posit$`, `^.vscode$`). They still work but match more than meant.
 - **Installed roxygen2 may be newer than 8.0.0** (8.1.1 here). Running
   `devtools::document()` then rewrites `Config/roxygen2/version` in
   `DESCRIPTION`. Do not commit that bump by accident.

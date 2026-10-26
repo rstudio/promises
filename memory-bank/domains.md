@@ -37,7 +37,7 @@ an environment made by `new_promise_domain()`, or a list made by
 - `R/otel.R` - `local_promise_domain()`, `has_otel_promise_domain()`,
   `create_otel_promise_domain()`, `with_otel_promise_domain()`.
 - Tests: `tests/testthat/test-domains.R`, `test-legacy-domains.R` (same tests
-  written with `%>%`), `test-otel.R` (composition and the `.otel_promise_domain`
+  written with the `%...>%` promise pipes), `test-otel.R` (composition and the `.otel_promise_domain`
   flag). `create_counting_domain()` in `tests/testthat/helper.R` is the main
   test domain.
 

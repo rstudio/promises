@@ -212,8 +212,9 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
   for two parallel chains.
 - **Rejecting with a promise follows that promise.** `R/promise.R`
   `private$doReject()` checks `is.promising(reason)`. So
-  `promise_reject(promise_resolve(5))` *fulfills* with `5`. This is pinned by
-  `tests/testthat/test-methods.R` ("future" block) and differs from JavaScript.
+  `promise_reject(promise_resolve(5))` *fulfills* with `5`. This differs from
+  JavaScript. `tests/testthat/test-methods.R` ("future" block) pins it with a
+  Future as the reason: `promise_reject(future::future(1))` fulfills with `1`.
 - **Only direct cycles are found.** `doResolve()` compares the new value with
   `self` only. Two promises that resolve to each other stay pending forever
   with no error.

@@ -9,7 +9,7 @@ description: "Map of how promises fits together: the promise object, chaining, d
 
 **Promise Class (`R/promise.R`):**
 - Promises are simple classed environments (not R6) created by the `Promise()` factory function; this reduces creation overhead by up to 10x (#191)
-  - Internal state and methods live in a `private` environment inside the closure; the public promise object exposes `$then()`, `$catch()`, `$finally()`, and `$status`
+  - Internal state and methods live in a `private` environment inside the closure; the public promise object is a list of `$then()`, `$catch()`, and `$finally()`; `$status()` lives only on the inner object
   - Internals are reachable via `attr(p, "promise_impl", exact = TRUE)` (used by tests and `as.promise()` methods)
 - States: "pending", "fulfilled", "rejected"
 - Private methods `doResolve`/`doReject` handle state transitions
