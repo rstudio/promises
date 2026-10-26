@@ -100,7 +100,20 @@ promiseDomain <- list(
     #
     # It's important to reenter even if domain is NULL. In that case, we need to
     # ensure that the current domain is set to NULL while the callback executes.
-    results <- lapply(results, wrap_callback_reenter, domain = domain)
+    if (!is.null(results$onFulfilled)) {
+      results$onFulfilled <- wrap_callback_reenter(
+        results$onFulfilled,
+        domain,
+        "fulfilled"
+      )
+    }
+    if (!is.null(results$onRejected)) {
+      results$onRejected <- wrap_callback_reenter(
+        results$onRejected,
+        domain,
+        "rejected"
+      )
+    }
     results
   },
   onError = function(error) {
@@ -112,34 +125,62 @@ promiseDomain <- list(
   }
 )
 
-wrap_callback_reenter <- function(callback, domain) {
+# `onThen` only ever sees two callback shapes, because callbacks are
+# normalized (by `normalizeOnFulfilled`/`normalizeOnRejected`) before `onThen`
+# runs: fulfilled-side callbacks take `(value, .visible)` and rejected-side
+# callbacks take `(reason)`. `handleFulfill`/`handleReject` invoke the
+# wrappers positionally with exactly those arguments, and domain wrappers
+# return `function(...)`-shaped functions, so fixed-shape closures are
+# sufficient; nothing inspects the formals of the returned wrapper.
+wrap_callback_reenter <- function(callback, domain, side) {
   force(callback)
   force(domain)
 
-  wrapper <- function(...) {
-    # replace = TRUE because we don't care what the current domain is; we're
-    # (temporarily) putting the world back to the way it was when the callback
-    # was bound to a promise.
-    reenter_promise_domain(domain, callback(...), replace = TRUE)
+  if (is.null(domain)) {
+    # NULL-domain fast path: avoid the reenter_promise_domain() call (and its
+    # on.exit) unless a domain is active at call time, which can happen when
+    # later::run_now() is invoked from within an active domain. In that case
+    # the callback must still run with a NULL domain (replace = TRUE), as no
+    # domain was active when the callback was bound.
+    if (identical(side, "fulfilled")) {
+      function(value, .visible) {
+        if (is.null(globals$domain)) {
+          callback(value, .visible)
+        } else {
+          reenter_promise_domain(
+            NULL,
+            callback(value, .visible),
+            replace = TRUE
+          )
+        }
+      }
+    } else {
+      function(reason) {
+        if (is.null(globals$domain)) {
+          callback(reason)
+        } else {
+          reenter_promise_domain(NULL, callback(reason), replace = TRUE)
+        }
+      }
+    }
+  } else {
+    if (identical(side, "fulfilled")) {
+      function(value, .visible) {
+        # replace = TRUE because we don't care what the current domain is;
+        # we're (temporarily) putting the world back to the way it was when
+        # the callback was bound to a promise.
+        reenter_promise_domain(
+          domain,
+          callback(value, .visible),
+          replace = TRUE
+        )
+      }
+    } else {
+      function(reason) {
+        reenter_promise_domain(domain, callback(reason), replace = TRUE)
+      }
+    }
   }
-
-  # There are parts of this package that will inspect formals() to see if
-  # there's a `.visible` parameter in the callback. So it's important to have
-  # the returned wrapper have the same formals as the original callback.
-  wrap_with_signature(wrapper, formals(callback))
-}
-
-wrap_with_signature <- function(func, formal_args) {
-  # func must have a `...` signature
-  stopifnot("..." %in% names(formals(func)))
-
-  args <- names(formal_args)
-  recall <- rlang::call2(
-    func,
-    !!!rlang::set_names(lapply(args, as.symbol), args)
-  )
-
-  rlang::new_function(formal_args, recall)
 }
 
 globals <- new.env(parent = emptyenv())
