@@ -187,7 +187,7 @@ catch <- function(promise, onRejected, ..., tee = FALSE) {
     onRejected <- rlang::as_function(onRejected)
   }
 
-  if (!tee) {
+  if (!tee || is.null(onRejected)) {
     promise$catch(onRejected)
   } else {
     onRejected <- normalizeOnRejected(onRejected)

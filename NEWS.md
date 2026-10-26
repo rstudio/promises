@@ -20,6 +20,9 @@
   loop when a promise is rejected with a value that is not a condition, such
   as `promise_reject(42)`. (#212)
 
+* `catch(promise, NULL, tee = TRUE)` now passes the original error through
+  instead of rejecting with "could not find function". (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry

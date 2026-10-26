@@ -216,3 +216,11 @@ test_that("primitive functions receive the value as callbacks", {
     expect_equal(c("simpleError", "error", "condition"))
   hybrid_then(c(1, 2), sum) |> expect_equal(3)
 })
+
+test_that("catch(NULL, tee = TRUE) passes the original error through", {
+  promise_reject("boom") |>
+    catch(NULL, tee = TRUE) |>
+    catch(conditionMessage) |>
+    extract() |>
+    expect_equal("boom")
+})
