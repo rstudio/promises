@@ -340,3 +340,28 @@ test_that("a nested domain without wrapOnFinally still sees finally", {
   expect_identical(inner$counts$onFinallyCalled, 1L)
   expect_identical(outer$counts$onFulfilledCalled, 1L)
 })
+
+test_that("nested domains drop custom fields (known limitation)", {
+  # `compose_domains()` does not merge the `...` fields of
+  # `new_promise_domain()`; only the otel flag is passed through. If this test
+  # starts failing, the limitation was fixed: update the comment in
+  # `compose_domains()` and memory-bank/domains.md.
+  outer <- new_promise_domain(outer_field = "outer")
+  inner <- new_promise_domain(inner_field = "inner")
+
+  with_promise_domain(outer, {
+    expect_identical(current_promise_domain()$outer_field, "outer")
+    with_promise_domain(inner, {
+      expect_null(current_promise_domain()$outer_field)
+      expect_null(current_promise_domain()$inner_field)
+    })
+  })
+})
+
+test_that("nested domains keep the otel flag", {
+  with_otel_promise_domain({
+    with_promise_domain(new_promise_domain(), {
+      expect_true(has_otel_promise_domain())
+    })
+  })
+})

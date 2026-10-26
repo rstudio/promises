@@ -179,6 +179,10 @@ surface), in `hybrid_then()`, and in `as.promise.Future()`.
   `new_promise_domain()` are not copied by `compose_domains()`, except the
   `.otel_promise_domain` flag. Code that reads custom fields from
   `current_promise_domain()` will not find them once domains are nested.
+  Known limitation, not yet fixed; pinned by "nested domains drop custom
+  fields (known limitation)" in `tests/testthat/test-domains.R`. The flag only
+  marks that an otel domain is active; the active span is carried by the otel
+  domain's `wrapOnFulfilled`/`wrapOnRejected`, which composition still calls.
 - **`with_promise_domain(NULL, expr)` does not clear the domain.** With
   `replace = FALSE`, `compose_domains(old, NULL)` returns `old`, so the outer
   domain stays active. To run with no domain, use `replace = TRUE` (as

@@ -266,8 +266,13 @@ compose_domains <- function(base, new) {
   }
 
   list(
-    # The `...` of `new_promise_domain` are not automatically composed here.
-    # For now, pass through the otel span promise domain flag
+    # Known limitation: custom fields passed through the `...` of
+    # `new_promise_domain()` are dropped here, so `current_promise_domain()$x`
+    # is `NULL` once domains are nested. Only the otel flag is passed through,
+    # so `has_otel_promise_domain()` can tell an otel domain is already active.
+    # (The active span itself is carried by the otel domain's wrapOnFulfilled /
+    # wrapOnRejected, which the composed wrappers below still call.)
+    # Pinned in tests/testthat/test-domains.R.
     .otel_promise_domain = has_otel_promise_domain(base) ||
       has_otel_promise_domain(new),
     wrapOnFulfilled = function(onFulfilled) {
