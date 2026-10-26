@@ -35,7 +35,10 @@ promise_reduce(.x, .f, ..., .init)
 - .init:
 
   The initial result value of the fold, passed into `.f` when it is
-  first executed.
+  first executed. If missing, the first element of `.x` is used and the
+  fold starts with the second element. If `.init` is missing and `.x` is
+  empty, `promise_reduce()` throws an error right away instead of
+  returning a rejected promise, as this is a mistake in the call itself.
 
 ## Value
 

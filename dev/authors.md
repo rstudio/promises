@@ -17,7 +17,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/rstudio/promises/blob/agents/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/rstudio/promises/blob/main/DESCRIPTION)
 
 Cheng J, Schloerke B, Chang W, Gao C (2026). *promises: Abstractions for
 Promise-Based Asynchronous Programming*. R package version 1.5.0.9000,

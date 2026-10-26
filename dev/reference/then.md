@@ -147,8 +147,17 @@ like closing file handles or database connections. Unlike `then` and
 is thrown in `finally`, that error will be propagated forward into the
 returned promise.
 
+## Unhandled errors
+
+If a promise rejects and no `onRejected` handler is attached by the time
+the event loop has run twice after the rejection, promises prints
+`Unhandled promise error: <message>` to standard error. A handler
+attached later still runs, but the message has already been printed.
+Attach handlers in the same tick that creates the promise to avoid the
+message.
+
 ## Visibility
 
 `onFulfilled` functions can optionally have a second parameter
-`visible`, which will be `FALSE` if the result value is
+`.visible`, which will be `FALSE` if the result value is
 [invisible](https://rdrr.io/r/base/invisible.html).

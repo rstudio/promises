@@ -69,7 +69,7 @@ single argument reason: the error that caused the failure."><meta property="og:i
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Access the results of a promise</h1>
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/agents/R/then.R" class="external-link"><code>R/then.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/R/then.R" class="external-link"><code>R/then.R</code></a></small>
       <div class="d-none name"><code>then.Rd</code></div>
     </div>
 
@@ -218,11 +218,22 @@ of <code>finally</code> is ignored; however, if an error is thrown in <code>fina
 error will be propagated forward into the returned promise.</p>
     </div>
     <div class="section level2">
+    <h2 id="unhandled-errors">Unhandled errors<a class="anchor" aria-label="anchor" href="#unhandled-errors"></a></h2>
+
+
+
+<p>If a promise rejects and no <code>onRejected</code> handler is attached by the time the
+event loop has run twice after the rejection, promises prints
+<code>Unhandled promise error: &lt;message&gt;</code> to standard error. A handler attached
+later still runs, but the message has already been printed. Attach handlers
+in the same tick that creates the promise to avoid the message.</p>
+    </div>
+    <div class="section level2">
     <h2 id="visibility">Visibility<a class="anchor" aria-label="anchor" href="#visibility"></a></h2>
 
 
 
-<p><code>onFulfilled</code> functions can optionally have a second parameter <code>visible</code>,
+<p><code>onFulfilled</code> functions can optionally have a second parameter <code>.visible</code>,
 which will be <code>FALSE</code> if the result value is <a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a>.</p>
     </div>
 

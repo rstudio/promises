@@ -10,7 +10,7 @@ executed if a future worker is not available.
 finishes. However, if `can_proceed()` returns `FALSE` (no future workers
 are available) and there is more work to be done, then work is attempted
 later a random amount of time later using exponential backoff. The
-exponential backoff will cap out at 10 seconds to prevent unnecessarily
+exponential backoff will cap out at 2 seconds to prevent unnecessarily
 large wait times.
 
 Each time `WorkQueue` tries to start more work, it will repeat until

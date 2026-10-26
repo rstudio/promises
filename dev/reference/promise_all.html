@@ -55,7 +55,7 @@ objects to be either fulfilled or rejected."><meta property="og:image" content="
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Combine multiple promise objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/agents/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/rstudio/promises/blob/main/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
       <div class="d-none name"><code>promise_all.Rd</code></div>
     </div>
 
@@ -94,7 +94,8 @@ promise will resolve to a list of the promises' values; if any promise
 fails, the first error to be encountered will be used to reject the
 returned promise.</p>
 <p>For <code>promise_race</code>, the first of the promises to either fulfill or reject
-will be passed through to the returned promise.</p>
+will be passed through to the returned promise. As in JavaScript, racing
+no promises returns a promise that never settles.</p>
     </div>
 
     <div class="section level2">
