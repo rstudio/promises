@@ -11,6 +11,11 @@
   longer breaks `then()` calls made in `expr`; the outer domain stays
   active. (#212)
 
+* Nested promise domains no longer drop `wrapOnFinally`. When one of the
+  nested domains has a `wrapOnFinally`, each domain now wraps `finally()`
+  callbacks once; a domain without one wraps them with its
+  `wrapOnFulfilled`. (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry

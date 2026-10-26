@@ -311,3 +311,32 @@ test_that("a NULL domain nested in another domain keeps the outer domain", {
   expect_identical(cd$counts$onFulfilledBound, 1L)
   p |> extract() |> expect_equal(2)
 })
+
+test_that("nested domains each wrap finally with wrapOnFinally", {
+  cd1 <- create_counting_domain(trackFinally = TRUE)
+  cd2 <- create_counting_domain(trackFinally = TRUE)
+  with_promise_domain(cd1, {
+    with_promise_domain(cd2, {
+      p <- promise_resolve(1) |> finally(\() NULL)
+    })
+  })
+  p |> wait_for_it()
+  for (cd in list(cd1, cd2)) {
+    expect_identical(cd$counts$onFinallyBound, 1L)
+    expect_identical(cd$counts$onFinallyCalled, 1L)
+    expect_identical(cd$counts$onFulfilledBound, 0L)
+  }
+})
+
+test_that("a nested domain without wrapOnFinally still sees finally", {
+  outer <- create_counting_domain(trackFinally = FALSE)
+  inner <- create_counting_domain(trackFinally = TRUE)
+  with_promise_domain(outer, {
+    with_promise_domain(inner, {
+      p <- promise_resolve(1) |> finally(\() NULL)
+    })
+  })
+  p |> wait_for_it()
+  expect_identical(inner$counts$onFinallyCalled, 1L)
+  expect_identical(outer$counts$onFulfilledCalled, 1L)
+})

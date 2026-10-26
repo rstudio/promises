@@ -282,6 +282,13 @@ compose_domains <- function(base, new) {
       new_wrapped <- new$wrapOnRejected(onRejected)
       base$wrapOnRejected(new_wrapped)
     },
+    wrapOnFinally = if (
+      !is.null(base$wrapOnFinally) || !is.null(new$wrapOnFinally)
+    ) {
+      function(onFinally) {
+        wrap_finally(base, wrap_finally(new, onFinally))
+      }
+    },
     # Only include the new wrapSync, assuming that we've already applied the
     # base domain's wrapSync. This assumption won't hold if we either export
     # compose_domains in the future, or if we use it in cases where the base
@@ -292,6 +299,16 @@ compose_domains <- function(base, new) {
       new$onError(e)
     }
   )
+}
+
+# A domain without `wrapOnFinally` wraps the finally callback with
+# `wrapOnFulfilled`, as the callback runs once either way.
+wrap_finally <- function(domain, onFinally) {
+  if (is.null(domain$wrapOnFinally)) {
+    domain$wrapOnFulfilled(onFinally)
+  } else {
+    domain$wrapOnFinally(onFinally)
+  }
 }
 
 without_promise_domain <- function(expr) {
