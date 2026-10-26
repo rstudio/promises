@@ -224,3 +224,12 @@ test_that("catch(NULL, tee = TRUE) passes the original error through", {
     extract() |>
     expect_equal("boom")
 })
+
+test_that("`tee` must be a single TRUE or FALSE", {
+  p <- promise_resolve(1)
+  for (bad in list(NA, c(TRUE, FALSE), "yes")) {
+    expect_error(then(p, identity, tee = bad), "`tee` must be")
+    expect_error(catch(p, identity, tee = bad), "`tee` must be")
+    expect_error(hybrid_then(1, identity, tee = bad), "`tee` must be")
+  }
+})

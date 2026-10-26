@@ -23,6 +23,9 @@
 * `catch(promise, NULL, tee = TRUE)` now passes the original error through
   instead of rejecting with "could not find function". (#212)
 
+* `then()`, `catch()`, and `hybrid_then()` now give a clear error when `tee`
+  is `NA` or has more than one value. (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry

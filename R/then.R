@@ -219,7 +219,7 @@ check_dots <- function(..., call = parent.frame()) {
 }
 
 check_tee <- function(tee) {
-  if (is.logical(tee)) {
+  if (rlang::is_bool(tee)) {
     return()
   }
 
