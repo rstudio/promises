@@ -77,6 +77,10 @@ If no \code{on_failure} callback is provided and an error occurs, the error is
 re-thrown immediately (for synchronous errors) or propagated through the
 returned promise (for asynchronous errors).
 
+\code{on_failure} only handles a failure of \code{expr}. An error thrown by
+\code{on_success} is not passed to \code{on_failure}; it is re-thrown (sync) or rejects
+the returned promise (async), like \code{then()}.
+
 If an \code{on_failure} callback is provided but it throws an error, that new
 error replaces the original error. With \code{tee = TRUE}, even if \code{on_failure}
 executes successfully, the original error is still re-thrown.
@@ -91,7 +95,8 @@ input was synchronous. This allows seamless transitions between synchronous
 and asynchronous execution.
 
 With \code{tee = TRUE}, the callback's return value is ignored, even if it is a
-promise, so a synchronous input still gives a synchronous result.
+promise: it is not waited on, and its result or error does not change the
+result. A synchronous input still gives a synchronous result.
 }
 
 \examples{

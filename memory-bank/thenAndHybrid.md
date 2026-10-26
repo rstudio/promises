@@ -181,16 +181,21 @@ in `tests/testthat/test-otel.R`.
   `then()` and `catch()` use it, so a non-condition reason such as `42` reaches
   the next handler unchanged. `stop(reason)` would turn it into a
   `simpleError`. Pinned in `tests/testthat/test-then.R`.
-- **`hybrid_then()` does not catch errors from `on_success`.** On the sync path
-  an error in `on_success` is thrown straight out; `on_failure` only covers
-  `expr`. This matches `then()`, where `onRejected` does not see errors from
-  `onFulfilled` in the same call. Pinned by `tests/testthat/test-hybrid-then.R`
-  ("on_success callback can throw errors synchronously").
-- **`hybrid_then(tee = TRUE)` does not wait for promises returned by
-  callbacks on the sync path.** `on_success` or `on_failure` may return a
-  promise; with `tee = TRUE` it is dropped and the plain value is returned
-  (or the error re-thrown). This is on purpose and documented in
-  `R/hybrid-then.R`; pinned by `tests/testthat/test-hybrid-then.R`.
+- **`hybrid_then()` does not send `on_success` errors to `on_failure`.** This
+  is expected: `on_failure` handles a failure of `expr` only. On the sync path
+  an error in `on_success` is thrown straight out; on the async path the
+  returned promise rejects with it. This matches `then()`, where `onRejected`
+  does not see errors from `onFulfilled` in the same call. Pinned by
+  "on_failure does not handle on_success errors" in
+  `tests/testthat/test-hybrid-then.R`.
+- **`hybrid_then(tee = TRUE)` ignores promises returned by callbacks.**
+  `on_success` or `on_failure` may return a promise; with `tee = TRUE` it is
+  not waited on or followed, on both the sync and async paths. A sync input
+  gives back the plain value right away (or re-throws the error). This is on
+  purpose, matches `then(tee = TRUE)`, and is documented in `R/hybrid-then.R`.
+  Pinned by "tee = TRUE ignores a promise returned by the callback" in
+  `tests/testthat/test-hybrid-then.R`, using a promise that never settles and
+  one that rejects.
 - **`hybrid_then()` sync errors still reach domain `onError`.** Because the
   package `tryCatch()` runs `promiseDomain$onError()` as a calling handler, a
   domain sees the error even when `on_failure` recovers from it.

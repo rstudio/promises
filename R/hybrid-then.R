@@ -40,6 +40,10 @@ check_hybrid_callback <- function(callback, name) {
 #' re-thrown immediately (for synchronous errors) or propagated through the
 #' returned promise (for asynchronous errors).
 #'
+#' `on_failure` only handles a failure of `expr`. An error thrown by
+#' `on_success` is not passed to `on_failure`; it is re-thrown (sync) or rejects
+#' the returned promise (async), like `then()`.
+#'
 #' If an `on_failure` callback is provided but it throws an error, that new
 #' error replaces the original error. With `tee = TRUE`, even if `on_failure`
 #' executes successfully, the original error is still re-thrown.
@@ -52,7 +56,8 @@ check_hybrid_callback <- function(callback, name) {
 #' and asynchronous execution.
 #'
 #' With `tee = TRUE`, the callback's return value is ignored, even if it is a
-#' promise, so a synchronous input still gives a synchronous result.
+#' promise: it is not waited on, and its result or error does not change the
+#' result. A synchronous input still gives a synchronous result.
 #'
 #' @param expr An expression that evaluates to either a promise or a non-promise
 #'   value.
