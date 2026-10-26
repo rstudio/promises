@@ -87,7 +87,11 @@ Promise <- function() {
             cat(
               file = stderr(),
               "Unhandled promise error: ",
-              reason$message,
+              if (inherits(reason, "condition")) {
+                conditionMessage(reason)
+              } else {
+                paste(format(reason), collapse = " ")
+              },
               "\n",
               sep = ""
             )

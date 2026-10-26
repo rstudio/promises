@@ -182,3 +182,11 @@ describe("future", {
     expect_error(extract(p2))
   })
 })
+
+test_that("unhandled rejection message works for non-condition reasons", {
+  out <- capture.output(type = "message", {
+    promise_reject(42)
+    wait_for_it()
+  })
+  expect_identical(out, "Unhandled promise error: 42")
+})

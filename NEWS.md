@@ -16,6 +16,10 @@
   callbacks once; a domain without one wraps them with its
   `wrapOnFulfilled`. (#212)
 
+* The "Unhandled promise error" message no longer errors inside the event
+  loop when a promise is rejected with a value that is not a condition, such
+  as `promise_reject(42)`. (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry
