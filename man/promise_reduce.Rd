@@ -17,7 +17,9 @@ recent call to \code{func}), and the second parameter will be an element of \cod
 
 \item{.init}{The initial result value of the fold, passed into \code{.f} when it
 is first executed. If missing, the first element of \code{.x} is used and the
-fold starts with the second element.}
+fold starts with the second element. If \code{.init} is missing and \code{.x} is
+empty, \code{promise_reduce()} throws an error right away instead of returning a
+rejected promise, as this is a mistake in the call itself.}
 }
 \value{
 A promise that will resolve to the result of calling \code{.f} on the last

@@ -200,7 +200,9 @@ promise_map <- function(.x, .f, ...) {
 #' @param ... Other arguments to pass to `.f`
 #' @param .init The initial result value of the fold, passed into `.f` when it
 #'   is first executed. If missing, the first element of `.x` is used and the
-#'   fold starts with the second element.
+#'   fold starts with the second element. If `.init` is missing and `.x` is
+#'   empty, `promise_reduce()` throws an error right away instead of returning a
+#'   rejected promise, as this is a mistake in the call itself.
 #'
 #' @return A promise that will resolve to the result of calling `.f` on the last
 #'   element (or `.init` if `.x` had no elements). If any invocation of `.f`
