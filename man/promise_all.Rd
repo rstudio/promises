@@ -25,7 +25,8 @@ fails, the first error to be encountered will be used to reject the
 returned promise.
 
 For \code{promise_race}, the first of the promises to either fulfill or reject
-will be passed through to the returned promise.
+will be passed through to the returned promise. As in JavaScript, racing
+no promises returns a promise that never settles.
 }
 \description{
 Use \code{promise_all} to wait for multiple promise objects to all be successfully

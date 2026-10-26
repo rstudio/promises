@@ -20,7 +20,8 @@
 #'   returned promise.
 #'
 #'   For `promise_race`, the first of the promises to either fulfill or reject
-#'   will be passed through to the returned promise.
+#'   will be passed through to the returned promise. As in JavaScript, racing
+#'   no promises returns a promise that never settles.
 #'
 #' @examples
 #' p1 <- promise(\(resolve, reject) later::later(\() resolve(1), delay = 1))

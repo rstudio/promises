@@ -222,3 +222,9 @@ test_that("promise_reduce() without .init starts from the first element", {
   promise_reduce(list("a"), paste0) |> extract() |> expect_equal("a")
   expect_error(promise_reduce(list(), `+`), "`.init`")
 })
+
+test_that("promise_race() with no promises stays pending", {
+  p <- promise_race()
+  wait_for_it()
+  expect_identical(attr(p, "promise_impl", exact = TRUE)$status(), "pending")
+})
