@@ -52,16 +52,149 @@ The package uses RStudio’s shiny-workflows for CI/CD: - Automated R CMD
 check on push/PR - Website deployment via pkgdown - Code formatting
 checks
 
-## Memory Bank
+## Architecture Overview
 
-The `memory-bank/` directory holds contributor documentation with YAML
-frontmatter (`title`, `description`). **Before exploring the codebase**,
-invoke the `memory-bank` skill to find and read the relevant docs. Start
-with `memory-bank/architecture.md`; it explains how the pieces fit and
-which doc covers each `R/` file. Update or add docs when you learn
-something future contributors will need (see the skill for conventions).
+### Core Promise Implementation
 
-Contributor skills live in `.agents/skills/`; `.claude/skills` is a
-symlink to it. Only allowlisted skills are tracked, so when adding or
-removing one, update the `!/.agents/skills/<name>/` lines in
-`.gitignore` to match.
+**Promise Class (`R/promise.R`):** - Promises are simple classed
+environments (not R6) created by the `Promise()` factory function; this
+reduces creation overhead by up to 10x (#191) - Internal state and
+methods live in a `private` environment inside the closure; the public
+promise object exposes `$then()`, `$catch()`, `$finally()`, and
+`$status` - Internals are reachable via
+`attr(p, "promise_impl", exact = TRUE)` (used by tests and
+[`as.promise()`](https://rstudio.github.io/promises/dev/reference/is.promise.md)
+methods) - States: “pending”, “fulfilled”, “rejected” - Private methods
+`doResolve`/`doReject` handle state transitions - Public API through
+[`resolve()`](https://rstudio.github.io/promises/dev/reference/resolve.md),
+[`reject()`](https://rstudio.github.io/promises/dev/reference/resolve.md),
+and [`then()`](https://rstudio.github.io/promises/dev/reference/then.md)
+methods - Chaining cycle detection to prevent infinite loops - Uses
+[`later::later()`](https://later.r-lib.org/reference/later.html) to
+schedule callbacks for fulfillment/rejection -
+`normalizeOnFulfilled()`/`normalizeOnRejected()` - Normalize callbacks
+to handle 0, 1, or 2 arguments - `onFulfilled` can take
+`(value, .visible)` for visibility detection - Callbacks with 0 args are
+wrapped to ignore arguments - Used by both
+[`then()`](https://rstudio.github.io/promises/dev/reference/then.md) and
+[`hybrid_then()`](https://rstudio.github.io/promises/dev/reference/hybrid_then.md)
+for consistent callback handling
+
+**Promise Domains (`R/domains.R`):** - Context management system for
+promise execution - Custom error handling and domain-specific behavior -
+Functions:
+[`new_promise_domain()`](https://rstudio.github.io/promises/dev/reference/with_promise_domain.md),
+[`with_promise_domain()`](https://rstudio.github.io/promises/dev/reference/with_promise_domain.md) -
+Domain composition allows layering of contexts - Critical for
+maintaining execution context across async boundaries (e.g., graphics
+devices, reactive contexts)
+
+**Core Operations (`R/then.R`):** -
+[`then()`](https://rstudio.github.io/promises/dev/reference/then.md) -
+Primary interface for promise chaining and result handling - Supports
+both fulfillment (`onFulfilled`) and rejection (`onRejected`)
+callbacks - Callbacks support
+[`rlang::as_function()`](https://rlang.r-lib.org/reference/as_function.html)
+conversions (functions, formulas, and function-name strings) - Formula
+syntax `~ fn(.)` is deprecated in favor of function shorthand
+`\(x) fn(x)` - Returns new promise that chains from the input promise -
+[`catch()`](https://rstudio.github.io/promises/dev/reference/then.md)
+and
+[`finally()`](https://rstudio.github.io/promises/dev/reference/then.md) -
+Convenience functions (equivalent to
+[`then()`](https://rstudio.github.io/promises/dev/reference/then.md)
+with specific callbacks) - `tee` parameter - Execute callbacks for
+side-effects while preserving original values - With `tee=TRUE`,
+callback result is discarded and original value/error is propagated -
+Useful for logging, debugging, or other side-effect operations -
+[`hybrid_then()`](https://rstudio.github.io/promises/dev/reference/hybrid_then.md) -
+Hybrid synchronous/asynchronous execution - If `expr` evaluates to a
+promise, delegates to
+[`then()`](https://rstudio.github.io/promises/dev/reference/then.md) for
+async handling - If `expr` evaluates to a value, executes
+`on_success`/`on_failure` callbacks synchronously (same tick) - Useful
+for functions that need to work with both sync and async inputs (e.g.,
+plumber2)
+
+**Combining Operations (`R/utils.R`):** -
+[`promise_all()`](https://rstudio.github.io/promises/dev/reference/promise_all.md) -
+Wait for all promises to complete -
+[`promise_race()`](https://rstudio.github.io/promises/dev/reference/promise_all.md) -
+Wait for first promise to complete -
+[`promise_map()`](https://rstudio.github.io/promises/dev/reference/promise_map.md) -
+Apply function over list of promises -
+[`promise_reduce()`](https://rstudio.github.io/promises/dev/reference/promise_reduce.md) -
+Reduce promises sequentially
+
+**Future Integration (`R/future_promise.R`):** -
+[`future_promise()`](https://rstudio.github.io/promises/dev/reference/future_promise.md) -
+Run an expression in a future once a worker is free, and return a
+promise for the result -
+[`future_promise_queue()`](https://rstudio.github.io/promises/dev/reference/future_promise.md) -
+The default `WorkQueue` used by
+[`future_promise()`](https://rstudio.github.io/promises/dev/reference/future_promise.md) -
+Work queue system (`WorkQueue` R6 class) that holds work until a future
+worker is free - Exponential backoff (`ExpoDelay`) when workers
+unavailable - Polling mechanism to check
+[`future::resolved()`](https://future.futureverse.org/reference/resolved.html)
+status
+
+**OpenTelemetry Integration (`R/otel.R`):** - Integration with `otel`
+package (\>= 0.2.0, in Imports) for distributed tracing; `otelsdk` (\>=
+0.2.0) in Suggests for span collection in tests -
+[`with_otel_span()`](https://rstudio.github.io/promises/dev/reference/otel.md) -
+Create a span, execute an expression within it, end it on completion
+(handles both sync values and promises) -
+[`with_otel_promise_domain()`](https://rstudio.github.io/promises/dev/reference/otel.md) -
+Handoff promise domain that restores the active span from when
+[`then()`](https://rstudio.github.io/promises/dev/reference/then.md) was
+called -
+[`local_otel_promise_domain()`](https://rstudio.github.io/promises/dev/reference/otel.md) -
+Add the span promise domain to the local scope (for
+[coro](https://github.com/r-lib/coro) where `with_*()` wrappers are not
+allowed) - Earlier
+[`with_ospan_async()`](https://rstudio.github.io/promises/dev/reference/promises-deprecated.md)/[`with_ospan_promise_domain()`](https://rstudio.github.io/promises/dev/reference/promises-deprecated.md)/[`local_ospan_promise_domain()`](https://rstudio.github.io/promises/dev/reference/promises-deprecated.md)
+names are deprecated (#198) - Uses cached tracer via
+`promises_otel_tracer()` for performance
+
+### Integration Points
+
+**Future Package:** - `as.promise.Future()` (in `R/promise.R`) converts
+Future objects to promises and caches the promise on the Future - Uses
+polling loop with 0.1s intervals to check
+[`future::resolved()`](https://future.futureverse.org/reference/resolved.html) -
+[`future_promise()`](https://rstudio.github.io/promises/dev/reference/future_promise.md)
+creates lazy futures and schedules work via WorkQueue
+
+**Mirai Package:** - Mirai package provides its own `as.promise.mirai()`
+method - Newer generation event-driven promises - No polling needed -
+mirai handles completions on a thread pool, and calls into the later
+event loop directly
+
+### Package Structure
+
+Standard R package layout: - `R/` - Core R source code (15 files;
+includes `hybrid-then.R`, `deprecated.R`, `pipe.R`, `first_type.R`,
+`is_something.R`, `promises-package.R`, and standalone imports in
+`staticimports.R` / `import-standalone-defer.R`) - `tests/testthat/` -
+Unit tests following testthat 3.0 conventions; includes Promises/A+ spec
+tests (`test-aplus-*.R`), legacy behavior tests (`test-legacy-*.R`), and
+`_snaps/` snapshots - `vignettes/` - Comprehensive documentation with 9
+vignettes covering motivation, usage patterns, and case studies -
+`inst/` - Only `WORDLIST` for spelling; the C++ `promise_task.cpp`
+template / interface test was moved to the `later` package (#204)
+
+### Key Design Patterns
+
+- **Classed Environments:** Promises are environments with closures (not
+  R6) for fast construction; R6 remains only for
+  `WorkQueue`/`Delay`/`ExpoDelay` in `future_promise.R`
+- **Callback Chaining:** JavaScript-style `.then()` method chaining
+- **Domain System:** Context isolation and custom error handling via
+  promise domains; nested domains invoke in reverse (innermost-first)
+  order
+- **Lazy Evaluation:**
+  [`withVisible()`](https://rdrr.io/r/base/withVisible.html) to preserve
+  visibility of promise results
+- **Work Queue Pattern:** FIFO queue with exponential backoff for
+  resource-constrained async operations
