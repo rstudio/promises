@@ -508,3 +508,11 @@ test_that("hybrid_then() works with complex expressions", {
   )
   expect_equal(result, 60)
 })
+
+test_that("hybrid_then(tee = TRUE) returns the original sync value", {
+  # Like `then(tee = TRUE)`, a promise returned by the callback is ignored
+  expect_identical(
+    hybrid_then(1, \(x) promise_resolve(2), tee = TRUE),
+    1
+  )
+})

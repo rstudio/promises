@@ -34,7 +34,8 @@ the callback executes but the original error is re-thrown afterward.}
 promise to handle the \code{on_success} or \code{on_failure} callbacks.
 \item If \code{expr} evaluates to a non-promise value, the result of the synchronous
 operation after being processed by \code{on_success} or \code{on_failure}.
-\item If a callback returns a promise, the result is always a promise.
+\item If a callback returns a promise (and \code{tee = FALSE}), the result is
+always a promise.
 }
 }
 \description{
@@ -88,6 +89,9 @@ Callbacks can return any value, including promises. If a callback returns a
 promise, the entire \code{hybrid_then()} call will return a promise, even if the
 input was synchronous. This allows seamless transitions between synchronous
 and asynchronous execution.
+
+With \code{tee = TRUE}, the callback's return value is ignored, even if it is a
+promise, so a synchronous input still gives a synchronous result.
 }
 
 \examples{
