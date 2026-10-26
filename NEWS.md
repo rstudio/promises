@@ -63,7 +63,7 @@ promises now integrates with the otel package to provide observability and traci
   function handles both synchronous and asynchronous (promise-based)
   operations. For promises, the span is automatically ended when the promise
   resolves or rejects. To access the OpenTelemetry span within your
-  expression, use `otel::get_current_span()`. (#198)
+  expression, use `otel::get_active_span()`. (#198)
 
 ## New features
 
@@ -95,7 +95,7 @@ promises now integrates with the otel package to provide observability and traci
 
 promises now integrates with the otel package to provide observability and tracing for asynchronous operations. OpenTelemetry integration is experimental and subject to change.
 
-* `with_ospan_async()` creates an OpenTelemetry span, executes the given expression within it, and ends the span. This function handles both synchronous and asynchronous (promise-based) operations. For promises, the span is automatically ended when the promise resolves or rejects. To access the OpenTelemetry span within your expression, use `otel::get_current_span()`. (#173)
+* `with_ospan_async()` creates an OpenTelemetry span, executes the given expression within it, and ends the span. This function handles both synchronous and asynchronous (promise-based) operations. For promises, the span is automatically ended when the promise resolves or rejects. To access the OpenTelemetry span within your expression, use `otel::get_active_span()`. (#173)
 
 * `with_ospan_promise_domain()` creates a promise domain that restores the currently active OpenTelemetry span from when a call to `then()` is executed. This enables proper tracing context across asynchronous operations. (#173)
 
