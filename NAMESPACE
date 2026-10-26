@@ -41,10 +41,14 @@ export(with_promise_domain)
 importFrom(R6,R6Class)
 importFrom(later,later)
 importFrom(lifecycle,deprecated)
-importFrom(magrittr,"%>%")
-importFrom(magrittr,"%T>%")
-importFrom(otel,end_span)
-importFrom(otel,get_active_span)
-importFrom(otel,is_tracing_enabled)
-importFrom(otel,start_span)
-importFrom(otel,with_active_span)
+importFrom(magrittr,
+  "%>%",
+  "%T>%"
+)
+importFrom(otel,
+  end_span,
+  get_active_span,
+  is_tracing_enabled,
+  start_span,
+  with_active_span
+)
