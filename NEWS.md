@@ -48,6 +48,8 @@
 
 * `then()` chaining is now considerably faster when no promise domain is active: the common path no longer goes through the `promise()` constructor, `tryCatch` setup, or domain machinery, and allocates fewer closures per link. One subtle behavior change on this path: an error thrown by `later::later()` itself (e.g. when the event loop has been destroyed) now propagates to the caller of `then()` instead of silently rejecting the derived promise. `promise_resolve()` and `promise_reject()` also skip the redundant `promise()` constructor.
 
+* Promise adoption (resolving a promise with another promise, e.g. a `then()` callback that returns `promise_resolve(x)`) and the `promise_all()`/`promise_race()` combinators no longer build a throwaway derived promise per link or input; they subscribe to settlement directly through the internal promise implementation. In benchmarks, a 1000-link adoption chain is ~2.3x faster than before the performance work, and `promise_all()`/`promise_race()` over 100 resolved promises are ~8x faster. One subtle effect: an adopting promise's listeners now run one event-loop tick earlier, because the throwaway promise's settlement task no longer sits in between.
+
 # promises 1.5.0
 
 ## OpenTelemetry

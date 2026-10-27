@@ -57,7 +57,6 @@ All callbacks run later, through `later::later()`, never at the moment you call
 - `visible` - whether the result was visible (see Visibility).
 - `publicResolveRejectCalled` - guards so `resolve`/`reject` work only once.
 - `onFulfilled`, `onRejected` - lists of waiting handlers.
-- `onFinally` - set to `list()` but never used.
 - `rejectionHandled` - used for the unhandled error message.
 - `following` - the inner object of the promise this one is waiting on, or
   `NULL`. Set by `adopt()` and used to find chaining cycles. Cleared when the
@@ -65,7 +64,8 @@ All callbacks run later, through `later::later()`, never at the moment you call
   in memory.
 
 `self` gets the public functions `status()`, `resolve()`, `reject()`,
-`then()`, `catch()`, `finally()`, and `format()`. It also gets
+`then()`, `catch()`, `finally()`, and `format()`, plus the internal
+`subscribe()` (see below). It also gets
 `self$.__enclos_env__ <- list(private = private)` so code that expects the R6
 layout can still reach `private`. `private$adopt()` reads it to walk the
 `following` chain of other promises. The class is set to `"Promise"`.
@@ -100,9 +100,16 @@ calls `doRejectFinalReason()`.
    This finds direct cycles (resolving with yourself) and longer ones (`a`
    waits on `b`, `b` waits on `a`).
 2. It sets `private$following` to the inner object of `p`.
-3. It calls `p$then(private$doResolve, private$doReject)` inside
-   `without_promise_domain()`, so this internal `then()` is not seen by any
-   domain.
+3. It subscribes to `p` directly:
+   `attr(p, "promise_impl")$subscribe(private$doResolveFinalValue,
+   private$doRejectFinalReason)`. A settled promise's value is always final,
+   so the `withVisible()`/`is.promising()` re-check in
+   `doResolve()`/`doReject()` is skipped, and `subscribe()` never consults
+   domains. If `p` has no `promise_impl` attribute (possible for a
+   third-party `as.promise()` result; the documented shape is just
+   `then`/`catch`/`finally`), it falls back to
+   `p$then(private$doResolve, private$doReject)` inside
+   `without_promise_domain()`.
 
 ### Settling and scheduling
 
@@ -129,9 +136,18 @@ Because state changes at once, `status()` reports `"fulfilled"` right after
 
 `self$then(onFulfilled, onRejected, onFinally)`:
 
-1. Normalizes `onFulfilled` and `onRejected` (below). A non-function
-   `onFinally` becomes `NULL`.
-2. Builds a new promise with `promise()`. Inside its action:
+1. If no promise domain is active (the common case), `then_no_domain()`
+   takes a fast path: it builds the derived promise directly with
+   `new_promise()` (no `promise()` constructor, no `tryCatch`, no
+   `promiseDomain$onThen()`), computes each callback's calling convention
+   from `callback_formals()` as a 0/1/2-arg code instead of allocating
+   `normalizeOn*()` wrappers, and fuses the NULL-domain reentry branch into
+   the handle closures. The "cannot combine `onFinally` with
+   `onFulfilled`/`onRejected`" check still rejects the derived promise
+   asynchronously rather than throwing.
+2. With a domain active, it normalizes `onFulfilled` and `onRejected`
+   (below). A non-function `onFinally` becomes `NULL`. Then it builds a new
+   promise with `promise()`. Inside its action:
    - Calls `promiseDomain$onThen()` to let the current domain wrap the
      callbacks. If `onFinally` is set, it is turned into an `onFulfilled` and
      `onRejected` pair here. See `domains.md`.
@@ -141,13 +157,28 @@ Because state changes at once, `status()` reports `"fulfilled"` right after
    - `handleReject(reason)` calls `onRejected(reason)` and *resolves* the new
      promise with the result. With no `onRejected`, it rejects the new promise
      with the same reason.
-   - If pending, both handlers are added to the waiting lists. If already
-     settled, one `later()` task is scheduled to call the right handler. For an
-     already rejected promise, that task also sets `rejectionHandled`.
-3. Returns the new promise invisibly.
+3. Both paths end the same way: if pending, both handlers are added to the
+   waiting lists; if already settled, one `later()` task is scheduled to call
+   the right handler (for an already rejected promise, that task also sets
+   `rejectionHandled`); the new promise is returned invisibly.
 
 Since `resolve()` does not force its argument, an error thrown by a callback is
 caught inside `resolve()` and rejects the new promise.
+
+### subscribe()
+
+`self$subscribe(onFulfilled, onRejected)` is the internal, low-overhead way
+to listen for settlement: it registers the handlers as-is — no
+normalization, no domain wrapping, no derived promise. Handlers must use the
+internal calling convention, `(value, visible)` on fulfillment and
+`(reason)` on rejection, matching what `doResolveFinalValue()`'s settlement
+task invokes. If the promise is already settled, it schedules the usual
+`later()` task (setting `rejectionHandled` first when rejected, which keeps
+the unhandled-rejection message semantics intact). Used by `adopt()` and by
+`promise_all()`/`promise_race()` — the latter two through the
+`promise_subscribe()` helper, which falls back to a domain-free `then()` for
+third-party promises without a `promise_impl` attribute. User callbacks
+still go through `then()` and get domain wrapping.
 
 `self$catch(onRejected)` is `then(onRejected = onRejected)`.
 `self$finally(onFinally)` is `then(onFinally = onFinally)`.
@@ -230,6 +261,11 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
   the handler with `later()`. Tests must run the event loop (`wait_for_it()` or
   `later::run_now()`). `tests/testthat/test-ordering.R` pins the exact order
   for two parallel chains.
+- **Adoption skips a settlement tick.** Resolving a promise with another
+  promise used to route through a throwaway derived promise (an extra
+  `later()` task); now `adopt()` subscribes to it directly, so the adopting
+  promise's handlers run one event-loop tick earlier. The relative order of
+  `then()` callbacks is unchanged.
 - **Rejecting with a promise follows that promise.** `R/promise.R`
   `private$doReject()` checks `is.promising(reason)`. So
   `promise_reject(promise_resolve(5))` *fulfills* with `5`. This differs from
