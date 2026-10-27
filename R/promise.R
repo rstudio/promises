@@ -6,8 +6,10 @@ Promise <- function() {
   private$value <- NULL
   private$visible <- TRUE
   private$publicResolveRejectCalled <- FALSE
-  private$onFulfilled <- list()
-  private$onRejected <- list()
+  # Handler chains, newest first: each cell is list(handler, rest).
+  # Prepending is O(1); see collect_handlers() for why not c()/index growth.
+  private$onFulfilled <- NULL
+  private$onRejected <- NULL
   private$rejectionHandled <- FALSE
   private$following <- NULL
 
@@ -81,12 +83,20 @@ Promise <- function() {
     # Skip the settlement task when nobody is listening: a then() attached
     # after settlement schedules its own task. Observable side effect:
     # later::loop_empty() can be TRUE immediately after promise_resolve().
-    if (length(private$onFulfilled) > 0) {
+    if (!is.null(private$onFulfilled)) {
       later(function() {
-        lapply(private$onFulfilled, function(f) {
-          f(private$value, private$visible)
-        })
-        private$onFulfilled <- list()
+        node <- private$onFulfilled
+        private$onFulfilled <- NULL
+        if (is.null(node[[2L]])) {
+          # The common case of exactly one handler skips collect/rev.
+          node[[1L]](private$value, private$visible)
+        } else {
+          handlers <- collect_handlers(node)
+          # Cells are newest-first; rev() restores registration order.
+          lapply(rev(handlers), function(f) {
+            f(private$value, private$visible)
+          })
+        }
       })
     }
   }
@@ -98,11 +108,20 @@ Promise <- function() {
     private$following <- NULL
 
     later(function() {
-      lapply(private$onRejected, function(f) {
-        private$rejectionHandled <- TRUE
-        f(private$value)
-      })
-      private$onRejected <- list()
+      node <- private$onRejected
+      private$onRejected <- NULL
+      if (!is.null(node)) {
+        if (is.null(node[[2L]])) {
+          private$rejectionHandled <- TRUE
+          node[[1L]](private$value)
+        } else {
+          handlers <- collect_handlers(node)
+          lapply(rev(handlers), function(f) {
+            private$rejectionHandled <- TRUE
+            f(private$value)
+          })
+        }
+      }
 
       later(
         function() {
@@ -229,18 +248,9 @@ Promise <- function() {
       }
 
       if (private$state == "pending") {
-        private$onFulfilled <- c(
-          private$onFulfilled,
-          list(
-            handleFulfill
-          )
-        )
-        private$onRejected <- c(
-          private$onRejected,
-          list(
-            handleReject
-          )
-        )
+        # Prepend a list(handler, rest) cell; see collect_handlers().
+        private$onFulfilled <- list(handleFulfill, private$onFulfilled)
+        private$onRejected <- list(handleReject, private$onRejected)
       } else if (private$state == "fulfilled") {
         later(function() {
           handleFulfill(private$value, private$visible)
@@ -265,8 +275,9 @@ Promise <- function() {
   # promise_all()/promise_race(), whose callbacks are pure bookkeeping.
   self$subscribe <- function(onFulfilled, onRejected) {
     if (private$state == "pending") {
-      private$onFulfilled <- c(private$onFulfilled, list(onFulfilled))
-      private$onRejected <- c(private$onRejected, list(onRejected))
+      # Prepend a list(handler, rest) cell; see collect_handlers().
+      private$onFulfilled <- list(onFulfilled, private$onFulfilled)
+      private$onRejected <- list(onRejected, private$onRejected)
     } else if (private$state == "fulfilled") {
       later(function() {
         onFulfilled(private$value, private$visible)
@@ -308,6 +319,21 @@ Promise <- function() {
   self$.__enclos_env__ <- list(private = private)
   class(self) <- "Promise"
   self
+}
+
+# Handler lists grow by prepending list(handler, rest) cells: O(1) per
+# registration. c(chain, list(f)) copies the whole list every time (quadratic
+# for fan-out), and index assignment on an environment-bound list duplicates it
+# on every write too (measured worse than c()), because env-bound values are
+# never mutated in place. The settlement tasks collect the chain into a plain
+# list (newest first) and iterate it reversed.
+collect_handlers <- function(node) {
+  handlers <- list()
+  while (!is.null(node)) {
+    handlers[[length(handlers) + 1L]] <- node[[1L]]
+    node <- node[[2L]]
+  }
+  handlers
 }
 
 # Re-throw a rejection reason from inside a callback. `stop()` would turn a
@@ -444,8 +470,9 @@ then_no_domain <- function(private, onFulfilled, onRejected, onFinally) {
   }
 
   if (private$state == "pending") {
-    private$onFulfilled <- c(private$onFulfilled, list(handleFulfill))
-    private$onRejected <- c(private$onRejected, list(handleReject))
+    # Prepend a list(handler, rest) cell; see collect_handlers().
+    private$onFulfilled <- list(handleFulfill, private$onFulfilled)
+    private$onRejected <- list(handleReject, private$onRejected)
   } else if (private$state == "fulfilled") {
     later(function() {
       handleFulfill(private$value, private$visible)

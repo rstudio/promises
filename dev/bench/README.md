@@ -97,7 +97,7 @@ Notes:
 
 | 3 | 39.6ms | 82.0ms | 60.3ms | −41% / −56% / −29% vs baseline; scenario 4 −33% vs step 2 despite a ~1.6x slower `later` floor this session (7.44ms vs 4.4–5.0ms). Scenario 6: `promise_all`/`promise_race` ×100 went 6.74/6.60 → 0.85/0.84ms (−87%), mem 56KB → 1.4KB. Adoption and combinators now subscribe to settlement directly — no throwaway derived promise. See step-3 notes below |
 | 4 | 47.3ms | — | — | Target was scenario 1: `promise_resolve(1)` + drain 26.0–26.5 → 14.9–15.2µs (−42%; skips the settlement `later()` task when nobody is listening). Scenario 2 unchanged (delta is machine drift). See step-4 notes below |
-| 5 | | | | |
+| 5 | 35.8ms | 77.7ms | 56.9ms | Target was scenario 5: register 24.6–25.4 → 17.6–20.3ms (−25%), `mem_alloc` 8.27MB → 558KB (−93%). Mechanism differs from the plan — linked-cell prepend, not index assignment; see step-5 notes. All numbers interleaved same-round A/B vs HEAD |
 | 6 | | | | |
 | 7 | | | | |
 
@@ -126,12 +126,35 @@ Notes:
 - Interleaved Rscript A/B vs the pre-step-4 build, 3 rounds: scenario 1
   `promise_resolve(1)` + drain 26.0–26.5 → 14.9–15.2µs (−42%; one fewer
   event-loop task per listener-less settlement). Scenario 2: 50.8–54.6 →
-  47.0–48.0ms — the gate adds one cheap check per settlement, so treat the
-  delta as machine drift. (Absolute numbers this session are ~40% slower than
-  the step-3 session for identical code; only same-round comparisons are
+  47.0–48.0ms — the gate adds one `is.null` check per settlement, so treat
+  the delta as machine drift. (Absolute numbers this session are ~40% slower
+  than the step-5 session for identical code; only same-round comparisons are
   meaningful.)
 - NEWS bullet added: `later::loop_empty()` may be `TRUE` immediately after
   `promise_resolve(x)`. Full test suite passes (787 tests).
+
+### Step 5 measurement notes (2026-10-27)
+
+- **The plan's prescribed mechanism was measured and rejected.** The plan
+  called for index assignment (`x[[length(x) + 1L]] <- f`), which is amortized
+  O(1) only for *local* lists (259µs/186KB per 1000 appends vs 2.0ms/3.88MB
+  for `c()`). The handler lists live in the `private` environment, and
+  env-bound lists are duplicated on every `[[<-`: measured in place the idiom
+  cost 4.4ms/7.9MB per 1000 paired appends — 2x *worse* than `c()` — and
+  scenario 5 registration rose to 24.9ms/17.4MB (from 23.5ms/9.4MB).
+- **Shipped instead: linked-cell prepend.** Registration stores
+  `list(handler, rest)` cells (O(1); ~240µs/46KB per 1000 paired
+  registrations). Settlement collects the chain and iterates `rev()` to
+  restore registration order (A+ 2.2.6), with a single-handler fast path that
+  skips collect/`rev()` for the common one-callback case. An empty chain is
+  now `NULL`, not `list()` — step 4's settlement gate is expressed as
+  `!is.null(private$onFulfilled)`.
+- Interleaved Rscript A/B vs HEAD (step 3), medians of 2–3 rounds: scenario 2
+  39.4–46.7 → 35.3–36.3ms; scenario 4 79.6–82.8 → 77.5–77.9ms; scenario 7
+  58.8–58.9 → 56.4–57.4ms (no domain-path regression); scenario 5 as in the
+  table above. Scenario 2's small win is incidental: `NULL` init saves two
+  `list()` allocations per `Promise()`, and the fast path skips `lapply`.
+  Full test suite passes (787 tests).
 
 Targets (net of the `later` floor): ≥2x on scenario 2, ≥2x on scenario 4,
 meaningfully lower `mem_alloc` and `n_gc` on both; no regression >5% on
