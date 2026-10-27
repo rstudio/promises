@@ -25,14 +25,16 @@ an environment made by `new_promise_domain()`, or a list made by
   - `spliceOnFinally()`, `finallyToFulfilled()`, `finallyToRejected()` - turn
     one `onFinally` into an `onFulfilled`/`onRejected` pair.
   - `promiseDomain` - internal list with `onThen()` and `onError()`.
-  - `wrap_callback_reenter()`, `wrap_with_signature()` - re-enter the domain
-    when a callback runs, keeping the callback's formals.
+  - `wrap_callback_reenter()` - re-enter the domain when a callback runs;
+    returns fixed-shape closures (`function(value, .visible)` /
+    `function(reason)`) with the side passed explicitly.
   - `globals`, `current_promise_domain()`.
   - `with_promise_domain()` (exported), `reenter_promise_domain()`,
     `without_promise_domain()`.
   - `new_promise_domain()` (exported), `compose_domains()`, `wrap_finally()`.
 - `R/promise.R` - `self$then()` inside `Promise()` calls
-  `promiseDomain$onThen()`; `doResolve()`/`doReject()` use
+  `promiseDomain$onThen()` on the domain path (with no active domain it takes
+  the `then_no_domain()` fast path instead); `doResolve()`/`doReject()` use
   `without_promise_domain()`.
 - `R/otel.R` - `local_promise_domain()`, `has_otel_promise_domain()`,
   `create_otel_promise_domain()`, `with_otel_promise_domain()`.
@@ -82,32 +84,38 @@ internal "follow another promise" `then()` is not seen by any domain.
 
 ### What happens at then() time
 
-`self$then()` in `R/promise.R` first normalizes the callbacks, then, inside the
-action of the new promise (which runs right away), calls
-`promiseDomain$onThen(onFulfilled, onRejected, onFinally)`:
+When a domain is active, `self$then()` in `R/promise.R` first normalizes the
+callbacks, then, inside the action of the new promise (which runs right away),
+calls `promiseDomain$onThen(onFulfilled, onRejected, onFinally)`. With no
+active domain, `self$then()` takes the `then_no_domain()` fast path and
+`onThen()` never runs.
+
+`onThen()`:
 
 1. Errors if `onFinally` is given with either other callback.
 2. Reads `current_promise_domain()`. **This is the moment the domain is
    captured.**
 3. If `onFinally` is set and the domain has `wrapOnFinally`, it wraps
-   `onFinally` with it.
-4. If `onFinally` is set, it is spliced into an `onFulfilled`/`onRejected`
-   pair (`spliceOnFinally()`).
-5. If there is a domain and `wrapOnFinally` was *not* used, it wraps
-   `onFulfilled` with `wrapOnFulfilled` and `onRejected` with
-   `wrapOnRejected`.
-6. Drops `NULL` entries and wraps each remaining callback with
-   `wrap_callback_reenter(callback, domain)`.
+   `onFinally` with it and splices the result into an
+   `onFulfilled`/`onRejected` pair (`spliceOnFinally()`); that pair is *not*
+   also wrapped with `wrapOnFulfilled`/`wrapOnRejected`. Otherwise (no
+   `onFinally`, or the domain has no `wrapOnFinally`) the callbacks are
+   eligible for side wrapping.
+4. Each non-NULL callback is wrapped with the domain's
+   `wrapOnFulfilled`/`wrapOnRejected` — skipped when the wrapper is
+   `base::identity` (the `new_promise_domain()` default, i.e. pass-through
+   domains).
+5. Each non-NULL callback is then wrapped with
+   `wrap_callback_reenter(callback, domain, side)`, the side passed explicitly
+   (`"fulfilled"` / `"rejected"`).
 
-`wrap_callback_reenter()` returns a function that runs
+`wrap_callback_reenter()` returns a fixed-shape closure
+(`function(value, .visible)` or `function(reason)`) that runs
 `reenter_promise_domain(domain, callback(...), replace = TRUE)`. This is done
 even if the domain is `NULL`, so a callback bound outside any domain runs with
-no domain, no matter what is active when the event loop calls it. The wrapper
-is rebuilt with `wrap_with_signature()` so it has the same formals as the
-callback; other code checks `formals()` for `.visible`. It uses
-`rlang::call2()` and `rlang::new_function()` instead of `do.call()` so values
-that are symbols are not evaluated (see "handles weird edge case relating to
-symbols" in `tests/testthat/test-domains.R`).
+no domain, no matter what is active when the event loop calls it; a call-time
+branch skips `reenter_promise_domain()` when no domain is active at callback
+time.
 
 The final call order when a callback runs is:
 
@@ -169,6 +177,15 @@ surface), in `hybrid_then()`, and in `as.promise.Future()`.
   called with two arguments. A wrapper that returns `function(value)` fails
   with "unused argument". Return `function(...)` and pass `...` on, as
   `create_counting_domain()` and `create_otel_promise_domain()` do.
+- **Domain wrappers may not force their argument — never rebind the symbols
+  passed to them.** A wrapper like `function(f) function(...) f(...)` (no
+  `force(f)`) keeps a lazy reference to the *symbol* `f` was passed as, in
+  `onThen()`'s frame. If `onThen()` rebinds `onFulfilled`/`onRejected`/
+  `onFinally` after passing them to a wrapper, the wrapper sees the rebound
+  value at call time — its own output — and recurses infinitely
+  (`onRejected(...)` → `reenter_promise_domain()` → `callback(reason)` in a
+  cycle). Keep wrapped values in fresh locals instead. The counting domains
+  in `tests/testthat/helper.R` don't force, so the domain suites pin this.
 - **In a nested stack, a domain without `wrapOnFinally` sees `finally()`
   through `wrapOnFulfilled` only.** Once any domain in the stack has
   `wrapOnFinally`, `wrap_finally()` wraps the finally callback with

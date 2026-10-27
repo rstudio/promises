@@ -401,3 +401,21 @@ test_that("nested domains keep the otel flag", {
     })
   })
 })
+
+test_that("pass-through (identity-wrapped) domains still reenter and propagate", {
+  # Domains created with the new_promise_domain() defaults have
+  # base::identity wrapOnFulfilled/wrapOnRejected, which promiseDomain$onThen()
+  # skips invoking. Behavior must be as if they were applied: callbacks run,
+  # values and visibility propagate, and the domain is reentered.
+  dom <- new_promise_domain()
+  p <- with_promise_domain(dom, {
+    promise_resolve(invisible(10)) |>
+      then(\(value, .visible) {
+        expect_identical(value, 10)
+        expect_false(.visible)
+        expect_identical(current_promise_domain(), dom)
+        value + 1
+      })
+  })
+  expect_identical(extract(p), 11)
+})

@@ -49,46 +49,40 @@ promiseDomain <- list(
       )
     }
 
+    # self$then() calls onThen() only when a domain is active (the NULL-domain
+    # case takes the then_no_domain() fast path), and promise() runs its action
+    # synchronously, so `domain` is the domain that was active at then() time.
+    # The is.null(domain) guards below keep onThen() correct even if that
+    # invariant is ever broken.
     domain <- current_promise_domain()
 
-    shouldWrapFinally <- !is.null(onFinally) &&
-      !is.null(domain) &&
-      !is.null(domain$wrapOnFinally)
-
-    newOnFinally <- if (shouldWrapFinally) {
-      domain$wrapOnFinally(onFinally)
-    } else {
-      onFinally
-    }
-
-    if (!is.null(newOnFinally)) {
-      spliced <- spliceOnFinally(newOnFinally)
-      onFulfilled <- spliced$onFulfilled
-      onRejected <- spliced$onRejected
-    }
-
-    shouldWrapFulfilled <- !is.null(onFulfilled) &&
-      !is.null(domain) &&
-      !shouldWrapFinally
-    shouldWrapRejected <- !is.null(onRejected) &&
-      !is.null(domain) &&
-      !shouldWrapFinally
-
-    results <- list(
-      onFulfilled = if (shouldWrapFulfilled) {
-        domain$wrapOnFulfilled(onFulfilled)
+    # Domain wrappers are not required to force their argument, so a wrapper
+    # may hold a lazy reference to the symbol it was passed (e.g. `onFinally`)
+    # in this frame. Never rebind those symbols after passing them to a
+    # wrapper: at call time the wrapper would see the rebound value (its own
+    # output) and recurse forever. Wrapped values go into fresh locals.
+    wrapSides <- TRUE
+    if (!is.null(onFinally)) {
+      newOnFinally <- if (!is.null(domain) && !is.null(domain$wrapOnFinally)) {
+        # The wrapped finally is spliced below; the spliced pair must not also
+        # be wrapped with wrapOnFulfilled/wrapOnRejected.
+        wrapSides <- FALSE
+        domain$wrapOnFinally(onFinally)
       } else {
-        onFulfilled
-      },
-      onRejected = if (shouldWrapRejected) {
-        domain$wrapOnRejected(onRejected)
-      } else {
-        onRejected
+        onFinally
       }
-    )
-    results <- results[!vapply(results, is.null, logical(1))]
-    # If there's a domain, ensure that before any callback is invoked, we
-    # reenter the domain. This is important for this kind of code:
+      if (!is.null(newOnFinally)) {
+        spliced <- spliceOnFinally(newOnFinally)
+        onFulfilled <- spliced$onFulfilled
+        onRejected <- spliced$onRejected
+      }
+    }
+
+    # Wrap each side with the domain, then with a reenter closure (the side is
+    # passed explicitly). Domains created with the new_promise_domain()
+    # defaults have base::identity wrappers; skip those calls. The reenter
+    # closure ensures that before any callback is invoked, we reenter the
+    # domain. This is important for this kind of code:
     #
     #     with_promise_domain(domain, {
     #       async_sleep(0.1) |>
@@ -100,16 +94,35 @@ promiseDomain <- list(
     #
     # It's important to reenter even if domain is NULL. In that case, we need to
     # ensure that the current domain is set to NULL while the callback executes.
-    if (!is.null(results$onFulfilled)) {
+    results <- list()
+    if (!is.null(onFulfilled)) {
+      wrappedFulfilled <- if (
+        wrapSides &&
+          !is.null(domain) &&
+          !identical(domain$wrapOnFulfilled, base::identity)
+      ) {
+        domain$wrapOnFulfilled(onFulfilled)
+      } else {
+        onFulfilled
+      }
       results$onFulfilled <- wrap_callback_reenter(
-        results$onFulfilled,
+        wrappedFulfilled,
         domain,
         "fulfilled"
       )
     }
-    if (!is.null(results$onRejected)) {
+    if (!is.null(onRejected)) {
+      wrappedRejected <- if (
+        wrapSides &&
+          !is.null(domain) &&
+          !identical(domain$wrapOnRejected, base::identity)
+      ) {
+        domain$wrapOnRejected(onRejected)
+      } else {
+        onRejected
+      }
       results$onRejected <- wrap_callback_reenter(
-        results$onRejected,
+        wrappedRejected,
         domain,
         "rejected"
       )
