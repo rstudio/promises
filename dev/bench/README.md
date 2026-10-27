@@ -98,8 +98,32 @@ Notes:
 | 3 | 39.6ms | 82.0ms | 60.3ms | −41% / −56% / −29% vs baseline; scenario 4 −33% vs step 2 despite a ~1.6x slower `later` floor this session (7.44ms vs 4.4–5.0ms). Scenario 6: `promise_all`/`promise_race` ×100 went 6.74/6.60 → 0.85/0.84ms (−87%), mem 56KB → 1.4KB. Adoption and combinators now subscribe to settlement directly — no throwaway derived promise. See step-3 notes below |
 | 4 | 47.3ms | — | — | Target was scenario 1: `promise_resolve(1)` + drain 26.0–26.5 → 14.9–15.2µs (−42%; skips the settlement `later()` task when nobody is listening). Scenario 2 unchanged (delta is machine drift). See step-4 notes below |
 | 5 | 35.8ms | 77.7ms | 56.9ms | Target was scenario 5: register 24.6–25.4 → 17.6–20.3ms (−25%), `mem_alloc` 8.27MB → 558KB (−93%). Mechanism differs from the plan — linked-cell prepend, not index assignment; see step-5 notes. All numbers interleaved same-round A/B vs HEAD |
-| 6 | | | | |
+| 6 | — | — | 62.5ms | Target was scenario 7 (no regression >5%): ≈63.5 → 62.5ms vs HEAD, interleaved 6-round A/B, both orders (noise ±5ms; directionally a small win). Pass-through (identity-wrapped) domain chain ≈ −4%. See step-6 notes below |
 | 7 | | | | |
+
+### Step 6 measurement notes (2026-10-27)
+
+- `promiseDomain$onThen()` streamlined: direct per-callback handling replaces
+  the `results` list + `vapply(is.null)` filter (the list is now built by
+  conditional assignment), and `domain$wrapOnFulfilled`/`wrapOnRejected` are
+  skipped when `identical()` to `base::identity` (the `new_promise_domain()`
+  default — pass-through domains).
+- Benchmark: `bench7.R`-style interleaved A/B (HEAD worktree vs modified),
+  3 rounds each run order, 6 total. Scenario 7 (1000-link chain, non-identity
+  wrappers): HEAD medians 57.8–66.4ms, modified 58.9–64.3ms — overlapping
+  ranges, no regression. Pass-through domain (`new_promise_domain()`
+  defaults): ≈ −4%. `resolved_chain` control (untouched fast path) moved with
+  run order, not build — machine drift, confirming only same-round comparisons
+  are meaningful. `mem_alloc` 5.99 → 5.97MB, `n_gc` 35 → 34 (marginal; the
+  per-link saving is one small list + one `vapply`).
+- Implementation pitfall found (fixed before commit): domain wrappers are not
+  required to force their argument, so `onThen` must never rebind the symbols
+  it passes to them (`onFulfilled`/`onRejected`/`onFinally`) — the wrapper's
+  lazy reference would see its own output and recurse infinitely. Caught by
+  `test-domains.R` (the counting domains don't force); regression test for
+  the identity-skip path added ("pass-through (identity-wrapped) domains
+  still reenter and propagate").
+- Full test suite: 785 passed, 0 failed, identical to HEAD.
 
 ### Step 3 measurement notes (2026-10-27)
 
