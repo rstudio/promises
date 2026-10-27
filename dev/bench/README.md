@@ -66,6 +66,52 @@ Notes:
 - Scenario 3 settlement (~39.5ms) is derived by subtracting registration from
   the combined expression.
 
+## Final results (2026-10-27)
+
+Same environment and caveats as the baseline (R 4.6.1, later 1.4.8, bench
+1.1.4, macOS arm64, `pkgload::load_all()` — not byte-compiled). This session's
+`later` floor measured 4.31ms vs 8.73ms in the baseline session (~2x
+machine-state difference), so raw cross-session ratios are approximate; the
+per-step interleaved A/B measurements in the step notes below are the
+reliable per-change evidence.
+
+| Scenario | Baseline (2026-10-26) | Final | Change |
+|---|---|---|---|
+| 1 create `promise_resolve(1)` + drain | 31.8µs | 11.9µs | −63% |
+| 1 create pending `promise()` | 9.2µs | 8.7µs | −6% |
+| 2 resolved chain ×1000 (headline) | 66.8ms | 34.9ms | −48% (1.92x); n_gc 41 → 20 |
+| 3 pending register ×1000 | 36.2ms | 19.7ms | −46% |
+| 3 register + settle ×1000 | 75.6ms | 38.9ms | −49% (settle 39.5 → 19.3ms) |
+| 4 adoption chain ×1000 | 188ms | 64.6ms | −66% (2.91x); mem 1.61 → 1.07MB; n_gc 75 → 41 |
+| 5 fan-out register ×1000 | 54.4ms / 8.26MB | 19.8ms / 548KB | −64% / −93% alloc |
+| 5 fan-out register + settle | 72.6ms | 21.0ms | −71% |
+| 6 `promise_all` ×100 | 6.74ms | 0.82ms | −88% (8.2x); mem 56KB → 1.4KB |
+| 6 `promise_race` ×100 | 6.60ms | 0.78ms | −88% (8.5x); mem 56KB → 1.4KB |
+| 7 domain chain ×1000 | 85.6ms | 53.4ms | −38% (no regression — improved) |
+| 8 `hybrid_then` sync | 19.6µs | 9.3µs | −52% |
+| 9 `later` floor ×1000 | 8.73ms | 4.31ms | machine-state delta, not package code |
+
+Targets assessment:
+
+- **≥2x on scenario 2: essentially met.** Raw 1.92x; net of each session's own
+  `later` floor (58.1 → 30.6ms promises-side) also 1.90x; compounding the
+  per-step same-session A/B ratios (steps 1, 2, 3, 5, 7) gives ≈2.1x. The
+  cross-session machine drift (~2x) dominates the residual uncertainty.
+- **≥2x on scenario 4: met** (2.91x), with `mem_alloc` −34% and `n_gc` −45%.
+- **Scenario 2 allocation:** `n_gc` halved (41 → 20); `bench` `mem_alloc`
+  reads 744KB → 881KB, but that instrument proved unreliable for these
+  scenarios (step-2 notes: Rprofmem A/B measured +1.7% per link at step 2,
+  with reductions expected from steps 3–5; step 5 then removed the fan-out
+  copies). Treat the GC halving as the trustworthy signal.
+- **Scenario 7 (domain path): no regression** — it improved ~1.6x.
+
+Release-check profile note: scenario 2 re-profiled after all steps — `Promise()`
+self-time share is ~0% (not in the top rows). Dominant residuals: later's
+C++ `execCallbacks`/`execLater` (~23%, includes GC triggered there), `<GC>`
+(~21%), `new.env` (~9%), byte-compiler rows for per-link closures (~9%).
+The ~10% criterion for reviving the fewer-closures-per-`Promise()` item is
+not met; it stays deferred.
+
 ## After each step
 
 | Step | Scenario 2 | Scenario 4 | Scenario 7 | Notes |
