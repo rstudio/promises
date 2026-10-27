@@ -96,7 +96,7 @@ Notes:
   keeps full validation and its `tryCatch`).
 
 | 3 | 39.6ms | 82.0ms | 60.3ms | −41% / −56% / −29% vs baseline; scenario 4 −33% vs step 2 despite a ~1.6x slower `later` floor this session (7.44ms vs 4.4–5.0ms). Scenario 6: `promise_all`/`promise_race` ×100 went 6.74/6.60 → 0.85/0.84ms (−87%), mem 56KB → 1.4KB. Adoption and combinators now subscribe to settlement directly — no throwaway derived promise. See step-3 notes below |
-| 4 | | | | |
+| 4 | 47.3ms | — | — | Target was scenario 1: `promise_resolve(1)` + drain 26.0–26.5 → 14.9–15.2µs (−42%; skips the settlement `later()` task when nobody is listening). Scenario 2 unchanged (delta is machine drift). See step-4 notes below |
 | 5 | | | | |
 | 6 | | | | |
 | 7 | | | | |
@@ -117,6 +117,21 @@ Notes:
   schedules one bare task per input instead of constructing and settling a
   derived promise per input: `promise_all` ×100 6.74 → 0.845ms,
   `promise_race` ×100 6.60 → 0.840ms, `mem_alloc` 56KB → 1.4KB.
+
+### Step 4 measurement notes (2026-10-27)
+
+- Gate the settlement `later()` in `doResolveFinalValue()` on `onFulfilled`
+  handlers being present; `doRejectFinalReason()` is unchanged — its nested
+  `later()` drives the unhandled-rejection message and must always run.
+- Interleaved Rscript A/B vs the pre-step-4 build, 3 rounds: scenario 1
+  `promise_resolve(1)` + drain 26.0–26.5 → 14.9–15.2µs (−42%; one fewer
+  event-loop task per listener-less settlement). Scenario 2: 50.8–54.6 →
+  47.0–48.0ms — the gate adds one cheap check per settlement, so treat the
+  delta as machine drift. (Absolute numbers this session are ~40% slower than
+  the step-3 session for identical code; only same-round comparisons are
+  meaningful.)
+- NEWS bullet added: `later::loop_empty()` may be `TRUE` immediately after
+  `promise_resolve(x)`. Full test suite passes (787 tests).
 
 Targets (net of the `later` floor): ≥2x on scenario 2, ≥2x on scenario 4,
 meaningfully lower `mem_alloc` and `n_gc` on both; no regression >5% on
