@@ -50,6 +50,8 @@
 
 * Promise adoption (resolving a promise with another promise, e.g. a `then()` callback that returns `promise_resolve(x)`) and the `promise_all()`/`promise_race()` combinators no longer build a throwaway derived promise per link or input; they subscribe to settlement directly through the internal promise implementation. In benchmarks, a 1000-link adoption chain is ~2.3x faster than before the performance work, and `promise_all()`/`promise_race()` over 100 resolved promises are ~8x faster. One subtle effect: an adopting promise's listeners now run one event-loop tick earlier, because the throwaway promise's settlement task no longer sits in between.
 
+* A promise that settles with no listeners no longer schedules an event-loop task. `promise_resolve(x)` before any `then()` is attached now skips the empty settlement task entirely; a `then()` attached after settlement schedules its own task, as before. One observable effect: `later::loop_empty()` can now be `TRUE` immediately after `promise_resolve(x)` (previously the empty settlement task kept it `FALSE` until the next event-loop pass).
+
 # promises 1.5.0
 
 ## OpenTelemetry
