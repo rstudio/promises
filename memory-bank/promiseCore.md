@@ -86,11 +86,14 @@ do nothing after the first call to either one.
 
 1. Runs `withVisible(value)`.
 2. If the value `is.promising()`, it calls `private$adopt(as.promise(value))`.
+   The S3 dispatch is gated on `is.object(value)`, so plain (unclassed) values
+   skip `UseMethod` entirely; only hypothetical implicit-class methods (e.g.
+   `is.promising.numeric`) are bypassed, and none exist in the ecosystem.
 3. Otherwise it calls `doResolveFinalValue(value, visible)`.
 
-`doReject()` does the same check: if the reason `is.promising()`, it calls
-`adopt()` on it, so the final state comes from that promise. Otherwise it
-calls `doRejectFinalReason()`.
+`doReject()` does the same check (with the same `is.object()` gate): if the
+reason `is.promising()`, it calls `adopt()` on it, so the final state comes
+from that promise. Otherwise it calls `doRejectFinalReason()`.
 
 `private$adopt(p)` makes this promise follow `p`:
 

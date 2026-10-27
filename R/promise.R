@@ -18,7 +18,11 @@ Promise <- function() {
     value <- val$value
     visible <- val$visible
 
-    if (is.promising(value)) {
+    # is.object() gates the S3 dispatch so plain values (the common case)
+    # skip UseMethod entirely. This only bypasses hypothetical is.promising()
+    # methods on implicit classes (e.g. is.promising.numeric); none exist in
+    # the ecosystem — mirai/future methods are on classed objects.
+    if (is.object(value) && is.promising(value)) {
       private$adopt(as.promise(value))
     } else {
       private$doResolveFinalValue(value, visible)
@@ -26,7 +30,8 @@ Promise <- function() {
   }
 
   private$doReject <- function(reason) {
-    if (is.promising(reason)) {
+    # See the is.object() gate in doResolve().
+    if (is.object(reason) && is.promising(reason)) {
       private$adopt(as.promise(reason))
     } else {
       private$doRejectFinalReason(reason)

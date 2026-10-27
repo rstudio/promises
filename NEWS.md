@@ -52,6 +52,8 @@
 
 * A promise that settles with no listeners no longer schedules an event-loop task. `promise_resolve(x)` before any `then()` is attached now skips the empty settlement task entirely; a `then()` attached after settlement schedules its own task, as before. One observable effect: `later::loop_empty()` can now be `TRUE` immediately after `promise_resolve(x)` (previously the empty settlement task kept it `FALSE` until the next event-loop pass).
 
+* Promise settlement with an ordinary (unclassed) value no longer pays for the `is.promising()` S3 dispatch: the check in the resolve/reject path is gated on `is.object()`, so plain values skip `UseMethod` entirely. Compatibility note: this bypasses only hypothetical `is.promising()` methods defined on implicit classes (such as an `is.promising.numeric` method); none are known to exist — the mirai and future methods are on classed objects, which still dispatch as before.
+
 # promises 1.5.0
 
 ## OpenTelemetry

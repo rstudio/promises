@@ -99,7 +99,34 @@ Notes:
 | 4 | 47.3ms | — | — | Target was scenario 1: `promise_resolve(1)` + drain 26.0–26.5 → 14.9–15.2µs (−42%; skips the settlement `later()` task when nobody is listening). Scenario 2 unchanged (delta is machine drift). See step-4 notes below |
 | 5 | 35.8ms | 77.7ms | 56.9ms | Target was scenario 5: register 24.6–25.4 → 17.6–20.3ms (−25%), `mem_alloc` 8.27MB → 558KB (−93%). Mechanism differs from the plan — linked-cell prepend, not index assignment; see step-5 notes. All numbers interleaved same-round A/B vs HEAD |
 | 6 | — | — | 62.5ms | Target was scenario 7 (no regression >5%): ≈63.5 → 62.5ms vs HEAD, interleaved 6-round A/B, both orders (noise ±5ms; directionally a small win). Pass-through (identity-wrapped) domain chain ≈ −4%. See step-6 notes below |
-| 7 | | | | |
+| 7 | 29ms | — | — | Target was the settlement path: scenario 1 `promise_resolve(1)` + drain 13.3 → 12.5µs (−6%); scenario 2 min-of-3 × 8 alternating rounds 30–31 → 29ms. `is.promising()` S3 dispatch gated behind `is.object()`. See step-7 notes |
+
+### Step 7 measurement notes (2026-10-27)
+
+- `doResolve()`/`doReject()` now run `is.object(value) && is.promising(value)`:
+  unclassed values (the common case) skip `UseMethod` dispatch. Mechanism
+  micro-benchmark (10k+ itr): `is.promising(1)` ~570–740ns vs
+  `is.object(1) && is.promising(1)` ~0–41ns.
+- Interleaved A/B vs HEAD (both builds as sibling git worktrees).
+  Scenario 1 (`bench::mark`, 10k itr, 11 paired rounds over 2 batches):
+  HEAD 13.24–13.49µs, modified 12.46–12.69µs — non-overlapping, ~−0.8µs
+  (−6%). Scenario 2: fine-grained protocol (short Rscript per round, warmup +
+  min-of-3 `system.time`, 8 alternating rounds): HEAD min 30–31ms, modified
+  29ms — modified faster in every round, ≈ −1.5ms, matching the predicted
+  1000 × ~0.6–1µs. `mem_alloc`/`n_gc` unchanged, as expected.
+- **Measurement caution (matters for step 8):** two `bench::mark` A/B batches
+  on this machine produced tightly-clustered but mutually contradictory
+  scenario 2/3 results (modified +7ms on s2, −5ms on s3, both label-locked
+  across alternating rounds — mechanistically impossible for this change).
+  Long `bench::mark` processes (~40s, `memory = TRUE` profiling) appear to
+  alias with periodic system load. The short-process, warmup + min-of-N
+  protocol above agreed with the mechanism and the scenario 1 result; prefer
+  it for sub-5% effects on this machine.
+- Compat note drafted for the PR description (also in NEWS): behaviour changes
+  only for hypothetical `is.promising()` methods on implicit classes (e.g.
+  `is.promising.numeric`); none exist in the ecosystem — mirai/future methods
+  are on classed objects, which still dispatch normally.
+- Full test suite: 791 passed, 0 failed.
 
 ### Step 6 measurement notes (2026-10-27)
 
