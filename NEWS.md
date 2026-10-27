@@ -44,6 +44,10 @@
   `promise_reject(42)`) on unchanged. Before, it became a `simpleError`.
   (#212)
 
+## Performance improvements
+
+* `then()` chaining is now considerably faster when no promise domain is active: the common path no longer goes through the `promise()` constructor, `tryCatch` setup, or domain machinery, and allocates fewer closures per link. One subtle behavior change on this path: an error thrown by `later::later()` itself (e.g. when the event loop has been destroyed) now propagates to the caller of `then()` instead of silently rejecting the derived promise. `promise_resolve()` and `promise_reject()` also skip the redundant `promise()` constructor.
+
 # promises 1.5.0
 
 ## OpenTelemetry
