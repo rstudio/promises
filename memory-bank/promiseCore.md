@@ -114,13 +114,13 @@ calls `doRejectFinalReason()`.
 ### Settling and scheduling
 
 `doResolveFinalValue()` sets `value`, `visible`, and `state`
-(`"fulfilled"`) right away. When at least one `onFulfilled` handler is
-waiting, it schedules one `later()` task that calls every waiting handler in
-order with `(value, visible)` and clears the list. With no handlers it
-schedules nothing — so `later::loop_empty()` can be `TRUE` immediately after
-`promise_resolve(x)`, and a `then()` attached after settlement schedules its
-own task. `doRejectFinalReason()` always schedules: its nested `later()`
-drives the unhandled-rejection message.
+(`"fulfilled"`) right away. When at least one `onFulfilled` handler is waiting
+(the chain is not `NULL`), it schedules one `later()` task that calls every
+waiting handler in registration order with `(value, visible)` and clears the
+chain. With no handlers it schedules nothing — so `later::loop_empty()` can be
+`TRUE` immediately after `promise_resolve(x)`, and a `then()` attached after
+settlement schedules its own task. `doRejectFinalReason()` always schedules:
+its nested `later()` drives the unhandled-rejection message.
 
 `doRejectFinalReason()` sets `value` and `state` (`"rejected"`), then schedules
 one `later()` task that:
@@ -261,6 +261,16 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
 
 ## Pitfalls
 
+- **Handler lists grow by prepending cells.** Registration uses
+  `private$onFulfilled <- list(f, private$onFulfilled)` (and the `onRejected`
+  twin): O(1) per registration, with handlers stored newest-first.
+  `collect_handlers()` turns the chain into a plain list at settlement and the
+  loops iterate `rev()` to restore registration order. The obvious alternatives
+  lose: `c(chain, list(f))` copies the list every time (quadratic for fan-out —
+  1000 registrations measured ~8MB), and index assignment
+  (`x[[length(x) + 1L]] <- f`) is O(1) only for local lists — on an
+  environment-bound list it duplicates on every write (measured 2x slower than
+  `c()` in place). An empty chain is `NULL`, not `list()`.
 - **Callbacks always run later.** Even for a settled promise, `then()` schedules
   the handler with `later()`. Tests must run the event loop (`wait_for_it()` or
   `later::run_now()`). `tests/testthat/test-ordering.R` pins the exact order
