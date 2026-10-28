@@ -265,6 +265,21 @@ is_false <- function(x) {
 #' @return The value of the resolved promise. An error will be thrown if the
 #'   promise is rejected.
 #'
+#' @section Event loop:
+#' `wait_for()` runs a single event loop, given by `loop`. This must be the
+#' loop that runs the promise's callbacks. If it is not, `wait_for()` waits
+#' indefinitely. The default, [later::current_loop()], is the right choice
+#' whenever you did not create a custom loop yourself. Do not call
+#' `wait_for()` from inside a `later` callback to wait on work that depends
+#' on that callback finishing.
+#'
+#' @section Interrupts:
+#' An interrupt (Esc in RStudio, Ctrl+C in a terminal) means "stop waiting".
+#' It exits `wait_for()` cleanly: the promise stays pending, and its
+#' callbacks stay on the loop and run the next time the loop runs.
+#' `wait_for()` does not cancel the underlying work, because only the creator
+#' of the work knows how to cancel it.
+#'
 #' @examples
 #' # Returns a promise for the sum of e1 + e2, with a 1 sec delay
 #' slowly_add <- function(e1, e2) {

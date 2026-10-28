@@ -10,7 +10,7 @@ wait_for(promise, loop = later::current_loop())
 \item{promise}{A promise object. The object can be in any state.}
 
 \item{loop}{the \pkg{later} loop on which the promise has been scheduled.
-Defaults to \code{\link[later:create_loop]{later::current_loop()}}.}
+Defaults to \code{\link[later:current_loop]{later::current_loop()}}.}
 }
 \value{
 The value of the resolved promise. An error will be thrown if the
@@ -20,6 +20,25 @@ promise is rejected.
 Synchronizes a promise by waiting for it to complete and then retrieving its
 value.
 }
+\section{Event loop}{
+
+\code{wait_for()} runs a single event loop, given by \code{loop}. This must be the
+loop that runs the promise's callbacks. If it is not, \code{wait_for()} waits
+indefinitely. The default, \code{\link[later:current_loop]{later::current_loop()}}, is the right choice
+whenever you did not create a custom loop yourself. Do not call
+\code{wait_for()} from inside a \code{later} callback to wait on work that depends
+on that callback finishing.
+}
+
+\section{Interrupts}{
+
+An interrupt (Esc in RStudio, Ctrl+C in a terminal) means "stop waiting".
+It exits \code{wait_for()} cleanly: the promise stays pending, and its
+callbacks stay on the loop and run the next time the loop runs.
+\code{wait_for()} does not cancel the underlying work, because only the creator
+of the work knows how to cancel it.
+}
+
 \examples{
 # Returns a promise for the sum of e1 + e2, with a 1 sec delay
 slowly_add <- function(e1, e2) {
