@@ -299,6 +299,42 @@ describe("Promise domains", {
     expect_identical(test_env$activations[1], "x=1")
     expect_identical(test_env$activations[2], "x=2")
   })
+
+  it("calls domain onError for async callback errors (signal-time semantics)", {
+    # Pins the semantics Shiny's createStackTracePromiseDomain relies on:
+    # callbacks are registered under a domain, but drained at top level with
+    # NO domain active. onError must still fire, because the domain is
+    # re-entered around the callback before the error is signaled.
+    errors <- list()
+    d <- new_promise_domain(
+      onError = function(e) {
+        errors[[length(errors) + 1L]] <<- e
+      }
+    )
+
+    with_promise_domain(d, {
+      promise_resolve(TRUE) |>
+        then(\(x) stop("fulfilled boom"))
+    }) |>
+      squelch_unhandled_promise_error()
+
+    with_promise_domain(d, {
+      promise_reject("a reason") |>
+        catch(\(reason) stop("rejected boom"))
+    }) |>
+      squelch_unhandled_promise_error()
+
+    # onError fires at signal time, not at registration time
+    expect_length(errors, 0L)
+
+    # Drain at top level, with no promise domain active
+    expect_null(current_promise_domain())
+    wait_for_it()
+
+    expect_length(errors, 2L)
+    expect_equal(conditionMessage(errors[[1]]), "fulfilled boom")
+    expect_equal(conditionMessage(errors[[2]]), "rejected boom")
+  })
 })
 
 test_that("a NULL domain nested in another domain keeps the outer domain", {
