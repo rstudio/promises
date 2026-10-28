@@ -13,6 +13,9 @@
   Asynchronous or synchronous
   [`then()`](https://rstudio.github.io/promises/dev/reference/then.md)
 
+- [`wait_for()`](https://rstudio.github.io/promises/dev/reference/wait_for.md)
+  : Wait for a Promise
+
 - [`` `%...>%` ``](https://rstudio.github.io/promises/dev/reference/pipes.md)
   [`` `%...T>%` ``](https://rstudio.github.io/promises/dev/reference/pipes.md)
   [`` `%...!%` ``](https://rstudio.github.io/promises/dev/reference/pipes.md)

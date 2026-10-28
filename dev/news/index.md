@@ -2,6 +2,15 @@
 
 ## promises (development version)
 
+### New features
+
+- New
+  [`wait_for()`](https://rstudio.github.io/promises/dev/reference/wait_for.md)
+  synchronizes a promise by blocking until it resolves or rejects, then
+  returns the value or raises the error. Set `timeout` to stop waiting
+  after that many seconds.
+  ([\#190](https://github.com/rstudio/promises/issues/190))
+
 ### Bug fixes
 
 - Primitive functions such as `sum` and `abs` now receive the value when

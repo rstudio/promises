@@ -57,6 +57,10 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="promises-development-version">promises (development version)<a class="anchor" aria-label="anchor" href="#promises-development-version"></a></h2>
 <div class="section level3">
+<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<ul><li>New <code><a href="../reference/wait_for.html">wait_for()</a></code> synchronizes a promise by blocking until it resolves or rejects, then returns the value or raises the error. Set <code>timeout</code> to stop waiting after that many seconds. (<a href="https://github.com/rstudio/promises/issues/190" class="external-link">#190</a>)</li>
+</ul></div>
+<div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
 <ul><li><p>Primitive functions such as <code>sum</code> and <code>abs</code> now receive the value when used as <code><a href="../reference/then.html">then()</a></code>, <code><a href="../reference/then.html">catch()</a></code>, or <code><a href="../reference/hybrid_then.html">hybrid_then()</a></code> callbacks. Before, <code><a href="https://rdrr.io/r/base/formals.html" class="external-link">formals()</a></code> returned <code>NULL</code> for them, so they were called with no arguments. (<a href="https://github.com/rstudio/promises/issues/212" class="external-link">#212</a>)</p></li>
 <li><p>Calling <code>with_promise_domain(NULL, expr)</code> inside another promise domain no longer breaks <code><a href="../reference/then.html">then()</a></code> calls made in <code>expr</code>; the outer domain stays active. (<a href="https://github.com/rstudio/promises/issues/212" class="external-link">#212</a>)</p></li>

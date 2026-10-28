@@ -22,16 +22,17 @@ practices (devtools, roxygen2, testthat, pkgdown).
 - `spelling::spell_check_test(vignettes = TRUE, error = TRUE, skip_on_cran = TRUE)` -
   Check spelling
 
-**Test Helpers** (`tests/testthat/helper.R`): - `wait_for_it(p)` - Block
-until all pending later tasks execute; optionally wait for promise `p`
-to resolve/reject - `extract(promise)` - Block until promise resolves
-and return value (or throw error if rejected) - `ext_promise()` - Create
-externally-controllable promise for testing (returns list with
-`promise`, `resolve`, `reject`, `status`) -
-`expect_assertions(code, n_expected)` - Run `code` and assert it
-produces exactly `n_expected` testthat expectations (useful with async
-tests) - `resolve_later(value, delaySecs)` - Create a promise that
-resolves with `value` after a delay -
+To get a promise’s value in a test, use the package’s `wait_for(p)`; it
+blocks until `p` settles and returns the value or throws the rejection.
+
+**Test Helpers** (`tests/testthat/helper.R`): - `wait_for_all(p)` -
+Block until all pending later tasks execute; optionally wait for promise
+`p` to resolve/reject - `ext_promise()` - Create externally-controllable
+promise for testing (returns list with `promise`, `resolve`, `reject`,
+`status`) - `expect_assertions(code, n_expected)` - Run `code` and
+assert it produces exactly `n_expected` testthat expectations (useful
+with async tests) - `resolve_later(value, delaySecs)` - Create a promise
+that resolves with `value` after a delay -
 `squelch_unhandled_promise_error(promise)` - Suppress “Unhandled promise
 error” warnings (but rethrow test failures) -
 `create_counting_domain(trackFinally)` - Promise domain that counts
