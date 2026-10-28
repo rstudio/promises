@@ -37,13 +37,14 @@ All callbacks run later, through `later::later()`, never at the moment you call
   - `resolve()`, `reject()` - internal stubs that only exist for docs; they
     always throw.
 - `R/methods.R` - `format.promise()` and `print.promise()`.
+- `R/wait-for.R` - `wait_for()`, the public blocking wait.
 - `R/domains.R` - package-level `tryCatch()` override and
   `promiseDomain$onThen()`, used by `Promise()` (see `domains.md`).
 - Tests: `tests/testthat/test-aplus-2-1.R`, `test-aplus-2-2.R`,
   `test-aplus-2-3.R` (Promises/A+ spec), `test-methods.R`, `test-visibility.R`,
-  `test-ordering.R`, `test-zzz-future_promise.R`.
-- Test helpers: `tests/testthat/helper.R` (`ext_promise()`, `wait_for_it()`,
-  `extract()`, `squelch_unhandled_promise_error()`).
+  `test-ordering.R`, `test-wait-for.R`, `test-zzz-future_promise.R`.
+- Test helpers: `tests/testthat/helper.R` (`ext_promise()`, `wait_for_all()`,
+  `squelch_unhandled_promise_error()`).
 
 ## How it works
 
@@ -218,6 +219,28 @@ survives every mix of `then`, `catch`, and `finally`.
   environment, so setting an attribute on the local `x` changes the shared
   object. Comments in the code explain why polling is still needed.
 
+### wait_for()
+
+`wait_for(promise, ..., timeout = Inf, loop = later::current_loop())` accepts
+anything `is.promising()` and converts it with `as.promise()`. `loop` must be
+named (`check_dots()`). It calls `later::run_now(remaining, loop = loop)` until
+the inner object's `status()` is no longer `"pending"`. `run_now()` returns
+after *any* ready callback runs, not when this promise settles, so the loop
+re-checks the status and the time left on every pass. The deadline is
+`as.numeric(Sys.time()) + timeout` (plain seconds; `Inf` stays `Inf`). When
+it passes, `wait_for()` throws class `promises_timeout` and leaves the promise
+pending. It then reads `private$value` and `private$visible` through
+`$.__enclos_env__$private` (the same route `adopt()` uses). On rejection it
+sets `private$rejectionHandled <- TRUE` before `stop(private$value)`, so the
+caller gets the error once and no "Unhandled promise error" line is printed
+later. A non-condition reason such as `42` becomes a `simpleError` with that
+message.
+
+It returns as soon as the state changes. `doResolveFinalValue()` and
+`doRejectFinalReason()` set the state and *then* schedule the callback that
+runs handlers, so that callback (and anything chained off the promise) is
+still on the loop when `wait_for()` returns.
+
 ### Printing
 
 `format.promise()` reads the `promise_impl` attribute and calls its `format()`.
@@ -226,8 +249,26 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
 
 ## Pitfalls
 
+- **`wait_for()` can only stop the unhandled message if it runs first.** The
+  message is printed two ticks after rejection. If the loop is drained (for
+  example by `wait_for_all()`) before `wait_for()` is called, the message is
+  already out. The state is set right away, so a rejected promise can be
+  passed to `wait_for()` without running the loop first.
+- **An interrupt inside a callback can strand a chain.** `run_now()` removes
+  a callback from the queue before running it. If Ctrl+C lands mid-callback
+  (including the `lapply()` over handlers in `doResolveFinalValue()` /
+  `doRejectFinalReason()`), the rest of it never runs and dependent promises
+  stay pending. The `wait_for()` docs say this; don't promise more.
+- **`wait_for()` must run the loop that owns the promise.** Callbacks go to
+  the loop that was current when they were scheduled. Waiting on another loop
+  blocks until `timeout`, which is forever by default.
+- **Do not subtract `POSIXct` values for the deadline.** `d - Sys.time()` is a
+  `difftime` whose units R picks by size ("days" for 2 days), and it is ~10x
+  slower. Convert with `as.numeric()` first. `proc.time()[["elapsed"]]` is not
+  a steadier clock; R builds it from the same wall clock as `Sys.time()`.
+
 - **Callbacks always run later.** Even for a settled promise, `then()` schedules
-  the handler with `later()`. Tests must run the event loop (`wait_for_it()` or
+  the handler with `later()`. Tests must run the event loop (`wait_for_all()` or
   `later::run_now()`). `tests/testthat/test-ordering.R` pins the exact order
   for two parallel chains.
 - **Rejecting with a promise follows that promise.** `R/promise.R`

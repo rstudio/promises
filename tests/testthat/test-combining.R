@@ -7,7 +7,7 @@ describe("promise_all", {
     c <- resolve_later(3, 0.1)
 
     x <- promise_all(.list = list(a = a, b = b, c = c))
-    expect_identical(extract(x), list(a = 1, b = 2, c = 3))
+    expect_identical(wait_for(x), list(a = 1, b = 2, c = 3))
   })
 
   it("Handles NULLs correctly", {
@@ -16,14 +16,14 @@ describe("promise_all", {
       promise_resolve(NULL),
       promise_resolve(NULL)
     )
-    expect_identical(extract(x), list(NULL, NULL, NULL))
+    expect_identical(wait_for(x), list(NULL, NULL, NULL))
 
     x <- promise_all(
       a = promise_resolve(NULL),
       b = promise_resolve(NULL),
       c = promise_resolve(NULL)
     )
-    expect_identical(extract(x), list(a = NULL, b = NULL, c = NULL))
+    expect_identical(wait_for(x), list(a = NULL, b = NULL, c = NULL))
   })
 
   it("handles duplicate names correctly", {
@@ -32,6 +32,6 @@ describe("promise_all", {
     z <- resolve_later(3, 0.1)
 
     x <- promise_all(.list = list(a = x, a = y, a = z))
-    expect_identical(extract(x), list(a = 1, a = 2, a = 3))
+    expect_identical(wait_for(x), list(a = 1, a = 2, a = 3))
   })
 })

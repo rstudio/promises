@@ -43,6 +43,9 @@ description: "Map of how promises fits together: the promise object, chaining, d
   - If `expr` evaluates to a value, executes `on_success`/`on_failure` callbacks synchronously (same tick)
   - Useful for functions that need to work with both sync and async inputs (e.g., plumber2)
 
+**Blocking Wait (`R/wait-for.R`):**
+- `wait_for()` - Run a later loop until a promise settles, then return its value or re-throw its rejection
+
 **Combining Operations (`R/utils.R`):**
 - `promise_all()` - Wait for all promises to complete
 - `promise_race()` - Wait for first promise to complete
@@ -78,7 +81,7 @@ description: "Map of how promises fits together: the promise object, chaining, d
 
 ## Package Structure
 Standard R package layout:
-- `R/` - Core R source code (15 files; includes `hybrid-then.R`, `deprecated.R`, `pipe.R`, `first_type.R`, `is_something.R`, `promises-package.R`, and standalone imports in `staticimports.R` / `import-standalone-defer.R`)
+- `R/` - Core R source code (16 files; includes `hybrid-then.R`, `deprecated.R`, `pipe.R`, `first_type.R`, `is_something.R`, `promises-package.R`, and standalone imports in `staticimports.R` / `import-standalone-defer.R`)
 - `tests/testthat/` - Unit tests following testthat 3.0 conventions; includes Promises/A+ spec tests (`test-aplus-*.R`), legacy behavior tests (`test-legacy-*.R`), and `_snaps/` snapshots
 - `vignettes/` - Comprehensive documentation with 9 vignettes covering motivation, usage patterns, and case studies
 - `inst/` - Only `WORDLIST` for spelling; the C++ `promise_task.cpp` template / interface test was moved to the `later` package (#204)
@@ -94,7 +97,7 @@ Standard R package layout:
 
 | R file(s) | Doc |
 |---|---|
-| `R/promise.R`, `R/methods.R` | `promiseCore.md` |
+| `R/promise.R`, `R/methods.R`, `R/wait-for.R` | `promiseCore.md` |
 | `R/then.R`, `R/hybrid-then.R`, `R/pipe.R`, `R/deprecated.R` | `thenAndHybrid.md` |
 | `R/domains.R` | `domains.md` |
 | `R/utils.R` | `combining.md` |

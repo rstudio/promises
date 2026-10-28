@@ -38,7 +38,7 @@ test_that("hybrid_then() handles asynchronous values with on_success", {
       on_success = \(x) x + 8
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(50)
+    result |> wait_for() |> expect_equal(50)
   })
 })
 
@@ -46,7 +46,7 @@ test_that("hybrid_then() handles asynchronous values without callbacks", {
   expect_assertions(n = 2, {
     result <- hybrid_then(promise_resolve(42))
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(42)
+    result |> wait_for() |> expect_equal(42)
   })
 })
 
@@ -60,7 +60,7 @@ test_that("hybrid_then() handles asynchronous errors with on_failure", {
       }
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal("recovered")
+    result |> wait_for() |> expect_equal("recovered")
   })
 })
 
@@ -72,7 +72,7 @@ test_that("hybrid_then() propagates asynchronous errors without on_failure", {
       catch(\(err) {
         expect_match(err$message, "async error")
       }) |>
-      wait_for_it()
+      wait_for()
   })
 })
 
@@ -119,7 +119,7 @@ test_that("hybrid_then() with tee=TRUE preserves asynchronous values", {
       tee = TRUE
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(42)
+    result |> wait_for() |> expect_equal(42)
     expect_equal(counter, 1)
   })
 })
@@ -140,7 +140,7 @@ test_that("hybrid_then() with tee=TRUE preserves asynchronous errors", {
       catch(\(err) {
         expect_match(err$message, "async error")
       }) |>
-      wait_for_it()
+      wait_for()
     expect_equal(counter, 1)
   })
 })
@@ -204,7 +204,7 @@ test_that("hybrid_then() handles both callbacks with asynchronous success", {
   )
 
   expect_true(is.promise(result))
-  result |> extract() |> expect_equal(84)
+  result |> wait_for() |> expect_equal(84)
   expect_true(success_called)
   expect_false(failure_called)
 })
@@ -226,7 +226,7 @@ test_that("hybrid_then() handles both callbacks with asynchronous failure", {
   )
 
   expect_true(is.promise(result))
-  result |> extract() |> expect_equal("recovered")
+  result |> wait_for() |> expect_equal("recovered")
   expect_false(success_called)
   expect_true(failure_called)
 })
@@ -238,7 +238,7 @@ test_that("hybrid_then() can chain synchronous and asynchronous operations", {
     on_success = \(x) promise_resolve(x + 8)
   )
   expect_true(is.promise(result1))
-  result1 |> extract() |> expect_equal(50)
+  result1 |> wait_for() |> expect_equal(50)
 
   # Start with async, callback returns sync
   result2 <- hybrid_then(
@@ -246,7 +246,7 @@ test_that("hybrid_then() can chain synchronous and asynchronous operations", {
     on_success = \(x) x + 8
   )
   expect_true(is.promise(result2))
-  result2 |> extract() |> expect_equal(50)
+  result2 |> wait_for() |> expect_equal(50)
 })
 
 test_that("hybrid_then() validates tee parameter", {
@@ -293,7 +293,7 @@ test_that("hybrid_then() example from documentation works", {
       async_called <<- TRUE
       expect_equal(x, 50)
     }) |>
-    wait_for_it()
+    wait_for()
   expect_true(async_called)
 })
 
@@ -318,7 +318,7 @@ test_that("hybrid_then() on_success callback can throw errors asynchronously", {
       catch(\(err) {
         expect_match(err$message, "callback error")
       }) |>
-      wait_for_it()
+      wait_for()
   })
 })
 
@@ -343,7 +343,7 @@ test_that("hybrid_then() on_failure callback can throw errors asynchronously", {
       catch(\(err) {
         expect_match(err$message, "callback error")
       }) |>
-      wait_for_it()
+      wait_for()
   })
 })
 
@@ -379,7 +379,7 @@ test_that("hybrid_then() with tee=TRUE and on_success that throws (async)", {
       catch(\(err) {
         expect_match(err$message, "callback error")
       }) |>
-      wait_for_it()
+      wait_for()
     expect_equal(counter, 1)
   })
 })
@@ -399,7 +399,7 @@ test_that("hybrid_then() can chain multiple hybrid_then calls asynchronously", {
       hybrid_then(on_success = \(x) x * 2) |>
       hybrid_then(on_success = \(x) x - 1)
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(3)
+    result |> wait_for() |> expect_equal(3)
   })
 })
 
@@ -410,7 +410,7 @@ test_that("hybrid_then() can chain with mix of sync and async results", {
       hybrid_then(on_success = \(x) x * 2) |>
       hybrid_then(on_success = \(x) promise_resolve(x - 1))
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(3)
+    result |> wait_for() |> expect_equal(3)
   })
 })
 
@@ -445,7 +445,7 @@ test_that("hybrid_then() handles on_success returning a promise (sync to async)"
       on_success = \(x) promise_resolve(x * 2)
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(84)
+    result |> wait_for() |> expect_equal(84)
   })
 })
 
@@ -456,7 +456,7 @@ test_that("hybrid_then() handles on_failure returning a promise (sync to async)"
       on_failure = \(err) promise_resolve("recovered via promise")
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal("recovered via promise")
+    result |> wait_for() |> expect_equal("recovered via promise")
   })
 })
 
@@ -475,7 +475,7 @@ test_that("hybrid_then() with only on_failure and asynchronous success", {
       on_failure = \(err) "should not be called"
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(42)
+    result |> wait_for() |> expect_equal(42)
   })
 })
 
@@ -539,7 +539,7 @@ test_that("hybrid_then() on_failure does not handle on_success errors", {
     on_success = \(x) stop("success boom"),
     on_failure = on_failure
   ) |>
-    extract() |>
+    wait_for() |>
     expect_error("success boom")
   expect_identical(failure_calls, 0)
 })
@@ -561,13 +561,13 @@ test_that("hybrid_then(tee = TRUE) ignores a promise returned by the callback", 
 
   # Async input: the result does not wait for or follow the returned promise
   hybrid_then(promise_resolve(1), never, tee = TRUE) |>
-    extract() |>
+    wait_for() |>
     expect_identical(1)
   hybrid_then(
     promise_resolve(1),
     \(x) squelch_unhandled_promise_error(rejects()),
     tee = TRUE
   ) |>
-    extract() |>
+    wait_for() |>
     expect_identical(1)
 })

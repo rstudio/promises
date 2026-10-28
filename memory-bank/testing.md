@@ -29,11 +29,11 @@ Promises/A+ spec sections.
 - `tests/testthat/test-zzz-future_promise.R` - slow timing tests for
   `future_promise()`.
 - `tests/testthat/test-otel.R` - OpenTelemetry; see `otel.md`.
-- `tests/testthat/_snaps/` - `hybrid-then.md`, `otel.md`, `then.md`.
+- `tests/testthat/_snaps/` - `hybrid-then.md`, `otel.md`, `then.md`, `wait-for.md`.
 - Other files: `test-combining.R`, `test-domains.R`, `test-hybrid-then.R`,
   `test-expo-delay.R` (the 2 second `ExpoDelay` cap),
   `test-hybrid-then-visibility.R`, `test-methods.R`, `test-ordering.R`,
-  `test-promise-map.R`, `test-then.R`, `test-visibility.R`.
+  `test-promise-map.R`, `test-then.R`, `test-visibility.R`, `test-wait-for.R`.
 
 ## Helpers in helper.R
 
@@ -41,17 +41,27 @@ Promises/A+ spec sections.
 |---|---|
 | `on_ci` | `TRUE` when env var `CI` is true. Used for longer timeouts. |
 | `ext_promise()` | Makes a pending promise and returns `list(promise, resolve, reject, status)`, so the test can settle it from outside. `status` is the internal `status()` function, read from `attr(p, "promise_impl")`. |
-| `wait_for_it(p = NULL, timeout = if (on_ci) 60 else 30)` | Runs `later::run_now(0.1)` until `later::loop_empty()` is `TRUE`. Stops with "Waited too long" after `timeout` seconds. If `p` is given and rejects, re-throws the reason after the loop is empty, inside `withRestarts(..., continue_test = )`. |
-| `extract(promise)` | `then()` to store the value, then `wait_for_it()`. Returns the value or throws the rejection. |
+| `wait_for_all(p = NULL, timeout = if (on_ci) 60 else 30)` | Runs `later::run_now(0.1)` until `later::loop_empty()` is `TRUE`. Stops with "Waited too long" after `timeout` seconds. If `p` is given and rejects, re-throws the reason after the loop is empty, inside `withRestarts(..., continue_test = )`. |
 | `resolve_later(value, delaySecs)` | Promise that resolves to `value` after `delaySecs` using `later::later()`. |
 | `squelch_unhandled_promise_error(promise)` | Adds a `catch()` so a rejection does not print "Unhandled promise error". Re-throws testthat `failure` conditions so failed expectations still fail. |
 | `create_counting_domain(trackFinally = FALSE)` | A promise domain that counts, in `pd$counts`, how many callbacks were bound (`*Bound`), called (`*Called`), and are running now (`*Active`). With `trackFinally = TRUE` it also sets `wrapOnFinally` and `onFinally*` counters; `onFinallyActive` goes up while the callback runs and back down after. |
 | `expect_assertions(code, n_expected)` | Counts `expectation_success` and `expectation_failure` signals while running `code`, then checks the count. Proves that expectations inside callbacks actually ran. |
-| `.GlobalEnv$.Last` | Set to call `wait_for_it()` when R exits, so stray unhandled rejections still print. |
+| `.GlobalEnv$.Last` | Set to call `wait_for_all()` when R exits, so stray unhandled rejections still print. |
 
 ## Driving the event loop
 
-- `wait_for_it()` and `extract()` only run the **global** later loop.
+- To wait on a promise, use the package's own `wait_for(p)`. It stops as
+  soon as `p` settles, so other callbacks may still be queued. Use
+  `wait_for_all()` instead when:
+  - the promise is meant to stay pending and the test needs the loop drained
+    first (to show no handler ran). To only check that it does not settle,
+    use `expect_error(wait_for(p, timeout = 0.1), class = "promises_timeout")`;
+    `wait_for()` without `timeout` would block forever;
+  - the test checks for (or against) the "Unhandled promise error" message,
+    which only prints after the loop runs on;
+  - there is no promise to wait on, only queued callbacks.
+- `wait_for_all()` only runs the **global** later loop. `wait_for()` runs
+  `later::current_loop()` unless given `loop =`.
 - A single `later::run_now()` runs everything that is ready, including
   callbacks scheduled by those callbacks with no delay. `test-ordering.R`
   depends on this: two chains of two `then()` calls each finish in one
@@ -60,12 +70,12 @@ Promises/A+ spec sections.
   ([rstudio/promises#151](https://github.com/rstudio/promises/issues/151)).
 - Expectations inside callbacks run on a later tick. If the loop is never
   run, the expectation never runs and the test passes silently. Use
-  `extract()`, `wait_for_it(p)`, or `expect_assertions()` to make sure they
+  `wait_for()`, `wait_for_all(p)`, or `expect_assertions()` to make sure they
   run.
 - Unhandled rejections print "Unhandled promise error: ..." to `stderr` two
   ticks after rejection (see `doRejectFinalReason()` in `R/promise.R`). Tests
   for this use `capture.output(type = "message", ...)`
-  (`test-methods.R`, `test-zzz-future_promise.R`).
+  (`test-methods.R`, `test-wait-for.R`, `test-zzz-future_promise.R`).
 
 ## Promises/A+ and legacy tests
 
@@ -135,7 +145,7 @@ devtools::check()                                  # full R CMD check
 - **`ext_promise()$status` depends on an internal detail**: the
   `"promise_impl"` attribute on the public promise object
   (`promise()` in `R/promise.R`). If that changes, this helper breaks.
-- **`wait_for_it(p)` re-throws only after the loop is empty**, and only for
+- **`wait_for_all(p)` re-throws only after the loop is empty**, and only for
   `p`. Other rejected promises just print "Unhandled promise error" and do not
   fail the test.
 - **`squelch_unhandled_promise_error()` must not hide test failures.** It

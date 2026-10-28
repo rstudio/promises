@@ -1,5 +1,11 @@
 # promises (development version)
 
+## New features
+
+* New `wait_for()` synchronizes a promise by blocking until it resolves or
+  rejects, then returns the value or raises the error. Set `timeout` to stop
+  waiting after that many seconds. (#190)
+
 ## Bug fixes
 
 * Primitive functions such as `sum` and `abs` now receive the value when

@@ -135,7 +135,7 @@ tracer, so callers must pass one. Shiny passes its own cached tracer
 - Spans are collected with `records <- otelsdk::with_otel_record({ ... })`,
   then checked by name: `records$traces[["name"]]`, `$span_id`, `$parent`.
   Promises must be settled inside the `with_otel_record()` block (call
-  `wait_for_it(p)` or `extract(p)` there), or the spans are not recorded.
+  `wait_for_all(p)` or `wait_for(p)` there), or the spans are not recorded.
 - Parent checks such as
   `expect_equal(records$traces[["child"]]$parent, records$traces[["outer"]]$span_id)`
   are the main way to prove the handoff works.

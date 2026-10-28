@@ -87,7 +87,7 @@ with_otel_promise_domain({
           tracer = otel::get_tracer()
         )
         expect_true(is.promising(result))
-        expect_equal(extract(result), 42)
+        expect_equal(wait_for(result), 42)
       })
 
       it("handles promise results", {
@@ -101,7 +101,7 @@ with_otel_promise_domain({
           )
 
           expect_true(is.promising(result))
-          expect_equal(extract(result), 42)
+          expect_equal(wait_for(result), 42)
         })
         expect_true(!is.null(records$traces[["test_span2"]]))
       })
@@ -129,7 +129,7 @@ with_otel_promise_domain({
             promise_reject("async boom"),
             tracer = otel::get_tracer()
           ) |>
-            extract() |>
+            wait_for() |>
             expect_error("async boom")
         })
         span <- records$traces[["test_span_async_error"]]
@@ -145,7 +145,7 @@ with_otel_promise_domain({
             tracer = otel::get_tracer()
           ) |>
             catch(\(reason) reason) |>
-            extract() |>
+            wait_for() |>
             expect_identical(42)
         })
         span <- records$traces[["test_span_value_error"]]
@@ -165,7 +165,7 @@ with_otel_promise_domain({
           })
         })
 
-        result <- extract(p)
+        result <- wait_for(p)
         expect_equal(result, 84)
 
         # Verify the counting domain was active
@@ -196,7 +196,7 @@ with_otel_promise_domain({
                 })
               })
           })
-          wait_for_it(p)
+          wait_for(p)
           p
         })
         expect_true(is.promising(p))
@@ -285,8 +285,8 @@ with_otel_promise_domain({
         })
 
         # Wait for both chains to complete
-        result1 <- extract(chain1)
-        result2 <- extract(chain2)
+        result1 <- wait_for(chain1)
+        result2 <- wait_for(chain2)
 
         # Verify final recording
         expect_equal(result1, "init1_step11_step12_step13_final1")
@@ -420,12 +420,12 @@ describe("local_otel_promise_domain()", {
           })
       })
 
-      wait_for_it(result)
+      wait_for(result)
       result
     })
 
     expect_true(is.promising(result))
-    expect_equal(extract(result), 42)
+    expect_equal(wait_for(result), 42)
     expect_true(!is.null(records$traces[["outer_test_span"]]))
     expect_true(!is.null(records$traces[["inner_test_span"]]))
     expect_equal(
@@ -617,12 +617,12 @@ describe("with_otel_promise_domain() idempotency", {
         })
       })
 
-      wait_for_it(result)
+      wait_for(result)
       result
     })
 
     expect_true(is.promising(result))
-    expect_equal(extract(result), 84)
+    expect_equal(wait_for(result), 84)
 
     # Verify spans were created correctly
     expect_true(!is.null(records$traces[["outer_span"]]))

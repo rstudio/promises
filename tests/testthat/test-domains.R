@@ -29,7 +29,7 @@ describe("Promise domains", {
       })
 
     expect_identical(cd$counts$onFulfilledBound, 2L)
-    p |> wait_for_it()
+    p |> wait_for()
 
     with_promise_domain(cd, {
       p <- async_true() |>
@@ -42,7 +42,7 @@ describe("Promise domains", {
       expect_identical(cd$counts$onFulfilledBound, 2L)
       expect_identical(cd$counts$onRejectedBound, 0L)
 
-      p |> wait_for_it()
+      p |> wait_for()
     })
 
     expect_identical(cd$counts$onFulfilledBound, 2L)
@@ -67,7 +67,7 @@ describe("Promise domains", {
     expect_true(is.null(current_promise_domain()))
     expect_identical(cd$counts$onFulfilledCalled, 2L)
 
-    p |> wait_for_it()
+    p |> wait_for()
   })
 
   it("pass finally binding to fulfill/reject by default", {
@@ -82,7 +82,7 @@ describe("Promise domains", {
 
       expect_identical(cd1$counts$onFulfilledBound, 1L)
       expect_identical(cd1$counts$onRejectedBound, 1L)
-      p1 |> wait_for_it()
+      p1 |> wait_for()
       expect_identical(cd1$counts$onFulfilledCalled, 1L)
       expect_identical(cd1$counts$onRejectedCalled, 0L)
     })
@@ -100,7 +100,7 @@ describe("Promise domains", {
 
     expect_identical(cd2$counts$onFulfilledBound, 1L)
     expect_identical(cd2$counts$onRejectedBound, 1L)
-    p2 |> wait_for_it()
+    p2 |> wait_for()
     expect_identical(cd2$counts$onFulfilledCalled, 0L)
     expect_identical(cd2$counts$onRejectedCalled, 1L)
   })
@@ -119,7 +119,7 @@ describe("Promise domains", {
       expect_identical(cd1$counts$onFinallyBound, 1L)
       expect_identical(cd1$counts$onFulfilledBound, 0L)
       expect_identical(cd1$counts$onRejectedBound, 0L)
-      p1 |> wait_for_it()
+      p1 |> wait_for()
       expect_identical(cd1$counts$onFinallyCalled, 1L)
       expect_identical(cd1$counts$onFulfilledCalled, 0L)
       expect_identical(cd1$counts$onRejectedCalled, 0L)
@@ -141,7 +141,7 @@ describe("Promise domains", {
     expect_identical(cd2$counts$onFinallyBound, 1L)
     expect_identical(cd2$counts$onFulfilledBound, 0L)
     expect_identical(cd2$counts$onRejectedBound, 0L)
-    p2 |> wait_for_it()
+    p2 |> wait_for()
     expect_identical(cd2$counts$onFinallyCalled, 1L)
     expect_identical(cd2$counts$onFulfilledCalled, 0L)
     expect_identical(cd2$counts$onRejectedCalled, 0L)
@@ -159,7 +159,7 @@ describe("Promise domains", {
         then(\(x) {
           expect_identical(x, as.symbol("foo"))
         }) |>
-        wait_for_it()
+        wait_for()
     })
   })
 
@@ -175,7 +175,7 @@ describe("Promise domains", {
         then(\() {
           x <<- x + 1L
         }) |>
-        wait_for_it()
+        wait_for()
     })
     expect_identical(x, 2L)
   })
@@ -210,7 +210,7 @@ describe("Promise domains", {
           # 5 (from inside recursive_promise) + 1 (for the current handler)
           expect_identical(cd$counts$onFulfilledCalled, 6L)
         }) |>
-        wait_for_it()
+        wait_for()
     })
 
     cd2 <- create_counting_domain()
@@ -220,10 +220,10 @@ describe("Promise domains", {
         then(\() {
           # This time, none of the ones inside recursive_promise count, since
           # they were bound outside of the influence of cd2 (even though they
-          # are resolved within the influence of cd2, thanks to wait_for_it()).
+          # are resolved within the influence of cd2, thanks to wait_for()).
           expect_identical(cd2$counts$onFulfilledCalled, 1L)
         }) |>
-        wait_for_it()
+        wait_for()
     })
   })
 
@@ -286,7 +286,7 @@ describe("Promise domains", {
             result <<- test_env$x
             test_env$x
           }) |>
-          wait_for_it()
+          wait_for()
       })
     })
 
@@ -309,7 +309,7 @@ test_that("a NULL domain nested in another domain keeps the outer domain", {
     })
   })
   expect_identical(cd$counts$onFulfilledBound, 1L)
-  p |> extract() |> expect_equal(2)
+  p |> wait_for() |> expect_equal(2)
 })
 
 test_that("nested domains each wrap finally with wrapOnFinally", {
@@ -320,7 +320,7 @@ test_that("nested domains each wrap finally with wrapOnFinally", {
       p <- promise_resolve(1) |> finally(\() NULL)
     })
   })
-  p |> wait_for_it()
+  p |> wait_for()
   for (cd in list(cd1, cd2)) {
     expect_identical(cd$counts$onFinallyBound, 1L)
     expect_identical(cd$counts$onFinallyCalled, 1L)
@@ -336,7 +336,7 @@ test_that("a nested domain without wrapOnFinally still sees finally", {
       p <- promise_resolve(1) |> finally(\() NULL)
     })
   })
-  p |> wait_for_it()
+  p |> wait_for()
   expect_identical(inner$counts$onFinallyCalled, 1L)
   expect_identical(outer$counts$onFulfilledCalled, 1L)
 })

@@ -11,12 +11,12 @@ describe("2.2. The `then` Method", {
     it("2.2.1.1. If onFulfilled is not a function, it must be ignored.", {
       # NOTE: This behavior varies; we throw an error
       # p <- promise(\(resolve, reject) resolve(10)) |> then(20)
-      # expect_identical(extract(p), 10)
+      # expect_identical(wait_for(p), 10)
     })
     it("2.2.1.1. If onRejected is not a function, it must be ignored.", {
       # NOTE: This behavior varies; we throw an error
       # p <- promise(\(resolve, reject) reject("foo")) |> then(onRejected = "bar")
-      # expect_error(extract(p), "foo")
+      # expect_error(wait_for(p), "foo")
     })
   })
 
@@ -29,10 +29,10 @@ describe("2.2. The `then` Method", {
         then(function(value) {
           x <<- value
         }) |>
-        wait_for_it()
+        wait_for_all()
       expect_identical(x, NULL)
 
-      p$resolve(10) |> wait_for_it()
+      p$resolve(10) |> wait_for_all()
       expect_identical(x, 10)
     })
     it("2.2.2.2. it must not be called before promise is fulfilled.", {})
@@ -47,11 +47,11 @@ describe("2.2. The `then` Method", {
         then(onRejected = function(reason) {
           x <<- reason
         }) |>
-        wait_for_it()
+        wait_for_all()
       expect_identical(x, NULL)
 
       p$reject(simpleError("boom"))
-      wait_for_it()
+      wait_for_all()
       expect_identical(x, simpleError("boom"))
     })
   })
@@ -63,7 +63,7 @@ describe("2.2. The `then` Method", {
           x <<- value
         })
       expect_identical(x, NULL)
-      p |> wait_for_it()
+      wait_for(p)
       expect_identical(x, TRUE)
     })
   })
@@ -89,10 +89,10 @@ describe("2.2. The `then` Method", {
 
       # str(all_promises)
       p$resolve(cars)
-      promise_all(.list = all_promises) |> wait_for_it()
+      promise_all(.list = all_promises) |> wait_for()
 
       lapply(as.list(results), function(x) {
-        expect_identical(extract(x), cars)
+        expect_identical(wait_for(x), cars)
       })
     })
   })
@@ -112,10 +112,10 @@ describe("2.2. The `then` Method", {
     })
 
     p$reject(simpleError("an error"))
-    promise_all(.list = all_promises) |> wait_for_it()
+    promise_all(.list = all_promises) |> wait_for()
 
     lapply(as.list(results), function(x) {
-      expect_identical(extract(x), simpleError("an error"))
+      expect_identical(wait_for(x), simpleError("an error"))
     })
   })
 
@@ -129,28 +129,28 @@ describe("2.2. The `then` Method", {
 
     it("2.2.7.1. If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x).", {
       p1 <- promise_resolve(TRUE) |> then(\() "foo")
-      expect_identical(extract(p1), "foo")
+      expect_identical(wait_for(p1), "foo")
 
       p2 <- promise_reject("boom") |> catch(\() "bar")
-      expect_identical(extract(p2), "bar")
+      expect_identical(wait_for(p2), "bar")
     })
 
     it("2.2.7.2. If either onFulfilled or onRejected throws an exception e, promise2 must be rejected with e as the reason.", {
       p1 <- promise_resolve(TRUE) |> then(\(e) stop("foo"))
-      expect_error(extract(p1), "^foo$")
+      expect_error(wait_for(p1), "^foo$")
 
       p2 <- promise_reject("boom") |> catch(\(e) stop("bar"))
-      expect_error(extract(p2), "^bar$")
+      expect_error(wait_for(p2), "^bar$")
     })
 
     it("2.2.7.3. If onFulfilled is not a function and promise1 is fulfilled, promise2 must be fulfilled with the same value as promise1.", {
       p <- promise_resolve("baz") |> then()
-      expect_identical(extract(p), "baz")
+      expect_identical(wait_for(p), "baz")
     })
 
     it("2.2.7.4. If onRejected is not a function and promise1 is rejected, promise2 must be rejected with the same reason as promise1.", {
       p <- promise_reject("qux") |> then()
-      expect_error(extract(p), "^qux$")
+      expect_error(wait_for(p), "^qux$")
     })
   })
 })
