@@ -71,7 +71,7 @@ Notes:
 | Step | Scenario 2 | Scenario 4 | Scenario 7 | Notes |
 |---|---|---|---|---|
 | Baseline | 66.8ms | 188ms | 85.6ms | |
-| 1 | | | | |
+| 1 | 51.1ms | 167.7ms | 70.8ms | −23% / −11% / −17% vs baseline; `wrap_callback_reenter` now returns fixed-shape byte-compiled closures with an explicit side, `wrap_with_signature` deleted, `NULL`-domain call-time branch added |
 | 2 | | | | |
 | 3 | | | | |
 | 4 | | | | |
