@@ -35,7 +35,8 @@ Promise <- function() {
   private$adopt <- function(p) {
     # Walk the chain of promises that `p` is waiting on. If it leads back to
     # this promise, nothing in the chain can ever settle.
-    impl <- attr(p, "promise_impl", exact = TRUE)
+    p_impl <- attr(p, "promise_impl", exact = TRUE)
+    impl <- p_impl
     while (!is.null(impl)) {
       if (identical(impl, self)) {
         return(private$doRejectFinalReason(simpleError(
@@ -44,17 +45,26 @@ Promise <- function() {
       }
       impl <- impl$.__enclos_env__$private$following
     }
-    private$following <- attr(p, "promise_impl", exact = TRUE)
+    private$following <- p_impl
 
-    # This then() call doesn't need promise domains; semantically, it doesn't
-    # really exist, as it's just a convenient way to implement the new promise
-    # inhabiting the old promise's corpse.
-    without_promise_domain({
-      p$then(
-        private$doResolve,
-        private$doReject
-      )
-    })
+    if (!is.null(p_impl)) {
+      # This subscription doesn't need promise domains; semantically, it
+      # doesn't really exist, as it's just a convenient way to implement the
+      # new promise inhabiting the old promise's corpse. Nor does it need the
+      # withVisible()/is.promising() re-check in doResolve()/doReject(): a
+      # settled promise's value is always final.
+      p_impl$subscribe(private$doResolveFinalValue, private$doRejectFinalReason)
+    } else {
+      # Third-party as.promise() methods may return a "promise"-classed
+      # object without a promise_impl attribute (the documented shape is just
+      # then/catch/finally); fall back to a full then().
+      without_promise_domain({
+        p$then(
+          private$doResolve,
+          private$doReject
+        )
+      })
+    }
   }
 
   # These "final" versions of resolve/reject are for when we've
@@ -241,6 +251,30 @@ Promise <- function() {
     })
 
     invisible(promise2)
+  }
+
+  # Internal subscription point: registers raw settlement handlers with no
+  # normalization, no domain wrapping, and no derived promise. Handlers must
+  # use the internal calling convention: (value, visible) for fulfillment,
+  # (reason) for rejection. Used by private$adopt() and by
+  # promise_all()/promise_race(), whose callbacks are pure bookkeeping.
+  self$subscribe <- function(onFulfilled, onRejected) {
+    if (private$state == "pending") {
+      private$onFulfilled <- c(private$onFulfilled, list(onFulfilled))
+      private$onRejected <- c(private$onRejected, list(onRejected))
+    } else if (private$state == "fulfilled") {
+      later(function() {
+        onFulfilled(private$value, private$visible)
+      })
+    } else if (private$state == "rejected") {
+      later(function() {
+        private$rejectionHandled <- TRUE
+        onRejected(private$value)
+      })
+    } else {
+      stop("Unexpected state ", private$state)
+    }
+    invisible()
   }
 
   self$catch <- function(onRejected) {
@@ -516,6 +550,23 @@ normalizeOnRejected <- function(onRejected) {
   } else {
     onRejected
   }
+}
+
+# Subscribe to a promise's settlement without creating a derived promise;
+# see Promise()$subscribe() for the handler calling convention. Third-party
+# promises without a promise_impl attribute fall back to a domain-free
+# then(), with the handlers adapted to its normalized convention.
+promise_subscribe <- function(p, onFulfilled, onRejected) {
+  impl <- attr(p, "promise_impl", exact = TRUE)
+  if (!is.null(impl)) {
+    impl$subscribe(onFulfilled, onRejected)
+  } else {
+    without_promise_domain(p$then(
+      function(value, .visible) onFulfilled(value, .visible),
+      function(reason) onRejected(reason)
+    ))
+  }
+  invisible()
 }
 
 # Internal constructor: a Promise() impl plus its public "promise"-classed

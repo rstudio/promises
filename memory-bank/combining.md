@@ -18,7 +18,10 @@ once:
 | `promise_reduce()` | one element at a time | the last `.f` result | `.f` throws or returns a rejected promise |
 
 All four return a promise. All are built only from `promise()`,
-`promise_resolve()`, and `then()`, so the core rules in `promiseCore.md`
+`promise_resolve()`, and `then()` — except that `promise_all()` and
+`promise_race()` attach to their inputs with the internal
+`promise_subscribe()` (no derived promise per input; see
+`promiseCore.md`#subscribe). The core rules in `promiseCore.md`
 apply: callbacks run later, and the first `resolve`/`reject` wins.
 
 ## Key files
@@ -44,7 +47,9 @@ apply: callbacks run later, and the first `resolve`/`reject` wins.
 3. Names must be all set or all empty. A mix throws right away (a real error,
    not a rejected promise): "promise_all expects promise arguments (or list) to
    be either all named or all unnamed".
-4. Inside `promise()`, it calls `then()` on each input in order:
+4. Inside `promise()`, it coerces each input with `as.promise()` and
+   subscribes to it, in order (the callbacks are pure bookkeeping, so they
+   skip domain wrapping):
    - On success, it stores the value with `results[idx] <<- list(value)` (this
      keeps `NULL` values) and counts down. When the count reaches zero it
      resolves with `results`.
@@ -60,10 +65,12 @@ rejections do not print "Unhandled promise error".
 
 ### promise_race(..., .list = NULL)
 
-Uses `.list` or `list(...)` the same way, then inside `promise()` calls
-`then(p, resolve, reject)` on every input. The first input to settle wins. When
-several inputs are already settled, their handlers are queued in input order,
-so the first one in the list wins.
+Uses `.list` or `list(...)` the same way, then inside `promise()` subscribes
+to every input with `function(value, visible) resolve(if (visible) value
+else invisible(value))` and `reject` (equivalent to `then(p, resolve,
+reject)`, without the derived promise). The first input to settle wins. When
+several inputs are already settled, their handlers are queued in input
+order, so the first one in the list wins.
 
 ### promise_map(.x, .f, ...)
 
@@ -101,7 +108,7 @@ promise.
 ## Pitfalls
 
 - **Inputs must be promises.** `promise_all()` and `promise_race()` call
-  `then()` on each element, which calls `as.promise()`. A plain value like `1`
+  `as.promise()` on each element. A plain value like `1`
   makes the result reject with "Don't know how to convert object of class
   numeric into a promise". Wrap plain values in `promise_resolve()`.
 - **Mixed names throw instead of rejecting.** The name check in
