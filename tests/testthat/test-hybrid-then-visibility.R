@@ -141,7 +141,7 @@ test_that("hybrid_then() async with visible promise and on_success returning vis
       on_success = \(x) x + 8
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(50)
+    result |> wait_for() |> expect_equal(50)
   })
 })
 
@@ -152,7 +152,7 @@ test_that("hybrid_then() async with visible promise and on_success returning inv
       on_success = \(x) invisible(x + 8)
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(50)
+    result |> wait_for() |> expect_equal(50)
   })
 })
 
@@ -169,7 +169,7 @@ test_that("hybrid_then() async visibility is handled by underlying then()", {
       }
     )
     expect_true(is.promise(result))
-    result |> extract() |> expect_equal(84)
+    result |> wait_for() |> expect_equal(84)
     expect_true(visible_captured)
   })
 })

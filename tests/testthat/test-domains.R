@@ -309,7 +309,7 @@ test_that("a NULL domain nested in another domain keeps the outer domain", {
     })
   })
   expect_identical(cd$counts$onFulfilledBound, 1L)
-  p |> extract() |> expect_equal(2)
+  p |> wait_for() |> expect_equal(2)
 })
 
 test_that("nested domains each wrap finally with wrapOnFinally", {

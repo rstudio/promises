@@ -37,13 +37,14 @@ All callbacks run later, through `later::later()`, never at the moment you call
   - `resolve()`, `reject()` - internal stubs that only exist for docs; they
     always throw.
 - `R/methods.R` - `format.promise()` and `print.promise()`.
+- `R/wait-for.R` - `wait_for()`, the public blocking wait.
 - `R/domains.R` - package-level `tryCatch()` override and
   `promiseDomain$onThen()`, used by `Promise()` (see `domains.md`).
 - Tests: `tests/testthat/test-aplus-2-1.R`, `test-aplus-2-2.R`,
   `test-aplus-2-3.R` (Promises/A+ spec), `test-methods.R`, `test-visibility.R`,
-  `test-ordering.R`, `test-zzz-future_promise.R`.
+  `test-ordering.R`, `test-wait-for.R`, `test-zzz-future_promise.R`.
 - Test helpers: `tests/testthat/helper.R` (`ext_promise()`, `wait_for_it()`,
-  `extract()`, `squelch_unhandled_promise_error()`).
+  `squelch_unhandled_promise_error()`).
 
 ## How it works
 
@@ -218,6 +219,23 @@ survives every mix of `then`, `catch`, and `finally`.
   environment, so setting an attribute on the local `x` changes the shared
   object. Comments in the code explain why polling is still needed.
 
+### wait_for()
+
+`wait_for(promise, loop = later::current_loop())` accepts anything
+`is.promising()` and converts it with `as.promise()`. It calls
+`later::run_now(Inf, loop = loop)` until the inner object's `status()` is no
+longer `"pending"`, then reads `private$value` and `private$visible` through
+`$.__enclos_env__$private` (the same route `adopt()` uses). On rejection it
+sets `private$rejectionHandled <- TRUE` before `stop(private$value)`, so the
+caller gets the error once and no "Unhandled promise error" line is printed
+later. A non-condition reason such as `42` becomes a `simpleError` with that
+message.
+
+It returns as soon as the state changes. `doResolveFinalValue()` and
+`doRejectFinalReason()` set the state and *then* schedule the callback that
+runs handlers, so that callback (and anything chained off the promise) is
+still on the loop when `wait_for()` returns.
+
 ### Printing
 
 `format.promise()` reads the `promise_impl` attribute and calls its `format()`.
@@ -225,6 +243,15 @@ It gives `<Promise [pending]>` or `<Promise [<state>: <class of value>]>`, for
 example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
 
 ## Pitfalls
+
+- **`wait_for()` can only stop the unhandled message if it runs first.** The
+  message is printed two ticks after rejection. If the loop is drained (for
+  example by `wait_for_it()`) before `wait_for()` is called, the message is
+  already out. The state is set right away, so a rejected promise can be
+  passed to `wait_for()` without running the loop first.
+- **`wait_for()` must run the loop that owns the promise.** Callbacks go to
+  the loop that was current when they were scheduled. Waiting on another loop
+  blocks forever (`run_now(Inf)` has no timeout).
 
 - **Callbacks always run later.** Even for a settled promise, `then()` schedules
   the handler with `later()`. Tests must run the event loop (`wait_for_it()` or

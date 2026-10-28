@@ -45,7 +45,7 @@ describe("then()", {
       },
       NA
     )
-    expect_identical(extract(p1), 1)
+    expect_identical(wait_for(p1), 1)
   })
   it("...but function only ignores NULL, not non-functions", {
     expect_error(promise(\(resolve, reject) resolve(1)) |> then(10))
@@ -76,11 +76,11 @@ describe("catch()", {
     p <- ext_promise()
     p2 <- p$promise |> catch(\(err) TRUE)
     p$reject("boom")
-    expect_identical(extract(p2), TRUE)
+    expect_identical(wait_for(p2), TRUE)
   })
   it("can throw", {
     p <- promise(\(resolve, reject) stop("foo")) |> catch(\(err) stop("bar"))
-    expect_error(extract(p), "^bar$")
+    expect_error(wait_for(p), "^bar$")
   })
   it("method ignores non-functions or NULL...", {
     p1 <- promise(\(resolve, reject) resolve(1))
@@ -97,7 +97,7 @@ describe("catch()", {
       },
       NA
     )
-    expect_identical(extract(p1), 1)
+    expect_identical(wait_for(p1), 1)
   })
   it("...but function only ignores NULL, not non-functions", {
     expect_error(promise(\(resolve, reject) resolve(1)) |> catch(10))
@@ -114,7 +114,7 @@ describe("finally()", {
       })
     p |> wait_for_it()
     expect_identical(called, TRUE)
-    expect_identical(extract(p), 10)
+    expect_identical(wait_for(p), 10)
   })
   it("calls back when a promise is rejected", {
     called <- FALSE
@@ -126,37 +126,37 @@ describe("finally()", {
       squelch_unhandled_promise_error() |>
       wait_for_it()
     expect_identical(called, TRUE)
-    expect_error(extract(p), "^foobar$")
+    expect_error(wait_for(p), "^foobar$")
   })
   it("does not affect the return value of the promise", {
     p1 <- promise(\(resolve, reject) resolve(1)) |>
       finally(\() {
         20
       })
-    expect_identical(extract(p1), 1)
+    expect_identical(wait_for(p1), 1)
 
     p2 <- promise(\(resolve, reject) reject("err")) |>
       finally(\() {
         20
       })
-    expect_error(extract(p2), "^err$")
+    expect_error(wait_for(p2), "^err$")
   })
   it("errors replace the result of the promise", {
     p1 <- promise(\(resolve, reject) resolve(1)) |>
       finally(\() {
         stop("boom")
       })
-    expect_error(extract(p1), "^boom$")
+    expect_error(wait_for(p1), "^boom$")
 
     p2 <- promise(\(resolve, reject) reject("foo")) |>
       finally(\() {
         stop("bar")
       })
-    expect_error(extract(p2), "^bar$")
+    expect_error(wait_for(p2), "^bar$")
   })
   it("method ignores non-functions or NULL...", {
     p1 <- promise(\(resolve, reject) resolve(1))$finally(10)$finally(NULL)
-    expect_identical(extract(p1), 1)
+    expect_identical(wait_for(p1), 1)
   })
   it("...but function only ignores NULL, not non-functions", {
     expect_error(promise(\(resolve, reject) resolve(1)) |> finally(10))
@@ -168,18 +168,18 @@ describe("future", {
   skip_if_not_installed("future")
   it("is treated as promise when used as resolution", {
     p <- promise_resolve(future::future(1))
-    expect_identical(extract(p), 1)
+    expect_identical(wait_for(p), 1)
 
     p2 <- promise_resolve(future::future(stop("boom")))
-    expect_error(extract(p2))
+    expect_error(wait_for(p2))
   })
 
   it("is treated as promise when used as resolution", {
     p <- promise_reject(future::future(1))
-    expect_identical(extract(p), 1)
+    expect_identical(wait_for(p), 1)
 
     p2 <- promise_reject(future::future(stop("boom")))
-    expect_error(extract(p2))
+    expect_error(wait_for(p2))
   })
 })
 
@@ -199,7 +199,7 @@ test_that("promises that resolve to each other reject with a cycle error", {
   for (p in list(a$promise, b$promise)) {
     p |>
       catch(conditionMessage) |>
-      extract() |>
+      wait_for() |>
       expect_match("Chaining cycle detected")
   }
 })
@@ -213,7 +213,7 @@ test_that("a settled promise drops its link to the promise it followed", {
   expect_false(is.null(following(outer)))
 
   inner$resolve(1)
-  expect_identical(extract(outer), 1)
+  expect_identical(wait_for(outer), 1)
   expect_null(following(outer))
 })
 
@@ -227,12 +227,12 @@ test_that("handlers attached in the same tick prevent the unhandled message", {
 })
 
 test_that("promise_reduce() accepts a function name for .f", {
-  promise_reduce(1:3, "+", .init = 0) |> extract() |> expect_equal(6)
+  promise_reduce(1:3, "+", .init = 0) |> wait_for() |> expect_equal(6)
 })
 
 test_that("promise_reduce() without .init starts from the first element", {
-  promise_reduce(1:3, `+`) |> extract() |> expect_equal(6)
-  promise_reduce(list("a"), paste0) |> extract() |> expect_equal("a")
+  promise_reduce(1:3, `+`) |> wait_for() |> expect_equal(6)
+  promise_reduce(list("a"), paste0) |> wait_for() |> expect_equal("a")
   expect_error(promise_reduce(list(), `+`), "`.init`")
 })
 

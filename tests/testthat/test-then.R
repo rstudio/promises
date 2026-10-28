@@ -30,7 +30,7 @@ test_that("then() handles NULL callbacks correctly", {
   expect_assertions(n = 1, {
     promise_resolve(42) |>
       then(NULL, \(err) "error") |>
-      extract() |>
+      wait_for() |>
       expect_equal(42)
   })
 })
@@ -208,11 +208,11 @@ test_that("catch(tee=TRUE) functions are normalized", {
 })
 
 test_that("primitive functions receive the value as callbacks", {
-  promise_resolve(c(1, 2)) |> then(sum) |> extract() |> expect_equal(3)
-  promise_resolve(-1) |> then(abs) |> extract() |> expect_equal(1)
+  promise_resolve(c(1, 2)) |> then(sum) |> wait_for() |> expect_equal(3)
+  promise_resolve(-1) |> then(abs) |> wait_for() |> expect_equal(1)
   promise_reject("boom") |>
     catch(class) |>
-    extract() |>
+    wait_for() |>
     expect_equal(c("simpleError", "error", "condition"))
   hybrid_then(c(1, 2), sum) |> expect_equal(3)
 })
@@ -221,7 +221,7 @@ test_that("catch(NULL, tee = TRUE) passes the original error through", {
   promise_reject("boom") |>
     catch(NULL, tee = TRUE) |>
     catch(conditionMessage) |>
-    extract() |>
+    wait_for() |>
     expect_equal("boom")
 })
 
@@ -238,7 +238,7 @@ test_that("finally() and tee callbacks keep non-condition rejection reasons", {
   keeps_reason <- function(p) {
     p |>
       catch(\(reason) reason) |>
-      extract() |>
+      wait_for() |>
       expect_identical(42)
   }
   promise_reject(42) |> finally(\() NULL) |> keeps_reason()
@@ -254,7 +254,7 @@ test_that("finally() and tee callbacks keep non-condition rejection reasons", {
   promise_reject(err) |>
     finally(\() NULL) |>
     catch(\(reason) reason) |>
-    extract() |>
+    wait_for() |>
     expect_identical(err)
 })
 
@@ -264,7 +264,7 @@ test_that("domain onError sees the reason when a non-condition is re-thrown", {
   with_promise_domain(d, {
     p <- promise_reject(42) |> finally(\() NULL)
   })
-  p |> catch(\(reason) reason) |> extract() |> expect_identical(42)
+  p |> catch(\(reason) reason) |> wait_for() |> expect_identical(42)
 
   # Same message `stop(42)` gave before non-condition reasons were kept
   expect_s3_class(seen, "simpleError")

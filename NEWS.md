@@ -48,6 +48,7 @@
   and `hybrid_then()` now pass a non-condition rejection reason (such as
   `promise_reject(42)`) on unchanged. Before, it became a `simpleError`.
   (#212)
+
 # promises 1.5.0
 
 ## OpenTelemetry

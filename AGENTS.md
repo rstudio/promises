@@ -15,9 +15,10 @@ This file provides guidance to coding agents when working with code in this repo
 - `testthat::test_file("tests/testthat/test-*.R")` - Run a single test file
 - `spelling::spell_check_test(vignettes = TRUE, error = TRUE, skip_on_cran = TRUE)` - Check spelling
 
+To get a promise's value in a test, use the package's `wait_for(p)`; it blocks until `p` settles and returns the value or throws the rejection.
+
 **Test Helpers** (`tests/testthat/helper.R`):
 - `wait_for_it(p)` - Block until all pending later tasks execute; optionally wait for promise `p` to resolve/reject
-- `extract(promise)` - Block until promise resolves and return value (or throw error if rejected)
 - `ext_promise()` - Create externally-controllable promise for testing (returns list with `promise`, `resolve`, `reject`, `status`)
 - `expect_assertions(code, n_expected)` - Run `code` and assert it produces exactly `n_expected` testthat expectations (useful with async tests)
 - `resolve_later(value, delaySecs)` - Create a promise that resolves with `value` after a delay

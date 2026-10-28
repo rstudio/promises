@@ -79,14 +79,14 @@ describe("visibility", {
               then(function(value, .visible) {
                 list(value = value, visible = .visible)
               }) |>
-              extract()
+              wait_for()
 
             regular_val <-
               p |>
               then(function(value) {
                 withVisible(value)
               }) |>
-              extract()
+              wait_for()
 
             if (add_finally != "false") {
               expect_true(finally_val)

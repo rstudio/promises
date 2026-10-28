@@ -29,7 +29,7 @@ describe("2.1. Promise States", {
       a$resolve(TRUE)
       expect_identical(a$status(), "fulfilled")
       a$resolve(FALSE)
-      expect_identical(extract(a$promise), TRUE)
+      expect_identical(wait_for(a$promise), TRUE)
     })
   })
 
@@ -47,7 +47,7 @@ describe("2.1. Promise States", {
       a$reject("err1")
       expect_identical(a$status(), "rejected")
       a$reject("err2")
-      expect_error(extract(a$promise), "err1")
+      expect_error(wait_for(a$promise), "err1")
     })
   })
 })
