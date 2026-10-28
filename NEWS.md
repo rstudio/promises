@@ -3,7 +3,8 @@
 ## New features
 
 * New `wait_for()` synchronizes a promise by blocking until it resolves or
-  rejects, then returns the value or raises the error. (#190)
+  rejects, then returns the value or raises the error. Set `timeout` to stop
+  waiting after that many seconds. (#190)
 
 ## Bug fixes
 

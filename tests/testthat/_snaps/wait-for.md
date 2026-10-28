@@ -1,3 +1,26 @@
+# wait_for() validates timeout
+
+    Code
+      wait_for(p, timeout = -1)
+    Condition
+      Error in `wait_for()`:
+      ! `timeout` must be a single non-negative number
+    Code
+      wait_for(p, timeout = NA)
+    Condition
+      Error in `wait_for()`:
+      ! `timeout` must be a single non-negative number
+    Code
+      wait_for(p, timeout = c(1, 2))
+    Condition
+      Error in `wait_for()`:
+      ! `timeout` must be a single non-negative number
+    Code
+      wait_for(p, timeout = "1")
+    Condition
+      Error in `wait_for()`:
+      ! `timeout` must be a single non-negative number
+
 # wait_for() works with mirai promise that rejects
 
     Code

@@ -4,13 +4,18 @@
 \alias{wait_for}
 \title{Wait for a Promise}
 \usage{
-wait_for(promise, ..., loop = later::current_loop())
+wait_for(promise, ..., timeout = Inf, loop = later::current_loop())
 }
 \arguments{
 \item{promise}{A promise object, or an object that can be converted to one
 with \code{\link[=as.promise]{as.promise()}} (such as a future or a mirai).}
 
 \item{...}{Ignored.}
+
+\item{timeout}{The most seconds to wait. If the promise has not settled by
+then, an error of class \code{promises_timeout} is thrown and the promise is
+left pending. Defaults to \code{Inf} (wait forever). With \code{0}, only an already
+settled promise returns.}
 
 \item{loop}{the \pkg{later} loop on which the promise has been scheduled.
 Defaults to \code{\link[later:current_loop]{later::current_loop()}}.}
@@ -27,7 +32,7 @@ value.
 
 \code{wait_for()} runs a single event loop, given by \code{loop}. This must be the
 loop that runs the promise's callbacks. If it is not, \code{wait_for()} waits
-indefinitely. The default, \code{\link[later:current_loop]{later::current_loop()}}, is the right choice
+until \code{timeout}, which is forever by default. The default, \code{\link[later:current_loop]{later::current_loop()}}, is the right choice
 whenever you did not create a custom loop yourself. Do not call
 \code{wait_for()} from inside a \code{later} callback to wait on work that depends
 on that callback finishing.

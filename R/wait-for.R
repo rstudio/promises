@@ -6,6 +6,10 @@
 #' @param promise A promise object, or an object that can be converted to one
 #'   with [as.promise()] (such as a future or a mirai).
 #' @param ... Ignored.
+#' @param timeout The most seconds to wait. If the promise has not settled by
+#'   then, an error of class `promises_timeout` is thrown and the promise is
+#'   left pending. Defaults to `Inf` (wait forever). With `0`, only an already
+#'   settled promise returns.
 #' @param loop the \pkg{later} loop on which the promise has been scheduled.
 #'   Defaults to [later::current_loop()].
 #'
@@ -15,7 +19,7 @@
 #' @section Event loop:
 #' `wait_for()` runs a single event loop, given by `loop`. This must be the
 #' loop that runs the promise's callbacks. If it is not, `wait_for()` waits
-#' indefinitely. The default, [later::current_loop()], is the right choice
+#' until `timeout`, which is forever by default. The default, [later::current_loop()], is the right choice
 #' whenever you did not create a custom loop yourself. Do not call
 #' `wait_for()` from inside a `later` callback to wait on work that depends
 #' on that callback finishing.
@@ -42,14 +46,37 @@
 #' res
 #'
 #' @export
-wait_for <- function(promise, ..., loop = later::current_loop()) {
+wait_for <- function(
+  promise,
+  ...,
+  timeout = Inf,
+  loop = later::current_loop()
+) {
   check_dots(...)
   if (!is.promising(promise)) {
     stop("wait_for() requires a promise object")
   }
+  if (
+    !is.numeric(timeout) ||
+      length(timeout) != 1 ||
+      is.na(timeout) ||
+      timeout < 0
+  ) {
+    rlang::abort("`timeout` must be a single non-negative number")
+  }
   impl <- attr(as.promise(promise), "promise_impl", exact = TRUE)
+  # POSIXct is always seconds since the epoch; an Inf timeout stays Inf
+  deadline <- as.numeric(Sys.time()) + timeout
   while (impl$status() == "pending") {
-    later::run_now(Inf, loop = loop)
+    # run_now() returns after any callback runs, so re-check each pass
+    remaining <- deadline - as.numeric(Sys.time())
+    if (remaining <= 0) {
+      rlang::abort(
+        sprintf("Promise did not settle within %s seconds", timeout),
+        class = "promises_timeout"
+      )
+    }
+    later::run_now(remaining, loop = loop)
   }
   private <- impl$.__enclos_env__$private
   if (impl$status() == "rejected") {

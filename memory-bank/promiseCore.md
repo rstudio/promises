@@ -221,10 +221,15 @@ survives every mix of `then`, `catch`, and `finally`.
 
 ### wait_for()
 
-`wait_for(promise, loop = later::current_loop())` accepts anything
-`is.promising()` and converts it with `as.promise()`. It calls
-`later::run_now(Inf, loop = loop)` until the inner object's `status()` is no
-longer `"pending"`, then reads `private$value` and `private$visible` through
+`wait_for(promise, ..., timeout = Inf, loop = later::current_loop())` accepts
+anything `is.promising()` and converts it with `as.promise()`. `loop` must be
+named (`check_dots()`). It calls `later::run_now(remaining, loop = loop)` until
+the inner object's `status()` is no longer `"pending"`. `run_now()` returns
+after *any* ready callback runs, not when this promise settles, so the loop
+re-checks the status and the time left on every pass. The deadline is
+`as.numeric(Sys.time()) + timeout` (plain seconds; `Inf` stays `Inf`). When
+it passes, `wait_for()` throws class `promises_timeout` and leaves the promise
+pending. It then reads `private$value` and `private$visible` through
 `$.__enclos_env__$private` (the same route `adopt()` uses). On rejection it
 sets `private$rejectionHandled <- TRUE` before `stop(private$value)`, so the
 caller gets the error once and no "Unhandled promise error" line is printed
@@ -256,7 +261,11 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
   stay pending. The `wait_for()` docs say this; don't promise more.
 - **`wait_for()` must run the loop that owns the promise.** Callbacks go to
   the loop that was current when they were scheduled. Waiting on another loop
-  blocks forever (`run_now(Inf)` has no timeout).
+  blocks until `timeout`, which is forever by default.
+- **Do not subtract `POSIXct` values for the deadline.** `d - Sys.time()` is a
+  `difftime` whose units R picks by size ("days" for 2 days), and it is ~10x
+  slower. Convert with `as.numeric()` first. `proc.time()[["elapsed"]]` is not
+  a steadier clock; R builds it from the same wall clock as `Sys.time()`.
 
 - **Callbacks always run later.** Even for a settled promise, `then()` schedules
   the handler with `later()`. Tests must run the event loop (`wait_for_all()` or

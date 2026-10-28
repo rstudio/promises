@@ -53,8 +53,10 @@ Promises/A+ spec sections.
 - To wait on a promise, use the package's own `wait_for(p)`. It stops as
   soon as `p` settles, so other callbacks may still be queued. Use
   `wait_for_all()` instead when:
-  - the promise is meant to stay pending (`wait_for()` has no timeout and
-    would block forever);
+  - the promise is meant to stay pending and the test needs the loop drained
+    first (to show no handler ran). To only check that it does not settle,
+    use `expect_error(wait_for(p, timeout = 0.1), class = "promises_timeout")`;
+    `wait_for()` without `timeout` would block forever;
   - the test checks for (or against) the "Unhandled promise error" message,
     which only prints after the loop runs on;
   - there is no promise to wait on, only queued callbacks.

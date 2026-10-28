@@ -94,6 +94,41 @@ test_that("wait_for() runs the given loop", {
   expect_equal(wait_for(p, loop = loop), "private")
 })
 
+test_that("wait_for() times out on a pending promise and leaves it pending", {
+  ep <- ext_promise()
+  start <- Sys.time()
+  expect_error(wait_for(ep$promise, timeout = 0.2), class = "promises_timeout")
+  expect_gte(as.numeric(Sys.time()) - as.numeric(start), 0.2)
+  expect_equal(ep$status(), "pending")
+
+  ep$resolve("later")
+  expect_equal(wait_for(ep$promise), "later")
+})
+
+test_that("wait_for() timeout is not cut short by unrelated callbacks", {
+  later::later(\() NULL, 0.05)
+  p <- resolve_later("ok", 0.2)
+  expect_equal(wait_for(p, timeout = 5), "ok")
+})
+
+test_that("wait_for() with timeout = 0 only returns settled promises", {
+  expect_equal(wait_for(promise_resolve(1), timeout = 0), 1)
+  expect_error(
+    wait_for(ext_promise()$promise, timeout = 0),
+    class = "promises_timeout"
+  )
+})
+
+test_that("wait_for() validates timeout", {
+  p <- promise_resolve(1)
+  expect_snapshot(error = TRUE, {
+    wait_for(p, timeout = -1)
+    wait_for(p, timeout = NA)
+    wait_for(p, timeout = c(1, 2))
+    wait_for(p, timeout = "1")
+  })
+})
+
 test_that("wait_for() requires loop to be named", {
   loop <- later::create_loop(parent = NULL)
   on.exit(later::destroy_loop(loop))
