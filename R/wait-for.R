@@ -5,6 +5,7 @@
 #'
 #' @param promise A promise object, or an object that can be converted to one
 #'   with [as.promise()] (such as a future or a mirai).
+#' @param ... Ignored.
 #' @param loop the \pkg{later} loop on which the promise has been scheduled.
 #'   Defaults to [later::current_loop()].
 #'
@@ -41,7 +42,8 @@
 #' res
 #'
 #' @export
-wait_for <- function(promise, loop = later::current_loop()) {
+wait_for <- function(promise, ..., loop = later::current_loop()) {
+  check_dots(...)
   if (!is.promising(promise)) {
     stop("wait_for() requires a promise object")
   }

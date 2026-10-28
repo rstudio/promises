@@ -94,6 +94,12 @@ test_that("wait_for() runs the given loop", {
   expect_equal(wait_for(p, loop = loop), "private")
 })
 
+test_that("wait_for() requires loop to be named", {
+  loop <- later::create_loop(parent = NULL)
+  on.exit(later::destroy_loop(loop))
+  expect_error(wait_for(promise_resolve(1), loop), class = "rlib_error_dots_nonempty")
+})
+
 test_that("wait_for() works inside a later callback", {
   value <- NULL
   later::later(\() value <<- wait_for(resolve_later(1, 0.1)))

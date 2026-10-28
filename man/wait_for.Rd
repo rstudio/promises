@@ -4,11 +4,13 @@
 \alias{wait_for}
 \title{Wait for a Promise}
 \usage{
-wait_for(promise, loop = later::current_loop())
+wait_for(promise, ..., loop = later::current_loop())
 }
 \arguments{
 \item{promise}{A promise object, or an object that can be converted to one
 with \code{\link[=as.promise]{as.promise()}} (such as a future or a mirai).}
+
+\item{...}{Ignored.}
 
 \item{loop}{the \pkg{later} loop on which the promise has been scheduled.
 Defaults to \code{\link[later:current_loop]{later::current_loop()}}.}
