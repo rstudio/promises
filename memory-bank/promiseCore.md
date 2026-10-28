@@ -249,6 +249,11 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
   example by `wait_for_it()`) before `wait_for()` is called, the message is
   already out. The state is set right away, so a rejected promise can be
   passed to `wait_for()` without running the loop first.
+- **An interrupt inside a callback can strand a chain.** `run_now()` removes
+  a callback from the queue before running it. If Ctrl+C lands mid-callback
+  (including the `lapply()` over handlers in `doResolveFinalValue()` /
+  `doRejectFinalReason()`), the rest of it never runs and dependent promises
+  stay pending. The `wait_for()` docs say this; don't promise more.
 - **`wait_for()` must run the loop that owns the promise.** Callbacks go to
   the loop that was current when they were scheduled. Waiting on another loop
   blocks forever (`run_now(Inf)` has no timeout).

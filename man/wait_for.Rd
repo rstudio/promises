@@ -34,8 +34,10 @@ on that callback finishing.
 \section{Interrupts}{
 
 An interrupt (Esc in RStudio, Ctrl+C in a terminal) means "stop waiting".
-It exits \code{wait_for()} cleanly: the promise stays pending, and its
-callbacks stay on the loop and run the next time the loop runs.
+It exits \code{wait_for()} and leaves the promise pending. Callbacks that have
+not started yet stay on the loop and run the next time the loop runs. If
+the interrupt lands while a callback is running, that callback stops part
+way and is not run again, so promises that depend on it may never settle.
 \code{wait_for()} does not cancel the underlying work, because only the creator
 of the work knows how to cancel it.
 }
