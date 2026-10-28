@@ -21,7 +21,7 @@ test_that("complex promise chains with mixed success/failure", {
       counter <<- counter + 1
       expect_equal(x, "recovered")
     }) |>
-    wait_for_it()
+    wait_for()
   expect_equal(counter, 4)
 })
 
@@ -41,7 +41,7 @@ test_that("catch() handles NULL callbacks correctly", {
     promise_resolve(stop("boom")) |>
       then(\(x) x, NULL) |>
       catch(\(err) expect_match(err$message, "boom")) |>
-      wait_for_it()
+      wait_for()
   })
 })
 
@@ -110,7 +110,7 @@ test_that("then(tee = FALSE) functions are normalized", {
         counter <<- counter + 1
       }
     )
-  wait_for_it()
+  wait_for_all()
   expect_equal(counter, 5)
 })
 test_that("catch(tee = FALSE) functions are normalized", {
@@ -129,7 +129,7 @@ test_that("catch(tee = FALSE) functions are normalized", {
       }
     ) |>
     catch(\(err) {})
-  wait_for_it()
+  wait_for_all()
   expect_equal(counter, 2)
 })
 
@@ -178,7 +178,7 @@ test_that("then(tee=TRUE) functions are normalized", {
       expect_true(grepl("boom", err$message))
       error_counter <<- error_counter + 1
     }) |>
-    wait_for_it()
+    wait_for()
 
   expect_equal(then_counter, 3)
   expect_equal(error_counter, 3)
@@ -203,7 +203,7 @@ test_that("catch(tee=TRUE) functions are normalized", {
     catch(\() {
       error_counter <<- error_counter + 1
     }) |>
-    wait_for_it()
+    wait_for()
   expect_equal(error_counter, 3)
 })
 

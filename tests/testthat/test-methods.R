@@ -7,7 +7,7 @@ describe("then()", {
       then(function(value, .visible) {
         result <<- list(value = value, visible = .visible)
       })
-    p |> wait_for_it()
+    p |> wait_for()
     expect_identical(result$value, 1)
     expect_identical(result$visible, FALSE)
 
@@ -15,7 +15,7 @@ describe("then()", {
       then(function(value, .visible) {
         result <<- list(value = value, visible = .visible)
       })
-    p |> wait_for_it()
+    p |> wait_for()
     expect_identical(result$value, 1)
     expect_identical(result$visible, TRUE)
 
@@ -26,7 +26,7 @@ describe("then()", {
       then(function(value, .visible) {
         result <<- list(value = value, visible = .visible)
       })
-    p |> wait_for_it()
+    p |> wait_for()
     expect_identical(result$value, 1)
     expect_identical(result$visible, FALSE)
   })
@@ -57,7 +57,7 @@ describe("then()", {
     p <- promise_resolve(invisible(1))$then(function(value) {
       result <<- withVisible(value)
     })
-    p |> wait_for_it()
+    p |> wait_for()
     expect_identical(result$value, 1)
     expect_identical(result$visible, FALSE)
 
@@ -65,7 +65,7 @@ describe("then()", {
     p <- promise_resolve(2)$then(function(value) {
       result <<- withVisible(value)
     })
-    p |> wait_for_it()
+    p |> wait_for()
     expect_identical(result$value, 2)
     expect_identical(result$visible, TRUE)
   })
@@ -112,7 +112,7 @@ describe("finally()", {
       finally(\() {
         called <<- TRUE
       })
-    p |> wait_for_it()
+    p |> wait_for()
     expect_identical(called, TRUE)
     expect_identical(wait_for(p), 10)
   })
@@ -124,7 +124,7 @@ describe("finally()", {
         called <<- TRUE
       }) |>
       squelch_unhandled_promise_error() |>
-      wait_for_it()
+      wait_for()
     expect_identical(called, TRUE)
     expect_error(wait_for(p), "^foobar$")
   })
@@ -186,7 +186,7 @@ describe("future", {
 test_that("unhandled rejection message works for non-condition reasons", {
   out <- capture.output(type = "message", {
     promise_reject(42)
-    wait_for_it()
+    wait_for_all()
   })
   expect_identical(out, "Unhandled promise error: 42")
 })
@@ -221,7 +221,7 @@ test_that("handlers attached in the same tick prevent the unhandled message", {
   out <- capture.output(type = "message", {
     p <- promise_reject("boom")
     catch(p, \(reason) NULL)
-    wait_for_it()
+    wait_for_all()
   })
   expect_length(out, 0)
 })
@@ -238,6 +238,6 @@ test_that("promise_reduce() without .init starts from the first element", {
 
 test_that("promise_race() with no promises stays pending", {
   p <- promise_race()
-  wait_for_it()
+  wait_for_all()
   expect_identical(attr(p, "promise_impl", exact = TRUE)$status(), "pending")
 })

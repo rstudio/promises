@@ -18,8 +18,7 @@ ext_promise <- function() {
 }
 
 # Block until all pending later tasks have executed
-# wait_for_it <- function(timeout = if (on_ci) 60 else 30) {
-wait_for_it <- function(p = NULL, timeout = if (on_ci) 60 else 30) {
+wait_for_all <- function(p = NULL, timeout = if (on_ci) 60 else 30) {
   start <- Sys.time()
 
   err <- NULL
@@ -61,7 +60,7 @@ squelch_unhandled_promise_error <- function(promise) {
 
 .GlobalEnv$.Last <- function() {
   # Detect unexpected "Unhandled promise error" warnings.
-  wait_for_it()
+  wait_for_all()
 }
 
 create_counting_domain <- function(trackFinally = FALSE) {

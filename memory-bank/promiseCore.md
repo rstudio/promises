@@ -43,7 +43,7 @@ All callbacks run later, through `later::later()`, never at the moment you call
 - Tests: `tests/testthat/test-aplus-2-1.R`, `test-aplus-2-2.R`,
   `test-aplus-2-3.R` (Promises/A+ spec), `test-methods.R`, `test-visibility.R`,
   `test-ordering.R`, `test-wait-for.R`, `test-zzz-future_promise.R`.
-- Test helpers: `tests/testthat/helper.R` (`ext_promise()`, `wait_for_it()`,
+- Test helpers: `tests/testthat/helper.R` (`ext_promise()`, `wait_for_all()`,
   `squelch_unhandled_promise_error()`).
 
 ## How it works
@@ -246,7 +246,7 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
 
 - **`wait_for()` can only stop the unhandled message if it runs first.** The
   message is printed two ticks after rejection. If the loop is drained (for
-  example by `wait_for_it()`) before `wait_for()` is called, the message is
+  example by `wait_for_all()`) before `wait_for()` is called, the message is
   already out. The state is set right away, so a rejected promise can be
   passed to `wait_for()` without running the loop first.
 - **An interrupt inside a callback can strand a chain.** `run_now()` removes
@@ -259,7 +259,7 @@ example `<Promise [fulfilled: numeric]>`. `print.promise()` prints that line.
   blocks forever (`run_now(Inf)` has no timeout).
 
 - **Callbacks always run later.** Even for a settled promise, `then()` schedules
-  the handler with `later()`. Tests must run the event loop (`wait_for_it()` or
+  the handler with `later()`. Tests must run the event loop (`wait_for_all()` or
   `later::run_now()`). `tests/testthat/test-ordering.R` pins the exact order
   for two parallel chains.
 - **Rejecting with a promise follows that promise.** `R/promise.R`

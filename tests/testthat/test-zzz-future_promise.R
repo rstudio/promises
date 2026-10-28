@@ -121,7 +121,7 @@ local({
         })
       post_lapply_time_diff <- time_diff()
 
-      p |> wait_for_it()
+      p |> wait_for()
 
       # expect that the average time is less than the expected total time
       expect_equal(median(exec_times) < expected_total_time, !block_mid_session)
@@ -192,7 +192,7 @@ local({
     with_test_workers({
       err <- capture.output(type = "message", {
         future_promise(stop("boom1"))
-        wait_for_it()
+        wait_for_all()
       })
       expect_match(err, "boom1")
     })
@@ -205,7 +205,7 @@ local({
           then(
             onRejected = \(err) {}
           ) |>
-          wait_for_it()
+          wait_for()
       })
       expect_equal(err, character(0))
     })

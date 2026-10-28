@@ -29,10 +29,10 @@ describe("2.2. The `then` Method", {
         then(function(value) {
           x <<- value
         }) |>
-        wait_for_it()
+        wait_for_all()
       expect_identical(x, NULL)
 
-      p$resolve(10) |> wait_for_it()
+      p$resolve(10) |> wait_for_all()
       expect_identical(x, 10)
     })
     it("2.2.2.2. it must not be called before promise is fulfilled.", {})
@@ -47,11 +47,11 @@ describe("2.2. The `then` Method", {
         then(onRejected = function(reason) {
           x <<- reason
         }) |>
-        wait_for_it()
+        wait_for_all()
       expect_identical(x, NULL)
 
       p$reject(simpleError("boom"))
-      wait_for_it()
+      wait_for_all()
       expect_identical(x, simpleError("boom"))
     })
   })
@@ -64,7 +64,7 @@ describe("2.2. The `then` Method", {
           x <<- value
         })
       expect_identical(x, NULL)
-      p |> wait_for_it()
+      wait_for(p)
       expect_identical(x, TRUE)
     })
   })
@@ -87,7 +87,7 @@ describe("2.2. The `then` Method", {
       })
 
       p$resolve(cars)
-      promise_all(.list = all_promises) |> wait_for_it()
+      promise_all(.list = all_promises) |> wait_for()
 
       lapply(as.list(results), function(x) {
         expect_identical(wait_for(x), cars)
@@ -110,7 +110,7 @@ describe("2.2. The `then` Method", {
     })
 
     p$reject(simpleError("an error"))
-    promise_all(.list = all_promises) |> wait_for_it()
+    promise_all(.list = all_promises) |> wait_for()
 
     lapply(as.list(results), function(x) {
       expect_identical(wait_for(x), simpleError("an error"))

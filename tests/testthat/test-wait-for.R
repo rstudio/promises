@@ -13,7 +13,7 @@ test_that("wait_for() works with delayed resolution", {
 test_that("wait_for() works with already-resolved promise", {
   ep <- ext_promise()
   ep$resolve("already done")
-  wait_for_it()
+  wait_for_all()
   expect_equal(wait_for(ep$promise), "already done")
 })
 
@@ -75,7 +75,7 @@ test_that("wait_for() does not report the rejection as unhandled", {
   p <- promise_reject(simpleError("boom"))
   msgs <- capture.output(type = "message", {
     expect_error(wait_for(p), "boom")
-    wait_for_it()
+    wait_for_all()
   })
   expect_equal(msgs, character())
 })
@@ -97,7 +97,7 @@ test_that("wait_for() runs the given loop", {
 test_that("wait_for() works inside a later callback", {
   value <- NULL
   later::later(\() value <<- wait_for(resolve_later(1, 0.1)))
-  wait_for_it()
+  wait_for_all()
   expect_equal(value, 1)
 })
 

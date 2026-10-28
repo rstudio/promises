@@ -72,7 +72,7 @@ test_that("hybrid_then() propagates asynchronous errors without on_failure", {
       catch(\(err) {
         expect_match(err$message, "async error")
       }) |>
-      wait_for_it()
+      wait_for()
   })
 })
 
@@ -140,7 +140,7 @@ test_that("hybrid_then() with tee=TRUE preserves asynchronous errors", {
       catch(\(err) {
         expect_match(err$message, "async error")
       }) |>
-      wait_for_it()
+      wait_for()
     expect_equal(counter, 1)
   })
 })
@@ -293,7 +293,7 @@ test_that("hybrid_then() example from documentation works", {
       async_called <<- TRUE
       expect_equal(x, 50)
     }) |>
-    wait_for_it()
+    wait_for()
   expect_true(async_called)
 })
 
@@ -318,7 +318,7 @@ test_that("hybrid_then() on_success callback can throw errors asynchronously", {
       catch(\(err) {
         expect_match(err$message, "callback error")
       }) |>
-      wait_for_it()
+      wait_for()
   })
 })
 
@@ -343,7 +343,7 @@ test_that("hybrid_then() on_failure callback can throw errors asynchronously", {
       catch(\(err) {
         expect_match(err$message, "callback error")
       }) |>
-      wait_for_it()
+      wait_for()
   })
 })
 
@@ -379,7 +379,7 @@ test_that("hybrid_then() with tee=TRUE and on_success that throws (async)", {
       catch(\(err) {
         expect_match(err$message, "callback error")
       }) |>
-      wait_for_it()
+      wait_for()
     expect_equal(counter, 1)
   })
 })

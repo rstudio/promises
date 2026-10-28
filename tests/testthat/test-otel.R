@@ -196,7 +196,7 @@ with_otel_promise_domain({
                 })
               })
           })
-          wait_for_it(p)
+          wait_for(p)
           p
         })
         expect_true(is.promising(p))
@@ -420,7 +420,7 @@ describe("local_otel_promise_domain()", {
           })
       })
 
-      wait_for_it(result)
+      wait_for(result)
       result
     })
 
@@ -617,7 +617,7 @@ describe("with_otel_promise_domain() idempotency", {
         })
       })
 
-      wait_for_it(result)
+      wait_for(result)
       result
     })
 
