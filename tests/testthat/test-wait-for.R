@@ -132,7 +132,10 @@ test_that("wait_for() validates timeout", {
 test_that("wait_for() requires loop to be named", {
   loop <- later::create_loop(parent = NULL)
   on.exit(later::destroy_loop(loop))
-  expect_error(wait_for(promise_resolve(1), loop), class = "rlib_error_dots_nonempty")
+  expect_error(
+    wait_for(promise_resolve(1), loop),
+    class = "rlib_error_dots_nonempty"
+  )
 })
 
 test_that("wait_for() works inside a later callback", {
