@@ -97,7 +97,10 @@ out of date; `release_bullets()` also reminds you.
 - Bootstrap 5, light/dark switch, colors and fonts from
   `pkgdown/_brand.yml` via `template: bslib: brand:`.
 - `pkgdown/extra.js` swaps the navbar logo to
-  `reference/figures/logo-dark.svg` in dark mode.
+  `reference/figures/logo-dark.svg` in dark mode. It must build paths from
+  the relative prefix pkgdown writes into each page's logo `src`
+  (`../`, `../../`, ...), captured once before rewriting `src`; hardcoded
+  root-relative paths only work on `index.html`.
 - `development: mode: auto`.
 - `reference:` groups every exported topic. A new exported function needs a
   new entry here or pkgdown fails with "topics missing from index".
