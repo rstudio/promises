@@ -72,9 +72,9 @@ promise_all <- function(..., .list = NULL) {
 
     results <- lapply(indices, function(idx) {
       # done[[idx]] <<- FALSE
-      then(
-        .list[[idx]],
-        onFulfilled = function(value) {
+      promise_subscribe(
+        as.promise(.list[[idx]]),
+        onFulfilled = function(value, visible) {
           # Save the result so we can return it to the user.
           # This weird assignment is similar to `results[[idx]] <- value`, except
           # that it handles NULL values correctly.
@@ -114,7 +114,13 @@ promise_race <- function(..., .list = NULL) {
 
   promise(function(resolve, reject) {
     lapply(.list, function(promise) {
-      then(promise, resolve, reject)
+      promise_subscribe(
+        as.promise(promise),
+        function(value, visible) {
+          resolve(if (visible) value else invisible(value))
+        },
+        reject
+      )
     })
   })
 }

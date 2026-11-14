@@ -95,11 +95,28 @@ Notes:
   bare `promise()` 9.2 → 9.1µs (unchanged, as expected — public `promise()`
   keeps full validation and its `tryCatch`).
 
-| 3 | | | | |
+| 3 | 39.6ms | 82.0ms | 60.3ms | −41% / −56% / −29% vs baseline; scenario 4 −33% vs step 2 despite a ~1.6x slower `later` floor this session (7.44ms vs 4.4–5.0ms). Scenario 6: `promise_all`/`promise_race` ×100 went 6.74/6.60 → 0.85/0.84ms (−87%), mem 56KB → 1.4KB. Adoption and combinators now subscribe to settlement directly — no throwaway derived promise. See step-3 notes below |
 | 4 | | | | |
 | 5 | | | | |
 | 6 | | | | |
 | 7 | | | | |
+
+### Step 3 measurement notes (2026-10-27)
+
+- **Floor shift again.** This session's `later` floor measured 7.44ms vs
+  4.4–5.0ms in the step-2 session, so raw step-2 → step-3 comparisons are
+  conservative. Scenario 4 removes the throwaway derived promise per link —
+  one fewer `later()` task per link (~4 tasks/link before, ~3 now, so ~1000
+  fewer tasks per chain) plus its ~44µs registration and ~31µs settlement
+  cost. Raw: 122 → 82.0ms (−33%); using each session's own floor, the
+  promises-side share drops from ~103ms to ~60ms (about −40%).
+- Scenario 4 `mem_alloc` 1.61 → 1.07MB and `n_gc` 75 → 45 vs the baseline
+  session; scenario 2 (39.6ms) and 7 (60.3ms) are untouched paths, their
+  differences vs step 2 are session noise from the slower floor.
+- Scenario 6 collapses because registration onto settled sources now
+  schedules one bare task per input instead of constructing and settling a
+  derived promise per input: `promise_all` ×100 6.74 → 0.845ms,
+  `promise_race` ×100 6.60 → 0.840ms, `mem_alloc` 56KB → 1.4KB.
 
 Targets (net of the `later` floor): ≥2x on scenario 2, ≥2x on scenario 4,
 meaningfully lower `mem_alloc` and `n_gc` on both; no regression >5% on
