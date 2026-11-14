@@ -15,6 +15,7 @@
 ^LICENSE\.md$
 ^CRAN-SUBMISSION$
 ^_dev$
+^dev$
 ^\.claude$
 ^\.agents$
 ^memory-bank$

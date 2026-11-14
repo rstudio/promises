@@ -9,6 +9,8 @@ doc
 Meta
 docs
 _dev
+dev/bench/results/
+dev/bench/profiles/
 /doc/
 /Meta/
 /.claude/*
