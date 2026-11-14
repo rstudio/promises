@@ -72,7 +72,29 @@ Notes:
 |---|---|---|---|---|
 | Baseline | 66.8ms | 188ms | 85.6ms | |
 | 1 | 51.1ms | 167.7ms | 70.8ms | −23% / −11% / −17% vs baseline; `wrap_callback_reenter` now returns fixed-shape byte-compiled closures with an explicit side, `wrap_with_signature` deleted, `NULL`-domain call-time branch added |
-| 2 | | | | |
+| 2 | 42.1ms | 122ms | 58.0ms | −37% / −35% / −32% vs baseline; median of 3 same-session runs. Domain-free fast path in `self$then` (no `promise()`/`tryCatch`/`onThen`, fused reenter branch, calling convention as data); `promise_resolve`/`promise_reject` skip the constructor. See step-2 notes below |
+
+### Step 2 measurement notes (2026-10-26)
+
+- **Floor shift across sessions.** This session's `later` floor measured
+  4.4–5.0ms vs 8.73ms in the baseline session (~1.9x machine-speed
+  difference), so raw cross-session comparisons flatter the step. Using each
+  session's own floor, the net promises-side share of scenario 2 is
+  58.1 → 42.4 (step 1) → 37.4ms (step 2), i.e. −36% vs baseline; scenario 4 is
+  179.3 → 159.0 → 117.3ms, i.e. −35% vs baseline. Same-session back-to-back
+  A/B (step 1 → step 2, machine under load, floor drifting 11.1 → 15.1ms):
+  scenario 2 −24%, scenario 4 −41%, scenario 7 −24%.
+- **`bench` `mem_alloc` is unreliable here.** It reported scenario 7 at
+  736KB vs the baseline 559KB, but an Rprofmem A/B of the identical scenario-7
+  expression shows the domain path's allocation is unchanged (step 1:
+  6,091,016 B; step 2: 6,098,464 B, +0.12%). Scenario 2 by Rprofmem A/B:
+  6,078,344 → 6,183,888 B (+1.7%, ~105B/link — slightly larger retained
+  closure frame, offset by two fewer wrapper closures; allocation reductions
+  are expected from steps 3–5 instead).
+- Scenario 1 creation: `promise_resolve(1)` + drain 31.8 → 27.8µs;
+  bare `promise()` 9.2 → 9.1µs (unchanged, as expected — public `promise()`
+  keeps full validation and its `tryCatch`).
+
 | 3 | | | | |
 | 4 | | | | |
 | 5 | | | | |
