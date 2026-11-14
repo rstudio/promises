@@ -78,12 +78,17 @@ Promise <- function() {
     # recursive async loop) in memory.
     private$following <- NULL
 
-    later(function() {
-      lapply(private$onFulfilled, function(f) {
-        f(private$value, private$visible)
+    # Skip the settlement task when nobody is listening: a then() attached
+    # after settlement schedules its own task. Observable side effect:
+    # later::loop_empty() can be TRUE immediately after promise_resolve().
+    if (length(private$onFulfilled) > 0) {
+      later(function() {
+        lapply(private$onFulfilled, function(f) {
+          f(private$value, private$visible)
+        })
+        private$onFulfilled <- list()
       })
-      private$onFulfilled <- list()
-    })
+    }
   }
 
   private$doRejectFinalReason <- function(reason) {

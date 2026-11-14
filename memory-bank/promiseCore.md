@@ -115,9 +115,13 @@ calls `doRejectFinalReason()`.
 ### Settling and scheduling
 
 `doResolveFinalValue()` sets `value`, `visible`, and `state`
-(`"fulfilled"`) right away, then schedules one `later()` task that calls every
-waiting `onFulfilled` handler in order with `(value, visible)` and clears the
-list.
+(`"fulfilled"`) right away. When at least one `onFulfilled` handler is
+waiting, it schedules one `later()` task that calls every waiting handler in
+order with `(value, visible)` and clears the list. With no handlers it
+schedules nothing — so `later::loop_empty()` can be `TRUE` immediately after
+`promise_resolve(x)`, and a `then()` attached after settlement schedules its
+own task. `doRejectFinalReason()` always schedules: its nested `later()`
+drives the unhandled-rejection message.
 
 `doRejectFinalReason()` sets `value` and `state` (`"rejected"`), then schedules
 one `later()` task that:
